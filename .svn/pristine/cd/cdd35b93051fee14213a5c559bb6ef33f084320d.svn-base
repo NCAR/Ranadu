@@ -1,0 +1,23 @@
+Package: Ranadu
+Title: Functions for accessing RAF aircraft data files and performing
+    calculations described in ProcessingAlgorithms.pdf
+Version: 0.0-2014-05-24
+Author: William Cooper
+Maintainer: William Cooper <cooperw@ucar.edu>
+Description: This package contains a function for loading a portion of a netCDF
+    data file into a data.frame, and it contains a number of functions that
+    implement algorithms described in ProcessingAlgorithms.pdf. The package
+    depends on the ncdf and nleqslv packages. Functions included are: GetNetCDF
+    (to load the data.frame), GetIndex to find the index corresponding to a
+    particular time, GetStartEnd to find the time limits of the data,
+    SpecificHeats for the (possibly moisture corrected) specific heats and gas
+    constant for air, MachNumber, RecoveryFactor, TrueAirspeed, AirTemperature,
+    MurphyKoop (for the water vapor pressure), DPfromE (to find the dew point
+    corresponding to a specified water vapor pressure), PressureAltitude,
+    PotentialTemperature, EquivalentPotentialTemperature,
+    WetEquivalentPotentialTemperature, MixingRatio, VirtualTemperature,
+    VirtualPotentialTemperature, and plotWAC (a convenience routine producing
+    some aspects of plots I use routinely).
+License: none
+Depends:
+    ncdf,nleqslv

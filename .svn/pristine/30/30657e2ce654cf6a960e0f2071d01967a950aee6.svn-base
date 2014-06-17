@@ -1,0 +1,8 @@
+To rebuild:
+  require(devtools)
+  require(roxygen2)
+  wd("~/RStudio/RANADU")
+  document()
+  check()
+  build()
+  install()
