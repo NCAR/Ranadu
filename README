@@ -1,3 +1,5 @@
+This is an R package with functions to facilitate use of NCAR/RAF-generated netCDF files from the research aircraft.
+
 To rebuild:
 require(devtools)
 require(roxygen2)
