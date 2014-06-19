@@ -1,7 +1,6 @@
-These are scripts based on R that facilitate use of the netCDF data files
-produced by the NCAR Research Aviation Facility, with measurements from
-flights of research aircraft. The files here are made into a package
-called 'Ranadu' (R-based analysis for NCAR aircraft-data users).
+
+This is an R package with functions to facilitate use of NCAR/RAF-generated netCDF files from the research aircraft.
+>>>>>>> 532ba164b6989b5d844c22b08de81e48c7d4b58a
 
 To rebuild:
 require(devtools)
