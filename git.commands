@@ -1,0 +1,9 @@
+git config --global user.name "WilliamCooper"
+git config --global user.email "cooperw@ucar.edu"
+git config --global credential.helper cache
+git config --global credential.helper 'cache --timeout=3600'
+git init
+git add README
+git commit -m "message"
+git remote add Ranadu https://github.com/WilliamCooper/Ranadu.git
+git push -u Ranadu master
