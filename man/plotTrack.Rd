@@ -3,8 +3,8 @@
 \alias{plotTrack}
 \title{plotTrack}
 \usage{
-plotTrack(lon, lat, Time, r = 0, xc = NULL, yc = NULL, sz = NULL,
-  Spacing = 15, WindFlags = 0, ...)
+plotTrack(lon, lat, Time, WDC = Data$WDC, WSC = Data$WSC, .Range = 0,
+  xc = NULL, yc = NULL, sz = NULL, .Spacing = 15, .WindFlags = 0, ...)
 }
 \arguments{
 \item{lon}{A numeric vector of longitude coordinates (degrees)}
@@ -13,17 +13,21 @@ plotTrack(lon, lat, Time, r = 0, xc = NULL, yc = NULL, sz = NULL,
 
 \item{Time}{A POSIX-format vector of times corresponding to lat/lon}
 
-\item{r}{A sequence of indices to use when plotting lat, lon, Time (default is 0 which causes the entire range of indices to be plotted.)}
+\item{WDC}{A numeric vector of wind direction}
+
+\item{WSC}{A numeric vector of wind speed}
+
+\item{.Range}{A sequence of indices to use when plotting lat, lon, Time (default is 0 which causes the entire range of indices to be plotted.)}
 
 \item{xc}{An optional central longitude for the plot. If omitted, the range in lon[r] is used to determine the midpoint.}
 
 \item{yc}{An optional central latitude for the plot. If omitted, the range in lat[r] is used to determine the midpoint.}
 
-\item{sz}{An optional size in units of degrees for the plot. If omitted, the size is determined from the range of measurements.}
+\item{sz}{An optional size in units of degrees for the plot. If omitted, the size is determined from 10\% more than the range of measurements.}
 
-\item{Spacing}{The spacing between time labels placed on the graph, in minutes. The default is 15 min.}
+\item{.Spacing}{The spacing between time labels placed on the graph, in minutes. The default is 15 min.}
 
-\item{WindFlags}{A scale factor for wind flags placed along the track, in units of percentage of the plot size. The default is 0 which suppresses the flags. A common value is 5.}
+\item{.WindFlags}{A scale factor for wind flags placed along the track, in units of percentage of the plot size. The default is 0 which suppresses the flags. A common value is 5.}
 
 \item{...}{Additional arguments passed to the plot routine to control graphics parameters etc.}
 }
@@ -34,19 +38,7 @@ NULL -- The result is the plot.
 Plot a flight track in lat-lon coordinates.
 }
 \details{
-The flight track is shown with appropriate
-geographic boundaries, and the lat-lon scales are adjusted
-to give rectilinear coordinates at the center of the plot.
-The center coordinates and size of the plot can be specified,
-or if omitted will be set to cover the range of data in the
-supplied coordinates. The range of indices to plot can
-be supplied in the argument Range, or in the range of indices
-supplied with the arguments (lon, lat, Time). By default,
-labels are placed along the track every 15 min; this can be
-changed by the .Spacing argument.
-}
-\examples{
-\dontrun{plotTrack (LONC, LATC, Time, setRange (Time, 25000, 43000))}
+The flight track is shown with appropriate geographic boundaries, and the lat-lon scales are adjusted to give rectilinear coordinates at the center of the plot. The center coordinates and size of the plot can be specified, or if omitted will be set to cover the range of data in the supplied coordinates. The range of indices to plot can  be supplied in the argument .Range or in the range of indices supplied with the arguments (lon, lat, Time). By default, labels are placed along the track every 15 min; this can be changed by the .Spacing argument.
 }
 \author{
 William Cooper

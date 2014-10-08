@@ -3,16 +3,14 @@
 \alias{PCorFunction}
 \title{Static Defect Correction}
 \usage{
-PCorFunction(p, q = 100, alpha = 3, Mach = 0.8, AC = "GV")
+PCorFunction(p, q = 100, akrd = 2.5, AC = "GV")
 }
 \arguments{
 \item{p}{Measured (uncorrected) ambient pressure (e.g., PSF), hPa (no default)}
 
 \item{q}{Measured (uncorrected) dynamic pressure (e.g., QCF), hPa (or any units that match those used for p) -- default 100 hPa. This is unused for the C-130 so it does not need to be supplied.}
 
-\item{alpha}{Angle of attack (degrees; default +3)}
-
-\item{Mach}{Mach number (default: 0.8)}
+\item{akrd}{Ther angle of attack (degrees; no default)}
 
 \item{AC}{Aircraft identifier, either "GV" of "C130" (default "GV")}
 }
@@ -27,7 +25,7 @@ This correction was determined from fits to the measurements from
 the Laser Air Motion Sensor, as described by Cooper et al., 2014.
 }
 \examples{
-\dontrun{dPoverP <- PCorFunction (p, q, alpha, Mach, "GV")}
+\dontrun{dPoverP <- PCorFunction (p, q, akrd, "GV")}
 }
 \author{
 William Cooper

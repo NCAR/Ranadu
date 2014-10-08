@@ -4,16 +4,8 @@
 \title{PotentialTemperature}
 \usage{
 PotentialTemperature(P, AT, E = 0)
-
-PotentialTemperature(P, AT, E = 0)
 }
 \arguments{
-\item{P}{A numeric representing the pressure in hPa}
-
-\item{AT}{A numeric representing the air temperature in deg. C}
-
-\item{E}{A numeric representing the water vapor pressure in hPa}
-
 \item{P}{A numeric representing the pressure in hPa}
 
 \item{AT}{A numeric representing the air temperature in deg. C}
@@ -22,26 +14,17 @@ PotentialTemperature(P, AT, E = 0)
 }
 \value{
 Numeric containing the potential temperature
-
-Numeric containing the potential temperature
 }
 \description{
-Function to calculate the potential temperature
-
 Function to calculate the potential temperature
 }
 \details{
 Potential temperature is calculated from the pressure and temperature, optionally with a humidity correction
-
-Potential temperature is calculated from the pressure and temperature, optionally with a humidity correction
 }
 \examples{
 THETAP <- PotentialTemperature (500.,0.)
-THETAP <- PotentialTemperature (500.,0.)
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

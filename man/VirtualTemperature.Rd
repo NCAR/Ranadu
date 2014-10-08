@@ -4,40 +4,25 @@
 \title{VirtualTemperature}
 \usage{
 VirtualTemperature(AT, r)
-
-VirtualTemperature(AT, r)
 }
 \arguments{
-\item{AT}{A numeric representing the air temperature in deg. C}
-
-\item{r}{A numeric representing the water vapor mixing ratio in dimensionless units (*NOT* g/kg)}
-
 \item{AT}{A numeric representing the air temperature in deg. C}
 
 \item{r}{A numeric representing the water vapor mixing ratio in dimensionless units (*NOT* g/kg)}
 }
 \value{
 A numeric representing the virtual temperature in deg. C
-
-A numeric representing the virtual temperature in deg. C
 }
 \description{
-Calculates the virtual temperature in deg. C
-
 Calculates the virtual temperature in deg. C
 }
 \details{
 The virtual temperature is calculated from the air temperature and mixing ratio of water vapor
-
-The virtual temperature is calculated from the air temperature and mixing ratio of water vapor
 }
 \examples{
 Tvir <- VirtualTemperature (20., 0.005)
-Tvir <- VirtualTemperature (20., 0.005)
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

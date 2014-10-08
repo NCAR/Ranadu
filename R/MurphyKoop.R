@@ -1,4 +1,4 @@
-TZERO = 273.15
+TZERO = StandardConstant("Tzero")
 #' @title MurphyKoop
 #' @description Returns the water vapor pressure
 #' @details Calculates the equilibrium water vapor pressure according to the Murphy-Koop equation

@@ -4,16 +4,8 @@
 \title{EquivalentPotentialTemperature}
 \usage{
 EquivalentPotentialTemperature(P, AT, E)
-
-EquivalentPotentialTemperature(P, AT, E)
 }
 \arguments{
-\item{P}{A numeric representing ambient pressure in hPa}
-
-\item{AT}{A numeric representing air temperature in deg. C}
-
-\item{E}{A numeric representing water vapor pressure in hPa}
-
 \item{P}{A numeric representing ambient pressure in hPa}
 
 \item{AT}{A numeric representing air temperature in deg. C}
@@ -22,26 +14,17 @@ EquivalentPotentialTemperature(P, AT, E)
 }
 \value{
 A numeric representing the pseudo-adiabatic equivalent potential temperature
-
-A numeric representing the pseudo-adiabatic equivalent potential temperature
 }
 \description{
-The pseudo-adiabatic equivalent potential temperature
-
 The pseudo-adiabatic equivalent potential temperature
 }
 \details{
 The pseudo-adiabatic equivalent potential temperature is calculated according to the formula of Davies-Jones (2009); see ProcessingAlgorithms.pdf
-
-The pseudo-adiabatic equivalent potential temperature is calculated according to the formula of Davies-Jones (2009); see ProcessingAlgorithms.pdf
 }
 \examples{
 THETAP <- EquivalentPotentialTemperature (700., 10., 9.)
-THETAP <- EquivalentPotentialTemperature (700., 10., 9.)
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

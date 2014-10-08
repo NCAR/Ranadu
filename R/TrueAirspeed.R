@@ -1,3 +1,4 @@
+TZERO <- StandardConstant("Tzero")
 #' @title TrueAirspeed
 #' @description Returns the true airspeed 
 #' @details Calculates the true airspeed from measurements of Mach number, air temperature, and optionally humidity

@@ -16,9 +16,10 @@ MachNumber <- function (P, Q, E=0.) {
 # humidity correction. Call with pressure, dynamic pressure,
 # and vapor pressure, all in the same units.
 # Any units can be used as long as it is the same for all
-# three arguments.
+# three arguments. Only ratios (Q/P, E/P) enter the formula
   CP <- SpecificHeats (E/P)
-  MACH <- ((2.*(CP[,1]-CP[,3])/CP[,3])*(((P+Q)/P)**(CP[,3]/CP[,1])-1.))**0.5
+  # shouldn't this be ((2.*CP[2,]/CP[3,])...? Formerly, ((2*(CP[,1]-CP[,3])/CP[,3])...
+  MACH <- ((2.*CP[,2]/CP[,3])*(((P+Q)/P)**(CP[,3]/CP[,1])-1.))**0.5
   return (MACH)
 }
 

@@ -10,7 +10,7 @@ getStartEnd(Time)
 \item{Time}{A POSIXct format vector}
 }
 \value{
-c(Start_Time, End_Time), a numeric vector in HHMMSS format
+c(Start_Time, End_Time), a numeric 2-element vector in HHMMSS format
 }
 \description{
 Find the start and end times of 'Time'

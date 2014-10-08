@@ -4,10 +4,7 @@
 \title{plotWAC}
 \usage{
 plotWAC(x, y, col = "blue", xlab = "TIME [UTC]", ylab = "", lwd = 2,
-  type = "l")
-
-plotWAC(x, y, col = "blue", xlab = "TIME [UTC]", ylab = "", lwd = 2,
-  type = "l")
+  type = "l", ...)
 }
 \arguments{
 \item{x}{Usually, Time from a data.frame; a vector of abscissa values. Default: Data$Time}
@@ -25,39 +22,18 @@ plotWAC(x, y, col = "blue", xlab = "TIME [UTC]", ylab = "", lwd = 2,
 \item{type}{Line type to pass to plot (default: "l")}
 
 \item{...}{Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt}
-
-\item{x}{Usually, Time from a data.frame; a vector of abscissa values for points to plot}
-
-\item{y}{A vector of ordinate values for points to plot.}
-
-\item{col}{Color to pass to plot (default: blue)}
-
-\item{xlab}{Label for the abscissa, to pass to plot (default: "TIME [UTC]")}
-
-\item{ylab}{Label for the ordinate, to pass to plot (default: "")}
-
-\item{lwd}{Line width to pass to plot (default: 2)}
-
-\item{type}{Line type to pass to plot (default: "l")}
 }
 \description{
 Convenience routine for plots
-
-Convenience routine for plots
 }
 \details{
-Sets some plot defaults and calls plot and axis
-
 Sets some plot defaults and calls plot and axis
 }
 \examples{
 \dontrun{plotWAC (Time, TASX, ylab="TAS")}
 \dontrun{plotWAC (Time, PSXC, lty=2)}
-\dontrun{plotWAC (Time, TASX)}
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

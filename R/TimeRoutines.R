@@ -4,23 +4,28 @@
 #' @aliases getIndex
 #' @author William Cooper
 #' @export getIndex
-#' @param Time A POSIXct format vector
-#' @param THMS An integer representing time in HHMMSS format 
+#' @param Time A POSIXct-format vector
+#' @param HHMMSS An integer representing time in HHMMSS format 
 #' @return A numeric index in the Time vector
 #' @examples 
 #' \dontrun{index <- getIndex (Time, 142503)}
-getIndex <- function (Time, THMS) {
-  # This function returns the index in Time corresponding to THMS,
-  # where Time should be POSIXct-format and THMS an integer HHMMSS.
+getIndex <- function (Time, HHMMSS) {
+  # This function returns the index in Time corresponding to HHMMSS,
+  # where Time should be POSIXct-format and HHMMSS an integer.
   idx = 1:length(Time)
+  # is this a hrt file?
+  #.HR <- ((Time[27]-Time[26]) < .5)
   t <- as.POSIXlt(Time[1], tz="UTC", origin="1970-01-01")
   hour1 <- t$hour
-  t$hour <- as.integer(THMS/10000)
-  t$min <- as.integer((THMS%%10000)/100)
-  t$sec <- as.integer(THMS%%100)
+  t$hour <- as.integer(HHMMSS/10000)
+  t$min <- as.integer((HHMMSS%%10000)/100)
+  t$sec <- as.integer(HHMMSS%%100)
   tc <- as.POSIXct(t, tz='UTC')
-  if (t$hour < hour1) {tc <- tc + 86400}
-  index <- idx[Time==tc]
+  tr <- as.POSIXct(Time, tz="UTC", origin="1970-01-01")
+  if (t$hour < hour1) {
+    tc <- tc + 86400
+  }
+  index <- idx[abs(tr-tc) < 0.02]
   return (index)
 }
 
@@ -31,7 +36,7 @@ getIndex <- function (Time, THMS) {
 #' @author William Cooper
 #' @export getStartEnd
 #' @param Time A POSIXct format vector
-#' @return c(Start_Time, End_Time), a numeric vector in HHMMSS format
+#' @return c(Start_Time, End_Time), a numeric 2-element vector in HHMMSS format
 #' @examples 
 #' \dontrun{SE <- getStartEnd (Time)}
 getStartEnd <- function (Time) {
@@ -56,6 +61,10 @@ getStartEnd <- function (Time) {
 #' @examples 
 #' \dontrun{r <- setRange (Time, 103000, 113000)}
 setRange <- function (Time, Start=0, End=0) {
+  if(length(Time[is.na(Time)]) > 0) {
+    print(sprintf("setRange failed, NA in time sequence; consider D <- D[!is.na(D$Time),]"))
+    return(1)
+  }
   SE <- getStartEnd(Time)
   if (Start == 0.) {Start <- SE[1]}
   if (End == 0.) {End <- SE[2]}

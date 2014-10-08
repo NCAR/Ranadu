@@ -1,6 +1,6 @@
 Package: Ranadu
 Title: Functions for use with RAF aircraft data files
-Version: 0.0-2014-06-19
+Version: 1.0-14-10-07
 Author: William Cooper
 Maintainer: William Cooper <cooperw@ucar.edu>
 Description: This package contains a function for loading a portion of a netCDF
@@ -15,9 +15,11 @@ Description: This package contains a function for loading a portion of a netCDF
     corresponding to a specified water vapor pressure), PressureAltitude,
     PotentialTemperature, EquivalentPotentialTemperature,
     WetEquivalentPotentialTemperature, MixingRatio, VirtualTemperature,
-    VirtualPotentialTemperature, and plotWAC (a convenience routine producing
-    some aspects of plots I use routinely).
+    VirtualPotentialTemperature, and plotWAC and lineWAC (convenience routines
+    producing some aspects of plots I use routinely). There is also a function
+    providing standard constants including those defined in
+    ProcessingAlgorithms.pdf. There is a utility for making subsets of a
+    netCDF file, and there are other functions also.
 License: none
 Depends:
-    ncdf,nleqslv,maps,mapproj,mapdata,
-    rPython
+    ncdf,nleqslv,maps,mapproj,mapdata,rPython,ggplot2,ggthemes,grid,reshape2,signal

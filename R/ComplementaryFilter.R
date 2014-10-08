@@ -7,12 +7,14 @@
 #' @export ComplementaryFilter
 #' @param FastSignal A numeric vector with a fast-response signal.
 #' @param SlowSignal A numeric vector that is slower but has less absolute error than the fast-response signal.
-#' @param tau The time constant for the low-pass filter, in units of the spacing of measurements in the input arrays.
-#' @return The vector of measurements that combines the two input signals. (Defaults to 600.)
+#' @param tau The time constant for the low-pass filter, in units of the spacing of measurements in the input arrays. (Default: 200)
+#' @return The vector of measurements that combines the two input signals.
 #' @examples 
-#' \dontrun{ComplementaryFilter(VNS, GGVNS, 200)}
+#' \dontrun{ComplementaryFilter(VNS, GGVNS, 150)}
 #' \dontrun{ComplementaryFilter(VEW, GGVEW)}
-ComplementaryFilter <- function (fast, slow, tau=200) {
-  xf <- ButterworthFilter (slow-fast, tau)
+ComplementaryFilter <- function (FastSignal, SlowSignal, tau=200) {
+#  xf <- FastSignal + ButterworthFilter (SlowSignal-FastSignal, tau)
+  xf <- FastSignal + 
+    filter (butter(3, 2/tau), (SlowSignal - FastSignal))
   return (xf)
 }

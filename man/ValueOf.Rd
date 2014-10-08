@@ -3,7 +3,7 @@
 \alias{ValueOf}
 \title{ValueOf}
 \usage{
-ValueOf(Variable, HHMMSS)
+ValueOf(Variable, HHMMSS, DataFrame = Data)
 }
 \arguments{
 \item{Variable}{A variable in a dataframe named Data that also includes Time. The
@@ -11,6 +11,8 @@ variable can be in the form Data$TASX or, if Data is attached,
 TASX.}
 
 \item{HHMMSS}{A time in hour-minute-second format (e.g., 134513)}
+
+\item{DataFrame}{The dataframe containing Variable}
 }
 \value{
 The value of the supplied variable at the specified time.

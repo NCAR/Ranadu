@@ -16,7 +16,7 @@ GV_AOAfromRadome <- function (ADIFR, QCXC, MACH) {
   c2 <- 6.49
   akrd <- c0 + (ADIFR/QCXC)*(c1 + c2 * MACH)
   return (akrd)
-}
+} 
 
 #' @title GV_YawFromRadome
 #' @description Calculate sideslip angle from radome pressures
@@ -34,4 +34,4 @@ GV_YawFromRadome <- function (BDIFR, QCXC) {
   b1 = 1./0.04727
   ssrd <- b1*((BDIFR/QCXC)-b0)
   return (ssrd)
-}
+} 

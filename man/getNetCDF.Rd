@@ -7,15 +7,15 @@
 getNetCDF(fname, VarList, Start = 0, End = 0, F = 0)
 }
 \arguments{
-\item{fname}{string, full file name 'e.g., "/home/Data/PREDICT/PREDICTrf01.nc"}
+\item{fname}{string, full file name 'e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"}
 
-\item{VarList}{vector of variable names to load from the netCDF file}
+\item{VarList}{vector of variable names to load from the netCDF file.}
 
 \item{Start}{An optional numeric giving the desired start time in HHMMSS format}
 
 \item{End}{An optional numeric giving the desired end time in HHMMSS format}
 
-\item{F}{An optional numeric entered in the data.frame as a column 'FNo' all set to this integer}
+\item{F}{An optional numeric entered in the data.frame as a column 'RF' all set to this integer. This may be useful when the resulting data.frame is combined with others, to have a variable distinguishing different flights.}
 }
 \value{
 data.frame containing the specified variables as columns, along with 'Time' and optionally the flight number 'FNo'
@@ -24,7 +24,7 @@ data.frame containing the specified variables as columns, along with 'Time' and 
 Loads selected variables in a specified RAF-aircraft data file into a data.frame.
 }
 \details{
-'Time' is converted to a POSIXcf variable, and other variables specified in a VarList list are included in the data.frame. By default, the entire file is loaded, but optional arguments Start and End limit the time range.
+'Time' is converted to a POSIXcf variable, and other variables specified in a VarList list are included in the data.frame. By default, the entire file is loaded, but optional arguments Start and End limit the time range. After reading the data, the netCDF file is closed before returning the data.frame to the calling program.
 }
 \examples{
 \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}

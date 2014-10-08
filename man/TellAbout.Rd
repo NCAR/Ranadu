@@ -19,7 +19,7 @@ Utility to show characteristics of a variable
 Prints the variable type, dimensions, and summary.
 }
 \examples{
-\dontrun{TellAbout(V)}
+\dontrun{TellAbout("TASX")}
 }
 \author{
 William Cooper

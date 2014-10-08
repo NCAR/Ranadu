@@ -5,42 +5,26 @@
 \title{MurphyKoopIce}
 \usage{
 MurphyKoopIce(FP, P = 0)
-
-MurphyKoopIce(FP, P = 0)
 }
 \arguments{
-\item{FP}{A numeric representing the frost point in deg. C}
-
-\item{P}{An optional numeric representing total pressure in hPa, set zero to suppress 'enhancement factor' correction for total pressure}
-
 \item{FP}{A numeric representing the frost point in deg. C}
 
 \item{P}{An optional numeric representing total pressure in hPa, set zero to suppress 'enhancement factor' correction for total pressure}
 }
 \value{
 Water vapor pressure in equilibrium with a plane ice surface at dew point DP
-
-Water vapor pressure in equilibrium with a plane ice surface at dew point DP
 }
 \description{
 Returns the water vapor pressure
-
-Returns the water vapor pressure
 }
 \details{
-Calculates the water vapor pressure in equilibrium over a plane ice surface according to the Murphy-Koop equation
-
 Calculates the water vapor pressure in equilibrium over a plane ice surface according to the Murphy-Koop equation
 }
 \examples{
 e <- MurphyKoopIce (-50.)
 e <- MurphyKoopIce (-60., 200.)
-e <- MurphyKoopIce (-50.)
-e <- MurphyKoopIce (-60., 200.)
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

@@ -5,42 +5,26 @@
 \title{MurphyKoop}
 \usage{
 MurphyKoop(DP, P = 0)
-
-MurphyKoop(DP, P = 0)
 }
 \arguments{
-\item{DP}{A numeric representing the dew point in deg. C}
-
-\item{P}{An optional numeric representing total pressure in hPa, set zero to suppress 'enhancement factor' correction for total pressure}
-
 \item{DP}{A numeric representing the dew point in deg. C}
 
 \item{P}{An optional numeric representing total pressure in hPa, set zero to suppress 'enhancement factor' correction for total pressure}
 }
 \value{
 Water vapor pressure in equilibrium with a plane water surface at dew point DP
-
-Water vapor pressure in equilibrium with a plane water surface at dew point DP
 }
 \description{
 Returns the water vapor pressure
-
-Returns the water vapor pressure
 }
 \details{
-Calculates the equilibrium water vapor pressure according to the Murphy-Koop equation
-
 Calculates the equilibrium water vapor pressure according to the Murphy-Koop equation
 }
 \examples{
 e <- MurphyKoop (-12.)
 e <- MurphyKoop (10., 800.)
-e <- MurphyKoop (-12.)
-e <- MurphyKoop (10., 800.)
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

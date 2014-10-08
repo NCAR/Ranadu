@@ -3,17 +3,17 @@
 \alias{ComplementaryFilter}
 \title{ComplementaryFilter}
 \usage{
-ComplementaryFilter(fast, slow, tau = 200)
+ComplementaryFilter(FastSignal, SlowSignal, tau = 200)
 }
 \arguments{
 \item{FastSignal}{A numeric vector with a fast-response signal.}
 
 \item{SlowSignal}{A numeric vector that is slower but has less absolute error than the fast-response signal.}
 
-\item{tau}{The time constant for the low-pass filter, in units of the spacing of measurements in the input arrays.}
+\item{tau}{The time constant for the low-pass filter, in units of the spacing of measurements in the input arrays. (Default: 200)}
 }
 \value{
-The vector of measurements that combines the two input signals. (Defaults to 600.)
+The vector of measurements that combines the two input signals.
 }
 \description{
 Calculates a result from combining a fast-response and slow-response signal
@@ -22,7 +22,7 @@ Calculates a result from combining a fast-response and slow-response signal
 Applies a Butterworth filter to calculate the low-pass-filtered result of the difference between the two signals, and adds this filtered result to the signal with fast response.
 }
 \examples{
-\dontrun{ComplementaryFilter(VNS, GGVNS, 200)}
+\dontrun{ComplementaryFilter(VNS, GGVNS, 150)}
 \dontrun{ComplementaryFilter(VEW, GGVEW)}
 }
 \author{

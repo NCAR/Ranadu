@@ -10,13 +10,13 @@ standardVariables(list = NULL)
 \item{list}{An optional list of variable names to add to the standard list}
 }
 \description{
-Standard set of variables for data.frame
+Standard set of variables, usually used in call to getNetCDF
 }
 \details{
 Sets a standard list of variable names in VarList suitable for use in a call to getNetCDF. Optionally, add "list" to the variables.
 }
 \examples{
-standardVariables (c("WIC", "PLWCC"))
+standardVariables (c("VEW", "PLWCC"))
 }
 \author{
 William Cooper

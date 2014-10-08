@@ -11,7 +11,7 @@
 MixingRatio <- function (EoverP) {
 # Mixing ratio (E/P); returns the
 # dimensionless mixing ratio, *NOT* g/kg
-  r <- (18.0153/28.9637) * (EoverP/(1.-EoverP))
+  r <- (StandardConstant("MWW")/StandardConstant("MWD")) * (EoverP/(1.-EoverP))
   return (r)
 }
 

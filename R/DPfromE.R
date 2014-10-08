@@ -4,7 +4,7 @@ require(nleqslv)
 #' @details The Murphy-Koop equation for water vapor pressure is inverted to find dew point (in deg. C) from water vapor pressure (in hPa). The inversion uses the R routine nleqslv.
 #' @aliases DPfromE
 #' @author William Cooper
-#' @import nleqslv
+#' @import "nleqslv"
 #' @export DPfromE
 #' @param E A numeric representing the water vapor pressure in hPa 
 #' @return A numeric representing the dewpoint in deg. C corresponding to the input vapor pressure.

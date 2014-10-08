@@ -1,7 +1,6 @@
 #' @title AirTemperature
 #' @description Calculates the ambient air temperature
 #' @details Finds the air temperature from measurements of recovery temperature and ambient and dynamic pressure, with optional correction for humidity
-#' @aliases AirTemperature
 #' @author William Cooper
 #' @export AirTemperature
 #' @param RT A numeric representing the recovery temperature in deg. C

@@ -9,7 +9,7 @@
 #' @examples 
 #' \dontrun{TellAbout("TASX")}
 TellAbout <- function (V) {
-  print(c(sprintf("Variable class is %s, dim = ", class(V)), dim(V)))
+  print(c(sprintf("Variable class is %s, length = %d, dim = ", class(V), length(V)), dim(V)))
   if (is.vector(V)) {
     print(sprintf("Variable rms = %g", sd(V, na.rm=TRUE))) 
   }  
@@ -28,11 +28,12 @@ TellAbout <- function (V) {
 #' variable can be in the form Data$TASX or, if Data is attached,
 #' TASX.
 #' @param HHMMSS A time in hour-minute-second format (e.g., 134513) 
+#' @param DataFrame The dataframe containing Variable
 #' @return The value of the supplied variable at the specified time.
 #' @examples 
 #' \dontrun{x <- ValueOf (ATX, 140233)}
-ValueOf <- function(Variable, HHMMSS) {
-  return (Variable[getIndex(Data$Time, HHMMSS)])
+ValueOf <- function(Variable, HHMMSS, DataFrame=Data) {
+  return (Variable[getIndex(DataFrame$Time, HHMMSS)])
 }
 
 #' @title ValueOfAll
@@ -73,8 +74,8 @@ ValueOfAll <- function (DataFrame=Data, HHMMSS) {
 #' \dontrun{attr <- GetAttributes ("/src/raf_data/Projectrf01.nc", "WDC"}
 GetAttributes <- function (fname=fname, vname) {
   python.load ("/home/cooperw/RStudio/Ranadu/getAttributes.py")
-  if (type (vname) != "string") {
-    print ("Usage of GetAttributes: Must provide a string for vname")
+  if (typeof (vname) != "character") {
+    print ("Usage of GetAttributes: Must provide a character string for vname")
     return (NULL)
   } else {
     attr <- python.call ("getAttributes", fname, vname)

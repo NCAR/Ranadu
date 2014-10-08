@@ -21,7 +21,11 @@ plotWAC <- function (x, y, col="blue", xlab="TIME [UTC]",
        type=type, col=col, xaxs="r", yaxs="r", ...)
   if (!is.expression(xlab)) {
     if (xlab == "TIME [UTC]") {
-      axis.POSIXct(1,x, format='%H:%M', tck=0.02)
+      if (length(x) < 120) {          # needs revision for high-rate data
+        axis.POSIXct(1, x, format='%H:%M:%S', tck=0.02)
+      } else {
+        axis.POSIXct(1,x, format='%H:%M', tck=0.02)
+      }
       axis.POSIXct(3,x, labels=NA, tck=0.02)
     } else {
       axis(1,tck=0.02)
@@ -35,3 +39,24 @@ plotWAC <- function (x, y, col="blue", xlab="TIME [UTC]",
   axis(4,labels=NA,tck=0.02)
   return ()
 }
+
+#' @title lineWAC
+#' @description Convenience routine for adding lines to plots
+#' @details Sets some plot defaults and calls points; assumes a plot with axes has already been generated to which to add this line.
+#' @aliases lineWAC
+#' @author William Cooper
+#' @export lineWAC
+#' @param x Usually, Time from a data.frame; a vector of abscissa values. Default: Data$Time
+#' @param y A vector of ordinate values for points to plot. 
+#' @param col Color to pass to plot (default: darkgreen)
+#' @param lwd Line width to pass to plot (default: 2)
+#' @param type Line type to pass to plot (default: "l")
+#' @param ... Additional arguments to pass to point()
+#' @examples 
+#' \dontrun{lineWAC (Time, TASX, col='darkgreen')}
+#' \dontrun{lineWAC (Time, PSXC, lty=2)}
+lineWAC <- function (x, y, col="blue", lwd=2, type='l', ...) {
+  points(x, y, lwd=lwd, type=type, col=col, ...)
+  return ()
+}
+

@@ -4,36 +4,23 @@
 \title{MKerror}
 \usage{
 MKerror(DP)
-
-MKerror(DP)
 }
 \arguments{
-\item{DP}{A numeric representing the dew point in deg. C}
-
 \item{DP}{A numeric representing the dew point in deg. C}
 }
 \value{
 The error between the vapor pressure corresponding to the input dew point and the reference vapor pressure (Ereference) set before calling this function.
-
-The error between the vapor pressure corresponding to the input dew point and the reference vapor pressure (Ereference) set before calling this function.
 }
 \description{
-Internal function used by DPfromE()
-
 Internal function used by DPfromE()
 }
 \details{
 Internal function used for inverting the Murphy-Koop formula to find dew-point as a function of water vapor pressure
-
-Internal function used for inverting the Murphy-Koop formula to find dew-point as a function of water vapor pressure
 }
 \examples{
 \dontrun{err <- MKerror (10.)}
-\dontrun{err <- MKerror (10.)}
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

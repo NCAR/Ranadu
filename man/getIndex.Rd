@@ -3,12 +3,12 @@
 \alias{getIndex}
 \title{getIndex}
 \usage{
-getIndex(Time, THMS)
+getIndex(Time, HHMMSS)
 }
 \arguments{
-\item{Time}{A POSIXct format vector}
+\item{Time}{A POSIXct-format vector}
 
-\item{THMS}{An integer representing time in HHMMSS format}
+\item{HHMMSS}{An integer representing time in HHMMSS format}
 }
 \value{
 A numeric index in the Time vector

@@ -5,36 +5,23 @@
 \title{RecoveryFactor}
 \usage{
 RecoveryFactor(MACH)
-
-RecoveryFactor(MACH)
 }
 \arguments{
-\item{MACH}{A numeric giving the Mach number, perhaps calculated by MachNumber()}
-
 \item{MACH}{A numeric giving the Mach number, perhaps calculated by MachNumber()}
 }
 \value{
 The recovery factor applicable to a heated sensor
-
-The recovery factor applicable to a heated sensor
 }
 \description{
-Mach-number-dependent recovery factor for heat sensor
-
 Mach-number-dependent recovery factor for heat sensor
 }
 \details{
 For specified Mach number, returns the recovery factor according to the formula in ProcessingAlgorithms.
-
-For specified Mach number, returns the recovery factor according to the formula in ProcessingAlgorithms.
 }
 \examples{
 rf <- RecoveryFactor (0.75)
-rf <- RecoveryFactor (0.75)
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

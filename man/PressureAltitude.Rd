@@ -4,36 +4,23 @@
 \title{PressureAltitude}
 \usage{
 PressureAltitude(P)
-
-PressureAltitude(P)
 }
 \arguments{
-\item{P}{A numeric representing pressure in hPa}
-
 \item{P}{A numeric representing pressure in hPa}
 }
 \value{
 The pressure altitude in meters
-
-The pressure altitude in meters
 }
 \description{
-Pressure altitude in the ISA standard atmosphere
-
 Pressure altitude in the ISA standard atmosphere
 }
 \details{
 Calculates the altitude in the ISA standard atmosphere corresponding to the specified pressure
-
-Calculates the altitude in the ISA standard atmosphere corresponding to the specified pressure
 }
 \examples{
 PALT <- PressureAltitude (500.)
-PALT <- PressureAltitude (500.)
 }
 \author{
-William Cooper
-
 William Cooper
 }
 

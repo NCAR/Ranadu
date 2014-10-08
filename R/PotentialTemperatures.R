@@ -1,3 +1,4 @@
+TZERO <- StandardConstant("Tzero")
 #' @title PotentialTemperature
 #' @description Function to calculate the potential temperature
 #' @details Potential temperature is calculated from the pressure and temperature, optionally with a humidity correction
@@ -60,7 +61,7 @@ EquivalentPotentialTemperature <- function (P, AT, E) {
 VirtualTemperature <- function (AT, r) {
 # Virtual Temperature, fn of AT (degC), r (mixing ratio
 # in dimensionless units, kg/kg)
-  Tvir <- (AT+TZERO)*((1.+(29.9637/18.0153)*r)/(1.+r))-TZERO
+  Tvir <- (AT+TZERO)*((1.+(StandardConstant("MWD")/StandardConstant("MWW")*r)/(1.+r)))-TZERO
   return (Tvir)
 }
 
@@ -113,7 +114,7 @@ WetEquivalentPotentialTemperature <- function (P, AT, E, w) {
   rho_air <- (P-E)/(CP[3]*(AT+TZERO))
   rt <- r + (w/1000.)/rho_air
   cpt <- CP[1]+rt*cw
-  Rw = 461.5228
+  Rw = StandardConstant("Rw")
   eeq <- MurphyKoop (AT)
   F1 <- ifelse ((E < 0.9*eeq) & (w < 0.00001), (E/eeq)**(r*Rw/cpt), 1.)
   T1 <- Tk * (1000./(P-E))**(CP[3]/CP[1])

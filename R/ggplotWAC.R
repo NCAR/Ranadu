@@ -27,7 +27,7 @@
 #' @examples 
 #' \dontrun{plotWAC (Time, TASX, ylab="TAS")}
 #' \dontrun{plotWAC (Time, PSXC, lty=2)}
-ggplotWAC <- function (data=Data, xp="Time", yp="ATX", col="blue", xlab="TIME [UTC]", 
+ggplotWAC <- function (data=Data, xp=Time, yp=ATX, col="blue", xlab="TIME [UTC]", 
                      ylab="", lwd=2, type='l', title="", ...) {
   theme_WAC <- theme_gdocs() + theme(
     plot.title = element_text(hjust=0.5),
@@ -50,7 +50,7 @@ ggplotWAC <- function (data=Data, xp="Time", yp="ATX", col="blue", xlab="TIME [U
   g <- ggplot (data, aes(x=xp))
   xl <- "Time [UTC]"
   clr <- yp
-  #col <- c("darkgreen","red","blue")
+  col <- c("darkgreen","red","blue")
   if (length(yp) > 1) {
     for (j in 1:length(yp)) {
       a <- eval(sprintf("aes (y=data[,yp[%d]], colour='%s')",j,yp[j]))
@@ -62,7 +62,7 @@ ggplotWAC <- function (data=Data, xp="Time", yp="ATX", col="blue", xlab="TIME [U
     g <- g + xlab(xlab)+ylab(ylab) +
       ggtitle(title)+theme_WAC
   } else {
-    a <- eval(sprintf("aes (y=data[,yp, colour='%s')",yp))
+    a <- eval(sprintf("aes (y=data[,yp], colour='%s')",yp))
     g <-  g + geom_line (eval(parse(text=a)))
     g <- g + xlab(xlab)+ylab(ylab)+ggtitle(title)+theme_WAC
   }
