@@ -56,31 +56,31 @@ ValueOfAll <- function (DataFrame=Data, HHMMSS) {
   return (DataFrame[getIndex(DataFrame$Time, HHMMSS),])
 }
 
-#' @title GetAttributes
-#' @description List the netCDF attributes for a specified variable.
-#' @details Prints the netCDF attributes and their values, and returns
-#' a text vector with the names of the attributes, for a specified
-#' netCDF file and variable. The name of the variable should be
-#' specified as a string.
-#' @aliases GetAttributes
-#' @author William Cooper
-#' @import "rPython"
-#' @export GetAttributes
-#' @param fname The name of the netCDF file.
-#' @param vname The name of a variable in the netCDF file. This should
-#' be specified as a string variable (e.g., "TASX")
-#' @return A list of the names of the attributes
-#' @examples 
-#' \dontrun{attr <- GetAttributes ("/src/raf_data/Projectrf01.nc", "WDC"}
-GetAttributes <- function (fname=fname, vname) {
-  python.load ("/home/cooperw/RStudio/Ranadu/getAttributes.py")
-  if (typeof (vname) != "character") {
-    print ("Usage of GetAttributes: Must provide a character string for vname")
-    return (NULL)
-  } else {
-    attr <- python.call ("getAttributes", fname, vname)
-  }
-  return (attr)
-}  
+# #' @title GetAttributes
+# #' @description List the netCDF attributes for a specified variable.
+# #' @details Prints the netCDF attributes and their values, and returns
+# #' a text vector with the names of the attributes, for a specified
+# #' netCDF file and variable. The name of the variable should be
+# #' specified as a string.
+# #' @aliases GetAttributes
+# #' @author William Cooper
+# #' @import "rPython"
+# #' @export GetAttributes
+# #' @param fname The name of the netCDF file.
+# #' @param vname The name of a variable in the netCDF file. This should
+# #' be specified as a string variable (e.g., "TASX")
+# #' @return A list of the names of the attributes
+# #' @examples 
+# #' \dontrun{attr <- GetAttributes ("/src/raf_data/Projectrf01.nc", "WDC"}
+# GetAttributes <- function (fname=fname, vname) {
+#   python.load ("/home/cooperw/RStudio/Ranadu/getAttributes.py")
+#   if (typeof (vname) != "character") {
+#     print ("Usage of GetAttributes: Must provide a character string for vname")
+#     return (NULL)
+#   } else {
+#     attr <- python.call ("getAttributes", fname, vname)
+#   }
+#   return (attr)
+# }  
   
 
