@@ -22,4 +22,4 @@ Description: This package contains a function for loading a portion of a netCDF
     netCDF file, and there are other functions also.
 License: none
 Depends:
-    ncdf,nleqslv,maps,mapproj,mapdata,ggplot2,ggthemes,grid,reshape2,signal
+    ncdf,nleqslv,maps,mapproj,mapdata,ggplot2,ggthemes,grid,reshape2,rPython,signal
