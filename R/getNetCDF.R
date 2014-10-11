@@ -32,7 +32,7 @@ standardVariables <- function (list=NULL) {
 #' @param Start An optional numeric giving the desired start time in HHMMSS format
 #' @param End An optional numeric giving the desired end time in HHMMSS format
 #' @param F An optional numeric entered in the data.frame as a column 'RF' all set to this integer. This may be useful when the resulting data.frame is combined with others, to have a variable distinguishing different flights.
-#' @return data.frame containing the specified variables as columns, along with 'Time' and optionally the flight number 'FNo'
+#' @return data.frame containing the specified variables as columns, along with 'Time' and optionally the flight number 'RF'
 #' @examples 
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2"), 133000, 143000, 5)}
