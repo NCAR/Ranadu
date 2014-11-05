@@ -61,9 +61,9 @@ plotTrack <- function (lon, lat, Time, WDC=Data$WDC,
       | (max(lon[.Range], na.rm=TRUE) > -70.)
       | (min(lat[.Range], na.rm=TRUE) < 30.) 
       | (max(lat[.Range], na.rm=TRUE) > 50.)) {
-        map("world", add=TRUE, fill=FALSE, col="black", lty=2)
+        maps::map("world", add=TRUE, fill=FALSE, col="black", lty=2)
       } else {
-        map("state", add=TRUE, fill=FALSE, col="black", lty=2)
+        maps::map("state", add=TRUE, fill=FALSE, col="black", lty=2)
       }
   points (lon[.Range], lat[.Range], type='l', col='blue', 
           xlab='Latitude [deg.]', ylab='Longitude [deg.]', ...)

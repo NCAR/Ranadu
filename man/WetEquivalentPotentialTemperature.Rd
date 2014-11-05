@@ -3,16 +3,17 @@
 \alias{WetEquivalentPotentialTemperature}
 \title{WetEquivalentPotentialTemperature}
 \usage{
-WetEquivalentPotentialTemperature(P, AT, E, w)
+WetEquivalentPotentialTemperature(P, AT, E = 0, w = 0)
 }
 \arguments{
 \item{P}{A numeric representing pressure in hPa}
 
 \item{AT}{A numeric representing air temperature in deg. C}
 
-\item{E}{A numeric representing water vapor pressure in hPa}
+\item{E}{A numeric representing water vapor pressure in hPa. Default is 0, and if
+E <= 0 then E is set to the equilibrium value for the calculation.}
 
-\item{w}{A numeric representing liquid water content in g/m^3}
+\item{w}{A numeric representing liquid water content in g/m^3. Default is 0.}
 }
 \value{
 A numeric representing the wet-equivalent potential temperature in kelvin

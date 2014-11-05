@@ -16,7 +16,7 @@ GV_AOAfromRadome(ADIFR, QCXC, MACH)
 The angle of attack in degrees (possibly a vector)
 }
 \description{
-Calculate angle-of-attack from radome pressures
+Calculate angle of attack from radome pressures
 }
 \details{
 based on calibration, applies model for AOA given ADIFR, QCXC, and Mach Number

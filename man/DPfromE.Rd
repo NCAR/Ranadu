@@ -3,7 +3,7 @@
 \alias{DPfromE}
 \title{DPfromE}
 \usage{
-DPfromE(E)
+DPfromE(.E)
 }
 \arguments{
 \item{E}{A numeric representing the water vapor pressure in hPa}
@@ -21,6 +21,6 @@ The Murphy-Koop equation for water vapor pressure is inverted to find dew point 
 DP <- DPfromE (0.01)
 }
 \author{
-William Cooper
+William Cooper"
 }
 

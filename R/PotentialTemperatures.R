@@ -96,29 +96,29 @@ VirtualPotentialTemperature <- function (Tvir, P, E=0.) {
 #' @export WetEquivalentPotentialTemperature
 #' @param P A numeric representing pressure in hPa 
 #' @param AT A numeric representing air temperature in deg. C 
-#' @param E A numeric representing water vapor pressure in hPa
-#' @param w A numeric representing liquid water content in g/m^3
+#' @param E A numeric representing water vapor pressure in hPa. Default is 0, and if
+#' E <= 0 then E is set to the equilibrium value for the calculation.
+#' @param w A numeric representing liquid water content in g/m^3. Default is 0.
 #' @return A numeric representing the wet-equivalent potential temperature in kelvin 
 #' @examples 
 #' THETAQ <- WetEquivalentPotentialTemperature (700., 0., 6.11, 1.0)
-WetEquivalentPotentialTemperature <- function (P, AT, E, w) {
+WetEquivalentPotentialTemperature <- function (P, AT, E=0, w=0) {
 # wet-equivalent potential temperature (THETAQ) as a function
 # of pressure (P, hPa), temperature (AT, degC), mixing
 # ratio (r, dimensionless), and condensed water content (w) in
 # g/m^3
   Tk <- AT + TZERO
-  Lv <- 2.501e6-2370.*AT
+  eeq <- MurphyKoop (AT, P)
+  if (E <= 0) {
+    E <- eeq
+  }
+  Lv <- 2.501e6-2370.*AT    # latent heat of vaporization, temp-dependent
   cw <- 4190.                  # J/(kg K), mean value 0-90C
-  CP <- SpecificHeats (0.)     # need dry-air values
+  CP <- SpecificHeats ()     # need dry-air values
   r <- MixingRatio (E/P)
-  rho_air <- (P-E)/(CP[3]*(AT+TZERO))
-  rt <- r + (w/1000.)/rho_air
+  rt <- r + (w/1000.) / (100 * (P-E) / (CP[3] * Tk)) # denom. is rho_air
   cpt <- CP[1]+rt*cw
-  Rw = StandardConstant("Rw")
-  eeq <- MurphyKoop (AT)
-  F1 <- ifelse ((E < 0.9*eeq) & (w < 0.00001), (E/eeq)**(r*Rw/cpt), 1.)
-  T1 <- Tk * (1000./(P-E))**(CP[3]/CP[1])
-  THETAQ <- T1*F1*exp((Lv*r)/(cpt*Tk))
-  return (THETAQ)            
+  F1 <- ifelse ((E < eeq), (E/eeq)**(r*StandardConstant("Rw")/cpt), 1.)
+  return (F1 * Tk * (1000 / (P - E)) ^ (CP[3] / CP[1]) * exp((Lv * r) / (cpt * Tk)))
 }
 

@@ -64,7 +64,6 @@ ValueOfAll <- function (DataFrame=Data, HHMMSS) {
 #' specified as a string.
 #' @aliases GetAttributes
 #' @author William Cooper
-#' @import "rPython"
 #' @export GetAttributes
 #' @param fname The name of the netCDF file.
 #' @param vname The name of a variable in the netCDF file. This should
@@ -73,12 +72,12 @@ ValueOfAll <- function (DataFrame=Data, HHMMSS) {
 #' @examples 
 #' \dontrun{attr <- GetAttributes ("/src/raf_data/Projectrf01.nc", "WDC"}
 GetAttributes <- function (fname=fname, vname) {
-  python.load ("/home/cooperw/RStudio/Ranadu/getAttributes.py")
+  rPython::python.load ("/home/cooperw/RStudio/Ranadu/getAttributes.py")
   if (typeof (vname) != "character") {
     print ("Usage of GetAttributes: Must provide a character string for vname")
     return (NULL)
   } else {
-    attr <- python.call ("getAttributes", fname, vname)
+    attr <- rPython::python.call ("getAttributes", fname, vname)
   }
   return (attr)
 }  

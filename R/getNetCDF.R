@@ -27,7 +27,7 @@ standardVariables <- function (list=NULL) {
 #' @author William Cooper
 #' @import "ncdf"
 #' @export getNetCDF
-#' @param fname string, full file name 'e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
+#' @param fname string, full file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
 #' @param VarList vector of variable names to load from the netCDF file.
 #' @param Start An optional numeric giving the desired start time in HHMMSS format
 #' @param End An optional numeric giving the desired end time in HHMMSS format
@@ -131,7 +131,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
 	        }
         }
 	      #T <- filter(butter(3,2./25.),T)
-	      T <- filter(sgolay(4,75),T)      
+	      T <- signal::filter(sgolay(4,75),T)      
         d[VarList[i]] <- T
       }
     } else {

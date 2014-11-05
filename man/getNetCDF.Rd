@@ -7,7 +7,7 @@
 getNetCDF(fname, VarList, Start = 0, End = 0, F = 0)
 }
 \arguments{
-\item{fname}{string, full file name 'e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"}
+\item{fname}{string, full file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"}
 
 \item{VarList}{vector of variable names to load from the netCDF file.}
 
@@ -18,7 +18,7 @@ getNetCDF(fname, VarList, Start = 0, End = 0, F = 0)
 \item{F}{An optional numeric entered in the data.frame as a column 'RF' all set to this integer. This may be useful when the resulting data.frame is combined with others, to have a variable distinguishing different flights.}
 }
 \value{
-data.frame containing the specified variables as columns, along with 'Time' and optionally the flight number 'FNo'
+data.frame containing the specified variables as columns, along with 'Time' and optionally the flight number 'RF'
 }
 \description{
 Loads selected variables in a specified RAF-aircraft data file into a data.frame.

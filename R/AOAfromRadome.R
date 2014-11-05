@@ -1,5 +1,5 @@
 #' @title GV_AOAfromRadome
-#' @description Calculate angle-of-attack from radome pressures
+#' @description Calculate angle of attack from radome pressures
 #' @details based on calibration, applies model for AOA given ADIFR, QCXC, and Mach Number
 #' @aliases GV_AOAfromRadome
 #' @author William Cooper

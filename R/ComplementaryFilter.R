@@ -15,6 +15,6 @@
 ComplementaryFilter <- function (FastSignal, SlowSignal, tau=200) {
 #  xf <- FastSignal + ButterworthFilter (SlowSignal-FastSignal, tau)
   xf <- FastSignal + 
-    filter (butter(3, 2/tau), (SlowSignal - FastSignal))
+    signal::filter (butter(3, 2/tau), (SlowSignal - FastSignal))
   return (xf)
 }
