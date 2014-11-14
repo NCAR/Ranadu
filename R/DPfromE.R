@@ -4,7 +4,7 @@
 #' @aliases DPfromE
 #' @author William Cooper"
 #' @export DPfromE
-#' @param E A numeric representing the water vapor pressure in hPa 
+#' @param .E A numeric representing the water vapor pressure in hPa 
 #' @return A numeric representing the dewpoint in deg. C corresponding to the input vapor pressure.
 #' @examples 
 #' DP <- DPfromE (0.01)
@@ -19,7 +19,7 @@ DPfromE <- function (.E) {
     # probably no other uses
     return (MurphyKoop(.DP)-.Ereference)
   }
-  A <- nleqslv::nleqslv (-10.,MKerror, method="Newton", Ereference)
+  A <- nleqslv::nleqslv (-10., fn=MKerror, jac=NULL, method="Newton", Ereference)
   return (A$x)
 }
 

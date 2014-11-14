@@ -14,8 +14,8 @@
 #' @param .VarList List of variables to include in the file (vector of character strings), default is the list of variables provided by 'standardVariables()'.
 #' @param .F A numeric flight number to include in the data frame as 'RF'. Defaults to 0 and, if 0, is not included.
 #' @return The full address where the compressed Rdata file was saved, or NULL in case of failure.  
-#' @examples RdataFile <- getRAFData ("Temp.Rdata.gz", "/scr/raf_data/", "PREDICT", "rf05")
-#' \dontrun{}
+## @examples 
+## \dontrun{RdataFile <- getRAFData ("Temp.Rdata.gz", "/scr/raf_data/", "PREDICT", "rf05")}
 
 ########################
 # getRAFData.R

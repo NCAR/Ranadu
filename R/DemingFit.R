@@ -14,11 +14,8 @@
 #' measurement uncertainty for the first set of measurements. Default: 1
 #' @param .sdy Like .sdx but for the second set of measurements.
 #' @return c(a, b, rms) for a fit of the form y = a + b * x, or NULL if no fit is possible (e.g., too few points or zero correlation)
-#' @examples DemingFit ((1:5+rnorm(5,0,0.5)), (1:5+rnorm(5,0,0.5)))
-#' xe <- 1:5 + rnorm (5, 0, 1)
-#' ye <- 1:5 + rnorm (5, 0, 1)
-#' DemingFit (xe, ye)
-#' \dontrun{Fit <- DemingFit (x, y, sdx, sdy)}
+#' @examples 
+#' DemingFit ((1:5+rnorm(5,0,0.5)), (1:5+rnorm(5,0,0.5)))
 DemingFit <- function (.x, .y, .sdx=1, .sdy=1) {
   ratio <- .sdy / .sdx
   xbar <- mean (.x, na.rm=TRUE)

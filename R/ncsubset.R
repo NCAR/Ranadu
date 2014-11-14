@@ -10,8 +10,10 @@
 #' @param .End The end time (in HHMMSS format) for the new file. Default is the end time for the old file.
 #' @param .VarList A vector of names of variables to include in the new file. Default is the list of variables in the old file.
 #' @return NULL; the result is a new file in a specified location.
-#' @examples 
-#' \dontrun{ncsubset ("/scr/raf_data/CONTRAST/CONTRASTrf14hrt.nc", "/h/eol/cooperw/Data/CSTrf14hrt.nc", 72300, 72800, standardVariables(c("GGVNSB","GGVEWB")))}
+## @examples 
+## \dontrun{ncsubset ("/scr/raf_data/CONTRAST/CONTRASTrf14hrt.nc", 
+##     "/h/eol/cooperw/Data/CSTrf14hrt.nc", 72300, 72800, 
+##     standardVariables(c("GGVNSB","GGVEWB")))}
 ncsubset <- function (.OldFileName, .NewFileName, .Start=NA, .End=NA, .VarList=NULL) {
 # 
 # This uses ncks to extract a subset of a netCDF file, and resets the 

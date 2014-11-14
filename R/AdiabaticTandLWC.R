@@ -14,8 +14,8 @@
 #' @export AdiabaticTandLWC
 #' @param .Pbase Starting-point pressure, hPa
 #' @param .Tbase Starting-point temperature, degC
-#' @param .pObs Pressure at the observation level, hPa (can be length>1)
-#' @param .eBase Optional vapor pressure at starting point; the default
+#' @param .Pobs Pressure at the observation level, hPa (can be length>1)
+#' @param .Ebase Optional vapor pressure at starting point; the default
 #' is zero and in that case the calculation uses the equilibrium vapor 
 #' pressure at .Tbase
 #' @param .lwc Liquid water content (g/m^3) at starting point (default 0)
@@ -23,14 +23,13 @@
 #' (possibly length>1) values of temperature [degC] and liquid water content
 #' [g/m^3] corresponding to the pressures .pObs .
 #' @examples 
-#' R <- AdiabaticTandLWC (900., 20., c(900,800,700,600,500,400)); print(R)
-#' \dontrun{}
+#' \dontrun{R <- AdiabaticTandLWC (900., 20., c(900,800,700,600,500,400)) ; print(R)}
 AdiabaticTandLWC <- function (.Pbase, .Tbase, .Pobs, .Ebase=0, .lwc=0) {
   ThetaQ <- WetEquivalentPotentialTemperature (.Pbase, .Tbase, .Ebase, .lwc)
   TZERO <- 273.15; CP <- SpecificHeats () # must use dry-air values
   eBase <- ifelse (.Ebase <= 0, MurphyKoop (.Tbase, .Pbase), .Ebase) 
   rTot <- MixingRatio (eBase / .Pbase) + (.lwc / 1000) /
-    (100 * (.Pbase - eBase) / (CP[3] * (.Tbase+TZERO))) #this is rho_air; 100 Pa / mb
+    (100 * (.Pbase - eBase) / (CP[3] * (.Tbase+TZERO))) #this is rho_dry_air; 100 Pa / mb
   cpt <- CP[1] + rTot * 4.190e3     # latter is specific heat of liq water
   
   ###### function for nleqslv, solving a non-linear equation

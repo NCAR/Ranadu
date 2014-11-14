@@ -51,7 +51,7 @@ getStartEnd <- function (Time) {
 
 #' @title setRange
 #' @description Set the index range based on requested time limits
-#' @details For time variable Time, finds indices that match the supplied start and end times and return the result as a sequence
+#' @details For time variable Time, finds indices that match the supplied start and end times and returns the result as a sequence
 #' @aliases setRange
 #' @author William Cooper
 #' @export setRange

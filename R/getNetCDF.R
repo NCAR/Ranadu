@@ -1,7 +1,7 @@
 #' @title standardVariables
 #' @description Standard set of variables, usually used in call to getNetCDF 
 #' @details Sets a standard list of variable names in VarList suitable for use in a call to getNetCDF. Optionally, add "list" to the variables.
-#' @details The standard variables are ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCSC, TASX, WDC, WSC, WIC.
+#' The standard variables are ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCSC, TASX, WDC, WSC, WIC.
 #' @aliases standardVariables StandardVariables
 #' @author William Cooper
 #' @export standardVariables
@@ -140,10 +140,10 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   }
   if (F != 0) {    # if specified, include the flight number
     RF <- rep (F, times=length(Time))    # label flight number
-    d["RF"] <- RF[r]
+    d["RF"] <- RF
   }
   close.ncdf (netCDFfile)
-  d[d == -32767.] <- NA   # replace missing-value with NA
+  d[d == -32767. ] <- NA   # replace missing-value with NA
   return (d)
 }
 

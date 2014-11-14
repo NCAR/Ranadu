@@ -29,22 +29,25 @@ PotentialTemperature <- function (P, AT, E=0.) {
 #' @export EquivalentPotentialTemperature
 #' @param P A numeric representing ambient pressure in hPa 
 #' @param AT A numeric representing air temperature in deg. C 
-#' @param E A numeric representing water vapor pressure in hPa
-#' @return A numeric representing the pseudo-adiabatic equivalent potential temperature
+#' @param E A numeric representing water vapor pressure in hPa. Defaults to zero,
+#' and for that case the calculation uses the equilibrium vapor pressure at AT.
+#' @return A numeric representing the pseudo-adiabatic equivalent potential temperature in kelvin.
 #' @examples 
 #' THETAP <- EquivalentPotentialTemperature (700., 10., 9.) 
-EquivalentPotentialTemperature <- function (P, AT, E) {
+EquivalentPotentialTemperature <- function (P, AT, E=0) {
 # Davies-Jones pseudo-adiabatic equivalent potential 
 # temperature. Needs P, AT, E (hPa, degC, hPa).
   L0 <- 2.56313e6
   L1 <- 1754.
   K2 <- 1.137e6
   TK <- AT + TZERO
+  if (E <= 0) {E <- MurphyKoop (AT)}
   r <- MixingRatio (E/P) 
   CP <- SpecificHeats(0.)     # need dry-air value, don't need vector
   TL = 2840./(3.5*log(TK)-log(E)-4.805)+55.
   TDL <- TK*(1000./(P-E))**0.2854*(TK/TL)**(0.28e-3*r)
   THETAP <- TDL * exp (r*(L0-L1*(TL-TZERO)+K2*r)/(CP[1]*TL))
+  return (THETAP)
 }
 
 #' @title VirtualTemperature
@@ -112,13 +115,13 @@ WetEquivalentPotentialTemperature <- function (P, AT, E=0, w=0) {
   if (E <= 0) {
     E <- eeq
   }
-  Lv <- 2.501e6-2370.*AT    # latent heat of vaporization, temp-dependent
+  Lv <- 2.501e6 - 2370.*AT    # latent heat of vaporization, temp-dependent
   cw <- 4190.                  # J/(kg K), mean value 0-90C
   CP <- SpecificHeats ()     # need dry-air values
   r <- MixingRatio (E/P)
-  rt <- r + (w/1000.) / (100 * (P-E) / (CP[3] * Tk)) # denom. is rho_air
+  rt <- r + (w/1000.) / (100 * (P-E) / (CP[3] * Tk)) # denom. is density of dry air
   cpt <- CP[1]+rt*cw
-  F1 <- ifelse ((E < eeq), (E/eeq)**(r*StandardConstant("Rw")/cpt), 1.)
-  return (F1 * Tk * (1000 / (P - E)) ^ (CP[3] / CP[1]) * exp((Lv * r) / (cpt * Tk)))
+  F1 <- ifelse ((E < eeq), (E/eeq) ^ (-r*StandardConstant("Rw")/cpt), 1.)
+  return (F1 * Tk * (1000 / (P - E)) ^ (CP[3] / cpt) * exp((Lv * r) / (cpt * Tk)))
 }
 
