@@ -7,3 +7,5 @@ git add README
 git commit -m "message"
 git remote add Ranadu https://github.com/WilliamCooper/Ranadu.git
 git push -u Ranadu master
+
+git remote set-url origin https://github.com/WilliamCooper/Ranadu.git
