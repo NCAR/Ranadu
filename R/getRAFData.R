@@ -2,7 +2,7 @@
 #' @title getRAFData
 #' @description Prepares RAF netCDF data, in data.frame, for FTP download
 #' @details For specified variables and time period, constructs a data.frame, saves it in Rdata format, gzipped, and places it on $FTP with a supplied name.
-#' @aliases getRAFdata.R 
+#' @aliases getRAFdata 
 #' @author William Cooper
 #' @export getRAFData
 #' @param .Rdata The name to be given to the compressed data file placed on $FTP. Example: "Temp" to get "Temp.Rdata.gz". Default "Temp".

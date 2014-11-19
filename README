@@ -2,11 +2,3 @@
 This is an R package with functions to facilitate use of NCAR/RAF-generated netCDF files from the research aircraft.
 >>>>>>> 532ba164b6989b5d844c22b08de81e48c7d4b58a
 
-To rebuild:
-require(devtools)
-require(roxygen2)
-wd("~/RStudio/Ranadu") or appropriate location of these files
-roxygen2::roxygenise()     # formerly document()
-check()
-build()
-install()
