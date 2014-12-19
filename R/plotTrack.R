@@ -4,6 +4,7 @@
 #' @aliases plotTrack
 #' @author William Cooper
 #' @export plotTrack
+#' @import maps mapdata mapproj
 #' @param lon A numeric vector of longitude coordinates (degrees)
 #' @param lat A numeric vector of latitude coordinates (degrees) 
 #' @param Time A POSIX-format vector of times corresponding to lat/lon
