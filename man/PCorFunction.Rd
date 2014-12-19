@@ -3,7 +3,7 @@
 \alias{PCorFunction}
 \title{Static Defect Correction}
 \usage{
-PCorFunction(p, q = 100, akrd = 2.5, AC = "GV")
+PCorFunction(p, q = 100, akrd = 2.5, AC = "GV", Sensors = "STD")
 }
 \arguments{
 \item{p}{Measured (uncorrected) ambient pressure (e.g., PSF), hPa (no default)}
@@ -13,6 +13,8 @@ PCorFunction(p, q = 100, akrd = 2.5, AC = "GV")
 \item{akrd}{Ther angle of attack (degrees; no default)}
 
 \item{AC}{Aircraft identifier, either "GV" of "C130" (default "GV")}
+
+\item{Sensors}{Normally "STD" (the default) but "R" for right pressure pair, C130}
 }
 \value{
 The ratio of the pressure correction to the measured pressure. The correction to dynamic pressure is the negative of the returned value.
