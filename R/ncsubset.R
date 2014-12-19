@@ -1,7 +1,7 @@
 #' @title ncsubset 
 #' @description Make a new netCDF file containing a subset of an existing netCDF file. 
 #' @details A smaller netCDF file is constructed by including only specified variables and a restricted time span
-#' @aliases ncsubset,ncSubset
+#' @aliases ncsubset
 #' @author William Cooper
 #' @export ncsubset
 #' @param .OldFileName The path to the existing netCDF file.

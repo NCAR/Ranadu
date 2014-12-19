@@ -1,0 +1,10 @@
+Version 1.0-14-11-19
+
+New functions: 
+  SkewT
+  RossbyEquivalentPotentialTemperature
+  BoltonEquivalentPotentialTemperature
+  AdiabaticTandLWC
+  LagrangeInterpolate
+Corrections:
+  WetEquivalentPotentialTemperature
