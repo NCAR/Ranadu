@@ -1,5 +1,5 @@
 # load the csym data.frame containing symbols and definitions
-load (file=paste (path.package ("Ranadu"), "inst", "Constants.Rdata", sep='/'))
+load (file=paste (find.package ("Ranadu"), "Constants.txt", sep='/'))
 
 #' @title StandardConstant
 #' @description Provides standard values of constants as used in the Processing Algorithms document, and others.
