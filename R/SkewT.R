@@ -50,7 +50,7 @@
 SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA, 
                            BackgroundSpecs="skewTDiagram.Rdata",
                            AverageInterval=0, ADD=FALSE) {
-  load (paste(path.package ("Ranadu"), "inst", BackgroundSpecs, sep='/'))
+  load (paste(path.package ("Ranadu"), BackgroundSpecs, sep='/'))
   # this loads skewTDiagram and tBot, tTop, pBot, pTop.
   g <- skewTDiagram     # just to save some length in later "s <- g + ..." lines
   ## A function for translation between the P-T coordinates and the skew-T plot coordinates:
