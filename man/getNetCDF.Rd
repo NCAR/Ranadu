@@ -25,7 +25,7 @@ data.frame containing the specified variables as columns, along with 'Time' and 
 Loads selected variables in a specified RAF-aircraft data file into a data.frame.
 }
 \details{
-'Time' is converted to a POSIXcf variable, and other variables specified in a VarList list are included in the data.frame. By default, the entire file is loaded, but optional arguments Start and End limit the time range. After reading the data, the netCDF file is closed before returning the data.frame to the calling program.
+'Time' is converted to a POSIXct variable, and other variables specified in a VarList list are included in the data.frame. By default, the entire file is loaded, but optional arguments Start and End limit the time range. After reading the data, the netCDF file is closed before returning the data.frame to the calling program.
 }
 \examples{
 \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}

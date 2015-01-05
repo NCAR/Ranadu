@@ -29,7 +29,7 @@ the Skew-T background. Default: "skewTDiagram.Rdata". This file must reside wher
 Ranadu is installed, in subdirectory "inst", so that it can be found at an
 address like paste(path.package("Ranadu", "inst", "skewTDiagram.Rdata", sep='/')).}
 
-\item{AverageInterval}{The interval in pressuree over which to average available
+\item{AverageInterval}{The interval in pressure (in hPa) over which to average available
 measurements before plotting. The default value is 0, and for that value or NA
 all values are plotted in a continuous "path".}
 
@@ -62,7 +62,7 @@ fname = sprintf("\%s\%s/\%s\%s.nc", Directory,Project,Project,Flight)
 Data <- getNetCDF (fname, standardVariables())
 r <- setRange (Data$Time, 123100, 125500)
 DS <- Data[r, c("PSXC", "ATX", "DPXC")]
-colnames(DS) <- c("Pressure", "Temperature", "Dewpoint")
+colnames(DS) <- c("Pressure", "Temperature", "DewPoint")
 print (SkewTSounding(DS))
 }
 }

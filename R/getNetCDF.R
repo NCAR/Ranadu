@@ -20,7 +20,7 @@ standardVariables <- function (list=NULL) {
 
 #' @title getNetCDF
 #' @description Loads selected variables in a specified RAF-aircraft data file into a data.frame.
-#' @details 'Time' is converted to a POSIXcf variable, and other variables specified in a VarList list are included in the data.frame. By default, the entire file is loaded, but optional arguments Start and End limit the time range. After reading the data, the netCDF file is closed before returning the data.frame to the calling program.
+#' @details 'Time' is converted to a POSIXct variable, and other variables specified in a VarList list are included in the data.frame. By default, the entire file is loaded, but optional arguments Start and End limit the time range. After reading the data, the netCDF file is closed before returning the data.frame to the calling program.
 #' @details If you get an error message with a long list of variable names, it probably indicates that one of the specified variables is not in this netCDF file.
 #' @details This routine handles 25-Hz files, but the Start-End option does not yet work for those files. The returned variables are single-dimension, and for 25 Hz files Time is returned as a sequence with fractional-second values.
 #' @aliases getNetCDF getnetcdf
@@ -62,13 +62,12 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   Time <- as.POSIXct(as.POSIXct(tref, tz='UTC')+Time, tz='UTC')
           # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
-  i2 <- ifelse ((End != 0), getIndex (Time, End), length(Time))
+  i2 <- ifelse ((End != 0), getIndex (Time, End)+24, length(Time))
   r <- i1:i2
   # for a 25-Hz file, r is appropriate 25-Hz index, but also need
   # the 1-Hz index for extrapolation:
   if ("sps25" %in% names(netCDFfile$dim)) {
-    r2 <- ((i1-1)/25+1):((i2-1)/25+1)
-    
+    r2 <- ((i1-1)/25+1):((i2-1)/25+1)    
   } else {
     r2 <- r
   }
@@ -131,7 +130,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
 	        }
         }
 	      #T <- filter(butter(3,2./25.),T)
-	      T <- signal::filter(sgolay(4,75),T)      
+	      T <- signal::filter(sgolay(4,75),T)
         d[VarList[i]] <- T
       }
     } else {

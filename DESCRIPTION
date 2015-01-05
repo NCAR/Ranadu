@@ -1,6 +1,6 @@
 Package: Ranadu
 Title: Functions for use with RAF aircraft data files
-Version: 1.0-14-12-19
+Version: 2.0-15-01-05
 Author: William Cooper
 Maintainer: William Cooper <cooperw@ucar.edu>
 Description: This package contains a function for loading a portion of a netCDF
@@ -24,4 +24,4 @@ License: none
 Depends:
     ncdf,ggplot2,ggthemes,grid
 Imports:
-    nleqslv,maps,mapdata,mapproj,reshape2,fields
+    nleqslv,maps,mapdata,mapproj,reshape2,zoo,fields,signal,plyr

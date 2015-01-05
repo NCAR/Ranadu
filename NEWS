@@ -1,18 +1,28 @@
-Version 1.0-14-12-19
+Version 2.0-15-01-05
+  Additions:
+    WindProcessor -- calculate wind from measurements
+    CorrectPitch  -- correct PITCH using measured ground-speed errors 
+  Corrections:
+    getNetCDF     -- fixed error in high-rate version with supplied times
+    plotTrack     -- improved operation with data-frame argument and with NAs 
+                     in data.
+    SkewT         -- corrected variable name to 'DewPoint'
+    plotWAC       -- added argument 'logxy' to make it possible to change
+                     axis labels for log plot to 10^x notation
 
-Corrections:
-  PCorFunction
-  Constants
+Version 1.0-14-12-19
+  Corrections:
+    PCorFunction
+    Constants
 
 Version 1.0-14-11-19
-
-New functions: 
-  SkewT
-  RossbyEquivalentPotentialTemperature
-  BoltonEquivalentPotentialTemperature
-  AdiabaticTandLWC
-  LagrangeInterpolate
-Corrections:
-  WetEquivalentPotentialTemperature
+  New functions: 
+    SkewT
+    RossbyEquivalentPotentialTemperature
+    BoltonEquivalentPotentialTemperature
+    AdiabaticTandLWC
+    LagrangeInterpolate
+  Corrections:
+    WetEquivalentPotentialTemperature
 
 

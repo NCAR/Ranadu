@@ -5,24 +5,41 @@
 #' @author William Cooper
 #' @export plotTrack
 #' @import maps mapdata mapproj
-#' @param lon A numeric vector of longitude coordinates (degrees)
+#' @param lon A numeric vector of longitude coordinates (degrees). Optionally,
+#' a data.frame containing the variables Time, LONC, LATC, WDC, WSC, in which
+#' case the corresponding parameters below can be omitted.
 #' @param lat A numeric vector of latitude coordinates (degrees) 
 #' @param Time A POSIX-format vector of times corresponding to lat/lon
 #' @param WDC A numeric vector of wind direction
 #' @param WSC A numeric vector of wind speed
-#' @param .Range A sequence of indices to use when plotting lat, lon, Time (default is 0 which causes the entire range of indices to be plotted.) 
-#' @param xc An optional central longitude for the plot. If omitted, the range in lon[r] is used to determine the midpoint.
-#' @param yc An optional central latitude for the plot. If omitted, the range in lat[r] is used to determine the midpoint.
-#' @param sz An optional size in units of degrees for the plot. If omitted, the size is determined from 10\% more than the range of measurements.
-#' @param .Spacing The spacing between time labels placed on the graph, in minutes. The default is 15 min.
-#' @param .WindFlags A scale factor for wind flags placed along the track, in units of percentage of the plot size. The default is 0 which suppresses the flags. A common value is 5.
-#' @param ... Additional arguments passed to the plot routine to control graphics parameters etc. 
+#' @param .Range A sequence of indices to use when plotting lat, lon, Time 
+#' (default is 0 which causes the entire range of indices to be plotted.) 
+#' @param xc An optional central longitude for the plot. If omitted, the range in 
+#' lon[r] is used to determine the midpoint.
+#' @param yc An optional central latitude for the plot. If omitted, the range in 
+#' lat[r] is used to determine the midpoint.
+#' @param sz An optional size in units of degrees for the plot. If omitted, the 
+#' size is determined from 20\% more than the range of measurements.
+#' @param .Spacing The spacing between time labels placed on the graph, 
+#' in minutes. The default is 15 min.
+#' @param .WindFlags A scale factor for wind flags placed along the track, 
+#' in units of percentage of the plot size. The default is 0 which suppresses the flags. A common value is 5.
+#' @param ... Additional arguments passed to the plot routine to control 
+#' graphics parameters etc. 
 #' @return NULL -- The result is the plot.
 ## @examples 
 ## \dontrun{plotTrack (LONC, LATC, Time, WDC, WSC, setRange (Time, 25000, 43000))}
-plotTrack <- function (lon, lat, Time, WDC=Data$WDC, 
-                       WSC=Data$WSC, .Range=0, xc=NULL,yc=NULL, 
+plotTrack <- function (lon=Data$LONC, lat=NULL, Time=NULL, WDC=NULL, 
+                       WSC=NULL, .Range=0, xc=NULL, yc=NULL, 
                        sz=NULL, .Spacing=15, .WindFlags=0, ...) {
+  if (is.data.frame (lon)) {
+    df <- lon
+    lat <- df$LATC
+    Time <- df$Time
+    WDC <- df$WDC
+    WSC <- df$WSC
+    lon <- df$LONC
+  }
   if (length(.Range) < 2) {
     .Range <- 1:length(Time)
   }
@@ -39,7 +56,7 @@ plotTrack <- function (lon, lat, Time, WDC=Data$WDC,
       xl <- c (xc-xt*1.05, xc+xt*1.05)
     }
   } else {
-    xl <- c(xlow-0.5*(xhigh-xlow), xhigh+0.5*(xhigh-xlow))
+    xl <- c(xlow-0.1*(xhigh-xlow), xhigh+0.1*(xhigh-xlow))
   }
   if (!is.null(yc)) {
     if (!is.null(sz)) {
@@ -50,7 +67,7 @@ plotTrack <- function (lon, lat, Time, WDC=Data$WDC,
       yl <- c (yc-yt*1.05, yc+yt*1.05)
     }
   } else {
-    yl <- c(ylow-0.5*(yhigh-ylow), yhigh+0.5*(yhigh-ylow))
+    yl <- c(ylow-0.1*(yhigh-ylow), yhigh+0.1*(yhigh-ylow))
   }
   sz <- max (xl[2] - xl[1], yl[2] - yl[1])
   
@@ -67,14 +84,19 @@ plotTrack <- function (lon, lat, Time, WDC=Data$WDC,
         maps::map("state", add=TRUE, fill=FALSE, col="black", lty=2)
       }
   points (lon[.Range], lat[.Range], type='l', col='blue', 
-          xlab='Latitude [deg.]', ylab='Longitude [deg.]', ...)
+          xlab='Latitude [deg.]', ylab='Longitude [deg.]')
   ltm <- as.POSIXlt(Time)
   inx <- 1:length(ltm)
-  ltime <- Time[(ltm$min%%.Spacing == 0) & (ltm$sec == 0)]
-  
-  for (l in 1:length(ltime)) {
-    ix <- inx[Time == ltime[l]]
-    if ((ix >= .Range[1]) & (ix <= .Range[length(.Range)])) {
+  ltime <- Time[(ltm$min %% .Spacing == 0) & (ltm$sec == 0)]
+  ltime <- ltime[!is.na(ltime)]
+  #print(ltime)
+  #print (sprintf (" length(ltime)=%d, length (inx)=%d", length(ltime), length(inx)))
+  #print (ltime)
+  for (lt in ltime) {
+    ix <- inx[(Time == lt)]
+    ix <- ix[!is.na(ix)]
+    ## print (sprintf("ix=%d .Range[1]=%d, .Range[L]=%d",  ix, .Range[1], .Range[length(.Range)]))
+    if ((ix >= .Range[1]) && (ix <= .Range[length(.Range)])) {
       lbl <- sprintf ("%02d%02d", ltm$hour[ix], ltm$min[ix])
       text (lon[ix], lat[ix], lbl, col='red', pos=4)
       points (lon[ix], lat[ix], pch=16, col='RED')

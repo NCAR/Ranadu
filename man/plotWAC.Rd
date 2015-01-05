@@ -5,7 +5,8 @@
 \title{plotWAC}
 \usage{
 plotWAC(x, y = NA, col = "blue", xlab = "TIME [UTC]", ylab = "",
-  lwd = 2, type = "l", legend.position = NA, ...)
+  lwd = 2, type = "l", lty = 1, logxy = "",
+  legend.position = "bottomright", ...)
 }
 \arguments{
 \item{x}{Usually, Time from a data.frame; a vector of abscissa values. Optionally,
@@ -14,19 +15,30 @@ a data.frame containing multiple variables to plot and superceding parameter y.}
 \item{y}{A vector of ordinate values for points to plot. If the first parameter
 is a data.frame, this argument is ignored.}
 
-\item{col}{Color to pass to plot (default: blue)}
+\item{col}{Color to pass to plot (default: blue). Can be multiple values
+to set colors for multiple variables in data.frame mode. There are defaults
+('blue', 'darkgreen', 'red', 'skyblue', 'darkorange') but values provided with
+this parameter precede that sequence of colors.}
 
 \item{xlab}{Label for the abscissa, to pass to plot (default: "TIME [UTC]")}
 
-\item{ylab}{Label for the ordinate, to pass to plot (default: "")}
+\item{ylab}{Label for the ordinate, to pass to plot (default: "" or, for data.frame
+mode, first variable name)}
 
-\item{lwd}{Line width to pass to plot (default: 2)}
+\item{lwd}{Line width to pass to plot (default: 1); can be a vector}
 
-\item{type}{Line type to pass to plot (default: "l")}
+\item{type}{Plot type to pass to plot (default: "l")}
+
+\item{lty}{Line type to pass to plot (default: 1). Can be a vector for multiple
+variables provided in data.frame mode.}
+
+\item{logxy}{Set to 'y' for log axes. This is provided (vs log='y') because it
+makes possible translation of axis labels to 10^i format.}
 
 \item{legend.position}{For multiple-line calls with a data.frame, this parameter
-specifies the position for the legend. The default is to produce no legend, but
-this can still be added after the plotWAC call.}
+specifies the position for the legend. The default is 'bottomright'. The legend
+can also be suppressed by setting this parameter to NA. Then a legend can still
+be added after the plotWAC call.}
 
 \item{...}{Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt}
 }
@@ -39,6 +51,7 @@ Sets some plot defaults and calls plot and axis
 \examples{
 \dontrun{plotWAC (Time, TASX, ylab="TAS")}
 \dontrun{plotWAC (Time, PSXC, lty=2)}
+\dontrun{plotWAC (Data[, c("Time", "PSXC")])}
 }
 \author{
 William Cooper

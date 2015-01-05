@@ -4,11 +4,14 @@
 \alias{plotTrack}
 \title{plotTrack}
 \usage{
-plotTrack(lon, lat, Time, WDC = Data$WDC, WSC = Data$WSC, .Range = 0,
-  xc = NULL, yc = NULL, sz = NULL, .Spacing = 15, .WindFlags = 0, ...)
+plotTrack(lon = Data$LONC, lat = NULL, Time = NULL, WDC = NULL,
+  WSC = NULL, .Range = 0, xc = NULL, yc = NULL, sz = NULL,
+  .Spacing = 15, .WindFlags = 0, ...)
 }
 \arguments{
-\item{lon}{A numeric vector of longitude coordinates (degrees)}
+\item{lon}{A numeric vector of longitude coordinates (degrees). Optionally,
+a data.frame containing the variables Time, LONC, LATC, WDC, WSC, in which
+case the corresponding parameters below can be omitted.}
 
 \item{lat}{A numeric vector of latitude coordinates (degrees)}
 
@@ -18,19 +21,26 @@ plotTrack(lon, lat, Time, WDC = Data$WDC, WSC = Data$WSC, .Range = 0,
 
 \item{WSC}{A numeric vector of wind speed}
 
-\item{.Range}{A sequence of indices to use when plotting lat, lon, Time (default is 0 which causes the entire range of indices to be plotted.)}
+\item{.Range}{A sequence of indices to use when plotting lat, lon, Time
+(default is 0 which causes the entire range of indices to be plotted.)}
 
-\item{xc}{An optional central longitude for the plot. If omitted, the range in lon[r] is used to determine the midpoint.}
+\item{xc}{An optional central longitude for the plot. If omitted, the range in
+lon[r] is used to determine the midpoint.}
 
-\item{yc}{An optional central latitude for the plot. If omitted, the range in lat[r] is used to determine the midpoint.}
+\item{yc}{An optional central latitude for the plot. If omitted, the range in
+lat[r] is used to determine the midpoint.}
 
-\item{sz}{An optional size in units of degrees for the plot. If omitted, the size is determined from 10\% more than the range of measurements.}
+\item{sz}{An optional size in units of degrees for the plot. If omitted, the
+size is determined from 20\% more than the range of measurements.}
 
-\item{.Spacing}{The spacing between time labels placed on the graph, in minutes. The default is 15 min.}
+\item{.Spacing}{The spacing between time labels placed on the graph,
+in minutes. The default is 15 min.}
 
-\item{.WindFlags}{A scale factor for wind flags placed along the track, in units of percentage of the plot size. The default is 0 which suppresses the flags. A common value is 5.}
+\item{.WindFlags}{A scale factor for wind flags placed along the track,
+in units of percentage of the plot size. The default is 0 which suppresses the flags. A common value is 5.}
 
-\item{...}{Additional arguments passed to the plot routine to control graphics parameters etc.}
+\item{...}{Additional arguments passed to the plot routine to control
+graphics parameters etc.}
 }
 \value{
 NULL -- The result is the plot.

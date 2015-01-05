@@ -25,7 +25,7 @@
 #' the Skew-T background. Default: "skewTDiagram.Rdata". This file must reside where
 #' Ranadu is installed, in subdirectory "inst", so that it can be found at an
 #' address like paste(path.package("Ranadu", "inst", "skewTDiagram.Rdata", sep='/')).
-#' @param AverageInterval The interval in pressuree over which to average available
+#' @param AverageInterval The interval in pressure (in hPa) over which to average available
 #' measurements before plotting. The default value is 0, and for that value or NA
 #' all values are plotted in a continuous "path".
 #' @param ADD A logical variable indicating if the data for the sounding should 
@@ -44,7 +44,7 @@
 #' Data <- getNetCDF (fname, standardVariables())
 #' r <- setRange (Data$Time, 123100, 125500)
 #' DS <- Data[r, c("PSXC", "ATX", "DPXC")]
-#' colnames(DS) <- c("Pressure", "Temperature", "Dewpoint")
+#' colnames(DS) <- c("Pressure", "Temperature", "DewPoint")
 #' print (SkewTSounding(DS))
 #' }
 SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA, 
@@ -67,18 +67,18 @@ SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA,
       Pressure <- SK$Pressure
       if ("Temperature" %in% names(SK)) {
         Temperature <- SK$Temperature
-        if ("Dewpoint" %in% names(SK)) {
-          Dewpoint <- SK$Dewpoint
+        if ("DewPoint" %in% names(SK)) {
+          DewPoint <- SK$DewPoint
           OK <- TRUE
         }
       }
     } 
     if (!OK) {
-      print (sprintf (" SkewT call failed, required names (Pressure, Temperature, Dewpoint) not in data.frame, first argument"))
+      print (sprintf (" SkewT call failed, required names (Pressure, Temperature, DewPoint) not in data.frame, first argument"))
       return(NA)
     }
   } else {
-    if ((length(Pressure) != length(Temperature)) || (length(Pressure) != length (Dewpoint))) {
+    if ((length(Pressure) != length(Temperature)) || (length(Pressure) != length (DewPoint))) {
       print (sprintf ("SkewT error, variables (P/T/DP) have different length"))
       return (NA)
     }
@@ -88,17 +88,17 @@ SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA,
   if (AverageInterval > 0) {
     NBins <- as.integer((pBot-pTop)/AverageInterval)
     AVT  <- fields::stats.bin (Pressure, Temperature, NBins)
-    AVDP <- fields::stats.bin (Pressure, Dewpoint,    NBins)
+    AVDP <- fields::stats.bin (Pressure, DewPoint,    NBins)
     Pressure <- AVT$centers
     Temperature <- AVT$stats["mean", ]
-    Dewpoint <- AVDP$stats["mean", ]
+    DewPoint <- AVDP$stats["mean", ]
   }
 
-DSKT <- data.frame (P=Pressure, T=Temperature, DP=Dewpoint)
+DSKT <- data.frame (P=Pressure, T=Temperature, DP=DewPoint)
   
   ## convert to plot coordinates:
   DSKT$T  <- XYplot (Temperature, Pressure)$X
-  DSKT$DP <- XYplot (Dewpoint, Pressure)$X
+  DSKT$DP <- XYplot (DewPoint, Pressure)$X
   DSKT$P  <- XYplot (Temperature, Pressure)$Y
   g <- g + geom_path (data=DSKT, aes(x=T,  y=P, color="T"),  lwd=1.0)
   g <- g + geom_path (data=DSKT, aes(x=DP, y=P, color="DP"), lwd=1.0, alpha=0.8)
