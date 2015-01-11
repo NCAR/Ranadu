@@ -26,8 +26,9 @@ The default is NA, in which case no dew-point sounding will be plotted.}
 
 \item{BackgroundSpecs}{The Rdata-format file containing the ggplot definition for
 the Skew-T background. Default: "skewTDiagram.Rdata". This file must reside where
-Ranadu is installed, in subdirectory "inst", so that it can be found at an
-address like paste(path.package("Ranadu", "inst", "skewTDiagram.Rdata", sep='/')).}
+Ranadu is installed so that it can be found at an
+address like paste(path.package("Ranadu", "skewTDiagram.Rdata", sep='/')).
+For the C-130, a suitable background is "skewTDiagramC130.Rdata".}
 
 \item{AverageInterval}{The interval in pressure (in hPa) over which to average available
 measurements before plotting. The default value is 0, and for that value or NA

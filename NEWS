@@ -1,3 +1,10 @@
+Version 2.0-15-1-11
+  Additions:
+    inst/skewTDiagramC130.Rdata  -- skew-T diagram appropriate for C130 altitude
+  Corrections:
+    minor documentation changes for SkewT (referencing new plot background)
+    minor mod to Murphy-Koop documentation: add reference to units
+
 Version 2.0-15-01-05
   Additions:
     WindProcessor -- calculate wind from measurements
