@@ -27,5 +27,9 @@ DataDirectory <- function() {
   if (file.exists(DataDir)){
     return(DataDir)
   }
+  DataDir <- "/home/data/"
+  if (file.exists(DataDir)) {
+    return(DataDir)
+  }
   return(NA)
 } 
