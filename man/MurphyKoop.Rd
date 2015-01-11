@@ -13,7 +13,7 @@ MurphyKoop(DP, P = 0)
 \item{P}{An optional numeric representing total pressure in hPa, set zero to suppress 'enhancement factor' correction for total pressure}
 }
 \value{
-Water vapor pressure in equilibrium with a plane water surface at dew point DP
+Water vapor pressure [hPa] in equilibrium with a plane water surface at dew point DP
 }
 \description{
 Returns the water vapor pressure

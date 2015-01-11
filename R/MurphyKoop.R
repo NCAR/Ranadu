@@ -7,7 +7,7 @@ TZERO = StandardConstant("Tzero")
 #' @export MurphyKoop
 #' @param DP A numeric representing the dew point in deg. C
 #' @param P An optional numeric representing total pressure in hPa, set zero to suppress 'enhancement factor' correction for total pressure
-#' @return Water vapor pressure in equilibrium with a plane water surface at dew point DP
+#' @return Water vapor pressure [hPa] in equilibrium with a plane water surface at dew point DP
 #' @examples 
 #' e <- MurphyKoop (-12.)
 #' e <- MurphyKoop (10., 800.)
