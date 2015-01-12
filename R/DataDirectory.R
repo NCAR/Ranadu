@@ -13,17 +13,22 @@ DataDirectory <- function() {
   #    tikal: /scr/raf_data/ 
   #    laptop: /Data/
   #    LookoutHaven: /home/Data/
+  #    RAF ground station: /home/data/
   # add others as needed
   
   DataDir <- "/scr/raf_data/"
   if (file.exists(DataDir)){
     return(DataDir)
   }
-  DataDir <- "/Data/"
+  DataDir <- "/home/data/"
   if (file.exists(DataDir)){
     return(DataDir)
   }
   DataDir <- "/home/Data/"
+  if (file.exists(DataDir)){
+    return(DataDir)
+  }
+  DataDir <- "/Data/"
   if (file.exists(DataDir)){
     return(DataDir)
   }
