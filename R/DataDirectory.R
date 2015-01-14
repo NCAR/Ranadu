@@ -13,6 +13,7 @@ DataDirectory <- function() {
   #    tikal: /scr/raf_data/ 
   #    laptop: /Data/
   #    LookoutHaven: /home/Data/
+  #    RAF ground station: /home/data/
   # add others as needed
   
   DataDir <- Sys.getenv ("DATA_DIR")
@@ -23,7 +24,7 @@ DataDirectory <- function() {
   if (file.exists(DataDir)){
     return(DataDir)
   }
-  DataDir <- "/Data/"
+  DataDir <- "/home/data/"
   if (file.exists(DataDir)){
     return(DataDir)
   }
@@ -31,8 +32,9 @@ DataDirectory <- function() {
   if (file.exists(DataDir)){
     return(DataDir)
   }
-  DataDir <- "/home/data/"
-  if (file.exists(DataDir)) {
+
+  DataDir <- "/Data/"
+  if (file.exists(DataDir)){
     return(DataDir)
   }
   return(NA)

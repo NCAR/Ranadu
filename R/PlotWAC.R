@@ -34,7 +34,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
                      ylab="", lwd=2, type="l", lty=1, logxy='',
                      legend.position="bottomright", ...) {
   if (is.data.frame (x)) {
-    if (ylab == "") {
+    if (!is.expression(ylab) && (ylab == "")) {
       ylab <- names(x)[2]
     }
     plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, lwd=lwd, 

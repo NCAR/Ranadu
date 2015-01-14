@@ -16,8 +16,8 @@ AirTemperature <- function (RT, P, Q, E=0.) {
 # E used for humidity correction; omit for dry-air)
   x <- E/P
   CP <- SpecificHeats(x)
-  Ra <- CP[,3]  #287.083/(1.+(0.6220-1.)*E/P)
-  cv <- CP[,2]  #717.66*(1.+0.92926*(E/P))/((1.+(0.6220-1.)*E/P))
+  Ra <- CP[,3]  
+  cv <- CP[,2]  
   MACH <- MachNumber (P, Q, E)
   AT <- (RT+TZERO)/
     (1.+RecoveryFactor(MACH)*MACH**2 *Ra/(2.*cv))-TZERO

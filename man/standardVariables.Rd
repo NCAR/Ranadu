@@ -15,7 +15,7 @@ Standard set of variables, usually used in call to getNetCDF
 }
 \details{
 Sets a standard list of variable names in VarList suitable for use in a call to getNetCDF. Optionally, add "list" to the variables.
-The standard variables are ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCSC, TASX, WDC, WSC, WIC.
+The standard variables are ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCXC, TASX, WDC, WSC, WIC.
 }
 \examples{
 standardVariables (c("VEW", "PLWCC"))
