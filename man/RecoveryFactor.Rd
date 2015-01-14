@@ -5,16 +5,19 @@
 \alias{recoveryfactor}
 \title{RecoveryFactor}
 \usage{
-RecoveryFactor(MACH)
+RecoveryFactor(MACH, probe = "HEATED")
 }
 \arguments{
 \item{MACH}{A numeric giving the Mach number, perhaps calculated by MachNumber()}
+
+\item{probe}{A string giving a probe name. Default is 'HEATED' and anything else is
+treated as unheated.}
 }
 \value{
-The recovery factor applicable to a heated sensor
+The recovery factor applicable to a temperature sensor
 }
 \description{
-Mach-number-dependent recovery factor for heat sensor
+Mach-number-dependent recovery factor for a temperature sensor
 }
 \details{
 For specified Mach number, returns the recovery factor according to the formula in ProcessingAlgorithms.
