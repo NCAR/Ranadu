@@ -37,8 +37,24 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     if (!is.expression(ylab) && (ylab == "")) {
       ylab <- names(x)[2]
     }
-    plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, lwd=lwd, 
-          lty=lty, type=type, col=col, xaxs="r", yaxs="r", log=logxy, ...)
+    yrange <- c(min(x[ ,2], na.rm=TRUE), max(x[ ,2], na.rm=TRUE))
+    if (length(x) > 2) {
+      for (j in 3:min(6, length(x))) {
+        yl <- min(x[ ,j], na.rm=TRUE)
+        yh <- max(x[ ,j], na.rm=TRUE)
+        if (yl < yrange[1]) {yrange[1] <- yl}
+        if (yh > yrange[2]) {yrange[2] <- yh}
+      }
+    }
+    if (!("ylim" %in% names(list(...)))) {
+      plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
+          lwd=lwd, lty=lty, type=type, col=col, xaxs="r", yaxs="r", 
+          log=logxy, ylim=c(yrange[1], yrange[2]), ...)
+    } else {
+      plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
+            lwd=lwd, lty=lty, type=type, col=col, xaxs="r", yaxs="r", 
+            log=logxy, ...)
+    }
     if ('y' %in% logxy) {
       aty <- axTicks(2)
       labs <- sapply(log10(aty),function(i)
