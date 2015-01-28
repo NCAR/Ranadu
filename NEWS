@@ -1,6 +1,9 @@
 Version 2.0-15.1.28
   Corrections:
     skewTDiagramC130.Rdata -- modified to suppress warning messages when used.
+    plotWAC                -- minor mods to data-frame handling
+    RecoveryFactor         -- added function for heated probes
+    WindProcessor          -- added protection against NAs entering filters
 
 Version 2.0-15-1-11
   Additions:

@@ -16,6 +16,10 @@ DataDirectory <- function() {
   #    RAF ground station: /home/data/
   # add others as needed
   
+  DataDir <- Sys.getenv ("DATA_DIR")
+  if (file.exists(DataDir)){
+    return(DataDir)
+  }
   DataDir <- "/scr/raf_data/"
   if (file.exists(DataDir)){
     return(DataDir)
@@ -28,6 +32,7 @@ DataDirectory <- function() {
   if (file.exists(DataDir)){
     return(DataDir)
   }
+
   DataDir <- "/Data/"
   if (file.exists(DataDir)){
     return(DataDir)
