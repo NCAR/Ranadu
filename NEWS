@@ -1,3 +1,7 @@
+Version 2.0-15.1.28
+  Corrections:
+    skewTDiagramC130.Rdata -- modified to suppress warning messages when used.
+
 Version 2.0-15-1-11
   Additions:
     inst/skewTDiagramC130.Rdata  -- skew-T diagram appropriate for C130 altitude
