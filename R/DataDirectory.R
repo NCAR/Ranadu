@@ -18,7 +18,7 @@ DataDirectory <- function() {
   
   DataDir <- Sys.getenv ("DATA_DIR")
   if (file.exists(DataDir)){
-    return(DataDir)
+    return(paste(DataDir,'/',sep=''))
   }
   DataDir <- "/scr/raf_data/"
   if (file.exists(DataDir)){
