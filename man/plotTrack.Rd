@@ -25,7 +25,11 @@ case the corresponding parameters below can be omitted.}
 (default is 0 which causes the entire range of indices to be plotted.)}
 
 \item{xc}{An optional central longitude for the plot. If omitted, the range in
-lon[r] is used to determine the midpoint.}
+lon[r] is used to determine the midpoint. If NA, this is a flag to plot a
+dead-reckoning plot drifting with the wind with coordinates relative to the
+starting point. This require the calling format where a data.frame is supplied
+because it needs additional variables (TASX, THDG, SSLIP) not supplied in the
+normal argument list.}
 
 \item{yc}{An optional central latitude for the plot. If omitted, the range in
 lat[r] is used to determine the midpoint.}
@@ -43,7 +47,7 @@ in units of percentage of the plot size. The default is 0 which suppresses the f
 graphics parameters etc.}
 }
 \value{
-NULL -- The result is the plot.
+none -- The result is the plot.
 }
 \description{
 Plot a flight track in lat-lon coordinates.
