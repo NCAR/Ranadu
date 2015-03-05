@@ -23,7 +23,7 @@ theme_WAC <- function () {
     legend.position=c(0.5,0.96),
     plot.margin=unit(c(1.5,1,0.5,0.5),"lines"),
     plot.title=element_text(vjust=1.3),
-    legend.background=element_rect(fill="white"),
+    legend.background=element_rect(colour='black', size=0.3, fill="ivory"),
     legend.direction="horizontal",
     legend.title=element_text(size=12),
     panel.border=element_rect(colour="black",size=0.7),
