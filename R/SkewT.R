@@ -54,6 +54,7 @@ SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA,
   load (paste(path.package ("Ranadu"), BackgroundSpecs, sep='/'))
   # this loads skewTDiagram and tBot, tTop, pBot, pTop.
   g <- skewTDiagram     # just to save some length in later "s <- g + ..." lines
+  ## print (ggplot_build(g$panel$ranges[[1]]$x.range))
   ## A function for translation between the P-T coordinates and the skew-T plot coordinates:
   ##    (note, expects tTop etc in calling environment, so not explicitly passed.)
   XYplot <- function (.T, .p) { 
@@ -100,6 +101,8 @@ DSKT <- data.frame (P=Pressure, T=Temperature, DP=DewPoint)
   ## convert to plot coordinates:
   DSKT$T  <- XYplot (Temperature, Pressure)$X
   DSKT$DP <- XYplot (DewPoint, Pressure)$X
+  ## clip DP trace at left axis
+  DSKT$DP[DSKT$DP < 0] <- 0
   DSKT$P  <- XYplot (Temperature, Pressure)$Y
   g <- g + geom_path (data=DSKT, aes(x=T,  y=P, color="T"),  lwd=1.0)
   g <- g + geom_path (data=DSKT, aes(x=DP, y=P, color="DP"), lwd=1.0, alpha=0.8)
