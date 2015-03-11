@@ -22,6 +22,6 @@ Description: This package contains a function for loading a portion of a netCDF
     for making subsets of a netCDF file, and there are other functions also.
 License: none
 Depends:
-    ncdf,ggplot2,ggthemes,grid
+    ncdf,ggplot2,ggthemes,grid,tcltk
 Imports:
     nleqslv,maps,mapdata,mapproj,reshape2,zoo,fields,signal,plyr
