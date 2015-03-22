@@ -10,7 +10,7 @@ TZERO <- StandardConstant("Tzero")
 #' @param E A numeric representing the water vapor pressure in hPa
 #' @return Numeric containing the potential temperature
 #' @examples 
-#' THETAP <- PotentialTemperature (500.,0.)
+#' THETA <- PotentialTemperature (500.,0.)
 PotentialTemperature <- function (P, AT, E=0.) {
 # Potential Temperature, conventionally for dry air which
 # results if E argument omitted. P and E in hPa; AT degC.

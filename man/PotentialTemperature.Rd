@@ -23,7 +23,7 @@ Function to calculate the potential temperature
 Potential temperature is calculated from the pressure and temperature, optionally with a humidity correction
 }
 \examples{
-THETAP <- PotentialTemperature (500.,0.)
+THETA <- PotentialTemperature (500.,0.)
 }
 \author{
 William Cooper

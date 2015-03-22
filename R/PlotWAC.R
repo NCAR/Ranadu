@@ -72,7 +72,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       }
       if (!is.na(legend.position)) {
         legend (legend.position, legend=names (x)[2:length(x)], 
-                text.col=colrs[1:(length(x)-1)], lwd=lwd, lty=lty, cex=0.50, 
+                text.col=colrs[1:(length(x)-1)], lwd=lwd, lty=lty, cex=0.80, 
                 col=colrs[1:(length(x)-1)])
       }
     }

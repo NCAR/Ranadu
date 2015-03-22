@@ -26,7 +26,6 @@ resulting from that correction should be included in the data.frame. (If PITCHC 
 present, it will be used instead of PITCH. If TASN is present it will be used in
 place of TASX. If ATTACK is not present then AKRD, if present, will be used. If
 SSLIP is not present then SSRD, if present, will be used.)
-should be the corrected pitch.
 }
 \author{
 Al Cooper
