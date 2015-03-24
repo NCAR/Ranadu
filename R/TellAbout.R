@@ -79,8 +79,8 @@ ValueOfAll <- function (DataFrame=Data, HHMMSS) {
 getAttributes <- function (dname=Data, vname=NULL) {
   atts <- list()
   if (!is.data.frame (dname)) {
-    if (!is.array(dname) && !is.vector(dname)) {
-      printf (sprintf ("invalid variable, dname=variable call; returning"))
+    if (!is.atomic(dname) && !is.vector(dname)) {
+      print (sprintf ("invalid variable, dname=variable call; returning"))
       return (NA)
     }
     ATT <- attributes (dname)

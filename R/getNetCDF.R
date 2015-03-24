@@ -152,7 +152,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   for (V in VarList) {
     ## get dimensions for the variable:
     kk <- which (grepl (sprintf ("float %s", V), Nhdr))
-    Dimensions <- sub (") ;", "", sub(sprintf(".*%s.", V), "", Nhdr[kk]))
+    Dimensions <- sub (") ;", "", sub(sprintf(".*%s\\(", V), "", Nhdr[kk]))
     X <- (get.var.ncdf(netCDFfile, V))
     alst <- which (grepl (sprintf ("\t%s:", V), Nhdr)) # attrib lines
     if ("sps25" %in% names(netCDFfile$dim)) {
