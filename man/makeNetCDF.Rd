@@ -20,11 +20,15 @@ Write a netCDF file using data from a data.frame
 }
 \details{
 This function writes a netCDFfile that includes all variables in a data.frame.
-For this to work effectively, the data.frame should be produced by a call to getNetCDF()
+It will not overwrite an existing file, so the file 'newNetCDFname' should be deleted
+before a call to makeNetCDF if overwriting is desired.
+For this routine to work effectively, the data.frame should be produced by a call to getNetCDF()
 because that function also assigns attributes to the data.frame and to the variables it
 contains that match those in the original netCDF file. This function extracts those
 attributes and adds them to the netCDF file that is created. Note that, when subsetting,
-it will be necessary to preserve the attributes; see help for getNetCDF.
+it will be necessary to preserve the attributes; see help for getNetCDF. At present, this
+will work for low-rate and 25-Hz variables but not for multi-dimensional variables like
+the hydrometeor size distributions.
 }
 \examples{
 \dontrun{makeNefCDF (Data, "./newFile.nc")}

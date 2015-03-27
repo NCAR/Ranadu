@@ -54,21 +54,21 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     aname <- sub (" =.*", "", line)
     aval  <- sub (".*= ", "", line)
     if (grepl ('\"', aval)) {
-      aval <- gsub ('\"', '', aval)
-      aval <- sub (' ;', '', aval)
+      avl <- gsub ('\"', '', aval)
+      avl <- sub (' ;', '', avl)
       # print (sprintf (" attribute assignment: %s <- %s", aname, aval))
     } else {
-      aval <- sub('f ;', '', aval)
-      aval <- sub (' ;', '', aval)
+      avl <- sub('f ;', '', aval)
+      avl <- sub (' ;', '', avl)
       if (grepl ('f', aval)) {
-        aval <- paste (aval, 'f', sep='')
+        avl <- paste (avl, 'f', sep='')
         # print (sprintf (" attribute assignment: %s <- %s", aname, aval))
       } else {
-        aval <- as.numeric (aval)
+        avl <- as.numeric (avl)
         # print (sprintf (" attribute assignment: %s <- %f", aname, aval))
       }
     }
-    return (c(aname, aval))
+    return (c(aname, avl))
   }
   
   ## get the header information
@@ -101,7 +101,12 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   Time <- as.POSIXct(as.POSIXct(tref, tz='UTC')+Time, tz='UTC')
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
-  i2 <- ifelse ((End != 0), getIndex (Time, End)+24, length(Time))
+  if (End != 0) {
+    i2 <- getIndex (Time, End)
+    if ("sps25" %in% names (netCDFfile$dim)) {i2 <- i2 + 24}
+  } else {
+    i2 <- length (Time)
+  }
   r <- i1:i2
   # for a 25-Hz file, r is appropriate 25-Hz index, but also need
   # the 1-Hz index for extrapolation:
@@ -127,6 +132,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   attr (d, "Dimensions") <- nf$dim
   ## Save all the global attributes in the netCDF file as 'd' attributes:----------
   SkipToGlobal <- TRUE
+  attr (d, "R_dataframe_created") <- date()
   for (line in Nhdr) {
     if (grepl ("global attributes", line)) {
       SkipToGlobal <- FALSE
