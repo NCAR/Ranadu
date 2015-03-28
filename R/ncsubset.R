@@ -3,6 +3,7 @@
 #' @details A smaller netCDF file is constructed by including only specified variables and a restricted time span
 #' @aliases ncsubset
 #' @author William Cooper
+#' @import ncdf4
 #' @export ncsubset
 #' @param .OldFileName The path to the existing netCDF file.
 #' @param .NewFileName The path to the new subset netCDF file. Will be silently removed if present before writing the new file.
@@ -56,7 +57,7 @@ ncsubset <- function (.OldFileName, .NewFileName, .Start=NA, .End=NA, .VarList=N
   }
   system(sprintf("rm %s", .NewFileName), wait=TRUE)
   system(Cmd, wait=TRUE)
-  .netCDFfile = open.ncdf(.NewFileName, write=TRUE)
+  .netCDFfile = nc_open (.NewFileName, write=TRUE)
   sh <- .Start %/% 10000
   sm <- (.Start %% 10000) %/% 100
   ss <- as.integer(.Start %% 100)
@@ -64,9 +65,10 @@ ncsubset <- function (.OldFileName, .NewFileName, .Start=NA, .End=NA, .VarList=N
   em <- (.End %% 10000) %/% 100
   es <- as.integer(.End %% 100)
   # may need to fix these:
-  #z <- att.put.ncdf (.netCDFfile, 0, "time_coverage_start", "2014-02-11T07:23:00 +0000")
-  #z <- att.put.ncdf (.netCDFfile, 0, "time_coverage_end", "2014-02-11T07:28:00 +0000")
-  z <- att.put.ncdf (.netCDFfile, 0, "TimeInterval", sprintf("%02d:%02d:%02d-%02d:%02d:%02d", sh, sm, ss, eh, em, es), prec="text")
-  close.ncdf(.netCDFfile)
+  #z <- ncatt_put (.netCDFfile, 0, "time_coverage_start", "2014-02-11T07:23:00 +0000")
+  #z <- ncatt_put (.netCDFfile, 0, "time_coverage_end", "2014-02-11T07:28:00 +0000")
+  z <- ncatt_put (.netCDFfile, 0, "TimeInterval", sprintf("%02d:%02d:%02d-%02d:%02d:%02d", 
+                                                          sh, sm, ss, eh, em, es), prec="text")
+  nc_close (.netCDFfile)
   return()
 }

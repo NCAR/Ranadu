@@ -1,3 +1,9 @@
+Version 2.1-15-3-28
+  Modifications:               Eliminated dependence on ncdf, replaced w ncdf4
+    makeNetCDF.R            -- modified to use ncdf4 and work at high rate
+    getNetCDF.R             -- modified to use ncdf4
+    TellAbout.R             -- modified getAttributes to use ncdf4
+    ncsubset.R              -- modified to use ncdf4
 Version 2.1-15-3-8
   Additions:
     makeNetCDF.R            -- create a netCDF file from an appropriate R data.frame

@@ -112,8 +112,9 @@ getAttributes <- function (dname=Data, vname=NULL) {
     ATT <- attributes (eval(parse(text=sprintf("dname$%s", vname))))
     print (sprintf ("attributes for variable %s", vname))
     for (i in 1:length(ATT)) {
-      if (names(ATT[i]) == "Dimensions") {next}
-      if (names(ATT[i]) == "dim") {next}
+      if (names (ATT[i]) == "Dimensions") {next}
+      if (names (ATT[i]) == "dim") {next}
+      if (names (ATT[i]) == "class") {next}
       atts[[length(atts)+1]]  <- ATT[i]
       print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
     }

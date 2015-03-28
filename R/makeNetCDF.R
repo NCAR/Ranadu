@@ -12,6 +12,7 @@
 #' the hydrometeor size distributions.
 #' @aliases makeNetCDF
 #' @author William Cooper
+#' @import ncdf4
 #' @export makeNetCDF
 #' @param d A data.frame produced by getNetCDF() or otherwise converted to the corresponding
 #' structure from that function.
@@ -38,7 +39,7 @@ makeNetCDF <- function (d, newNetCDFname) {
   Dimensions[["Time"]]$vars <- tstart:tend
   Dimensions[["Time"]]$len <- tend - tstart + 1
   ## must redefine Time to get it to be integer as is convention in RAF netCDF
-  Dimensions[["Time"]] <- dim.def.ncdf ("Time", Dimensions[["Time"]]$units,
+  Dimensions[["Time"]] <- ncdim_def ("Time", Dimensions[["Time"]]$units,
                                         vals=tstart:tend, create_dimvar=TRUE)
   if (HR <- "sps25" %in% names (Dimensions)) {
     Dim <- list(Dimensions[["sps25"]], Dimensions[["Time"]])
@@ -47,17 +48,17 @@ makeNetCDF <- function (d, newNetCDFname) {
   for (V in names(d)) {
     if (V == "Time") {next}
     if (HR) {
-      vd <- var.def.ncdf (V,
+      vd <- ncvar_def (V,
                  units=attr (eval (parse (text=sprintf ("d$%s", V))), "units"),
-                 dim=Dim, missval=as.single(-32767.), prec='single')
+                 dim=Dim, missval=as.single(-32767.), prec='float')
     } else {
-      vd <- var.def.ncdf (V, 
+      vd <- ncvar_def (V, 
                 units=attr (eval (parse (text=sprintf ("d$%s", V))), "units"),
-                Dimensions[["Time"]], missval=-32767., prec='single')
+                Dimensions[["Time"]], missval=as.single(-32767.), prec='float')
     }
     vdef[[length(vdef)+1]] <- vd
   }
-  ncdf <- create.ncdf (newNetCDFname, vdef)
+  nc <- nc_create (newNetCDFname, vdef)
   ## global attributes
   ##  (but skip row.names, names, Dimensions, class)
   ATG <- attributes (d)
@@ -76,12 +77,12 @@ makeNetCDF <- function (d, newNetCDFname) {
       ATT[[1]] <- av
     }
     if (is.numeric (ATT[[1]])) {
-      att.put.ncdf (ncdf, 0, attname=names(ATT), attval=as.numeric (ATT))
+      ncatt_put (nc, 0, attname=names(ATT), attval=as.numeric (ATT))
     } else {
-      att.put.ncdf (ncdf, 0, attname=names(ATT), attval=as.character(ATT))
+      ncatt_put (nc, 0, attname=names(ATT), attval=as.character(ATT))
     }
   }
-  redef.ncdf(ncdf)
+  nc_redef (nc)
   for (V in names(d)) {
     ATV <- attributes (eval (parse (text=sprintf ("d$%s", V))))
     for (i in 1:length(ATV)) {
@@ -93,10 +94,10 @@ makeNetCDF <- function (d, newNetCDFname) {
       if ("tzone" == names (ATT)) {next}
       aname <- names(ATT)
       avalue <- as.character (ATT)
-      att.put.ncdf (ncdf, V, attname=aname, attval=avalue, definemode=TRUE)
+      ncatt_put (nc, V, attname=aname, attval=avalue, definemode=TRUE)
     }
   }
-  enddef.ncdf (ncdf)
+  nc_enddef (nc)
   ## revise time to be RAF-netCDF convention:
   dT <- as.integer (d$Time - as.integer(as.POSIXct(strptime (attr (d$Time, "units"), 
                                                      attr (d$Time, "strptime_format"), 
@@ -118,15 +119,15 @@ makeNetCDF <- function (d, newNetCDFname) {
   }
   for (V in names (d)) {
     if (V == "Time") {
-      put.var.ncdf (ncdf, V, dT, count=length(dT))
+      ncvar_put (nc, V, dT, count=length(dT))
     } else {
       if (HR) {
-        put.var.ncdf (ncdf, V, eval (parse (text=sprintf ("d$%s", V))), count=c(25, nrow(d)/25))
+        ncvar_put (nc, V, eval (parse (text=sprintf ("d$%s", V))), count=c(25, nrow(d)/25))
       } else {
-        put.var.ncdf (ncdf, V, eval (parse (text=sprintf ("d$%s", V))))
+        ncvar_put (nc, V, eval (parse (text=sprintf ("d$%s", V))))
       }
     }
   }
-  close.ncdf (ncdf)
+  nc_close (nc)
   return (sprintf ("wrote file %s", newNetCDFname))
 }

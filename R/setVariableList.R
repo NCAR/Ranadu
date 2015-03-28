@@ -13,6 +13,7 @@
 #' @author William Cooper
 #' @export setVariableList
 #' @import tcltk
+#' @import ncdf4
 #' @param fname The name of a netCDF file containing variables.
 #' @param VarList A vector of character names to be selected before user interaction. 
 #' This might be the result of a call to Ranadu::standardVariables(), for example.
@@ -57,10 +58,10 @@ setVariableList <- function (fname, VarList=vector()) {
     }
   }
   ## start of main tcltk function
-  netCDFfile <- open.ncdf(fname)
+  netCDFfile <- nc_open (fname)
   vn <- names (netCDFfile$var)
   vnSel <- vector ("logical", length(vn))
-  close.ncdf (netCDFfile)
+  nc_close (netCDFfile)
   VarNames <- VarList
   guiVar <- tktoplevel()
   tktitle(guiVar) <- sprintf ("%s flight %s: Available Variables", Project, Flight)

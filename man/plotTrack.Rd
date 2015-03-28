@@ -27,7 +27,7 @@ case the corresponding parameters below can be omitted.}
 \item{xc}{An optional central longitude for the plot. If omitted, the range in
 lon[r] is used to determine the midpoint. If NA, this is a flag to plot a
 dead-reckoning plot drifting with the wind with coordinates relative to the
-starting point. This require the calling format where a data.frame is supplied
+starting point. This requires the calling format where a data.frame is supplied
 because it needs additional variables (TASX, THDG, SSLIP) not supplied in the
 normal argument list.}
 

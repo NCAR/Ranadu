@@ -29,7 +29,7 @@ standardVariables <- function (list=NULL) {
 #' variables like CCDP yet; it does work for 25-Hz files, with fractional-second times.
 #' @aliases getNetCDF getnetcdf
 #' @author William Cooper
-#' @import "ncdf"
+#' @import "ncdf4"
 #' @export getNetCDF
 #' @param fname string, full file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
 #' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load everything.
@@ -41,40 +41,15 @@ standardVariables <- function (list=NULL) {
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2"), 133000, 143000, 5)}
 getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
-# This function reads the netCDF file 'fname' and extracts 
-# the variables specified in 'VarList', returning the
-# results in a data.frame. It includes the flight number F
-# in the data.frame, as variable RF. It converts "Time",
-# seconds after a reference time in the netCDF files, to
-# a POSIXct date/time variable.
-  
-  ## define a function to use when getting attributes from the netCDF file
-  parseAttribute <- function (line, var) {
-    line <- gsub (sprintf ('\t\t%s:', var), "", line)
-    aname <- sub (" =.*", "", line)
-    aval  <- sub (".*= ", "", line)
-    if (grepl ('\"', aval)) {
-      avl <- gsub ('\"', '', aval)
-      avl <- sub (' ;', '', avl)
-      # print (sprintf (" attribute assignment: %s <- %s", aname, aval))
-    } else {
-      avl <- sub('f ;', '', aval)
-      avl <- sub (' ;', '', avl)
-      if (grepl ('f', aval)) {
-        avl <- paste (avl, 'f', sep='')
-        # print (sprintf (" attribute assignment: %s <- %s", aname, aval))
-      } else {
-        avl <- as.numeric (avl)
-        # print (sprintf (" attribute assignment: %s <- %f", aname, aval))
-      }
-    }
-    return (c(aname, avl))
-  }
+  # This function reads the netCDF file 'fname' and extracts 
+  # the variables specified in 'VarList', returning the
+  # results in a data.frame. It includes the flight number F
+  # in the data.frame, as variable RF. It converts "Time",
+  # seconds after a reference time in the netCDF files, to
+  # a POSIXct date/time variable.
   
   ## get the header information
-  Nhdr <- system (sprintf ("ncdump -h %s", fname), intern=TRUE)
-  
-  netCDFfile = open.ncdf(fname)
+  netCDFfile = nc_open(fname)
   if ("ALL" %in% VarList) {
     VarList <- names (netCDFfile$var)
   }
@@ -84,7 +59,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     cat (sprintf ("requested variable %s not in netCDF file;\n ---->ngetNetCDF returning with error", V))
     return (-1)
   }
-  Time <- get.var.ncdf (netCDFfile, "Time")
+  Time <- ncvar_get (netCDFfile, "Time")
   DL <- length (Time)
   # Expand Time to be high-rate
   if ("sps25" %in% names(netCDFfile$dim)) {
@@ -96,7 +71,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     }
     Time <- T
   }
-  time_units <- att.get.ncdf (netCDFfile, "Time", "units")
+  time_units <- ncatt_get (netCDFfile, "Time", "units")
   tref <- sub ('seconds since ', '', time_units$value)
   Time <- as.POSIXct(as.POSIXct(tref, tz='UTC')+Time, tz='UTC')
   # see if limited time range wanted:
@@ -119,11 +94,10 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   Time <- Time[r]
   SE <- getStartEnd (Time)
   ## save 'Time' attributes:
-  alst <- which (grepl ("\tTime:", Nhdr))
-  for (i in alst) {
-    AA <- parseAttribute (Nhdr[i], "Time")
-    attr (Time, AA[1]) <- AA[2]
-  } 
+  ATT <- ncatt_get (netCDFfile, "Time")   # get list of Time attributes
+  for (A in names (ATT)) {
+    attr(Time, A) <- ATT[[A]]
+  }
   d <- data.frame(Time)
   ## save the dimensions, useful if ever re-writing to netCDF:---------------------
   ##    but, to save space, omit the list of times
@@ -131,46 +105,31 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   nf$dim[1]$Time$vals <- NULL
   attr (d, "Dimensions") <- nf$dim
   ## Save all the global attributes in the netCDF file as 'd' attributes:----------
-  SkipToGlobal <- TRUE
-  attr (d, "R_dataframe_created") <- date()
-  for (line in Nhdr) {
-    if (grepl ("global attributes", line)) {
-      SkipToGlobal <- FALSE
-      next
-    }
-    if (SkipToGlobal) {next}
-    if (grepl ("}", line)) {next}
-    line <- gsub ('\t\t:', "", line)
-    aname <- sub (" =.*", "", line)
-    aval  <- sub (".*= ", "", line)
-    if (grepl ('\"', aval)) {
-      aval <- gsub ('\"', '', aval)
-      aval <- sub (' ;', '', aval)
-      # print (sprintf (" attribute assignment: %s <- %s", aname, aval))
-    } else {
-      aval <- as.numeric (sub ('f ;', '', aval))
-      # print (sprintf (" attribute assignment: %s <- %f", aname, aval))
-    }
-    attr (d, aname) <- aval
+  ATT <- ncatt_get (netCDFfile, 0)   # get list of global attributes
+  for (A in names (ATT)) {
+    attr(d, A) <- ATT[[A]]
   }
+  attr (d, "R_dataframe_created") <- date()    # add one global attribute:
   
   ## Add the requested variables:------------------------------------------------
   for (V in VarList) {
-    ## get dimensions for the variable:
-    kk <- which (grepl (sprintf ("float %s", V), Nhdr))
-    Dimensions <- sub (") ;", "", sub(sprintf(".*%s\\(", V), "", Nhdr[kk]))
-    X <- (get.var.ncdf(netCDFfile, V))
-    alst <- which (grepl (sprintf ("\t%s:", V), Nhdr)) # attrib lines
+    ## save dimensions for the variable:
+    datt <- list()
+    for (dd in netCDFfile$var[[V]]$dim) {
+      datt[[length(datt)+1]] <- dd$name
+    }    ## later, save datt as an attribute of V
+    X <- ncvar_get (netCDFfile, V)
+    ATT <- ncatt_get (netCDFfile, V)
     if ("sps25" %in% names(netCDFfile$dim)) {
       DM <- length(dim(X))           
       if (DM == 2) {    # flatten
         X <- X[,r2]
         dim(X) <- dim(X)[1]*dim(X)[2]
-        for (k in alst) {
-          AA <- parseAttribute (Nhdr[k], V)
-          attr (X, AA[1]) <- AA[2]
+        ## add variable attributes as in netCDF file
+        for (A in names (ATT)) {
+          attr (X, A) <- ATT[[A]]
         }
-        attr (X, "Dimensions") <- Dimensions
+        attr (X, "Dimensions") <- datt
         d[V] <- X
       } else {
         X <- X[r2]
@@ -221,21 +180,19 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
         #T <- filter(butter(3,2./25.),T)
         T <- signal::filter(sgolay(4,75),T)
         ## add variable attributes as in netCDF file
-        for (k in alst) {
-          AA <- parseAttribute (Nhdr[k], V)
-          attr (T, AA[1]) <- AA[2]
+        for (A in names (ATT)) {
+          attr (T, A) <- ATT[[A]]
         }
-        attr (T, "Dimensions") <- Dimensions
+        attr (T, "Dimensions") <- datt
         d[V] <- T
       }
-    } else {
+    } else {      ## this is the 1-Hz section
       X <- X[r2]
       ## add variable attributes as in netCDF file
-      for (k in alst) {
-        AA <- parseAttribute (Nhdr[k], V)
-        attr (X, AA[1]) <- AA[2]
+      for (A in names (ATT)) {
+        attr (X, A) <- ATT[[A]]
       }
-      attr (X, "Dimensions") <- Dimensions
+      attr (X, "Dimensions") <- datt
       d[V] <- X
     }
   }
@@ -243,7 +200,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     RF <- rep (F, times=length(Time))    # label flight number
     d["RF"] <- RF
   }
-  close.ncdf (netCDFfile)
+  nc_close (netCDFfile)
   d[d == -32767. ] <- NA   # replace missing-value with NA
   return (d)
 }
