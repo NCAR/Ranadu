@@ -41,13 +41,18 @@ makeNetCDF <- function (d, newNetCDFname) {
   ## must redefine Time to get it to be integer as is convention in RAF netCDF
   Dimensions[["Time"]] <- ncdim_def ("Time", Dimensions[["Time"]]$units,
                                         vals=tstart:tend, create_dimvar=TRUE)
-  if (HR <- "sps25" %in% names (Dimensions)) {
+  HR <- 0
+  if ("sps25" %in% names (Dimensions)) {
+    HR <- 25
     Dim <- list(Dimensions[["sps25"]], Dimensions[["Time"]])
+  } else if ("sps50" %in% names (Dimensions)) {
+    HR <- 50
+    Dim <- list(Dimensions[["sps50"]], Dimensions[["Time"]])
   }
   vdef <- list()   # start with empty list, add variables to it
   for (V in names(d)) {
     if (V == "Time") {next}
-    if (HR) {
+    if (HR > 1) {
       vd <- ncvar_def (V,
                  units=attr (eval (parse (text=sprintf ("d$%s", V))), "units"),
                  dim=Dim, missval=as.single(-32767.), prec='float')
@@ -114,15 +119,19 @@ makeNetCDF <- function (d, newNetCDFname) {
     return(ds)
   }
   #HR <- ("sps25" %in% names (Dimensions))
-  if (HR) {
+  if (HR == 25) {
     dT <- dT[seq(1, length(d), by=25)]
+  } else if (HR == 50) {
+    dT <- dT[seq(1, length(d), by=50)]
   }
   for (V in names (d)) {
     if (V == "Time") {
       ncvar_put (nc, V, dT, count=length(dT))
     } else {
-      if (HR) {
+      if (HR == 25) {
         ncvar_put (nc, V, eval (parse (text=sprintf ("d$%s", V))), count=c(25, nrow(d)/25))
+      } else if (HR == 50) {
+        ncvar_put (nc, V, eval (parse (text=sprintf ("d$%s", V))), count=c(50, nrow(d)/50))
       } else {
         ncvar_put (nc, V, eval (parse (text=sprintf ("d$%s", V))))
       }

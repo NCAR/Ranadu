@@ -61,12 +61,19 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   }
   Time <- ncvar_get (netCDFfile, "Time")
   DL <- length (Time)
+  ## set the maximum data rate (but not above 100 Hz):
+  Rate <- 1
+  nms <- names(netCDFfile$dim)
+  if ("sps25" %in% nms) {Rate <- 25}
+  if ("sps50" %in% nms) {Rate <- 50}
+  if ("sps100" %in% nms) {Rate <- 100}
+  print (sprintf ("output rate for this data.frame is %d", Rate))
   # Expand Time to be high-rate
-  if ("sps25" %in% names(netCDFfile$dim)) {
-    T <- vector ("numeric", 25*length(Time))
+  if (Rate > 1) {
+    T <- vector ("numeric", Rate*length(Time))
     for (i in 1:length(Time)) {
-      for (j in 0:24) {
-        T[(i-1)*25+j+1] <- Time[i]+0.04*j
+      for (j in 0:(Rate-1)) {
+        T[(i-1)*Rate+j+1] <- Time[i]+1/Rate*j
       }  
     }
     Time <- T
@@ -77,19 +84,14 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
   if (End != 0) {
-    i2 <- getIndex (Time, End)
-    if ("sps25" %in% names (netCDFfile$dim)) {i2 <- i2 + 24}
+    i2 <- getIndex (Time, End) + Rate - 1
   } else {
     i2 <- length (Time)
   }
   r <- i1:i2
-  # for a 25-Hz file, r is appropriate 25-Hz index, but also need
+  # r is the appropriate index for any rate, but also need
   # the 1-Hz index for extrapolation:
-  if ("sps25" %in% names(netCDFfile$dim)) {
-    r2 <- ((i1-1)/25+1):((i2-1)/25+1)    
-  } else {
-    r2 <- r
-  }
+  r2 <- ((i1-1)/Rate+1):((i2-1)/Rate+1)
   DL <- length(r2)
   Time <- Time[r]
   SE <- getStartEnd (Time)
@@ -109,7 +111,56 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   for (A in names (ATT)) {
     attr(d, A) <- ATT[[A]]
   }
-  attr (d, "R_dataframe_created") <- date()    # add one global attribute:
+  attr (d, "R_dataframe_created") <- date()    # add one global attribute
+  
+  ######------------------------------------------------------------------
+  IntFilter <- function (X, inRate, outRate) {
+    if (inRate == outRate) {return (X)}
+    ratio <- as.integer(outRate/inRate)    ## expected to be an integer
+    DL <- length (X) / inRate
+    T <- vector ("numeric", DL*inRate)
+    for (k in 2:(DL-1)) {
+      for (j in 0:as.integer(outRate/2)) {
+        if (is.na(X[k-1]) || is.na(X[k])) {T[(k-1)*outRate+j+1] <- NA}
+        else {T[(k-1)*outRate+j+1] <- X[k-1]+(j+as.integer(outRate/2+1))*(X[k]-X[k-1])/ratio}
+      }
+      for (j in as.integer(outRate/2+1):(outRate-1)) {
+        if (is.na(X[k]) || is.na(X[k+1])) {T[(k-1)*outRate+j+1] <- NA}
+        else {T[(k-1)*outRate+j+1] <- X[k]+(j-as.integer(outRate/2))*(X[k+1]-X[k])/ratio}
+      }
+    }
+    # just replicate the start and end measurements
+    k <- 1
+    if (is.na(X[k]) | is.na(X[k+1])) {
+      for (j in 1:outRate) {
+        T[j] <- NA
+      } 
+    } else {
+      for (j in 0:as.integer(outRate/2)) {
+        T[(k-1)*outRate+j+1] <- X[k]
+      }
+      for (j in as.integer(outRate/2+1):(outRate-1)) {
+        T[(k-1)*outRate+j+1] <- X[k]+(j-as.integer(outRate/2))*(X[k+1]-X[k])/ratio
+      }
+    }
+    k <- DL
+    if (is.na(X[k]) | is.na(X[k-1])) {
+      for (j in 1:outRate) {
+        T[j] <- NA
+      } 
+    } else {
+      for (j in 0:as.integer(outRate/2)) {
+        T[(k-1)*outRate+j+1] <- X[k-1]+(j+as.integer(outRate/2))*(X[k]-X[k-1])/ratio
+      }
+      for (j in as.integer(outRate/2+1):(outRate-1)) {
+        T[(k-1)*outRate+j+1] <- X[k]
+      }
+    }
+    #T <- filter(butter(3,2./25.),T)
+    T <- signal::filter(sgolay(4,75),T)
+    return (T)
+  }
+  ######------------------------------------------------------------------
   
   ## Add the requested variables:------------------------------------------------
   for (V in VarList) {
@@ -120,87 +171,33 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     }    ## later, save datt as an attribute of V
     X <- ncvar_get (netCDFfile, V)
     ATT <- ncatt_get (netCDFfile, V)
-    if ("sps25" %in% names(netCDFfile$dim)) {
+    ## for Rate == 1, nothing special is needed:
+    if (Rate == 1) {
+      X <- X[r2]
+    } else { ## other rates require flattening and possibly interpolation and filtering
       DM <- length(dim(X))           
       if (DM == 2) {    # flatten
         X <- X[,r2]
+        inputRate <- dim(X)[1]
         dim(X) <- dim(X)[1]*dim(X)[2]
-        ## add variable attributes as in netCDF file
-        for (A in names (ATT)) {
-          attr (X, A) <- ATT[[A]]
-        }
-        attr (X, "Dimensions") <- datt
-        d[V] <- X
-      } else {
+        ## see if adjustment to max rate is needed
+        if (dim(X)[1] != Rate) {X <- IntFilter(X, inputRate, Rate)}
+      } else {  ## single-dimension (1 Hz) in high-rate file
         X <- X[r2]
-        # for variables not 25-Hz, interpolate to 25 Hz, then filter
-        T <- vector ("numeric", 25*DL)
-        for (k in 2:(DL-1)) {
-          if ((is.na(X[k])) | (X[k] == -32767) |
-                is.na(X[k-1]) | is.na(X[k+1])) {
-            for (j in 1:25) {
-              T[(k-1)*25+j] <- -32767
-            }
-          } else {
-            for (j in 0:12) {
-              T[(k-1)*25+j+1] <- X[k-1]+0.04*(j+13)*(X[k]-X[k-1])
-            }
-            for (j in 13:24) {
-              T[(k-1)*25+j+1] <- X[k]+0.04*(j-12)*(X[k+1]-X[k])
-            }
-          }
-        }
-        # just replicate the start and end measurements
-        k <- 1
-        if (is.na(X[k]) | is.na(X[k+1])) {
-          for (j in 1:25) {
-            T[j] <- -32767.
-          } 
-        } else {
-          for (j in 0:12) {
-            T[(k-1)*25+j+1] <- X[k]
-          }
-          for (j in 13:24) {
-            T[(k-1)*25+j+1] <- X[k]+0.04*(j-12)*(X[k+1]-X[k])
-          }
-        }
-        k <- DL
-        if (is.na(X[k]) | is.na(X[k-1])) {
-          for (j in 1:25) {
-            T[j] <- -32767.
-          } 
-        } else {
-          for (j in 0:12) {
-            T[(k-1)*25+j+1] <- X[k-1]+0.04*(j+13)*(X[k]-X[k-1])
-          }
-          for (j in 13:24) {
-            T[(k-1)*25+j+1] <- X[k]
-          }
-        }
-        #T <- filter(butter(3,2./25.),T)
-        T <- signal::filter(sgolay(4,75),T)
-        ## add variable attributes as in netCDF file
-        for (A in names (ATT)) {
-          attr (T, A) <- ATT[[A]]
-        }
-        attr (T, "Dimensions") <- datt
-        d[V] <- T
+        X <- IntFilter (X, 1, Rate)
       }
-    } else {      ## this is the 1-Hz section
-      X <- X[r2]
-      ## add variable attributes as in netCDF file
-      for (A in names (ATT)) {
-        attr (X, A) <- ATT[[A]]
-      }
-      attr (X, "Dimensions") <- datt
-      d[V] <- X
+    } 
+    ## add variable attributes as in netCDF file
+    for (A in names (ATT)) {
+      attr (X, A) <- ATT[[A]]
     }
+    attr (X, "Dimensions") <- datt
+    d[V] <- X
   }
   if (F != 0) {    # if specified, include the flight number
     RF <- rep (F, times=length(Time))    # label flight number
     d["RF"] <- RF
   }
   nc_close (netCDFfile)
-  d[d == -32767. ] <- NA   # replace missing-value with NA
   return (d)
 }
