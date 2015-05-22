@@ -77,8 +77,13 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       }
     }
     if (!is.expression(xlab)) {
+      # get data.rate
+      data.rate <- 1
+      if ((x[2, 1]-x[1, 1]) <= 0.04) {data.rate <- 25}
+      if ((x[2, 1]-x[1, 1]) <= 0.02) {data.rate <- 50}
+      print (sprintf (" data.rate is %d", data.rate))
       if (xlab == "TIME [UTC]") {
-        if (length(x[, 1]) < 120) {          # needs revision for high-rate data
+        if (length(x[, 1]) < 180*data.rate+2) {          # needs revision for high-rate data
           axis.POSIXct(1, x[, 1], format='%H:%M:%S', tck=0.02)
         } else {
           axis.POSIXct(1,x[, 1], format='%H:%M', tck=0.02)
@@ -104,7 +109,12 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
   
     if (!is.expression(xlab)) {
       if (xlab == "TIME [UTC]") {
-        if (length(x) < 120) {          # needs revision for high-rate data
+        # get data.rate
+        data.rate <- 1
+        if ((x[2, 1]-x[1, 1]) <= 0.04) {data.rate <- 25}
+        if ((x[2, 1]-x[1, 1]) <= 0.02) {data.rate <- 50}
+        # print (sprintf (" data.rate is %d", data.rate))
+        if (length(x[, 1]) < 180*data.rate+2) {         
           axis.POSIXct(1, x, format='%H:%M:%S', tck=0.02)
         } else {
           axis.POSIXct(1,x, format='%H:%M', tck=0.02)

@@ -52,13 +52,15 @@ makeNetCDF <- function (d, newNetCDFname) {
   vdef <- list()   # start with empty list, add variables to it
   for (V in names(d)) {
     if (V == "Time") {next}
+    var_units <- attr (eval (parse (text=sprintf ("d$%s", V))), "units")
+    if (is.null(var_units)) {var_units <- "not defined"}
     if (HR > 1) {
       vd <- ncvar_def (V,
-                 units=attr (eval (parse (text=sprintf ("d$%s", V))), "units"),
+                 units=var_units,
                  dim=Dim, missval=as.single(-32767.), prec='float')
     } else {
       vd <- ncvar_def (V, 
-                units=attr (eval (parse (text=sprintf ("d$%s", V))), "units"),
+                units=var_units, 
                 Dimensions[["Time"]], missval=as.single(-32767.), prec='float')
     }
     vdef[[length(vdef)+1]] <- vd
