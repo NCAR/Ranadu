@@ -45,11 +45,16 @@ plotTrack <- function (lon=Data$LONC, lat=NULL, Time=NULL, WDC=NULL,
     if (length(.Range) < 2) {
       .Range <- 1:length(Time)
     }
+
     WDC <- df$WDC
     WSC <- df$WSC
     lon <- df$LONC
     if (!is.null(xc) && is.na(xc)) {
       DRIFT <- TRUE
+      # find the data.rate
+      data.rate <- 1
+      if (df$Time[2] - df$Time[1] <= 0.04) {data.rate <- 25}
+      if (df$Time[2] - df$Time[1] <= 0.02) {data.rate <- 50}
       df <- df[.Range, ]
       THDG <- (df$THDG + df$SSLIP) * pi / 180
       TASX <- df$TASX
@@ -58,8 +63,8 @@ plotTrack <- function (lon=Data$LONC, lat=NULL, Time=NULL, WDC=NULL,
       xa <- vector ("numeric", nrow(df))
       ya <- vector ("numeric", nrow(df))
       for (i in 1:nrow(df)) {
-        xa[i] <- xp <- xp + TASX[i] * sin (THDG[i])
-        ya[i] <- yp <- yp + TASX[i] * cos (THDG[i])
+        xa[i] <- xp <- xp + TASX[i] * sin (THDG[i]) / data.rate
+        ya[i] <- yp <- yp + TASX[i] * cos (THDG[i]) / data.rate
       }
       xa <- xa * 0.001
       ya <- ya * 0.001

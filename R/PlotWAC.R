@@ -81,7 +81,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       data.rate <- 1
       if ((x[2, 1]-x[1, 1]) <= 0.04) {data.rate <- 25}
       if ((x[2, 1]-x[1, 1]) <= 0.02) {data.rate <- 50}
-      print (sprintf (" data.rate is %d", data.rate))
+      # print (sprintf (" data.rate is %d", data.rate))
       if (xlab == "TIME [UTC]") {
         if (length(x[, 1]) < 180*data.rate+2) {          # needs revision for high-rate data
           axis.POSIXct(1, x[, 1], format='%H:%M:%S', tck=0.02)
