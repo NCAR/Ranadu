@@ -6,7 +6,7 @@ Maintainer: William Cooper <cooperw@ucar.edu>
 Description: This package contains a function for loading a portion of a netCDF
     data file into a data.frame, and it contains a number of functions that
     implement algorithms described in ProcessingAlgorithms.pdf. The package
-    depends on the ncdf and nleqslv packages. Functions included are: GetNetCDF
+    depends on the ncdf4 and nleqslv packages. Functions included are: GetNetCDF
     (to load the data.frame), GetIndex to find the index corresponding to a
     particular time, GetStartEnd to find the time limits of the data,
     SpecificHeats for the (possibly moisture corrected) specific heats and gas

@@ -21,7 +21,10 @@ Calculate a correction to pitch based on the Schuler oscillation.
 Uses measurements of the ground-speed error (as determined by comparison
 to GPS-measured ground-speed components) to estimate the error in pitch. This
 works best if long segments of flight are included in the input data.frame so
-there will be sufficient time to determine the Schuler oscillation well.
+there will be sufficient time to determine the Schuler oscillation well. For
+high-rate files, calculations are based on 1-Hz data and interpolated because
+the pitch correction is smoothed to be slowly varying over periods of several
+minutes.
 }
 \examples{
 \dontrun{PITCHC <- PITCH - CorrectPitch(D)}

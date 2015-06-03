@@ -67,7 +67,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   if ("sps25" %in% nms) {Rate <- 25}
   if ("sps50" %in% nms) {Rate <- 50}
   if ("sps100" %in% nms) {Rate <- 100}
-  print (sprintf ("output rate for this data.frame is %d", Rate))
+  # print (sprintf ("output rate for this data.frame is %d", Rate))
   # Expand Time to be high-rate
   if (Rate > 1) {
     T <- vector ("numeric", Rate*length(Time))

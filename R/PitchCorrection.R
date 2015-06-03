@@ -3,13 +3,16 @@
 ## it is the error in pitch, so you get the true value by subtraction
 ## This calculates corrections for an entire flight in one call.
 ## D must be a dataframe containing at least VNS, VEW, GGVNS, GGVEW,
-## LAT, GGALT, THDG, PITCH, ROLL
+## LAT, GGALT, THDG, PITCH, ROLL, and Time
 #' @title CorrectPitch
 #' @description Calculate a correction to pitch based on the Schuler oscillation.
 #' @details Uses measurements of the ground-speed error (as determined by comparison
 #' to GPS-measured ground-speed components) to estimate the error in pitch. This
 #' works best if long segments of flight are included in the input data.frame so
-#' there will be sufficient time to determine the Schuler oscillation well.
+#' there will be sufficient time to determine the Schuler oscillation well. For
+#' high-rate files, calculations are based on 1-Hz data and interpolated because
+#' the pitch correction is smoothed to be slowly varying over periods of several
+#' minutes.
 #' @aliases CorrectPitch
 #' @author William Cooper
 #' @export CorrectPitch
@@ -22,6 +25,15 @@
 #' \dontrun{PITCHC <- PITCH - CorrectPitch(D)}
 CorrectPitch <- function (D) {
   Cradeg <- pi/180
+  ## get the data rate
+  data.rate <- 1
+  if ((D$Time[2]-D$Time[1]) <= 0.04) {data.rate <- 25}
+  if ((D$Time[2]-D$Time[1]) <= 0.02) {data.rate <- 50}
+  ## for HR, extract a 1-Hz data.frame and work with that, then interpolate/smooth
+  if (data.rate > 1) {
+    LD <- nrow(D)
+    D <- D[(as.numeric(D$Time) %% 1) < 0.01,]
+  }
   .vns <- zoo::na.approx (as.vector(D$VNS), maxgap=1000, na.rm = FALSE)
   .vew <- zoo::na.approx (as.vector(D$VEW), maxgap=1000, na.rm = FALSE)
   .ggvns <- zoo::na.approx (as.vector(D$GGVNS), maxgap=1000, na.rm = FALSE)
@@ -49,7 +61,22 @@ CorrectPitch <- function (D) {
     deltaPitch2[i] <- atan(bb[2]/bb[3]) / Cradeg - D$PITCH[i]
     deltaRoll2[i]  <- atan(bb[1]/bb[3]) / Cradeg - D$ROLL[i]
   }
-  return (deltaPitch2)
+  if (data.rate > 1) {
+    PC <- vector ("numeric", LD)
+    L <- length(deltaPitch2)
+    for (i in 1:(L-1)) {
+      for (j in 0:(data.rate-1)) {
+        PC[(i-1)*data.rate+j+1] <- deltaPitch2[i]+
+                                   (j/data.rate)*(deltaPitch2[i+1]-deltaPitch2[i])
+      }
+    }
+#     for (j in 0:(data.rate-1)) {
+#       PC[L*data.rate+j+1] <- deltaPitch2[L]
+#     }    
+    return(PC)
+  } else {
+    return (deltaPitch2)
+  }
 }
 
 ## This function is needed by the function CorrectPitch(). 
