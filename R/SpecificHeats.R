@@ -15,8 +15,8 @@ SpecificHeats <- function (EoverP=0.) {
 # heats, or dry-air values if EoverP is 0:
   Rd <- StandardConstant("Rd")
   Ra <- Rd/(1.+(StandardConstant("MWW")/StandardConstant("MWD")-1.)*EoverP)
-  cp <- StandardConstant("cpd")*(Ra/Rd)*(1.+EoverP/5.)
-  cv <- StandardConstant("cvd")*(Ra/Rd)*(1.+EoverP/7.)
+  cp <- StandardConstant("cpd")*(Ra/Rd)*(1.+EoverP/7.)
+  cv <- StandardConstant("cvd")*(Ra/Rd)*(1.+EoverP/5.)
   L <- length(EoverP)
   R <- c(cp,cv,Ra)
   dim(R) <- c(L,3)
