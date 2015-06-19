@@ -29,7 +29,7 @@ standardVariables <- function (list=NULL) {
 #' variables like CCDP yet; it does work for 25-Hz files, with fractional-second times.
 #' @aliases getNetCDF getnetcdf
 #' @author William Cooper
-#' @import "ncdf4"
+#' @import ncdf4
 #' @export getNetCDF
 #' @param fname string, full file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
 #' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load everything.
@@ -83,11 +83,12 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   Time <- as.POSIXct(as.POSIXct(tref, tz='UTC')+Time, tz='UTC')
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
-  if (End != 0) {
-    i2 <- getIndex (Time, End) + Rate - 1
-  } else {
-    i2 <- length (Time)
-  }
+  i2 <- ifelse ((End != 0), getIndex (Time, End) + Rate - 1, length (Time))
+  # if (End != 0) {
+  #   i2 <- getIndex (Time, End) + Rate - 1
+  # } else {
+  #   i2 <- length (Time)
+  # }
   r <- i1:i2
   # r is the appropriate index for any rate, but also need
   # the 1-Hz index for extrapolation:
@@ -118,46 +119,10 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     if (inRate == outRate) {return (X)}
     ratio <- as.integer(outRate/inRate)    ## expected to be an integer
     DL <- length (X) / inRate
-    T <- vector ("numeric", DL*inRate)
-    for (k in 2:(DL-1)) {
-      for (j in 0:as.integer(outRate/2)) {
-        if (is.na(X[k-1]) || is.na(X[k])) {T[(k-1)*outRate+j+1] <- NA}
-        else {T[(k-1)*outRate+j+1] <- X[k-1]+(j+as.integer(outRate/2+1))*(X[k]-X[k-1])/ratio}
-      }
-      for (j in as.integer(outRate/2+1):(outRate-1)) {
-        if (is.na(X[k]) || is.na(X[k+1])) {T[(k-1)*outRate+j+1] <- NA}
-        else {T[(k-1)*outRate+j+1] <- X[k]+(j-as.integer(outRate/2))*(X[k+1]-X[k])/ratio}
-      }
-    }
-    # just replicate the start and end measurements
-    k <- 1
-    if (is.na(X[k]) | is.na(X[k+1])) {
-      for (j in 1:outRate) {
-        T[j] <- NA
-      } 
-    } else {
-      for (j in 0:as.integer(outRate/2)) {
-        T[(k-1)*outRate+j+1] <- X[k]
-      }
-      for (j in as.integer(outRate/2+1):(outRate-1)) {
-        T[(k-1)*outRate+j+1] <- X[k]+(j-as.integer(outRate/2))*(X[k+1]-X[k])/ratio
-      }
-    }
-    k <- DL
-    if (is.na(X[k]) | is.na(X[k-1])) {
-      for (j in 1:outRate) {
-        T[j] <- NA
-      } 
-    } else {
-      for (j in 0:as.integer(outRate/2)) {
-        T[(k-1)*outRate+j+1] <- X[k-1]+(j+as.integer(outRate/2))*(X[k]-X[k-1])/ratio
-      }
-      for (j in as.integer(outRate/2+1):(outRate-1)) {
-        T[(k-1)*outRate+j+1] <- X[k]
-      }
-    }
-    #T <- filter(butter(3,2./25.),T)
-    T <- signal::filter(sgolay(4,75),T)
+    x <- 0:(length(X)-1)
+    A <- approx (x, X, n=DL*outRate/inRate)
+    T <- A$y
+    T <- signal::filter(signal::sgolay(4,75),T)
     return (T)
   }
   ######------------------------------------------------------------------
