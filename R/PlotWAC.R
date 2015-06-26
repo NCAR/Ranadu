@@ -37,6 +37,13 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     if (!is.expression(ylab) && (ylab == "")) {
       ylab <- names(x)[2]
     }
+    ## protect against all-missing variables
+    for (j in 2:min(6, length(x))) {
+      if (!any (!is.na (x[, j]))) {
+        x[1, j] <- -32767.
+        x[2, j] <- 32767.
+      }
+    }
     yrange <- c(min(x[ ,2], na.rm=TRUE), max(x[ ,2], na.rm=TRUE))
     if (length(x) > 2) {
       for (j in 3:min(6, length(x))) {
