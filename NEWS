@@ -1,6 +1,7 @@
 
 Version 2.1-15-6-19
   Modifications: 
+    ggplotWAC.R:            -- fixed; never worked right before
     getNetCDF.R:            -- modified interpolation for speed;
                                 also, eliminated warning msgs, ncdf4
     SpecificHeats.R         -- corrected minor error
