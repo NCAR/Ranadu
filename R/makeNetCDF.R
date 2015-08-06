@@ -114,8 +114,11 @@ makeNetCDF <- function (d, newNetCDFname) {
     for (nm in names (ds)) {
       var <- sprintf ("d$%s", nm)
       A <- attributes (eval (parse (text=var)))
-      A$dim <- NULL
-      A$class <- NULL
+      A[[1]] <- nrow (ds)
+      if (!grepl ('Time', nm)) {
+        A$dim <- NULL
+        A$class <- NULL
+      }
       attributes (ds[,nm]) <- A
     }
     return(ds)

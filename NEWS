@@ -1,9 +1,14 @@
 
 Version 2.1-15-6-19
-  Modifications: 
+  Modifications:
     plotWAC.R               -- added protection for all-missing-value case
+    ggplotWAC.R:            -- fixed; never worked right before
     getNetCDF.R:            -- modified interpolation for speed;
-                                also, eliminated warning msgs, ncdf4
+                                also, eliminated warning msgs, ncdf4,
+                                and modified to search for location identifiers
+                                like _LWI if partial variables like CONCD_ are
+                                used.
+    PressureAltitude.R      -- modified to handle vector input for pressure
     SpecificHeats.R         -- corrected minor error
     PitchCorrection.R       -- CorrectPitch() modified to work with HR data
 Version 2.1-15-5-29

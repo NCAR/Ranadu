@@ -4,50 +4,48 @@
 \alias{ggplotWAC}
 \title{ggplotWAC}
 \usage{
-ggplotWAC(data = Data, xp = Time, yp = ATX, col = "blue",
-  xlab = "TIME [UTC]", ylab = "", lwd = 2, type = "l", title = "",
-  ...)
+ggplotWAC(.data, col = "blue", xlab = "TIME [UTC]", ylab = "",
+  lwd = 1.2, lty = 1, logxy = "", legend.position = "bottomright", ...)
 }
 \arguments{
-\item{data}{A dataframe containing the variables to plot}
+\item{.data}{A data.frame containing vectors to plot. The first will be the
+abscissa and the remainder ordinate vectors to plot vs the abscissa.}
 
-\item{xp}{Usually, Time from a data.frame; a vector of abscissa values. Default: Data$Time}
-
-\item{yp}{A vector or set of vectors containing ordinate values for points to plot.}
-
-\item{col}{Color or colors to pass to plot (default: blue)}
+\item{col}{Color to pass to plot (default: blue). Can be multiple values
+to set colors for multiple variables in data.frame mode. There are defaults
+('blue', 'darkgreen', 'red', 'skyblue', 'darkorange') but values provided with
+this parameter precede that sequence of colors.}
 
 \item{xlab}{Label for the abscissa, to pass to plot (default: "TIME [UTC]")}
 
-\item{ylab}{Label for the ordinate, to pass to plot (default: "")}
+\item{ylab}{Label for the ordinate, to pass to plot (default: second
+variable name)}
 
-\item{lwd}{Line width to pass to plot (default: 1)}
+\item{lwd}{Line width to pass to plot (default: 1); can be a vector}
 
-\item{type}{Line type to pass to plot (default: "l")}
+\item{lty}{Line type to pass to plot (default: 1). Can be a vector.
+variables provided in data.frame mode.}
 
-\item{title}{A title for the plot}
+\item{logxy}{Set to 'y' for log axes. This is provided (vs log='y') because it
+makes possible translation of axis labels to 10^i format.}
+
+\item{legend.position}{This parameter specifies the position for the
+legend. The default is 'bottomright'. The legend
+can also be suppressed by setting this parameter to NA. Then a legend can still
+be added after the ggplotWAC call.}
 
 \item{...}{Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt}
-}
-\value{
-A ggplot descriptor.
 }
 \description{
 Convenience routine for plots
 }
 \details{
-Sets some plot defaults and calls ggplot, using
-theme_WAC for the plot conventions. This can be followed with
-calls to lineWAC and legendWAC to add lines and a legend.
-The routine returns a descriptor for the plot that can be
-used to repeat the plot with additions. Because the descriptor
-that is returned is evaluated in the environment of the calling
-program, the calling arguments must be available in that
-environment.
+Sets some plot defaults and calls ggplot and theme_WAC()
 }
 \examples{
-\dontrun{plotWAC (Time, TASX, ylab="TAS")}
-\dontrun{plotWAC (Time, PSXC, lty=2)}
+\dontrun{ggplotWAC (data.frame ("Time"=Time, "TASX"=TASX), ylab="TAS")}
+\dontrun{plotWAC (Data[, c(Time, PSXCi)], lwd=2)}
+\dontrun{plotWAC (Data[, c("Time", "PSXC")])}
 }
 \author{
 William Cooper
