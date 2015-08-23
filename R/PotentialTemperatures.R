@@ -45,7 +45,8 @@ EquivalentPotentialTemperature <- function (P, AT, E=0) {
   r <- MixingRatio (E/P) 
   CP <- SpecificHeats(0.)     # need dry-air value, don't need vector
   TL = 2840./(3.5*log(TK)-log(E)-4.805)+55.
-  TDL <- TK*(1000./(P-E))**0.2854*(TK/TL)**(0.28e-3*r)
+  # TDL <- TK*(1000./(P-E))**0.2854*(TK/TL)**(0.28e-3*r)
+  TDL <- PotentialTemperature((P-E), AT)*(TK/TL)**(0.28e-3*r)
   THETAP <- TDL * exp (r*(L0-L1*(TL-TZERO)+K2*r)/(CP[1]*TL))
   return (THETAP)
 }

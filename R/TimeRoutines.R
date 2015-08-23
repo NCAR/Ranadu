@@ -26,6 +26,7 @@ getIndex <- function (Time, HHMMSS) {
     tc <- tc + 86400
   }
   index <- idx[abs(tr-tc) < 0.005]
+  index <- which(abs(tr-tc) < 0.02)
   return (index)
 }
 
