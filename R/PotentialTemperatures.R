@@ -45,7 +45,8 @@ EquivalentPotentialTemperature <- function (P, AT, E=0) {
   r <- MixingRatio (E/P) 
   CP <- SpecificHeats(0.)     # need dry-air value, don't need vector
   TL = 2840./(3.5*log(TK)-log(E)-4.805)+55.
-  TDL <- TK*(1000./(P-E))**0.2854*(TK/TL)**(0.28e-3*r)
+  # TDL <- TK*(1000./(P-E))**0.2854*(TK/TL)**(0.28e-3*r)
+  TDL <- PotentialTemperature(P-E, TK-273.15)*(TK/TL)**(0.28e-3*r)
   THETAP <- TDL * exp (r*(L0-L1*(TL-TZERO)+K2*r)/(CP[1]*TL))
   return (THETAP)
 }
@@ -180,6 +181,7 @@ WetEquivalentPotentialTemperature <- function (P, AT, E=0, w=0) {
   rt <- r + (w/1000.) / (100 * (P-E) / (CP[3] * Tk)) # denom. is density of dry air
   cpt <- CP[1] + rt*cw
   F1 <- ifelse ((E < eeq), (E/eeq) ^ (-r*StandardConstant("Rw")/cpt), 1)
+  F1 <- 1
   return (F1 * Tk * (1000 / (P - E)) ^ (CP[3] / cpt) 
           * exp((Lv * r) / (cpt * Tk)))
 }

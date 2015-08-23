@@ -1,0 +1,9 @@
+
+## To rebuild:
+require(devtools)
+require(roxygen2)
+setwd("~/RStudio/Ranadu")  # or appropriate location of these files
+roxygen2::roxygenise()     # formerly document()
+check()
+build()
+install()
