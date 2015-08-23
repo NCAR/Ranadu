@@ -104,6 +104,7 @@ DSKT <- data.frame (P=Pressure, T=Temperature, DP=DewPoint)
   ## clip DP trace at left axis
   DSKT$DP[DSKT$DP < 0] <- 0
   DSKT$P  <- XYplot (Temperature, Pressure)$Y
+  if (ADD) {return(DSKT)}
   g <- g + geom_path (data=DSKT, aes(x=T,  y=P, color="T"),  lwd=1.0)
   g <- g + geom_path (data=DSKT, aes(x=DP, y=P, color="DP"), lwd=1.0, alpha=0.8)
   g <- g + scale_fill_discrete(breaks=c("DP","T"))
