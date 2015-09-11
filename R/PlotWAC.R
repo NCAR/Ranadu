@@ -38,7 +38,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       ylab <- names(x)[2]
     }
     ## protect against all-missing variables
-    for (j in 2:min(6, length(x))) {
+    for (j in 2:min(7, length(x))) {
       if (!any (!is.na (x[, j]))) {
         x[1, j] <- -32767.
         x[2, j] <- 32767.
@@ -46,7 +46,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     }
     yrange <- c(min(x[ ,2], na.rm=TRUE), max(x[ ,2], na.rm=TRUE))
     if (length(x) > 2) {
-      for (j in 3:min(6, length(x))) {
+      for (j in 3:min(7, length(x))) {
         if (any (!is.na(x[ ,j]))) {
           yl <- min(x[ ,j], na.rm=TRUE)
           yh <- max(x[ ,j], na.rm=TRUE)
@@ -71,10 +71,10 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       )
     }
     if (length(x) > 2) {
-      colrs <- c(col, 'darkgreen', 'red', 'skyblue', 'darkorange')
+      colrs <- c(col, 'darkgreen', 'red', 'skyblue', 'darkorange', 'gray40')
       lwd <- c(lwd, rep(1,5))
       lty <- c(lty, rep(1,5))
-      for (j in 3:min(6, length(x))) {
+      for (j in 3:min(7, length(x))) {
         lines(x[ ,1], x[ ,j], lwd=lwd[j-1], lty=lty[j-1], col=colrs[j-1], ...)
       }
       if (!is.na(legend.position)) {
