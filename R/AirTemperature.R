@@ -7,10 +7,12 @@
 #' @param P  A numeric representing the ambient pressure in hPa
 #' @param Q  A numeric representing the dynamic pressure in hPa
 #' @param E  An optional numeric representing the water vapor pressure in hPa
+#' @param probe An identifier for type of temperature probe. Default is 'HARCO'.
+#' Other options are 'ROSE' for heated Rosemount 102 and 'UNHEATED' for unheated Rosemount 102AL.
 #' @return The ambient air temperature in deg.C
 #' @examples 
 #' AT <- AirTemperature (10., 700., 50.)
-AirTemperature <- function (RT, P, Q, E=0.) {
+AirTemperature <- function (RT, P, Q, E=0., probe='HARCO') {
 # Find air temperature from recovery temperature, MACH, and
 # humidity: (RT in deg C, P, Q, E all in the same units,
 # E used for humidity correction; omit for dry-air)
@@ -20,7 +22,7 @@ AirTemperature <- function (RT, P, Q, E=0.) {
   cv <- CP[,2]  
   MACH <- MachNumber (P, Q, E)
   AT <- (RT+TZERO)/
-    (1.+RecoveryFactor(MACH)*MACH**2 *Ra/(2.*cv))-TZERO
+    (1 + RecoveryFactor (MACH, probe) * MACH^2 * Ra / (2 * cv))-TZERO
   return (AT)
 }
 

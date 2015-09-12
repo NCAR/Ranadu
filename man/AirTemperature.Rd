@@ -4,7 +4,7 @@
 \alias{AirTemperature}
 \title{AirTemperature}
 \usage{
-AirTemperature(RT, P, Q, E = 0)
+AirTemperature(RT, P, Q, E = 0, probe = "HARCO")
 }
 \arguments{
 \item{RT}{A numeric representing the recovery temperature in deg. C}
@@ -14,6 +14,9 @@ AirTemperature(RT, P, Q, E = 0)
 \item{Q}{A numeric representing the dynamic pressure in hPa}
 
 \item{E}{An optional numeric representing the water vapor pressure in hPa}
+
+\item{probe}{An identifier for type of temperature probe. Default is 'HARCO'.
+Other options are 'ROSE' for heated Rosemount 102 and 'UNHEATED' for unheated Rosemount 102AL.}
 }
 \value{
 The ambient air temperature in deg.C
