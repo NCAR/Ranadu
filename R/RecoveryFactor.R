@@ -12,8 +12,8 @@
 RecoveryFactor <- function (MACH, probe='HARCO') {
 # recovery factor for heated probes:
   if (probe == 'ROSE') {
-    rf2 <- 0.9816655 + 0.1605396*log10(MACH)+0.2603177*log10(MACH^2)
-    +0.2512514*log10(MACH^3) 
+    rf2 <- 0.9816655 + 0.1605396*log10(MACH)+0.2603177*log10(MACH)^2
+    +0.2512514*log10(MACH)^3 
   } else if (probe == "UNHEATED") {
     rf2 <- 0.9959+0.0283*log10(MACH)+0.0374*log10(MACH)**2
     +0.0762*log10(MACH)**3

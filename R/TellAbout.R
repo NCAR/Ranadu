@@ -104,6 +104,7 @@ getAttributes <- function (dname=Data, vname=NULL) {
       atts[[length(atts)+1]]  <- ATT[i]
       print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
     }
+    return (atts)
   } else {    # variable attributes
     if (typeof (vname) != "character") {
       print ("Usage of GetAttributes: Must provide a character string for vname")
