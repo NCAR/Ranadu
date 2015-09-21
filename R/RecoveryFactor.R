@@ -5,8 +5,8 @@
 #' @author William Cooper
 #' @export RecoveryFactor
 #' @param MACH A numeric giving the Mach number, perhaps calculated by MachNumber()
-#' @param probe A string giving a probe name. Default is 'HARCO'; 
-#' other options are 'Rose" (heated 102 Rosemount) and 'UNHEATED' (Rosemount 102AL unheated)
+#' @param probe A string giving a probe name. Default is 'HARCO'; other options are
+#' 'HARCOB' for B-element of HARCO, 'Rose" (heated 102 Rosemount) and 'UNHEATED' (Rosemount 102AL unheated)
 #' @return The recovery factor applicable to a temperature sensor
 #' @examples rf <- RecoveryFactor (0.75)
 RecoveryFactor <- function (.M, probe='HARCO') {

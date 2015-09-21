@@ -1,7 +1,15 @@
 
 Version 2.1-15-6-19
   Modifications:
+    SkewT.R                 -- provided for 'ADD' to add a trace to existing
+                               Skew-T plot
+    potentialTemperatures.R -- minor change to EquivalentPotentialTemperature.R
+    RecoveryFactor.R        -- revised after RecoveryFactorStudy.pdf;
+                                new values for heated Rosemount and HARCO-B 
+    AirTemperature.R        -- added 'probe' argument
+    TellAbout.R             -- modified to return global attributes
     plotWAC.R               -- added protection for all-missing-value case
+                            -- provided for one more plot variable
     ggplotWAC.R:            -- fixed; never worked right before
     getNetCDF.R:            -- modified interpolation for speed;
                                 also, eliminated warning msgs, ncdf4,

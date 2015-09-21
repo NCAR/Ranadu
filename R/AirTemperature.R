@@ -8,7 +8,8 @@
 #' @param Q  A numeric representing the dynamic pressure in hPa
 #' @param E  An optional numeric representing the water vapor pressure in hPa
 #' @param probe An identifier for type of temperature probe. Default is 'HARCO'.
-#' Other options are 'ROSE' for heated Rosemount 102 and 'UNHEATED' for unheated Rosemount 102AL.
+#' Other options are 'ROSE' for heated Rosemount 102,
+#' 'HARCOB' for element-B of HARCO, and 'UNHEATED' for unheated Rosemount 102AL.
 #' @return The ambient air temperature in deg.C
 #' @examples 
 #' AT <- AirTemperature (10., 700., 50.)
