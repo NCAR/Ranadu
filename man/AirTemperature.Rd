@@ -16,7 +16,8 @@ AirTemperature(RT, P, Q, E = 0, probe = "HARCO")
 \item{E}{An optional numeric representing the water vapor pressure in hPa}
 
 \item{probe}{An identifier for type of temperature probe. Default is 'HARCO'.
-Other options are 'ROSE' for heated Rosemount 102 and 'UNHEATED' for unheated Rosemount 102AL.}
+Other options are 'ROSE' for heated Rosemount 102,
+'HARCOB' for element-B of HARCO, and 'UNHEATED' for unheated Rosemount 102AL.}
 }
 \value{
 The ambient air temperature in deg.C
