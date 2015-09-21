@@ -9,17 +9,20 @@
 #' other options are 'Rose" (heated 102 Rosemount) and 'UNHEATED' (Rosemount 102AL unheated)
 #' @return The recovery factor applicable to a temperature sensor
 #' @examples rf <- RecoveryFactor (0.75)
-RecoveryFactor <- function (MACH, probe='HARCO') {
-# recovery factor for heated probes:
+RecoveryFactor <- function (.M, probe='HARCO') {
+# recovery factor for temperature probes:
+  LM <- log10(.M)
   if (probe == 'ROSE') {
-    rf2 <- 0.9816655 + 0.1605396*log10(MACH)+0.2603177*log10(MACH)^2
-    +0.2512514*log10(MACH)^3 
+    # this is the alternate-geometry Rosemount probe, not the one we have
+    # rf2 <- 0.9816655 + 0.1605396*LM+0.2603177*LM^2+0.2512514*LM^3
+    # the one we have is nominally the HARCO formula below, but this works better:
+    rf2 <- 0.958    ## both elements
   } else if (probe == "UNHEATED") {
-    rf2 <- 0.9959+0.0283*log10(MACH)+0.0374*log10(MACH)**2
-    +0.0762*log10(MACH)**3
+    rf2 <- 0.9959+0.0283*LM+0.0374*LM^2+0.0762*LM^3
+  } else if (probe == 'HARCOB') {
+    rf2 <- 0.988+0.053*LM+0.090*LM^2+0.091*LM^3 - 0.015
   } else {  ## defaults to HARCO
-    rf2 <- 0.988+0.053*log10(MACH)+0.090*log10(MACH)**2
-       +0.091*log10(MACH)**3
+    rf2 <- 0.988+0.053*LM+0.090*LM^2+0.091*LM^3
   }
   return (rf2)
 }
