@@ -1,6 +1,6 @@
 Package: Ranadu
 Title: Functions for use with RAF aircraft data files
-Version: 2.1-15-6-19
+Version: 2.2-15-10-26
 Author: William Cooper
 Maintainer: William Cooper <cooperw@ucar.edu>
 Description: This package contains a function for loading a portion of a netCDF
@@ -20,7 +20,7 @@ Description: This package contains a function for loading a portion of a netCDF
     provided by SkewT.R. There is also a function providing standard constants
     including those defined in ProcessingAlgorithms.pdf. There is a utility
     for making subsets of a netCDF file, and there are other functions also.
-License: none
+License: GPL
 Depends:
     ncdf4,ggplot2,ggthemes,grid,tcltk
 Imports:
