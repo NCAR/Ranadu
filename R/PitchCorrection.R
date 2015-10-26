@@ -55,11 +55,11 @@ CorrectPitch <- function (D) {
   deltaPitch2 <- vector ("numeric", LHDG)
   deltaRoll2  <- vector ("numeric", LHDG)
   for (i in 1:LHDG) {
-    bl <- c(sin(deltaRollL[i]), sin(deltaPitchL[i]), 
+    bl <- c(-sin(deltaPitchL[i]), sin(deltaRollL[i]), 
             sqrt(1.-sin(deltaRollL[i])^2 - sin(deltaPitchL[i])^2))
-    bb <- as.vector(XformLB (bl, D$ROLL[i], D$PITCH[i], D$THDG[i], .reverse=TRUE))
-    deltaPitch2[i] <- atan(bb[2]/bb[3]) / Cradeg - D$PITCH[i]
-    deltaRoll2[i]  <- atan(bb[1]/bb[3]) / Cradeg - D$ROLL[i]
+    bb <- as.vector(XformLB (bl, 0, 0, D$THDG[i], .reverse=FALSE))
+    deltaPitch2[i] <- -atan(bb[1]/bb[3]) / Cradeg 
+    deltaRoll2[i]  <- atan(bb[2]/bb[3]) / Cradeg 
   }
   if (data.rate > 1) {
     PC <- vector ("numeric", LD)
@@ -80,17 +80,23 @@ CorrectPitch <- function (D) {
 }
 
 ## This function is needed by the function CorrectPitch(). 
-## It transforms a vector in the body frame to one in the local frame
+## It transforms a vector in the local frame to one in the body frame
 ## (or the reverse if .reverse=TRUE).
 XformLB <- function (bvector, .roll, .pitch, .heading, .reverse=FALSE) {
   Cradeg <- pi/180
   sr <- sin(.roll*Cradeg); cr <- cos(.roll*Cradeg)
   sp <- sin(.pitch*Cradeg); cp <- cos(.pitch*Cradeg)
   sh <- sin(.heading*Cradeg); ch <- cos(.heading*Cradeg)
-  M <- c (ch*cr+sh*sr*sp, -sh*cr+ch*sr*sp, -cp*sr, sh*cp, ch*cp, sp, 
-          ch*sr-sh*sp*cr, -sh*sr-ch*sp*sr, cp*cr)
+  if (.reverse) {
+    M <- c(cp*ch, sh*cp, -sp,
+           ch*sp*sr-sh*cr, sh*sp*sr+ch*cr, cp*sr,
+           ch*sp*cr+ch*cr, ch*cp*cr-ch*sr, cp*cr)
+  } else {
+    M <- c(ch*cp, sh*cr+ch*sp*sr, sh*sr-ch*sp*cr,
+           -sh*cp, ch*cr-sh*sp*sr, ch*sr+sh*sp*cr,
+           sp, -cp*sr, cp*cr)
+  }
   dim (M) <- c(3,3)
-  if (.reverse) {M <- t(M)}
   return (M %*% bvector)
 }
 

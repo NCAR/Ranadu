@@ -93,9 +93,9 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   # }
   r <- i1:i2
   # r is the appropriate index for any rate, but also need
-  # the 1-Hz index for extrapolation:
-  r2 <- ((i1-1)/Rate+1):((i2-1)/Rate+1)
-  DL <- length(r2)
+  # the 1-Hz and 5-Hz indices for interpolation:
+  r1 <- ((i1-1)/Rate+1):((i2-1)/Rate+1)
+  DL <- length (r1)
   Time <- Time[r]
   SE <- getStartEnd (Time)
   ## save 'Time' attributes:
@@ -104,7 +104,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     attr(Time, A) <- ATT[[A]]
   }
   d <- data.frame(Time)
-  ## save the dimensions, useful if ever re-writing to netCDF:---------------------
+  ## save the dimensions, useful for archiving or re-writing to netCDF:-------------
   ##    but, to save space, omit the list of times
   nf <- netCDFfile
   nf$dim[1]$Time$vals <- NULL
@@ -120,11 +120,14 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   IntFilter <- function (X, inRate, outRate) {
     if (inRate == outRate) {return (X)}
     ratio <- as.integer(outRate/inRate)    ## expected to be an integer
-    DL <- length (X) / inRate
     x <- 0:(length(X)-1)
-    A <- approx (x, X, n=DL*outRate/inRate)
+    A <- approx (x, X, n=length(X)*ratio)
     T <- A$y
     T <- signal::filter(signal::sgolay(4,75),T)
+    ## now shift to match 25-Hz:
+    n <- as.integer (ratio / 2)
+    NL = length(T)
+    T <- c(T[(1+n):NL],rep(T[NL],n))
     return (T)
   }
   ######------------------------------------------------------------------
@@ -135,7 +138,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     ## fill in location-tag for variable name if needed:
     if (substr(V, nchar(V), nchar(V)) == '_') {
       for (ncn in namesCDF) {
-        if (grepl (V, ncn)) {V <- ncn}
+        if (grepl (V, ncn)) {V <- ncn; break}   ## note, takes 1st match
       }
     }
     ## save dimensions for the variable:
@@ -147,17 +150,18 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     ATT <- ncatt_get (netCDFfile, V)
     ## for Rate == 1, nothing special is needed:
     if (Rate == 1) {
-      X <- X[r2]
+      X <- X[r1]
     } else { ## other rates require flattening and possibly interpolation and filtering
       DM <- length(dim(X))           
       if (DM == 2) {    # flatten
-        X <- X[,r2]
+        X <- X[,r1]
         inputRate <- dim(X)[1]
+        needFilter <- ifelse ((dim(X)[1] != Rate), TRUE, FALSE)
         dim(X) <- dim(X)[1]*dim(X)[2]
         ## see if adjustment to max rate is needed
-        if (dim(X)[1] != Rate) {X <- IntFilter(X, inputRate, Rate)}
+        if (needFilter) {X <- IntFilter(X, inputRate, Rate)}
       } else {  ## single-dimension (1 Hz) in high-rate file
-        X <- X[r2]
+        X <- X[r1]
         X <- IntFilter (X, 1, Rate)
       }
     } 

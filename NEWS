@@ -16,9 +16,11 @@ Version 2.1-15-6-19
                                 and modified to search for location identifiers
                                 like _LWI if partial variables like CONCD_ are
                                 used.
+                            -- 151026: modified to fix shifts from HR processing.
     PressureAltitude.R      -- modified to handle vector input for pressure
     SpecificHeats.R         -- corrected minor error
     PitchCorrection.R       -- CorrectPitch() modified to work with HR data
+                            -- Fixed erroneous transformation matrix
 Version 2.1-15-5-29
   Modifications:            Working in R 3.2 environment now
     PlotTrack.R             -- changed drifting plot to work with HR files
