@@ -17,65 +17,62 @@
 #' @author William Cooper
 #' @export CorrectPitch
 #' @param D a data.frame containing at least these variables: 
-#' VNS, VEW, GGVNS, GGVEW, LAT, GGALT, THDG, PITCH, ROLL
+#' VNS, VEW, GGVNS, GGVEW, LATC, GGALT, THDG, PITCH, ROLL
 #' @import zoo signal
-#' @return PitchError -- the estimated error in the pitch [deg], which
-#' should be subtracted from PITCH to get the corrected value.
+#' @return c(PitchError, RollError) -- the estimated errors in the 
+#' pitch and roll angles [deg], which should be subtracted from 
+#' PITCH and ROLL to get the corrected values.
 #' @examples 
-#' \dontrun{PITCHC <- PITCH - CorrectPitch(D)}
+#' \dontrun{PITCHC <- PITCH - CorrectPitch(D)[, 1]}
 CorrectPitch <- function (D) {
   Cradeg <- pi/180
   ## get the data rate
   data.rate <- 1
   if ((D$Time[2]-D$Time[1]) <= 0.04) {data.rate <- 25}
   if ((D$Time[2]-D$Time[1]) <= 0.02) {data.rate <- 50}
+  LD <- nrow(D)
   ## for HR, extract a 1-Hz data.frame and work with that, then interpolate/smooth
   if (data.rate > 1) {
-    LD <- nrow(D)
     D <- D[(as.numeric(D$Time) %% 1) < 0.01,]
   }
-  .vns <- zoo::na.approx (as.vector(D$VNS), maxgap=1000, na.rm = FALSE)
-  .vew <- zoo::na.approx (as.vector(D$VEW), maxgap=1000, na.rm = FALSE)
-  .ggvns <- zoo::na.approx (as.vector(D$GGVNS), maxgap=1000, na.rm = FALSE)
-  .ggvew <- zoo::na.approx (as.vector(D$GGVEW), maxgap=1000, na.rm = FALSE)
+  MaxGap <- 1000
+  .vns <- zoo::na.approx (as.vector(D$VNS), maxgap=MaxGap, na.rm = FALSE)
+  .vew <- zoo::na.approx (as.vector(D$VEW), maxgap=MaxGap, na.rm = FALSE)
+  .ggvns <- zoo::na.approx (as.vector(D$GGVNS), maxgap=MaxGap, na.rm = FALSE)
+  .ggvew <- zoo::na.approx (as.vector(D$GGVEW), maxgap=MaxGap, na.rm = FALSE)
   .vns[is.na(.vns)] <- 0
   .vew[is.na(.vew)] <- 0
   .ggvns[is.na(.ggvns)] <- 0
   .ggvew[is.na(.ggvew)] <- 0
   # 1013 points (must be odd) to span about 1/5 Schuler osc. -- about 16.8 min
-  vndot <- signal::sgolayfilt (.vns-.ggvns, 3, 1013, m=1)  # m=1 for first deriv.
-  vedot <- signal::sgolayfilt (.vew-.ggvew, 3, 1013, m=1)
-  deltaPitchL <- -vndot/Ranadu::Gravity (D$LAT, D$GGALT)
-  deltaRollL  <- -vedot/Ranadu::Gravity (D$LAT, D$GGALT)
-  LHDG <- length(D$THDG)
-  #  .hdg <- D$THDG*Cradeg
-  #  deltaPitch <- (sin(.hdg)*deltaRollL + cos(.hdg)*deltaPitchL)/Cradeg
-  #  deltaRoll <- (cos(.hdg)*deltaRollL - sin(.hdg)*deltaPitchL)/Cradeg
-  ## replace with the full transformation matrix:
-  deltaPitch2 <- vector ("numeric", LHDG)
-  deltaRoll2  <- vector ("numeric", LHDG)
-  for (i in 1:LHDG) {
-    bl <- c(-sin(deltaPitchL[i]), sin(deltaRollL[i]), 
-            sqrt(1.-sin(deltaRollL[i])^2 - sin(deltaPitchL[i])^2))
-    bb <- as.vector(XformLB (bl, 0, 0, D$THDG[i], .reverse=FALSE))
-    deltaPitch2[i] <- -atan(bb[1]/bb[3]) / Cradeg 
-    deltaRoll2[i]  <- atan(bb[2]/bb[3]) / Cradeg 
-  }
+  NAV <- 1013
+  vndot <- signal::sgolayfilt (.vns-.ggvns, 3, NAV, m=1)  # m=1 for first deriv.
+  vedot <- signal::sgolayfilt (.vew-.ggvew, 3, NAV, m=1)
+  deltaPitchL <- -vndot/Ranadu::Gravity (D$LATC, D$GGALT)
+  deltaRollL  <- vedot/Ranadu::Gravity (D$LATC, D$GGALT)
+  .hdg <- D$THDG*Cradeg
+  deltaPitch <- (sin(.hdg)*deltaRollL + cos(.hdg)*deltaPitchL)/Cradeg
+  deltaRoll <- (cos(.hdg)*deltaRollL - sin(.hdg)*deltaPitchL)/Cradeg
   if (data.rate > 1) {
     PC <- vector ("numeric", LD)
-    L <- length(deltaPitch2)
+    RC <- vector ("numeric", LD)
+    L <- length(deltaPitch)
     for (i in 1:(L-1)) {
       for (j in 0:(data.rate-1)) {
-        PC[(i-1)*data.rate+j+1] <- deltaPitch2[i]+
-                                   (j/data.rate)*(deltaPitch2[i+1]-deltaPitch2[i])
+        PC[(i-1)*data.rate+j+1] <- deltaPitch[i]+
+                                   (j/data.rate)*(deltaPitch[i+1]-deltaPitch[i])
+        RC[(i-1)*data.rate+j+1] <- deltaRoll[i]+
+                                   (j/data.rate)*(deltaRoll[i+1]-deltaRoll[i])
       }
     }
 #     for (j in 0:(data.rate-1)) {
 #       PC[L*data.rate+j+1] <- deltaPitch2[L]
 #     }    
-    return(PC)
+    C <- c(PD, RC); dim(C) <- c(LD, 2)
+    return(C)
   } else {
-    return (deltaPitch2)
+    C <- c(deltaPitch, deltaRoll); dim(C) <- c(LD, 2)
+    return (C)
   }
 }
 

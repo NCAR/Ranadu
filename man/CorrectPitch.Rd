@@ -8,11 +8,12 @@ CorrectPitch(D)
 }
 \arguments{
 \item{D}{a data.frame containing at least these variables:
-VNS, VEW, GGVNS, GGVEW, LAT, GGALT, THDG, PITCH, ROLL}
+VNS, VEW, GGVNS, GGVEW, LATC, GGALT, THDG, PITCH, ROLL}
 }
 \value{
-PitchError -- the estimated error in the pitch [deg], which
-should be subtracted from PITCH to get the corrected value.
+c(PitchError, RollError) -- the estimated errors in the
+pitch and roll angles [deg], which should be subtracted from
+PITCH and ROLL to get the corrected values.
 }
 \description{
 Calculate a correction to pitch based on the Schuler oscillation.
@@ -27,7 +28,7 @@ the pitch correction is smoothed to be slowly varying over periods of several
 minutes.
 }
 \examples{
-\dontrun{PITCHC <- PITCH - CorrectPitch(D)}
+\dontrun{PITCHC <- PITCH - CorrectPitch(D)[, 1]}
 }
 \author{
 William Cooper
