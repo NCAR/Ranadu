@@ -3,7 +3,7 @@
 ## it is the error in pitch, so you get the true value by subtraction
 ## This calculates corrections for an entire flight in one call.
 ## D must be a dataframe containing at least VNS, VEW, GGVNS, GGVEW,
-## LAT, GGALT, THDG, PITCH, ROLL, and Time
+## LATC, GGALT, THDG, PITCH, ROLL, and Time
 #' @title CorrectPitch
 #' @description Calculate a correction to pitch based on the Schuler oscillation.
 #' @details Uses measurements of the ground-speed error (as determined by comparison
