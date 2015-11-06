@@ -121,13 +121,13 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     if (inRate == outRate) {return (X)}
     ratio <- as.integer(outRate/inRate)    ## expected to be an integer
     x <- 0:(length(X)-1)
-    A <- approx (x, X, n=length(X)*ratio)
+    A <- approx (x, X, n=length(X)*ratio-ratio+1)
     T <- A$y
     T <- signal::filter(signal::sgolay(4,75),T)
     ## now shift to match 25-Hz:
     n <- as.integer (ratio / 2)
     NL = length(T)
-    T <- c(T[(1+n):NL],rep(T[NL],n))
+    T <- c(rep(T[1],n), T, rep(T[NL],n))
     return (T)
   }
   ######------------------------------------------------------------------

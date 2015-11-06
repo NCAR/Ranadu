@@ -28,7 +28,7 @@ the pitch correction is smoothed to be slowly varying over periods of several
 minutes.
 }
 \examples{
-\dontrun{PITCHC <- PITCH - CorrectPitch(D)[, 1]}
+\dontrun{D$PITCHC <- D$PITCH - CorrectPitch(D)[, 1]}
 }
 \author{
 William Cooper

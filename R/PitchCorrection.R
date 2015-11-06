@@ -23,8 +23,20 @@
 #' pitch and roll angles [deg], which should be subtracted from 
 #' PITCH and ROLL to get the corrected values.
 #' @examples 
-#' \dontrun{PITCHC <- PITCH - CorrectPitch(D)[, 1]}
+#' \dontrun{D$PITCHC <- D$PITCH - CorrectPitch(D)[, 1]}
 CorrectPitch <- function (D) {
+  ## check for required variables:
+  Required <- c("VNS", "VEW", "GGVNS", "GGVEW", "GGALT", "THDG", "PITCH", "ROLL")
+  .names <- names(D)
+  for (.R in Required) {
+    if (.R %in% .names) {next}
+    print (sprintf ("in CorrectPitch, required variable %s not found; returning 0", .R))
+    return(c(0,0))
+  }
+  if (!("LATC" %in% .names) && !("LAT" %in% .names)) {
+    print (sprintf ("in CorrectPitch, required variable LAT or LATC not found; returning 0"))
+    return(c(0,0))
+  }
   Cradeg <- pi/180
   ## get the data rate
   data.rate <- 1
@@ -32,9 +44,20 @@ CorrectPitch <- function (D) {
   if ((D$Time[2]-D$Time[1]) <= 0.02) {data.rate <- 50}
   LD <- nrow(D)
   ## for HR, extract a 1-Hz data.frame and work with that, then interpolate/smooth
+  ## to get the high-rate correction, which is smoothed to have no high-rate
+  ## signal but can be added to a measurement of PITCH that retains its high-rate
+  ## component
+  
   if (data.rate > 1) {
     D <- D[(as.numeric(D$Time) %% 1) < 0.01,]
   }
+  
+  if (("LATC" %in% names(D))) {
+    .lat <- D$LATC
+  } else {
+    .lat <- D$LAT
+  }
+    
   MaxGap <- 1000
   .vns <- zoo::na.approx (as.vector(D$VNS), maxgap=MaxGap, na.rm = FALSE)
   .vew <- zoo::na.approx (as.vector(D$VEW), maxgap=MaxGap, na.rm = FALSE)
@@ -46,10 +69,11 @@ CorrectPitch <- function (D) {
   .ggvew[is.na(.ggvew)] <- 0
   # 1013 points (must be odd) to span about 1/5 Schuler osc. -- about 16.8 min
   NAV <- 1013
-  vndot <- signal::sgolayfilt (.vns-.ggvns, 3, NAV, m=1)  # m=1 for first deriv.
-  vedot <- signal::sgolayfilt (.vew-.ggvew, 3, NAV, m=1)
-  deltaPitchL <- -vndot/Ranadu::Gravity (D$LATC, D$GGALT)
-  deltaRollL  <- vedot/Ranadu::Gravity (D$LATC, D$GGALT)
+  vndot <- SmoothInterp(signal::sgolayfilt (.vns-.ggvns, 3, NAV, m=1), .Length=301)  # m=1 for first deriv.
+  vedot <- SmoothInterp(signal::sgolayfilt (.vew-.ggvew, 3, NAV, m=1), .Length=301)
+  .G <- Ranadu::Gravity (.lat, D$GGALT)
+  deltaPitchL <- -vndot/.G
+  deltaRollL  <- vedot/.G
   .hdg <- D$THDG*Cradeg
   deltaPitch <- (sin(.hdg)*deltaRollL + cos(.hdg)*deltaPitchL)/Cradeg
   deltaRoll <- (cos(.hdg)*deltaRollL - sin(.hdg)*deltaPitchL)/Cradeg
