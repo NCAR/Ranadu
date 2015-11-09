@@ -127,7 +127,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     ## now shift to match 25-Hz:
     n <- as.integer (ratio / 2)
     NL = length(T)
-    T <- c(rep(T[1],n), T, rep(T[NL],n))
+    T <- c(rep(T[1],n), T, rep(T[NL],ratio-n-1))  ## OK, even or odd ratio
     return (T)
   }
   ######------------------------------------------------------------------

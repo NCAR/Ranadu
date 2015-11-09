@@ -4,11 +4,14 @@
 \alias{CorrectPitch}
 \title{CorrectPitch}
 \usage{
-CorrectPitch(D)
+CorrectPitch(D, .span = 1013)
 }
 \arguments{
 \item{D}{a data.frame containing at least these variables:
 VNS, VEW, GGVNS, GGVEW, LATC, GGALT, THDG, PITCH, ROLL}
+
+\item{.span}{Smoothing interval for ground-speed accelerations. Default 1013;
+should be an odd number and is forced odd if even}
 }
 \value{
 c(PitchError, RollError) -- the estimated errors in the

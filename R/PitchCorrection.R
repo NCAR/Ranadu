@@ -18,13 +18,15 @@
 #' @export CorrectPitch
 #' @param D a data.frame containing at least these variables: 
 #' VNS, VEW, GGVNS, GGVEW, LATC, GGALT, THDG, PITCH, ROLL
+#' @param .span Smoothing interval for ground-speed accelerations. Default 1013;
+#' should be an odd number and is forced odd if even
 #' @import zoo signal
 #' @return c(PitchError, RollError) -- the estimated errors in the 
 #' pitch and roll angles [deg], which should be subtracted from 
 #' PITCH and ROLL to get the corrected values.
 #' @examples 
 #' \dontrun{D$PITCHC <- D$PITCH - CorrectPitch(D)[, 1]}
-CorrectPitch <- function (D) {
+CorrectPitch <- function (D, .span=1013) {
   ## check for required variables:
   Required <- c("VNS", "VEW", "GGVNS", "GGVEW", "GGALT", "THDG", "PITCH", "ROLL")
   .names <- names(D)
@@ -68,9 +70,10 @@ CorrectPitch <- function (D) {
   .ggvns[is.na(.ggvns)] <- 0
   .ggvew[is.na(.ggvew)] <- 0
   # 1013 points (must be odd) to span about 1/5 Schuler osc. -- about 16.8 min
-  NAV <- 1013
-  vndot <- SmoothInterp(signal::sgolayfilt (.vns-.ggvns, 3, NAV, m=1), .Length=301)  # m=1 for first deriv.
-  vedot <- SmoothInterp(signal::sgolayfilt (.vew-.ggvew, 3, NAV, m=1), .Length=301)
+  NAV <- .span
+  if ((NAV %% 2) == 0) {NAV <- NAV + 1}
+  vndot <- signal::sgolayfilt (.vns-.ggvns, 3, NAV, m=1)  # m=1 for first deriv.
+  vedot <- signal::sgolayfilt (.vew-.ggvew, 3, NAV, m=1)
   .G <- Ranadu::Gravity (.lat, D$GGALT)
   deltaPitchL <- -vndot/.G
   deltaRollL  <- vedot/.G
@@ -100,27 +103,27 @@ CorrectPitch <- function (D) {
   return (C)
 }
 
-## This function is no longer needed by the function CorrectPitch(). 
-## It is kept here for reference and for other uses.
-## It transforms a vector in the body frame to one in the local frame
-## (or the reverse if .reverse=TRUE).
-XformLB <- function (bvector, .roll, .pitch, .heading, .reverse=FALSE) {
-  Cradeg <- pi/180
-  sr <- sin(.roll*Cradeg); cr <- cos(.roll*Cradeg)
-  sp <- sin(.pitch*Cradeg); cp <- cos(.pitch*Cradeg)
-  sh <- sin(.heading*Cradeg); ch <- cos(.heading*Cradeg)
-  if (.reverse) {   # note that entries are in column order
-    M <- c(sh*cr+ch*sp*sr, ch*cr-sh*sp*sr, -cp*sr,
-           ch*cp, -sh*cp, sp,
-           -sh*sr+ch*sp*cr, -ch*sr-sh*sp*cr, -cp*cr)
-  } else {
-    
-    M <- c(sh*cp, ch*cr+sh*sp*sr, ch*sr-sh*sp*cr,
-           ch*cp, -sh*cr+ch*sp*sr, -sh*sr-ch*sp*cr,
-           -sp, cp*sr, cp*cr)
-  }
-  dim (M) <- c(3,3)
-  return (M %*% bvector)
-  
-}
+# ## This function is no longer needed by the function CorrectPitch(). 
+# ## It is kept here for reference and for other uses.
+# ## It transforms a vector in the body frame to one in the local frame
+# ## (or the reverse if .reverse=TRUE).
+# XformLB <- function (bvector, .roll, .pitch, .heading, .reverse=FALSE) {
+#   Cradeg <- pi/180
+#   sr <- sin(.roll*Cradeg); cr <- cos(.roll*Cradeg)
+#   sp <- sin(.pitch*Cradeg); cp <- cos(.pitch*Cradeg)
+#   sh <- sin(.heading*Cradeg); ch <- cos(.heading*Cradeg)
+#   if (.reverse) {   # note that entries are in column order
+#     M <- c(sh*cr+ch*sp*sr, ch*cr-sh*sp*sr, -cp*sr,
+#            ch*cp, -sh*cp, sp,
+#            -sh*sr+ch*sp*cr, -ch*sr-sh*sp*cr, -cp*cr)
+#   } else {
+#     
+#     M <- c(sh*cp, ch*cr+sh*sp*sr, ch*sr-sh*sp*cr,
+#            ch*cp, -sh*cr+ch*sp*sr, -sh*sr-ch*sp*cr,
+#            -sp, cp*sr, cp*cr)
+#   }
+#   dim (M) <- c(3,3)
+#   return (M %*% bvector)
+#   
+# }
 

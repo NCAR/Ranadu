@@ -24,4 +24,4 @@ License: GPL
 Depends:
     ncdf4,ggplot2,ggthemes,grid,tcltk
 Imports:
-    nleqslv,maps,mapdata,mapproj,reshape2,zoo,fields,signal
+    nleqslv,maps,mapdata,mapproj,reshape2,zoo,fields,signal,stats
