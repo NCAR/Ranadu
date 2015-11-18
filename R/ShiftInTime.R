@@ -33,7 +33,7 @@
 #' @return The same series after shifting in time, possibly by fractions
 #' of the sampling period.
 #' @examples 
-#' newVariable <- ShiftInTime (1:50, .rate=1, .shift=500)
+#' newVariable <- ShiftInTime (1:50, .rate=1, .shift=-500)
   
 
 ShiftInTime <- function (.X, .rate=1, .shift=0, .smooth=0) {

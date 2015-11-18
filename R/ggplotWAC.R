@@ -80,6 +80,8 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
     g <- g + scale_size_manual ("", labels=clr, values = lwd)
     g <- g + scale_linetype_manual ("", labels=clr, values = lty)
     g <- g + theme_WAC()
+    ## preserve .data in the parent environment for plotting
+    .data <<- .data
     # suppressWarnings (print (g))
 
 ## left from plotWAC: implement someday?

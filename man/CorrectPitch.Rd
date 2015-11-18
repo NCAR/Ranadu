@@ -2,13 +2,15 @@
 % Please edit documentation in R/PitchCorrection.R
 \name{CorrectPitch}
 \alias{CorrectPitch}
+\alias{CorrectPitch,}
+\alias{CorrectRoll}
 \title{CorrectPitch}
 \usage{
 CorrectPitch(D, .span = 1013)
 }
 \arguments{
 \item{D}{a data.frame containing at least these variables:
-VNS, VEW, GGVNS, GGVEW, LATC, GGALT, THDG, PITCH, ROLL}
+VNS, VEW, GGVNS, GGVEW, LAT or LATC, GGALT, THDG, PITCH, ROLL}
 
 \item{.span}{Smoothing interval for ground-speed accelerations. Default 1013;
 should be an odd number and is forced odd if even}

@@ -6,11 +6,15 @@ Version 2.2-15-10-26
                                modified to return roll correction also.
     getNetCDF.R             -- modified to fix shifts from HR processing.
   Additions:
+    HeadingCorrection.R     -- provides function CorrectHeading() to give an estimate
+                               of the error in the heading measurement.
     SmoothInterp.R          -- fills missing values in data sequence via 
                                interpolation and then smooths using Savitzky-
                                Golay polynomials.
     ShiftInTime.R           -- shifts a variable forward or backward in time,
                                including fractional-sample shifts via interpolation.
+    XformLA.R               -- transforms a vector from the a-frame (aircraft reference
+                               frame) to the l-frame (local level frame or ENU frame).
 Version 2.1-15-6-19
   Modifications:
     SkewT.R                 -- provided for 'ADD' to add a trace to existing

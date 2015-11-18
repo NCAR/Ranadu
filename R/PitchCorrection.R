@@ -13,11 +13,11 @@
 #' high-rate files, calculations are based on 1-Hz data and interpolated because
 #' the pitch correction is smoothed to be slowly varying over periods of several
 #' minutes.
-#' @aliases CorrectPitch
+#' @aliases CorrectPitch, CorrectRoll
 #' @author William Cooper
 #' @export CorrectPitch
 #' @param D a data.frame containing at least these variables: 
-#' VNS, VEW, GGVNS, GGVEW, LATC, GGALT, THDG, PITCH, ROLL
+#' VNS, VEW, GGVNS, GGVEW, LAT or LATC, GGALT, THDG, PITCH, ROLL
 #' @param .span Smoothing interval for ground-speed accelerations. Default 1013;
 #' should be an odd number and is forced odd if even
 #' @import zoo signal
@@ -28,7 +28,8 @@
 #' \dontrun{D$PITCHC <- D$PITCH - CorrectPitch(D)[, 1]}
 CorrectPitch <- function (D, .span=1013) {
   ## check for required variables:
-  Required <- c("VNS", "VEW", "GGVNS", "GGVEW", "GGALT", "THDG", "PITCH", "ROLL")
+  Required <- c("VNS", "VEW", "GGVNS", "GGVEW", "GGALT", 
+                "THDG", "PITCH", "ROLL")
   .names <- names(D)
   for (.R in Required) {
     if (.R %in% .names) {next}
@@ -55,9 +56,9 @@ CorrectPitch <- function (D, .span=1013) {
   }
   
   if (("LATC" %in% names(D))) {
-    .lat <- D$LATC
+    .latc <- D$LATC
   } else {
-    .lat <- D$LAT
+    .latc <- D$LAT
   }
     
   MaxGap <- 1000
@@ -65,36 +66,39 @@ CorrectPitch <- function (D, .span=1013) {
   .vew <- zoo::na.approx (as.vector(D$VEW), maxgap=MaxGap, na.rm = FALSE)
   .ggvns <- zoo::na.approx (as.vector(D$GGVNS), maxgap=MaxGap, na.rm = FALSE)
   .ggvew <- zoo::na.approx (as.vector(D$GGVEW), maxgap=MaxGap, na.rm = FALSE)
-  .vns[is.na(.vns)] <- 0
-  .vew[is.na(.vew)] <- 0
-  .ggvns[is.na(.ggvns)] <- 0
-  .ggvew[is.na(.ggvew)] <- 0
+  rej <- is.na(.vns) | is.na(.vew) | is.na(.ggvns) | is.na(.ggvew)
+  .vns[rej] <- 0
+  .vew[rej] <- 0
+  .ggvns[rej] <- 0
+  .ggvew[rej] <- 0
   # 1013 points (must be odd) to span about 1/5 Schuler osc. -- about 16.8 min
   NAV <- .span
   if ((NAV %% 2) == 0) {NAV <- NAV + 1}
   vndot <- signal::sgolayfilt (.vns-.ggvns, 3, NAV, m=1)  # m=1 for first deriv.
   vedot <- signal::sgolayfilt (.vew-.ggvew, 3, NAV, m=1)
-  .G <- Ranadu::Gravity (.lat, D$GGALT)
+  .G <- Ranadu::Gravity (.latc, D$GGALT)
   deltaPitchL <- -vndot/.G
   deltaRollL  <- vedot/.G
   .hdg <- D$THDG*Cradeg
   deltaPitch <- (sin(.hdg)*deltaRollL + cos(.hdg)*deltaPitchL)/Cradeg
   deltaRoll <- (cos(.hdg)*deltaRollL - sin(.hdg)*deltaPitchL)/Cradeg
   if (data.rate > 1) {
-    PC <- vector ("numeric", LD)
-    RC <- vector ("numeric", LD)
-    L <- length(deltaPitch)
-    for (i in 1:(L-1)) {
-      for (j in 0:(data.rate-1)) {
-        PC[(i-1)*data.rate+j+1] <- deltaPitch[i]+
-                                   (j/data.rate)*(deltaPitch[i+1]-deltaPitch[i])
-        RC[(i-1)*data.rate+j+1] <- deltaRoll[i]+
-                                   (j/data.rate)*(deltaRoll[i+1]-deltaRoll[i])
-      }
-    }
-#     for (j in 0:(data.rate-1)) {
-#       PC[L*data.rate+j+1] <- deltaPitch2[L]
-#     }    
+#     PC <- vector ("numeric", LD)
+#     RC <- vector ("numeric", LD)
+#     L <- length(deltaPitch)
+#     for (i in 1:(L-1)) {
+#       for (j in 0:(data.rate-1)) {
+#         PC[(i-1)*data.rate+j+1] <- deltaPitch[i]+
+#                                    (j/data.rate)*(deltaPitch[i+1]-deltaPitch[i])
+#         RC[(i-1)*data.rate+j+1] <- deltaRoll[i]+
+#                                    (j/data.rate)*(deltaRoll[i+1]-deltaRoll[i])
+#       }
+#     }   
+    PC <- rep (NA, LD); RC <- rep (NA, LD)
+    PC[(0:(length(deltaPitch)-1)) * data.rate + 1] <- deltaPitch
+    RC[(0:(length(deltaRoll)-1))  * data.rate + 1] <- deltaRoll
+    PC <- zoo::na.approx (PC, maxgap=1000, na.rm=FALSE)
+    RC <- zoo::na.approx (RC, maxgap=1000, na.rm=FALSE)
     C <- c(PC, RC)
   } else {
     C <- c(deltaPitch, deltaRoll)
