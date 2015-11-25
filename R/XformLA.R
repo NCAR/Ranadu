@@ -14,7 +14,7 @@
 #' the aircraft reference frame where x is forward, y is starboard, and
 #' z is downward. For transforming accelerations, body-normal-acceleration
 #' is normally measured in the -z direction in the aircraft frame and has
-#' the acceleration of gravity G subtracted, so G should added before
+#' the acceleration of gravity G subtracted, so G should be added before
 #' transforming and subtracted afterward. The matrix should have 3 columns
 #' representing the components and a number of rows corresponding to the
 #' number of observations.
@@ -24,7 +24,7 @@
 #' Earth-relative with x east, y north, and z upward. Same structure as Avector.
 #' @examples 
 #' newDataFrame <- XformLA (data.frame("ROLL"=1:50, "PITCH"=(3+(1:50)/50), "THDG"=91:140),
-#'                                    Avector=c(21:70, 31:80, 41:90))
+#'                                    Avector=matrix(c(21:70, 31:80, 41:90), ncol=3))
 
 XformLA <- function (data=Data, Avector, .inverse=FALSE) { 
   # data must contain ROLL, PITCH or PITCHC, HEADING

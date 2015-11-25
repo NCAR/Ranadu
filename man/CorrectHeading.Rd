@@ -4,7 +4,8 @@
 \alias{CorrectHeading}
 \title{CorrectHeading}
 \usage{
-CorrectHeading(.data = Data, .span = 21, .default = -0.08)
+CorrectHeading(.data = Data, .span = 21, .default = -0.08,
+  .Valid = NULL, .plotfile = NULL)
 }
 \arguments{
 \item{.data}{A data.frame containing measurements of body accelerations (called
@@ -21,6 +22,15 @@ by differentiation and for smoothing the results.}
 \item{.default}{The default value to use if the routine does not find enough
 qualified turns to develop a valid estimate of the heading error. The default
 is -0.08 deg., as applies to the GV data for DEEPWAVE.}
+
+\item{.Valid}{An optional logical vector of length matching the rows in .data,
+which should be TRUE for qualified measurements and FALSE for measurements to
+exclude from the calculation. This can be used to exclude low-airspeed cases
+(where flaps might be deployed) or cases of rapid climbs, for example. The default
+is NULL, in which case the test will be skipped.}
+
+\item{.plotfile}{The name of a plot to generate (e.g., "./Plot1.pdf") that shows
+the results from the algorithm.}
 }
 \value{
 A vector of the same length as the supplied data.frame that gives an
@@ -39,6 +49,10 @@ to heading that provides the best match between these two sources of acceleratio
 The result is the estimated error, so this should be **subtracted** from the
 measured value to get the corrected value. Results are sensitive to timing
 delays among the variables, so these should be corrected prior to calling this routine.
+In addition, if there is a variable "Valid" in the data.frame, it should be logical
+and will be used to restrict the calculation of the corrections to the subset where
+Valid is TRUE. This can be used, for example, to exclude slow-flight regions where
+flaps might be deployed, high-rate-of-climb regions, etc.
 }
 \examples{
 \dontrun{HeadingCorrection <- CorrectHeading (DataFrame)}

@@ -9,6 +9,10 @@
 #' The result is the estimated error, so this should be **subtracted** from the 
 #' measured value to get the corrected value. Results are sensitive to timing
 #' delays among the variables, so these should be corrected prior to calling this routine.
+#' In addition, if there is a variable "Valid" in the data.frame, it should be logical
+#' and will be used to restrict the calculation of the corrections to the subset where
+#' Valid is TRUE. This can be used, for example, to exclude slow-flight regions where
+#' flaps might be deployed, high-rate-of-climb regions, etc.
 #' @author William Cooper
 #' @export CorrectHeading
 #' @param .data A data.frame containing measurements of body accelerations (called
@@ -23,15 +27,21 @@
 #' @param .default The default value to use if the routine does not find enough
 #' qualified turns to develop a valid estimate of the heading error. The default
 #' is -0.08 deg., as applies to the GV data for DEEPWAVE.
+#' @param .Valid An optional logical vector of length matching the rows in .data,
+#' which should be TRUE for qualified measurements and FALSE for measurements to
+#' exclude from the calculation. This can be used to exclude low-airspeed cases
+#' (where flaps might be deployed) or cases of rapid climbs, for example. The default
+#' is NULL, in which case the test will be skipped.
+#' @param .plotfile The name of a plot to generate (e.g., "./Plot1.pdf") that shows
+#' the results from the algorithm.
 #' @return A vector of the same length as the supplied data.frame that gives an
 #' estimate of the error in heading, the negative of the correction needed.
 #' @examples 
 #' \dontrun{HeadingCorrection <- CorrectHeading (DataFrame)}
-CorrectHeading <- function (.data=Data, .span=21, .default=-0.08) {
-  ## note: before calling, should apply timing corrections and to pitch/roll corrections if desired.
-  GeneratePlot <- FALSE ## these calls probably won't work if activated; they are here
-                        ## for reference and to guide construction of plots of the
-                        ## estimated errors
+CorrectHeading <- function (.data=Data, .span=21, .default=-0.08, .Valid=NULL, .plotfile=NULL) {
+  ## note: before calling, should apply timing corrections and to pitch/roll 
+  ##       corrections if desired.
+  GeneratePlot <- !is.null (.plotfile) 
   Cradeg <- pi/180
   ## The next correction calculates the correction needed to account for the rotation
   ## of the Earth and of the l-frame (ENU frame). See Noureldin et al., 2013, 
@@ -124,15 +134,13 @@ CorrectHeading <- function (.data=Data, .span=21, .default=-0.08) {
   
   ## a working data.frame, to avoid changing D1
   DT <- D1
-  v <- DT$TASX > 130  ## eliminate periods of slow flight, where flaps might be
-                      ## deployed -- aircraft specific, this is appropriate for
-                      ## the GV
-  v <- v & (A > 1) & abs (DT$herr) < 0.3 & abs(DT$GGVSPD) < 3
+  v <- (A > 1) & (abs (DT$herr) < 0.3)
+  if (!is.null (.Valid)) {
+    v <- v & .Valid
+  }
   DT[!v,] <- NA
-  r <- DT$ROLL > 10    ## right-turn cases
-  l <- DT$ROLL < -10   ## left-turn cases
-  DT$TestR <- DT$ROLL > 10     ## right-turn cases
-  DT$TestL <- DT$ROLL < -10    ## left-turn cases
+  DT$TestR <- (!is.na(DT$Time) & (DT$ROLL > 10))     ## right-turn cases
+  DT$TestL <- (!is.na(DT$Time) & (DT$ROLL < -10))    ## left-turn cases
   ## create a new data.frame to hold measurements from a sequence of measurements
   ## in turns
   DSET <- data.frame ()
@@ -198,14 +206,10 @@ CorrectHeading <- function (.data=Data, .span=21, .default=-0.08) {
     tbarL  <- c(tbarL, tbrL)
   }
   if (length (tbarL) < 3) {
-    print (sprintf ("CorrectHeading found too few qualifying turns (%d),\nso return is default of -0.08", length (tbarL)))
+    print (sprintf ("CorrectHeading found too few qualifying turns (%d); returning default (%.2f)", length (tbarL), .default))
     return (c(rep(.default, LD)))
   }
-  if (GeneratePlot) {
-    clr <- c("right", "left", "spline")
-    col <- c ('blue', 'darkgreen', "red")
-  }
-  
+
   ## construct data.frame holding results from each qualifying turn
   EH <- data.frame(tbar=c(tbarL, tbarR), hmeanR=c(rep(NA, length(tbarL)), hmeanR),
                    hmeanL=c(hmeanL, rep(NA, length(tbarR))), 
@@ -218,12 +222,12 @@ CorrectHeading <- function (.data=Data, .span=21, .default=-0.08) {
   whsd <- sqrt (1/sum(c(1/EH$hsdR^2, 1/EH$hsdL^2), na.rm=TRUE))
   if (GeneratePlot) {
     p <- ggplot(EH, aes(x=tbar), na.rm=TRUE)
-    p <- p + geom_errorbar(aes(ymin=hmeanR-hsdR, ymax=hmeanR+hsdR, colour=clr[1]),
+    p <- p + geom_errorbar(aes(ymin=hmeanR-hsdR, ymax=hmeanR+hsdR, colour="right"),
                            width=600, size=1.5, na.rm=TRUE) + ylim (-0.25,0.15)
-    p <- p + geom_point (aes(y = hmeanR, colour=clr[1]),size=3.5, na.rm=TRUE)
-    p <- p + geom_errorbar(aes(ymin=hmeanL-hsdL, ymax=hmeanL+hsdL, colour=clr[2]),
+    p <- p + geom_point (aes(y = hmeanR, colour="right"),size=3.5, na.rm=TRUE)
+    p <- p + geom_errorbar(aes(ymin=hmeanL-hsdL, ymax=hmeanL+hsdL, colour="left"),
                            width=600, size=1.5, na.rm=TRUE)
-    p <- p + geom_point (aes(y = hmeanL, colour=clr[2]), size=3.5, na.rm=TRUE)
+    p <- p + geom_point (aes(y = hmeanL, colour="left"), size=3.5, na.rm=TRUE)
     p <- p + ylab(expression(paste(delta,psi,' [',degree,']')))
     p <- p + xlab ("Time [UTC]")
   }
@@ -232,16 +236,16 @@ CorrectHeading <- function (.data=Data, .span=21, .default=-0.08) {
   SS <- smooth.spline(EH$tbar, yss, w=ywts, df=length(yss)-1, spar=0.7)
   if (GeneratePlot) {
     D1$HC <- predict(SS, as.numeric(D1$Time))$y
-    p <- p + geom_line (data=D1, aes (x=Time, y=HC, colour=clr[3]), lwd=2, na.rm=TRUE)
+    p <- p + geom_line (data=D1, aes (x=Time, y=HC, colour="spline"), lwd=2, na.rm=TRUE)
     # SS2 <- smooth.spline(EH$tbar, yss, df=8, spar=0.4)
     # xss2 <- as.POSIXct (SS2$x, origin="1970-01-01", tz="GMT")
-    # p <- p + geom_line(aes(x=xss2, y=SS2$y, colour=clr[3]), lwd=2, lty=2, na.rm=TRUE)
+    # p <- p + geom_line(aes(x=xss2, y=SS2$y, colour="spline"), lwd=2, lty=2, na.rm=TRUE)
     cols <- c("right"="blue", "left"="darkgreen", "spline"="red")
     p <- p + scale_colour_manual("turn direction:", values=cols)
     p <- p + guides(color=guide_legend(override.aes=list(shape=c(16,16,NA), 
                                                          linetype=c(0,0,1))))
     p <- p + theme_WAC()
-    print (p)
+    suppressMessages(ggsave (.plotfile, p))
   }
   
   ## construct the input-rate heading correction HC

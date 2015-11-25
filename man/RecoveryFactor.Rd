@@ -5,13 +5,13 @@
 \alias{recoveryfactor}
 \title{RecoveryFactor}
 \usage{
-RecoveryFactor(.M, probe = "HARCO")
+RecoveryFactor(.Mach, probe = "HARCO")
 }
 \arguments{
+\item{.Mach}{A numeric giving the Mach number, perhaps calculated by MachNumber()}
+
 \item{probe}{A string giving a probe name. Default is 'HARCO'; other options are
 'HARCOB' for B-element of HARCO, 'Rose" (heated 102 Rosemount) and 'UNHEATED' (Rosemount 102AL unheated)}
-
-\item{MACH}{A numeric giving the Mach number, perhaps calculated by MachNumber()}
 }
 \value{
 The recovery factor applicable to a temperature sensor
