@@ -25,3 +25,4 @@ Depends:
     ncdf4,ggplot2,ggthemes,grid,tcltk
 Imports:
     nleqslv,maps,mapdata,mapproj,reshape2,zoo,fields,signal,stats
+RoxygenNote: 5.0.1
