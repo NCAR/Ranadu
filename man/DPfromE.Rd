@@ -20,6 +20,7 @@ The Murphy-Koop equation for water vapor pressure is inverted to find dew point 
 }
 \examples{
 DP <- DPfromE (0.01)
+DPa <- DPfromE (RAFdata$EWX)
 }
 \author{
 William Cooper"

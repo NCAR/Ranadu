@@ -19,7 +19,8 @@
 #' @param newNetCDFname A character path name for the file to be created
 #' @return none The result is the file on disk
 #' @examples 
-#' \dontrun{makeNefCDF (Data, "./newFile.nc")}
+#' makeNetCDF (RAFdata, "RAFdata.nc")
+#' \dontrun{makeNetCDF (Data, "./newFile.nc")}
 
 makeNetCDF <- function (d, newNetCDFname) {
   if (file.exists (newNetCDFname)) {

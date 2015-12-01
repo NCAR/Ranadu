@@ -20,7 +20,8 @@ Utility to show characteristics of a variable
 Prints the variable type, dimensions, and summary.
 }
 \examples{
-\dontrun{TellAbout("TASX")}
+TellAbout (RAFdata$TASX)
+TellAbout (RAFdata)
 }
 \author{
 William Cooper

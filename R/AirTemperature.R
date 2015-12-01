@@ -13,6 +13,7 @@
 #' @return The ambient air temperature in deg.C
 #' @examples 
 #' AT <- AirTemperature (10., 700., 50.)
+#' AT <- AirTemperature (RAFdata$RTH1, RAFdata$PSXC, RAFdata$QCXC)
 AirTemperature <- function (RT, P, Q, E=0., probe='HARCO') {
 # Find air temperature from recovery temperature, MACH, and
 # humidity: (RT in deg C, P, Q, E all in the same units,

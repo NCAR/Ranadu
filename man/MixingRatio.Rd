@@ -20,6 +20,7 @@ The dimensionless mixing ratio of water vapor is calculated from the ratio of wa
 }
 \examples{
 MR <- MixingRatio (3./800.)
+MR <- MixingRatio (RAFdata$EWX / RAFdata$PSXC)
 }
 \author{
 William Cooper

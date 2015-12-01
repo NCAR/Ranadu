@@ -21,7 +21,7 @@ Calculate sideslip angle from radome pressures
 based on calibration, applies model for sideslip given BDIFR and QCXC
 }
 \examples{
-\dontrun{a <- GV_YawFromRadome (BDIFR, QCXC)}
+SS <- GV_YawFromRadome (RAFdata$BDIFR, RAFdata$QCXC)
 }
 \author{
 William Cooper

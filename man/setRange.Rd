@@ -7,7 +7,7 @@
 setRange(Time, Start = 0, End = 0)
 }
 \arguments{
-\item{Time}{A POSIXct-format Time variable}
+\item{Time}{A POSIXct-format Time variable or a data.frame containing such a variable}
 
 \item{Start}{The desired start time in HHMMSS format (defaults to 0, which gives first index 1)}
 

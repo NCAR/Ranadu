@@ -9,7 +9,7 @@ ValueOf(Variable, HHMMSS, DataFrame = Data)
 \arguments{
 \item{Variable}{A variable in a dataframe named Data that also includes Time. The
 variable can be in the form Data$TASX or, if Data is attached,
-TASX.}
+TASX, or "TASX".}
 
 \item{HHMMSS}{A time in hour-minute-second format (e.g., 134513)}
 
@@ -27,7 +27,8 @@ the specified time and returns the value of the specified
 variable at that index.
 }
 \examples{
-\dontrun{x <- ValueOf (ATX, 140233)}
+ValueOf (RAFdata$ATX, 201100, RAFdata)
+ValueOf ("ATX", 201100, RAFdata)
 }
 \author{
 William Cooper

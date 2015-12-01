@@ -33,7 +33,8 @@ the pitch correction is smoothed to be slowly varying over periods of several
 minutes.
 }
 \examples{
-\dontrun{D$PITCHC <- D$PITCH - CorrectPitch(D)[, 1]}
+PITCHC <- RAFdata$PITCH - CorrectPitch (RAFdata)[, 1]
+ROLLC <- RAFdata$ROLL - CorrectPitch (RAFdata)[, 2]
 }
 \author{
 William Cooper

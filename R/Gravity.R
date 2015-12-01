@@ -8,7 +8,7 @@
 #' @param altitude The altitude in meters above the WGS-84 geoid. GPS measurements are usually appropriate to use when supplying this altitude.
 #' @return The acceleration of gravidy in units of m/s^2
 #' @examples 
-#' \dontrun{Gravity (GGLAT[r], GGALT[r])}
+#' G <- Gravity (RAFdata$GGLAT, RAFdata$GGALT)
 Gravity <- function (latitude, altitude=0.) {
   sl2 <- sin (latitude * StandardConstant("Cradeg"))**2
   g <- 9.780327 * ((1.+0.001931851*sl2) / 

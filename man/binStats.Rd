@@ -40,7 +40,7 @@ The purpose is to provide values for error bars, e.g., for geom_errorbar
 where ymin=ybar-sigma and ymax=ybar+sigma.
 }
 \examples{
-\dontrun{E <- binStats(Data[, c("V1", "V2"), bins=15)}
+E <- binStats(RAFdata[, c("PSXC", "ATX")], bins=10)
 }
 \author{
 William Cooper

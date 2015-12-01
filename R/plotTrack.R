@@ -31,8 +31,8 @@
 #' @param ... Additional arguments passed to the plot routine to control 
 #' graphics parameters etc. 
 #' @return none -- The result is the plot.
-## @examples 
-## \dontrun{plotTrack (LONC, LATC, Time, WDC, WSC, setRange (Time, 25000, 43000))}
+#' @examples 
+#' plotTrack (RAFdata)
 plotTrack <- function (lon=Data$LONC, lat=NULL, Time=NULL, WDC=NULL, 
                        WSC=NULL, .Range=0, xc=NULL, yc=NULL, 
                        sz=NULL, .Spacing=15, .WindFlags=0, ...) {

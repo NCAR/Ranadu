@@ -7,7 +7,7 @@
 getIndex(Time, HHMMSS)
 }
 \arguments{
-\item{Time}{A POSIXct-format vector}
+\item{Time}{A POSIXct-format vector or a data.frame containing a similar variable 'Time"}
 
 \item{HHMMSS}{An integer representing time in HHMMSS format}
 }

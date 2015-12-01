@@ -34,8 +34,9 @@ King.ConcTest <- 1.  # conc of droplets below which to consider zero
 #' @param T Temperature (deg. C)
 #' @param N Droplet concentration (e.g., from a CDP)
 #' @return Liquid water content (g/m^3)
-# @examples
-# lwc <- KingProbe (25., 180., 700., 10.,0.) 
+#' @examples
+#' lwc <- KingProbe (25., 180., 700., 10.,0.) 
+#' lwc <- KingProbe (RAFdata$PLWC, RAFdata$TASX, RAFdata$PSXC, RAFdata$ATX, RAFdata$CONCD_LWII)
 KingProbe <- function (Power, TAS, p, T, N) {
   x <- log10 (p)
   Tb <- 10.**(King.cb[1]+x*(King.cb[2]+x*(King.cb[3]+x*King.cb[4])))  # boiling temperature deg.C

@@ -8,6 +8,7 @@
 #' @return A numeric representing the dewpoint in deg. C corresponding to the input vapor pressure.
 #' @examples 
 #' DP <- DPfromE (0.01)
+#' DPa <- DPfromE (RAFdata$EWX)
 DPfromE <- function (.E) {
 # Given water vapor pressure E, find the dewpoint that gives
 # this same vapor pressure:

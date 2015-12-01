@@ -8,7 +8,9 @@
 #' @param probe A string giving a probe name. Default is 'HARCO'; other options are
 #' 'HARCOB' for B-element of HARCO, 'Rose" (heated 102 Rosemount) and 'UNHEATED' (Rosemount 102AL unheated)
 #' @return The recovery factor applicable to a temperature sensor
-#' @examples rf <- RecoveryFactor (0.75)
+#' @examples 
+#' rf <- RecoveryFactor (0.75)
+#' rf2 <- RecoveryFactor (MachNumber (RAFdata$PSXC, RAFdata$QCXC))
 RecoveryFactor <- function (.Mach, probe='HARCO') {
 # recovery factor for temperature probes:
   LM <- log10(.Mach)

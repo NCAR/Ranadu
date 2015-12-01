@@ -33,6 +33,7 @@
 #' @return The same series after shifting in time, possibly by fractions
 #' of the sampling period.
 #' @examples 
+#' THDG2 <- ShiftInTime (RAFdata$THDG, .shift=-60)
 #' newVariable <- ShiftInTime (1:50, .rate=1, .shift=-500)
   
 

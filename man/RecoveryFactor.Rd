@@ -24,6 +24,7 @@ For specified Mach number, returns the recovery factor according to the formula 
 }
 \examples{
 rf <- RecoveryFactor (0.75)
+rf2 <- RecoveryFactor (MachNumber (RAFdata$PSXC, RAFdata$QCXC))
 }
 \author{
 William Cooper

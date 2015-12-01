@@ -25,7 +25,8 @@
 #' pitch and roll angles [deg], which should be subtracted from 
 #' PITCH and ROLL to get the corrected values.
 #' @examples 
-#' \dontrun{D$PITCHC <- D$PITCH - CorrectPitch(D)[, 1]}
+#' PITCHC <- RAFdata$PITCH - CorrectPitch (RAFdata)[, 1]
+#' ROLLC <- RAFdata$ROLL - CorrectPitch (RAFdata)[, 2]
 CorrectPitch <- function (D, .span=1013) {
   ## check for required variables:
   Required <- c("VNS", "VEW", "GGVNS", "GGVEW", "GGALT", 

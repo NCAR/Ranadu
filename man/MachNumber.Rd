@@ -26,6 +26,7 @@ returns the Mach number calculated from ambient and dynamic pressure and, option
 \examples{
 MACH <- MachNumber(500., 50.)
 MACH <- MachNumber(700., 60., 1.1)
+MACH <- MachNumber (RAFdata$PSXC, RAFdata$QCXC, RAFdata$EWX)
 }
 \author{
 William Cooper

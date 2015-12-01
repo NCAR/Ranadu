@@ -33,6 +33,10 @@ and uses that to adjust the zero reading when out of cloud (as
 indicated by a measured droplet concentration falling below some
 threshold).
 }
+\examples{
+lwc <- KingProbe (25., 180., 700., 10.,0.) 
+lwc <- KingProbe (RAFdata$PLWC, RAFdata$TASX, RAFdata$PSXC, RAFdata$ATX, RAFdata$CONCD_LWII)
+}
 \author{
 William Cooper
 }

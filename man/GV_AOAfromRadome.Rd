@@ -23,7 +23,8 @@ Calculate angle of attack from radome pressures
 based on calibration, applies model for AOA given ADIFR, QCXC, and Mach Number
 }
 \examples{
-\dontrun{a <- GV_AOAfromRadome (ADIFR, QCXC, MACH)}
+AOA <- GV_AOAfromRadome (RAFdata$ADIFR, RAFdata$QCXC, 
+       MachNumber (RAFdata$PSXC, RAFdata$QCXC))
 }
 \author{
 William Cooper

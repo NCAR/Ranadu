@@ -31,7 +31,8 @@ will work for low-rate and 25-Hz variables but not for multi-dimensional variabl
 the hydrometeor size distributions.
 }
 \examples{
-\dontrun{makeNefCDF (Data, "./newFile.nc")}
+makeNetCDF (RAFdata, "RAFdata.nc")
+\dontrun{makeNetCDF (Data, "./newFile.nc")}
 }
 \author{
 William Cooper

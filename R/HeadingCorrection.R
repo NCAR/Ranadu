@@ -37,7 +37,7 @@
 #' @return A vector of the same length as the supplied data.frame that gives an
 #' estimate of the error in heading, the negative of the correction needed.
 #' @examples 
-#' \dontrun{HeadingCorrection <- CorrectHeading (DataFrame)}
+#' HeadingCorrection <- CorrectHeading (RAFdata)
 CorrectHeading <- function (.data=Data, .span=21, .default=-0.08, .Valid=NULL, .plotfile=NULL) {
   ## note: before calling, should apply timing corrections and to pitch/roll 
   ##       corrections if desired.

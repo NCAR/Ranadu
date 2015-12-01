@@ -1,6 +1,7 @@
 #' @title plotWAC
 #' @description Convenience routine for plots
-#' @details Sets some plot defaults and calls plot and axis
+#' @details Sets some plot defaults and calls plot and axis. For a data.frame
+#' argument, sets plot limits to cover range of all variables in the data.frame.
 #' @aliases plotWAC
 #' @author William Cooper
 #' @export plotWAC
@@ -27,9 +28,13 @@
 #' be added after the plotWAC call.
 #' @param ... Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt
 #' @examples 
+#' plotWAC (RAFdata[, c("ATX", "DPXC")], legend.position="right")
+#' plotWAC (subset (RAFdata,, c(Time, TASX, GGVNS)), legend.position='topright')
 #' \dontrun{plotWAC (Time, TASX, ylab="TAS")}
 #' \dontrun{plotWAC (Time, PSXC, lty=2)}
 #' \dontrun{plotWAC (Data[, c("Time", "PSXC")])}
+#' \dontrun{plotWAC (subset (Data,,c(Time,ATX,DPXC)))}
+#' \dontrun{plotWAC (subset (Data,,c(ATX,DPXC)))}
 plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]", 
                      ylab="", lwd=2, type="l", lty=1, logxy='',
                      legend.position="bottomright", ...) {
