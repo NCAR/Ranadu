@@ -2,7 +2,6 @@
 % Please edit documentation in R/PitchCorrection.R
 \name{CorrectPitch}
 \alias{CorrectPitch}
-\alias{CorrectPitch,}
 \alias{CorrectRoll}
 \title{CorrectPitch}
 \usage{
@@ -33,8 +32,8 @@ the pitch correction is smoothed to be slowly varying over periods of several
 minutes.
 }
 \examples{
-PITCHC <- RAFdata$PITCH - CorrectPitch (RAFdata)[, 1]
-ROLLC <- RAFdata$ROLL - CorrectPitch (RAFdata)[, 2]
+PITCHC <- RAFdata$PITCH - CorrectPitch (RAFdata, .span=51)[, 1]
+ROLLC <- RAFdata$ROLL - CorrectPitch (RAFdata, .span=51)[, 2]
 }
 \author{
 William Cooper

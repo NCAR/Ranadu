@@ -4,8 +4,8 @@
 #' @aliases DPfromE
 #' @author William Cooper"
 #' @export DPfromE
-#' @param .E A numeric representing the water vapor pressure in hPa 
-#' @return A numeric representing the dewpoint in deg. C corresponding to the input vapor pressure.
+#' @param .E A numeric representing the water vapor pressure in hPa (vector OK)
+#' @return A numeric vector representing the dewpoint in deg. C corresponding to the input vapor pressure.
 #' @examples 
 #' DP <- DPfromE (0.01)
 #' DPa <- DPfromE (RAFdata$EWX)
@@ -20,8 +20,14 @@ DPfromE <- function (.E) {
     # probably no other uses
     return (MurphyKoop(.DP)-.Ereference)
   }
-  A <- nleqslv::nleqslv (-10., fn=MKerror, jac=NULL, method="Newton", Ereference)
-  return (A$x)
+  LE <- length (.E)
+  RDP <- vector ("numeric", LE)
+  for (i in 1:LE) {
+    Ereference <- .E[i]
+    A <- nleqslv::nleqslv (-10., fn=MKerror, jac=NULL, method="Newton", Ereference)
+    RDP[i] <- A$x
+  }
+  return (RDP)
 }
 
 

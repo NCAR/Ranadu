@@ -34,8 +34,9 @@ indicated by a measured droplet concentration falling below some
 threshold).
 }
 \examples{
-lwc <- KingProbe (25., 180., 700., 10.,0.) 
-lwc <- KingProbe (RAFdata$PLWC, RAFdata$TASX, RAFdata$PSXC, RAFdata$ATX, RAFdata$CONCD_LWII)
+\dontrun{lwc <- KingProbe (25, 180, 700, 10, 0) }
+\dontrun{lwc <- KingProbe (RAFdata$PLWC, RAFdata$TASX, RAFdata$PSXC, 
+RAFdata$ATX, RAFdata$CONCD_LWII)}
 }
 \author{
 William Cooper

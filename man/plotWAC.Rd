@@ -50,7 +50,7 @@ Sets some plot defaults and calls plot and axis. For a data.frame
 argument, sets plot limits to cover range of all variables in the data.frame.
 }
 \examples{
-plotWAC (RAFdata[, c("ATX", "DPXC")], legend.position="right")
+plotWAC (RAFdata[, c("Time", "ATX", "DPXC")], legend.position="right")
 plotWAC (subset (RAFdata,, c(Time, TASX, GGVNS)), legend.position='topright')
 \dontrun{plotWAC (Time, TASX, ylab="TAS")}
 \dontrun{plotWAC (Time, PSXC, lty=2)}

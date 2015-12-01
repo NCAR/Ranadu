@@ -16,6 +16,7 @@
 #' @return c(a, b, rms) for a fit of the form y = a + b * x, or NULL if no fit is possible (e.g., too few points or zero correlation)
 #' @examples 
 #' DemingFit ((1:5+rnorm(5,0,0.5)), (1:5+rnorm(5,0,0.5)))
+#' DemingFit (RAFdata$RTH1, RAFdata$RTH2)
 DemingFit <- function (.x, .y, .sdx=1, .sdy=1) {
   ratio <- .sdy / .sdx
   xbar <- mean (.x, na.rm=TRUE)

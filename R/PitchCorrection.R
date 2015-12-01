@@ -13,20 +13,20 @@
 #' high-rate files, calculations are based on 1-Hz data and interpolated because
 #' the pitch correction is smoothed to be slowly varying over periods of several
 #' minutes.
-#' @aliases CorrectPitch, CorrectRoll
+#' @aliases CorrectRoll
 #' @author William Cooper
 #' @export CorrectPitch
 #' @param D a data.frame containing at least these variables: 
 #' VNS, VEW, GGVNS, GGVEW, LAT or LATC, GGALT, THDG, PITCH, ROLL
 #' @param .span Smoothing interval for ground-speed accelerations. Default 1013;
 #' should be an odd number and is forced odd if even
-#' @import zoo signal
+#' @import zoo 
 #' @return c(PitchError, RollError) -- the estimated errors in the 
 #' pitch and roll angles [deg], which should be subtracted from 
 #' PITCH and ROLL to get the corrected values.
 #' @examples 
-#' PITCHC <- RAFdata$PITCH - CorrectPitch (RAFdata)[, 1]
-#' ROLLC <- RAFdata$ROLL - CorrectPitch (RAFdata)[, 2]
+#' PITCHC <- RAFdata$PITCH - CorrectPitch (RAFdata, .span=51)[, 1]
+#' ROLLC <- RAFdata$ROLL - CorrectPitch (RAFdata, .span=51)[, 2]
 CorrectPitch <- function (D, .span=1013) {
   ## check for required variables:
   Required <- c("VNS", "VEW", "GGVNS", "GGVEW", "GGALT", 

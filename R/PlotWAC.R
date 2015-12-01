@@ -28,7 +28,7 @@
 #' be added after the plotWAC call.
 #' @param ... Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt
 #' @examples 
-#' plotWAC (RAFdata[, c("ATX", "DPXC")], legend.position="right")
+#' plotWAC (RAFdata[, c("Time", "ATX", "DPXC")], legend.position="right")
 #' plotWAC (subset (RAFdata,, c(Time, TASX, GGVNS)), legend.position='topright')
 #' \dontrun{plotWAC (Time, TASX, ylab="TAS")}
 #' \dontrun{plotWAC (Time, PSXC, lty=2)}

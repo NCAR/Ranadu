@@ -29,7 +29,6 @@
 #' 40 ms (or five samples at 125-Hz). If .smooth is larger than 40, 
 #' smoothing is performed using 3rd-order Savitzky-Golay polynomials 
 #' spanning that interval.
-#' @import signal stats
 #' @return The same series after shifting in time, possibly by fractions
 #' of the sampling period.
 #' @examples 
@@ -50,7 +49,7 @@ ShiftInTime <- function (.X, .rate=1, .shift=0, .smooth=0) {
   n <- ifelse (.shift >= 0, as.integer (.shift*iRate/1000+0.5), 
                as.integer (.shift*iRate/1000-0.5))
   x <- 0:(NL-1)
-  At <- approx (x, .X, n=ND-ratio+1)
+  At <- stats::approx (x, .X, n=ND-ratio+1)
   ## now shift to match original
   j <- as.integer (ratio / 2)
   j2 <- ratio - j - 1

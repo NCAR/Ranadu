@@ -32,7 +32,7 @@
 #' graphics parameters etc. 
 #' @return none -- The result is the plot.
 #' @examples 
-#' plotTrack (RAFdata)
+#' \dontrun{plotTrack (RAFdata)}
 plotTrack <- function (lon=Data$LONC, lat=NULL, Time=NULL, WDC=NULL, 
                        WSC=NULL, .Range=0, xc=NULL, yc=NULL, 
                        sz=NULL, .Spacing=15, .WindFlags=0, ...) {

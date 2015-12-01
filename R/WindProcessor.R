@@ -10,7 +10,6 @@
 #' SSLIP is not present then SSRD, if present, will be used.)
 #' @author Al Cooper
 #' @export WindProcessor
-#' @import signal
 #' @param data A data.frame containing these variables: 
 #' TASX, ATTACK, SSLIP, GGVEW, GGVNS, GGVSPD, VEW, VNS, THDG, ROLL, and PITCH.
 #' @return The original data.frame is returned with variables WDN, WSN, WIN added. These

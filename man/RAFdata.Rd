@@ -35,7 +35,7 @@ variable.}
   \item{LATC}{aircraft latitude, from INS/GPS combination, deg.N}
   \item{LONC}{aircraft longitude, from INS/GPS combination, deg.E}
   \item{PLWC}{power passing through CSIRO/King LWC sensor, Watts}
-  \item{CONCD_LWII}{droplet concentration from a CDP, /cm3}
+  \item{CONCD}{droplet concentration from a CDP, per cubic cm}
   \item{WDC}{wind direction, GPS-corrected, degrees from north}
   \item{WSC}{wind speed, GPS-corrected, m/s}
 }}

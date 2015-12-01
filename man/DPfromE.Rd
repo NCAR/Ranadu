@@ -7,10 +7,10 @@
 DPfromE(.E)
 }
 \arguments{
-\item{.E}{A numeric representing the water vapor pressure in hPa}
+\item{.E}{A numeric representing the water vapor pressure in hPa (vector OK)}
 }
 \value{
-A numeric representing the dewpoint in deg. C corresponding to the input vapor pressure.
+A numeric vector representing the dewpoint in deg. C corresponding to the input vapor pressure.
 }
 \description{
 Finds the dew point given the water vapor pressure

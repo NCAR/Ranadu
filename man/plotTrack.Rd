@@ -56,7 +56,7 @@ Plot a flight track in lat-lon coordinates.
 The flight track is shown with appropriate geographic boundaries, and the lat-lon scales are adjusted to give rectilinear coordinates at the center of the plot. The center coordinates and size of the plot can be specified, or if omitted will be set to cover the range of data in the supplied coordinates. The range of indices to plot can  be supplied in the argument .Range or in the range of indices supplied with the arguments (lon, lat, Time). By default, labels are placed along the track every 15 min; this can be changed by the .Spacing argument.
 }
 \examples{
-plotTrack (RAFdata)
+\dontrun{plotTrack (RAFdata)}
 }
 \author{
 William Cooper
