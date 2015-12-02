@@ -244,6 +244,7 @@ CorrectHeading <- function (.data=Data, .span=21, .default=-0.08, .Valid=NULL, .
     p <- p + scale_colour_manual("turn direction:", values=cols)
     p <- p + guides(color=guide_legend(override.aes=list(shape=c(16,16,NA), 
                                                          linetype=c(0,0,1))))
+    p <- p + ggtitle (sprintf ("%d turns, wtd mean and std %.2f %.2f", length (tbarL), whmean, whsd))
     p <- p + theme_WAC()
     suppressMessages(ggsave (.plotfile, p))
   }
