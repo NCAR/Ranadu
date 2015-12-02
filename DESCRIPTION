@@ -22,7 +22,8 @@ Description: This package contains a function for loading a portion of a netCDF
     for making subsets of a netCDF file, and there are other functions also.
 License: GPL
 Depends:
-    ncdf4,ggplot2,ggthemes,grid,tcltk
+    R (>= 2.10), ncdf4,ggplot2,ggthemes,grid,tcltk,stats
 Imports:
-    nleqslv,maps,mapdata,mapproj,reshape2,zoo,fields,signal,stats
+    nleqslv,maps,mapdata,mapproj,reshape2,zoo,fields,signal
+LazyData: true
 RoxygenNote: 5.0.1

@@ -34,6 +34,7 @@ PotentialTemperature <- function (P, AT, E=0.) {
 #' @return A numeric representing the pseudo-adiabatic equivalent potential temperature in kelvin.
 #' @examples 
 #' THETAP <- EquivalentPotentialTemperature (700., 10., 9.) 
+#' THETAP <- EquivalentPotentialTemperature (RAFdata$PSXC, RAFdata$ATX, RAFdata$EWX)
 EquivalentPotentialTemperature <- function (P, AT, E=0) {
 # Davies-Jones pseudo-adiabatic equivalent potential 
 # temperature. Needs P, AT, E (hPa, degC, hPa).

@@ -20,6 +20,7 @@ Calculates the altitude in the ISA standard atmosphere corresponding to the spec
 }
 \examples{
 PALT <- PressureAltitude (500.)
+PALT2 <- PressureAltitude (RAFdata$PSXC)
 }
 \author{
 William Cooper

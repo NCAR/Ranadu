@@ -11,6 +11,7 @@
 #' @examples 
 #' MACH <- MachNumber(500., 50.)
 #' MACH <- MachNumber(700., 60., 1.1)
+#' MACH <- MachNumber (RAFdata$PSXC, RAFdata$QCXC, RAFdata$EWX)
 MachNumber <- function (P, Q, E=0.) {
 # function to calculate the Mach number, optionally with
 # humidity correction. Call with pressure, dynamic pressure,

@@ -9,11 +9,12 @@
 #' @param MACH  The Mach number
 #' @return The angle of attack in degrees (possibly a vector)
 #' @examples 
-#' \dontrun{a <- GV_AOAfromRadome (ADIFR, QCXC, MACH)}
+#' AOA <- GV_AOAfromRadome (RAFdata$ADIFR, RAFdata$QCXC, 
+#'        MachNumber (RAFdata$PSXC, RAFdata$QCXC))
 GV_AOAfromRadome <- function (ADIFR, QCXC, MACH) {
-  c0 <- 4.604
-  c1 <- 18.67
-  c2 <- 6.49
+  c0 <- 4.605
+  c1 <- 18.44
+  c2 <- 6.75
   akrd <- c0 + (ADIFR/QCXC)*(c1 + c2 * MACH)
   return (akrd)
 } 
@@ -28,10 +29,10 @@ GV_AOAfromRadome <- function (ADIFR, QCXC, MACH) {
 #' @param QCXC  The dynamic pressure (use consistent units for BDIFR and QCXC) 
 #' @return The sideslip angle in degrees (possibly a vector)
 #' @examples 
-#' \dontrun{a <- GV_YawFromRadome (BDIFR, QCXC)}
+#' SS <- GV_YawFromRadome (RAFdata$BDIFR, RAFdata$QCXC)
 GV_YawFromRadome <- function (BDIFR, QCXC) {
   b0 = -0.0025
   b1 = 1./0.04727
-  ssrd <- b1*((BDIFR/QCXC)-b0)
+  ssrd <- b1*((BDIFR/QCXC)+b0)
   return (ssrd)
 } 

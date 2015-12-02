@@ -42,6 +42,7 @@ of the interpolated series before subsetting to the original
 rate. The result is the shifted time series.
 }
 \examples{
+THDG2 <- ShiftInTime (RAFdata$THDG, .shift=-60)
 newVariable <- ShiftInTime (1:50, .rate=1, .shift=-500)
 }
 \author{

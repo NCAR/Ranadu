@@ -26,6 +26,7 @@ Calculates the true airspeed from measurements of Mach number, air temperature, 
 \examples{
 TAS <- TrueAirspeed (0.3, 10.)
 TAS <- TrueAirspeed (0.5, 0., 6.11/800.)
+TAS <- TrueAirspeed (MachNumber (RAFdata$PSXC, RAFdata$QCXC), RAFdata$ATX)
 }
 \author{
 William Cooper

@@ -8,7 +8,7 @@
 getStartEnd(Time)
 }
 \arguments{
-\item{Time}{A POSIXct format vector}
+\item{Time}{A POSIXct format vector or a data.frame containing such a vector named 'Time'.}
 }
 \value{
 c(Start_Time, End_Time), a numeric 2-element vector in HHMMSS format

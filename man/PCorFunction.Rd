@@ -28,6 +28,7 @@ This correction was determined from fits to the measurements from
 the Laser Air Motion Sensor, as described by Cooper et al., 2014.
 }
 \examples{
+PCOR <- PCorFunction (RAFdata$PSXC, RAFdata$QCXC, RAFdata$AKRD)
 \dontrun{dPoverP <- PCorFunction (p, q, akrd, "GV")}
 }
 \author{

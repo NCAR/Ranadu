@@ -8,6 +8,7 @@
 #' @return A numeric representing the mixing ratio in dimensionless units (*NOT* g/kg)
 #' @examples 
 #' MR <- MixingRatio (3./800.)
+#' MR <- MixingRatio (RAFdata$EWX / RAFdata$PSXC)
 MixingRatio <- function (EoverP) {
 # Mixing ratio (E/P); returns the
 # dimensionless mixing ratio, *NOT* g/kg

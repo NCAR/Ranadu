@@ -1,5 +1,6 @@
 # load the csym data.frame containing symbols and definitions
-load (file=paste (find.package ("Ranadu"), "Constants.txt", sep='/'))
+# load (file=paste (find.package ("Ranadu"), "Constants.txt", sep='/'))
+# csym is now saved in R/sysdata.rda
 
 #' @title StandardConstant
 #' @description Provides standard values of constants as used in the Processing Algorithms document, and others.
@@ -12,7 +13,8 @@ load (file=paste (find.package ("Ranadu"), "Constants.txt", sep='/'))
 #' @examples 
 #' StandardConstant ("MWW")
 StandardConstant <- function (Symbol) {
-    if (Symbol == '?') {
+  if (!exists ("csym")) {load(file="R/sysdata.rda")}
+  if (Symbol == '?') {
     return(row.names(csym))
   }
   if(substring(Symbol,1,1) == '?') {

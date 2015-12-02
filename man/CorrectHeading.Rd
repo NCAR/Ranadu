@@ -55,7 +55,7 @@ Valid is TRUE. This can be used, for example, to exclude slow-flight regions whe
 flaps might be deployed, high-rate-of-climb regions, etc.
 }
 \examples{
-\dontrun{HeadingCorrection <- CorrectHeading (DataFrame)}
+HeadingCorrection <- CorrectHeading (RAFdata)
 }
 \author{
 William Cooper

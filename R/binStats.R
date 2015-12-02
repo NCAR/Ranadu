@@ -24,7 +24,7 @@
 #' deviation for the bin, or NA for no members of the group, and 'N' = 
 #' the number of values in the bin.
 #' @examples 
-#' \dontrun{E <- binStats(Data[, c("V1", "V2"), bins=15)}
+#' E <- binStats(RAFdata[, c("PSXC", "ATX")], bins=10)
 binStats <- function (.d, bins=20, xlow=min(.d[,2], na.rm=TRUE), 
                       xhigh=max(.d[,2], na.rm=TRUE)) {
   v <- .d[!is.na(.d[,1]) & !is.na(.d[,2]),1]

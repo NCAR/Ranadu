@@ -1,5 +1,7 @@
 Version 2.2-15-10-26
   Modifications:
+                            -- fixed examples, added data.frame sample, and generally
+                               cleaned-up package - 15-12-01
                             -- accumulated mods as listed below seem to call for
                                a new version
     PitchCorrection.R       -- Fixed erroneous transformation matrix and

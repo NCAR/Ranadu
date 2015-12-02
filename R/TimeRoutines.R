@@ -4,7 +4,7 @@
 #' @aliases getIndex
 #' @author William Cooper
 #' @export getIndex
-#' @param Time A POSIXct-format vector
+#' @param Time A POSIXct-format vector or a data.frame containing a similar variable 'Time"
 #' @param HHMMSS An integer representing time in HHMMSS format 
 #' @return A numeric index in the Time vector
 #' @examples 
@@ -12,6 +12,7 @@
 getIndex <- function (Time, HHMMSS) {
   # This function returns the index in Time corresponding to HHMMSS,
   # where Time should be POSIXct-format and HHMMSS an integer.
+  if (is.data.frame(Time)) {Time <- Time$Time}
   idx = 1:length(Time)
   # is this a hrt file?
   #.HR <- ((Time[27]-Time[26]) < .5)
@@ -36,13 +37,14 @@ getIndex <- function (Time, HHMMSS) {
 #' @aliases getStartEnd getstartend 
 #' @author William Cooper
 #' @export getStartEnd
-#' @param Time A POSIXct format vector
+#' @param Time A POSIXct format vector or a data.frame containing such a vector named 'Time'.
 #' @return c(Start_Time, End_Time), a numeric 2-element vector in HHMMSS format
 #' @examples 
 #' \dontrun{SE <- getStartEnd (Time)}
 getStartEnd <- function (Time) {
 # Function to return the start and end times in a 2-element
 # vector in HHMMSS format
+  if (is.data.frame (Time)) {Time <- Time$Time}
   Tlt <- as.POSIXlt (Time[1], tz="UTC", origin="1970-01-01")
   StartTime = Tlt$hour*10000+Tlt$min*100+Tlt$sec
   Tlt <- as.POSIXlt (Time[length(Time)], tz="UTC", origin="1970-01-01")
@@ -56,12 +58,13 @@ getStartEnd <- function (Time) {
 #' @aliases setRange
 #' @author William Cooper
 #' @export setRange
-#' @param Time A POSIXct-format Time variable
+#' @param Time A POSIXct-format Time variable or a data.frame containing such a variable
 #' @param Start The desired start time in HHMMSS format (defaults to 0, which gives first index 1)
 #' @param End The desired end time in HHMMSS format (defaults to the last time in the array)
 #' @examples 
 #' \dontrun{r <- setRange (Time, 103000, 113000)}
 setRange <- function (Time, Start=0, End=0) {
+  if (is.data.frame (Time)) {Time <- Time$Time}
   if(length(Time[is.na(Time)]) > 0) {
     print(sprintf("setRange failed, NA in time sequence; consider D <- D[!is.na(D$Time),]"))
     return(1)

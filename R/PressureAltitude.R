@@ -8,6 +8,7 @@
 #' @return The pressure altitude in meters
 #' @examples 
 #' PALT <- PressureAltitude (500.)
+#' PALT2 <- PressureAltitude (RAFdata$PSXC)
 PressureAltitude <- function (P) {
 # Pressure altitude formula: (P in hPa)
   PALT <- 11000.+(8314.32*216.65)/(9.80665*28.9644)*log(226.3206/P)

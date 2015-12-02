@@ -7,7 +7,8 @@
 #' @param V A variable that may be scalar, vector, data.frame
 #' @return The summary, which is also printed by the function.
 #' @examples 
-#' \dontrun{TellAbout("TASX")}
+#' TellAbout (RAFdata$TASX)
+#' TellAbout (RAFdata)
 TellAbout <- function (V) {
   print(c(sprintf("Variable class is %s, length = %d, dim = ", class(V), length(V)), dim(V)))
   if (is.vector(V)) {
@@ -26,14 +27,16 @@ TellAbout <- function (V) {
 #' @export ValueOf
 #' @param Variable A variable in a dataframe named Data that also includes Time. The
 #' variable can be in the form Data$TASX or, if Data is attached,
-#' TASX.
+#' TASX, or "TASX".
 #' @param HHMMSS A time in hour-minute-second format (e.g., 134513) 
 #' @param DataFrame The dataframe containing Variable
 #' @return The value of the supplied variable at the specified time.
 #' @examples 
-#' \dontrun{x <- ValueOf (ATX, 140233)}
+#' ValueOf (RAFdata$ATX, 201100, RAFdata)
+#' ValueOf ("ATX", 201100, RAFdata)
 ValueOf <- function(Variable, HHMMSS, DataFrame=Data) {
-  return (Variable[getIndex(DataFrame$Time, HHMMSS)])
+  if (is.character (Variable)) {return (DataFrame[getIndex (DataFrame, HHMMSS), Variable])}
+  else {return (Variable[getIndex(DataFrame$Time, HHMMSS)])}
 }
 
 #' @title ValueOfAll

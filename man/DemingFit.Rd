@@ -28,6 +28,7 @@ See the detailed description in DemingFit.pdf
 }
 \examples{
 DemingFit ((1:5+rnorm(5,0,0.5)), (1:5+rnorm(5,0,0.5)))
+DemingFit (RAFdata$RTH1, RAFdata$RTH2)
 }
 \author{
 William Cooper

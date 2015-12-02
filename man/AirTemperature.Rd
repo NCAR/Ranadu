@@ -30,6 +30,7 @@ Finds the air temperature from measurements of recovery temperature and ambient 
 }
 \examples{
 AT <- AirTemperature (10., 700., 50.)
+AT <- AirTemperature (RAFdata$RTH1, RAFdata$PSXC, RAFdata$QCXC)
 }
 \author{
 William Cooper

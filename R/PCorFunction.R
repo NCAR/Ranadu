@@ -12,6 +12,7 @@
 #' @param Sensors Normally "STD" (the default) but "R" for right pressure pair, C130 
 #' @return The ratio of the pressure correction to the measured pressure. The correction to dynamic pressure is the negative of the returned value.
 #' @examples 
+#' PCOR <- PCorFunction (RAFdata$PSXC, RAFdata$QCXC, RAFdata$AKRD)
 #' \dontrun{dPoverP <- PCorFunction (p, q, akrd, "GV")}
 PCorFunction <- function (p, q=100., akrd=2.5, AC="GV", Sensors = "STD") {
   Mach <- MachNumber(p, q)   # calculated from raw measurements

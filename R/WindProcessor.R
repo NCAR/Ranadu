@@ -10,7 +10,6 @@
 #' SSLIP is not present then SSRD, if present, will be used.)
 #' @author Al Cooper
 #' @export WindProcessor
-#' @import signal
 #' @param data A data.frame containing these variables: 
 #' TASX, ATTACK, SSLIP, GGVEW, GGVNS, GGVSPD, VEW, VNS, THDG, ROLL, and PITCH.
 #' @return The original data.frame is returned with variables WDN, WSN, WIN added. These
@@ -18,54 +17,63 @@
 WindProcessor <- function (data=Data) {
   Cradeg <- pi/180
   Names <- names (data)
-  attach (data)
+  # attach (data)
   if ("PITCHC" %in% Names) {
-    PITCH <- PITCHC
+    PITCH <- data$PITCHC
   } else {
     if(!("PITCH" %in% Names)) {
       print ("*** ERROR in Wind Processor: Variable PITCH is not present in data.frame.")
       return (data)
     }
+    PITCH <- data$PITCH
   }
   if ("TASN" %in% Names) {
-    TASX <- TASN
+    TASX <- data$TASN
   } else {
     if(!("TASX" %in% Names)) {
       print ("*** ERROR in Wind Processor: Variable TASX is not present in data.frame.")
       return (data)
     }
+    TASX <- data$TASX
   }
   if ("GGVSPDB" %in% Names) {
-    GGVSPD <- GGVSPDB
+    GGVSPD <- data$GGVSPDB
   } else if ("GGVSPD_NVTL" %in% Names) {
-    GGVSPD <- GGVSPD_NVTL
+    GGVSPD <- data$GGVSPD_NVTL
   } else {
     if(!("GGVSPD" %in% Names)) {
       print ("*** ERROR in Wind Processor: Variable GGVSPD is not present in data.frame.")
       return (data)
     }
+    GGVSPD <- data$GGVSPD
   }
   if (!("ATTACK" %in% Names)) {
     if ("AKRD" %in% Names) {
-      ATTACK <- AKRD
+      ATTACK <- data$AKRD
     } else {
       print ("*** ERROR in Wind Processor: Variable ATTACK is not present in data.frame.")
       return(data)
     }
+  } else {
+    ATTACK <- data$ATTACK
   }
   if (!("SSLIP" %in% Names)) {
     if ("SSRD" %in% Names) {
-      SSLIP <- SSRD
+      SSLIP <- data$SSRD
     } else {
       print ("*** ERROR in Wind Processor: Variable SSLIP is not present in data.frame.")
       return(data)
     }
+  } else {
+    SSLIP <- data$SSLIP
   }
   RequiredNames <- c("GGVEW", "GGVNS", "VEW", "VNS", "THDG", "ROLL")
   for (N in RequiredNames) {
     if (!(N %in% Names)) {
       print (sprintf("*** ERROR in WindProcessor: Variable %s is not present in data.frame", N))
       return (data)
+    } else {
+      assign (N, eval(parse(text=sprintf('data$%s', N))))
     }
   }
   d <- data.frame ("U" = TASX)
@@ -119,7 +127,7 @@ WindProcessor <- function (data=Data) {
     WSN[i] <- sqrt (Y4[1]**2 + Y4[2]**2)
     WIN[i] <- Y4[3]
   }
-  detach (data)
+  # detach (data)
   data$WDN <- WDN
   data$WSN <- WSN
   data$WIN <- WIN

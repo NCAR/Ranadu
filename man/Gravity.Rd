@@ -21,7 +21,7 @@ Provides the acceleration caused by gravity.
 The formula used incorporates the dependence on latitude and on altitude above the WGS-84 geoid.
 }
 \examples{
-\dontrun{Gravity (GGLAT[r], GGALT[r])}
+G <- Gravity (RAFdata$GGLAT, RAFdata$GGALT)
 }
 \author{
 William Cooper

@@ -23,7 +23,7 @@
 #' (possibly length>1) values of temperature [degC] and liquid water content
 #' [g/m^3] corresponding to the pressures .pObs .
 #' @examples 
-#' \dontrun{R <- AdiabaticTandLWC (900., 20., c(900,800,700,600,500,400)) ; print(R)}
+#' {Z <- AdiabaticTandLWC (900., 20., c(900,800,700,600,500,400)) ; print(Z)}
 AdiabaticTandLWC <- function (.Pbase, .Tbase, .Pobs, .Ebase=0, .lwc=0) {
   ThetaQ <- WetEquivalentPotentialTemperature (.Pbase, .Tbase, .Ebase, .lwc)
   TZERO <- 273.15; CP <- SpecificHeats () # must use dry-air values

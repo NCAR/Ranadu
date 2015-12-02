@@ -7,7 +7,7 @@
 LagrangeInterpolate(.x, .n, .D)
 }
 \arguments{
-\item{.x}{Value of variable-1 for which interpolated result is to be returned}
+\item{.x}{Value of variable #1 for which interpolated result is to be returned}
 
 \item{.n}{Number of points to use (order of polynomial will be .n-1).
 The value provided must be in the range from 2 to 10; otherwise NA is returned.}
@@ -15,8 +15,8 @@ The value provided must be in the range from 2 to 10; otherwise NA is returned.}
 \item{.D}{Data.frame containing the two variables to use for interpolation}
 }
 \value{
-The interpolated value of variable-2 corresponding to the 
-value provided for variable-1 (.x)
+The interpolated value of variable #2 corresponding to the 
+value provided for variable #1 (.x)
 }
 \description{
 Interpolates tabulated values via Lagrange interpolation
@@ -26,9 +26,6 @@ The routine takes as input a data.frame with two variables, one
 to be used for interpolation of values in the second. It returns the
 value of the second variable corresponding to the provided value
 of the first variable.
-}
-\examples{
-\dontrun{}
 }
 \author{
 William Cooper

@@ -6,14 +6,13 @@
 #' of the first variable.
 #' @author William Cooper
 #' @export LagrangeInterpolate
-#' @param .x Value of variable-1 for which interpolated result is to be returned
+#' @param .x Value of variable #1 for which interpolated result is to be returned
 #' @param .n Number of points to use (order of polynomial will be .n-1).
 #' The value provided must be in the range from 2 to 10; otherwise NA is returned.
 #' @param .D  Data.frame containing the two variables to use for interpolation
-#' @return The interpolated value of variable-2 corresponding to the 
-#' value provided for variable-1 (.x)
-#' @examples 
-#' \dontrun{}
+#' @return The interpolated value of variable #2 corresponding to the 
+#' value provided for variable #1 (.x)
+
 LagrangeInterpolate <- function (.x, .n, .D) {
   if (.n < 2 || .n > 10) {return(NA)}
   .D <- .D[order(.D[,1]), ] # require increasing order

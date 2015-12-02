@@ -11,6 +11,7 @@ TZERO = StandardConstant("Tzero")
 #' @examples 
 #' e <- MurphyKoop (-12.)
 #' e <- MurphyKoop (10., 800.)
+#' EW2 <- MurphyKoop (RAFdata$DPXC, RAFdata$PSXC)
 MurphyKoop <- function (DP, P=0) {
 # returns vapor pressure via Murphy-Koop equations.
 # Supply DP=dewpoint (deg C) and optionally P=pressure (hPa),

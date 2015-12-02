@@ -17,10 +17,11 @@ calcAttack(PITCH, VSPD, TASX)
 Calculate angle-of-attack
 }
 \details{
-Assumes vertical wind = 0, finds AOA from pitch, VSPD and TASX
+Assumes vertical wind = 0, finds AOA from pitch, VSPD and TASX. Used to
+provide a reference value for calibrating gust probes.
 }
 \examples{
-\dontrun{a <- calcAttack (PITCH, VSPD, TASX)}
+AOAREF <- calcAttack (RAFdata$PITCH, RAFdata$GGVSPD, RAFdata$TASX)
 }
 \author{
 William Cooper

@@ -40,7 +40,7 @@ at the starting point is zero or omittedthe equilibrium vapor pressure at the
 starting-point temperature will be used.
 }
 \examples{
-\dontrun{R <- AdiabaticTandLWC (900., 20., c(900,800,700,600,500,400)) ; print(R)}
+{Z <- AdiabaticTandLWC (900., 20., c(900,800,700,600,500,400)) ; print(Z)}
 }
 \author{
 William Cooper

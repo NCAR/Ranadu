@@ -24,6 +24,7 @@ Calculates the equilibrium water vapor pressure according to the Murphy-Koop equ
 \examples{
 e <- MurphyKoop (-12.)
 e <- MurphyKoop (10., 800.)
+EW2 <- MurphyKoop (RAFdata$DPXC, RAFdata$PSXC)
 }
 \author{
 William Cooper
