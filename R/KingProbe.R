@@ -111,9 +111,9 @@ KingProbe <- function (Power, TAS, p, T, N) {
 #   xm <- mean(x, na.rm=TRUE)
 #   x <- Pdry
 #   x[is.na(x)] <- xm
-#   fc <- butter(4,0.05,type="low")
-#   Pdry <- filtfilt(fc,x)
-#   Pdry <- sgolayfilt(x, 3, 301)
+#   fc <- signal::butter(4,0.05,type="low")
+#   Pdry <- signal::filtfilt(fc,x)
+#   Pdry <- signal::sgolayfilt(x, 3, 301)
   #plotWAC (Data$Time, Pdry)
   w <- 1000. * (Power-Pdry) / (King$L * King$d * TAS * (lhv + King$cw * (Tb-T)))
   return (w)
