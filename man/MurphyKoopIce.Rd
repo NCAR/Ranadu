@@ -10,10 +10,11 @@ MurphyKoopIce(FP, P = 0)
 \arguments{
 \item{FP}{A numeric representing the frost point in deg. C}
 
-\item{P}{An optional numeric representing total pressure in hPa, set zero to suppress 'enhancement factor' correction for total pressure}
+\item{P}{An optional numeric representing total pressure in hPa, set zero to 
+suppress 'enhancement factor' correction for total pressure}
 }
 \value{
-Water vapor pressure in equilibrium with a plane ice surface at dew point DP
+Water vapor pressure in equilibrium with a plane ice surface at frost point FP
 }
 \description{
 Returns the water vapor pressure

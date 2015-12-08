@@ -1,8 +1,17 @@
 #' @title standardVariables
-#' @description Standard set of variables, usually used in call to getNetCDF 
-#' @details Sets a standard list of variable names in VarList suitable for use in a call to getNetCDF. Optionally, add "list" to the variables.
-#' The standard variables are ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCXC, TASX, WDC, WSC, WIC.
-#' @aliases standardVariables StandardVariables
+#' @description Standard set of variables, usually used in a call to getNetCDF 
+#' @details Sets a standard list of variable names in VarList suitable for use in a call 
+#' to getNetCDF. Optionally, add "list" to the variables.
+#' The standard variables are ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, 
+#' PSXC, QCXC, TASX, WDC, WSC, WIC. For NCAR/RAF-produced aircraft-data files, these
+#' variables are respectively the air temperature (degC), dew-point temperature (degC),
+#' aircraft altitude (m), aircraft latitude (deg N), aircraft longitude (deg. E),
+#' Mach Number, mixing ratio (g/kg), pressure altitude (m), ambient pressure (hPa),
+#' dynamic pressure (hPa), true airspeed (m/s), wind direction (degrees relative to 
+#' true north), wind speed (m/s), and vertical wind (m/s). For additional information
+#' on these and other variables used in those data archives, see the document 
+#' ProcessingAlgorithms.pdf with link in the github Wiki for this R package.
+#' @aliases StandardVariables
 #' @author William Cooper
 #' @export standardVariables
 #' @param list An optional list of variable names to add to the standard list
@@ -19,24 +28,42 @@ standardVariables <- function (list=NULL) {
 }
 
 #' @title getNetCDF
-#' @description Loads selected variables in a specified RAF-aircraft data file into a data.frame.
-#' @details 'Time' is converted to a POSIXct variable, and other variables specified in VarList are included in the data.frame. By default, the entire file is loaded, but optional arguments Start and End limit the time range. After reading the data, the netCDF file is closed before returning the data.frame to the calling program.
-#' @details The global attributes in the netCDF file are loaded as attributes of the returned data.frame,
-#' and attributes of each requested variable are also assigned to that column in the data.frame from the variable attributes in the netCDF file.
-#' When working with attributes, it is a feature of R data.frames that subsetting loses all the assigned variable attributes.
-#' If you want to preserve them, copy them via A <- attributes (Data$VAR), remove A$dim (e.g., A$dim <- NULL),
-#' and re-assign via attributes (DataNew$VAR) <- A. The function does not handle multi-dimensional
-#' variables like CCDP yet; it does work for 25-Hz files, with fractional-second times.
-#' @aliases getNetCDF getnetcdf
+#' @description Loads selected variables in a specified netCDF data file into a data.frame.
+#' @details 'Time' is converted to a POSIXct variable, and other variables specified in 
+#' VarList are included in the data.frame. By default, the entire file is loaded, but 
+#' optional arguments Start and End can limit the time range. After reading the data, the 
+#' netCDF file is closed before returning the data.frame to the calling program.
+#' The global attributes in the netCDF file are loaded as attributes of the returned 
+#' data.frame, and attributes of each requested variable are also assigned to that column 
+#' in the data.frame from the variable attributes in the netCDF file.
+#' When working with attributes, it is a feature of R data.frames that subsetting loses 
+#' all the assigned variable attributes. To preserve them, copy them via 
+#' A <- attributes (Data$VAR), remove A$dim (e.g., A$dim <- NULL),
+#' and re-assign via attributes (DataNew$VAR) <- A. The function does not handle 
+#' multi-dimensional variables (e.g., CCDP, the size distribution measured by a cloud
+#' droplet probe) yet; it does work for 25-Hz files, and returns with fractional-second times.
+#' @aliases getnetcdf GetNetCDF
 #' @author William Cooper
 #' @import ncdf4
+#' @importFrom signal filter sgolay
+#' @importFrom stats approx
 #' @export getNetCDF
-#' @param fname string, full file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
-#' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load everything.
+#' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
+#' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load 
+#' everything. (May produce quite large data.frames.) SPECIAL NOTE: Some variable names
+#' have a suffix indicating the location on the aircraft, like _LWI (left-wing inboard).
+#' To avoid having to supply these, a partial name can be supplied, like "CONCD_", and
+#' the routine will find the first matching variable and use that variable name. These
+#' can always be overridden by providing the full name; this is just a convenience to
+#' avoid having to look up where a particular measurement was installed in a given project.
 #' @param Start An optional numeric giving the desired start time in HHMMSS format
 #' @param End An optional numeric giving the desired end time in HHMMSS format
-#' @param F An optional numeric entered in the data.frame as a column 'RF' all set to this integer. This may be useful when the resulting data.frame is combined with others, to have a variable distinguishing different flights.
-#' @return data.frame containing the specified variables as columns, along with 'Time' and optionally the flight number 'RF'
+#' @param F An optional numeric entered in the data.frame as a column 'RF' all set to 
+#' this integer. This may be useful when the resulting data.frame is combined with others, 
+#' to have a variable distinguishing different flights.
+#' @return data.frame containing the specified variables as columns, along with 'Time' 
+#' and optionally the flight number 'RF'. The netCDF-file attributes and variable
+#' attributes are assigned to the data.frame and columns, respectively.
 #' @examples 
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2"), 133000, 143000, 5)}
@@ -49,7 +76,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   # a POSIXct date/time variable.
   
   ## get the header information
-  netCDFfile = nc_open(fname)
+  netCDFfile = nc_open (fname)
   if ("ALL" %in% VarList) {
     VarList <- names (netCDFfile$var)
   }
@@ -70,7 +97,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   if ("sps50" %in% nms) {Rate <- 50}
   if ("sps100" %in% nms) {Rate <- 100}
   # print (sprintf ("output rate for this data.frame is %d", Rate))
-  # Expand Time to be high-rate
+  # Expand Time to be high-rate if necessary
   if (Rate > 1) {
     T <- vector ("numeric", Rate*length(Time))
     for (i in 1:length(Time)) {
@@ -82,7 +109,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   }
   time_units <- ncatt_get (netCDFfile, "Time", "units")
   tref <- sub ('seconds since ', '', time_units$value)
-  Time <- as.POSIXct(as.POSIXct(tref, tz='UTC')+Time, tz='UTC')
+  Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
   i2 <- ifelse ((End != 0), getIndex (Time, End) + Rate - 1, length (Time))
@@ -121,7 +148,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
     if (inRate == outRate) {return (X)}
     ratio <- as.integer(outRate/inRate)    ## expected to be an integer
     x <- 0:(length(X)-1)
-    A <- approx (x, X, n=length(X)*ratio-ratio+1)
+    A <- stats::approx (x, X, n=length(X)*ratio-ratio+1)
     T <- A$y
     T <- signal::filter(signal::sgolay(4,75),T)
     ## now shift to match 25-Hz:

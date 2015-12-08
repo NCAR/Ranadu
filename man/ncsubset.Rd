@@ -25,7 +25,9 @@ NULL; the result is a new file in a specified location.
 Make a new netCDF file containing a subset of an existing netCDF file.
 }
 \details{
-A smaller netCDF file is constructed by including only specified variables and a restricted time span
+A smaller netCDF file is constructed by including only specified variables and 
+a restricted time span. This only works for 1-Hz and 25-Hz files. It relies on the
+routine 'ncks' which must be present on the system.
 }
 \author{
 William Cooper

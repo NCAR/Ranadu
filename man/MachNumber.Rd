@@ -21,12 +21,14 @@ A numeric (possible vector) giving the MACH Number
 Calculates the Mach number
 }
 \details{
-returns the Mach number calculated from ambient and dynamic pressure and, optionally, corrected for water vapor pressure
+returns the Mach number calculated from ambient and dynamic pressure and, 
+optionally, corrected for water vapor pressure
 }
 \examples{
 MACH <- MachNumber(500., 50.)
 MACH <- MachNumber(700., 60., 1.1)
 MACH <- MachNumber (RAFdata$PSXC, RAFdata$QCXC, RAFdata$EWX)
+
 }
 \author{
 William Cooper

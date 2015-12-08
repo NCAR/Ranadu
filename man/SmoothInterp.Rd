@@ -2,6 +2,7 @@
 % Please edit documentation in R/SmoothInterp.R
 \name{SmoothInterp}
 \alias{SmoothInterp}
+\alias{smoothInterp}
 \title{SmoothInterp}
 \usage{
 SmoothInterp(.timeSeries, .maxGap = 1000, .Length = 61, .order = 3)
@@ -28,7 +29,7 @@ interpolating to fill missing values and then, if they still exist,
 setting remaining missing values to zero.
 }
 \examples{
-\dontrun{Wsmoothed <- SmoothInterp (Data$WIC)}
+DPsmoothed <- SmoothInterp (RAFdata$DPXC)
 }
 \author{
 William Cooper

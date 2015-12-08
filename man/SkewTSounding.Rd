@@ -2,6 +2,7 @@
 % Please edit documentation in R/SkewT.R
 \name{SkewTSounding}
 \alias{SkewTSounding}
+\alias{skewTSounding}
 \title{SkewTSounding}
 \usage{
 SkewTSounding(Pressure = NA, Temperature = NA, DewPoint = NA,
@@ -27,8 +28,9 @@ The default is NA, in which case no dew-point sounding will be plotted.}
 \item{BackgroundSpecs}{The Rdata-format file containing the ggplot definition for
 the Skew-T background. Default: "skewTDiagram.Rdata". This file must reside where
 Ranadu is installed so that it can be found at an
-address like paste(path.package("Ranadu", "skewTDiagram.Rdata", sep='/')).
-For the C-130, a suitable background is "skewTDiagramC130.Rdata".}
+address like paste(path.package("Ranadu", "skewTDiagram.Rdata", sep='/')). Two
+data files are part of the Ranadu package, one suited to typical GV flights and
+the for the C-130. The latter is "skewTDiagramC130.Rdata".}
 
 \item{AverageInterval}{The interval in pressure (in hPa) over which to average available
 measurements before plotting. The default value is 0, and for that value or NA
@@ -55,6 +57,8 @@ is generated separately via a "Skew-TDiagram" program, with the plot saved in
 plot definition can be specified as the third parameter.
 }
 \examples{
+print (SkewTSounding (data.frame (Pressure=RAFdata$PSXC, Temperature=RAFdata$ATX, 
+DewPoint=RAFdata$DPXC)))
 \dontrun{
 Directory <- DataDirectory ()
 Flight <- "rf16"       	

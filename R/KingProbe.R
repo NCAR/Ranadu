@@ -1,19 +1,3 @@
-# constants used in the KingProbe function:
-King.TASL <- 0.
-King.ReL <- 0.
-King.tauNu <- 100.      # time constant for updating zero value
-# three regimes: [c] TAS < 150; o.w. [a] Re<7244 or [b] Re>=7244
-King.afb <- c(0.135, 0.638)
-King.afa <- c(1.868, 0.343)
-King.afc <- c(0.133, 0.382)
-King.L <- 0.021     # element length, m
-King.d <- 1.805e-3   # wire diameter, m
-King.Ts <- 130.      # sensor temperature, deg. C
-King.cb <- c(0.03366503, 1.34236135, -0.33479451, 0.0351934)
-King.Rd <- StandardConstant("Rd")
-King.cw <- 4190.     # specific heat of water, J/(kg K), mean value 0-90C
-King.ConcTest <- 1.  # conc of droplets below which to consider zero
-
 
 #' @title KingProbe
 #' @description Calculates liquid water content from King Probe
@@ -45,9 +29,9 @@ KingProbe <- function (Power, TAS, p, T, N) {
                   afc=c(0.133, 0.382), L=0.021, d=1.805e-3, Ts=130, 
                   cb=c(0.03366503, 1.34236135, -0.33479451, 0.0351934),
                   Rd=StandardConstant("Rd"), cw=4190., ConcTest=1.)
-    attributes (KingProbe) <<- King 
+    attributes (KingProbe) <<- King   ## save for future calls
     
-  } else {King <- attributes (KingProbe)}
+  } else {King <- attributes (KingProbe)}  ## retrieve from last call
 #  constants used in the KingProbe function:
 #   King.TASL <- 0.
 #   King.ReL <- 0.
@@ -74,15 +58,6 @@ KingProbe <- function (Power, TAS, p, T, N) {
   Re <- dens * TAS * King$d / visc
   Nup <- Power / (pi * King$L * cond * (King$Ts-T))
   Valid <- (N < King$ConcTest) & (TAS > 50.) & (!is.na(Power))
-#     Nup[!Valid] <- NA
-#     NuRe0 <- rep (NA, length(Power))
-#     NuRe1 <- rep (NA, length(Power))
-#     NuRe0[TAS >= 150.] <- King.afc[1]
-#     NuRe1[TAS >= 150.] <- King.afc[2]
-#     NuRe0[(TAS > 150.) & (Re < 7244)] <- King.afa[1]
-#     NuRe1[(TAS > 150.) & (Re < 7244)] <- King.afa[2]
-#     NuRe0[(TAS > 150.) & (Re >= 7244)] <- King.afb[1]
-#     NuRe1[(TAS > 150.) & (Re >= 7244)] <- King.afb[2]
   w <- vector ("numeric", length(Power))
   af <- matrix (nrow=length(Power), ncol=2)
 #
@@ -106,30 +81,9 @@ KingProbe <- function (Power, TAS, p, T, N) {
   
   Nu <- af[,1] * Re**af[,2]
   Pdry <- pi * Nu * King$L * cond * (King$Ts-T)
-#   x <- Pdry
-#   x[TAS < 50.] <- NA
-#   xm <- mean(x, na.rm=TRUE)
-#   x <- Pdry
-#   x[is.na(x)] <- xm
-#   fc <- signal::butter(4,0.05,type="low")
-#   Pdry <- signal::filtfilt(fc,x)
-#   Pdry <- signal::sgolayfilt(x, 3, 301)
-  #plotWAC (Data$Time, Pdry)
   w <- 1000. * (Power-Pdry) / (King$L * King$d * TAS * (lhv + King$cw * (Tb-T)))
   return (w)
-#   for (i in 1:length(Power)) {
-#     if (is.na(Power[i]) | is.na(TAS[i]) | is.na(T[i]) | is.na(N[i])) {
-#       w[i] <- NA
-#     } else {
-#       af <- KingUpdate(N[i], TAS[i], King.afa, King.afb, King.afc, Re[i], Nup[i])
-#       King.TASL <<- TAS[i]
-#       King.ReL <<- Re[i]
-#       Nu <- af[1] * Re[i]**af[2]
-#       Pdry <- pi * Nu * King.L * cond[i] * (King.Ts-T[i])
-#       w[i] <- 1000. * (Power[i]-Pdry) / (King.L * King.d * TAS[i] * (lhv[i] + King.cw * (Tb[i]-T[i])))
-#     }
-#   }
-#   return(w)
+
 }    
 
 KingUpdate <- function (N, TAS, afa, afb, afc, Re, Nup) {

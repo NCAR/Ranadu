@@ -2,7 +2,7 @@
 #' @description Convenience routine for plots
 #' @details Sets some plot defaults and calls plot and axis. For a data.frame
 #' argument, sets plot limits to cover range of all variables in the data.frame.
-#' @aliases plotWAC
+#' @aliases plotRAF
 #' @author William Cooper
 #' @export plotWAC
 #' @param x Usually, Time from a data.frame; a vector of abscissa values. Optionally,
@@ -35,6 +35,7 @@
 #' \dontrun{plotWAC (Data[, c("Time", "PSXC")])}
 #' \dontrun{plotWAC (subset (Data,,c(Time,ATX,DPXC)))}
 #' \dontrun{plotWAC (subset (Data,,c(ATX,DPXC)))}
+
 plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]", 
                      ylab="", lwd=2, type="l", lty=1, logxy='',
                      legend.position="bottomright", ...) {

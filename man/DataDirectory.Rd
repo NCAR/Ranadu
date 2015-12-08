@@ -13,7 +13,9 @@ Directory The path to the local data directory, or NA if none found
 Returns the location of the local data directory.
 }
 \details{
-This is intended to make it easier to write programs that work on different computers where the netCDF files by convention are stored in different locations. It returns the local location, or NA if none of the standard locations are found.
+This is intended to make it easier to write programs that work on different 
+computers where the netCDF files by convention are stored in different locations. 
+It returns the local location, or NA if none of the standard locations are found.
 }
 \examples{
 Directory <- DataDirectory ()

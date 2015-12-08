@@ -1,7 +1,7 @@
 #' @title RecoveryFactor
 #' @description Mach-number-dependent recovery factor for a temperature sensor
 #' @details For specified Mach number, returns the recovery factor according to the formula in ProcessingAlgorithms.
-#' @aliases RecoveryFactor recoveryfactor
+#' @aliases recoveryFactor recoveryfactor
 #' @author William Cooper
 #' @export RecoveryFactor
 #' @param .Mach A numeric giving the Mach number, perhaps calculated by MachNumber()
@@ -26,6 +26,6 @@ RecoveryFactor <- function (.Mach, probe='HARCO') {
   } else {  ## defaults to HARCO
     rf2 <- 0.988+0.053*LM+0.090*LM^2+0.091*LM^3
   }
-  return (rf2)
+  return (as.vector(rf2))
 }
 

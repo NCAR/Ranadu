@@ -7,13 +7,14 @@
 #' because that function also assigns attributes to the data.frame and to the variables it
 #' contains that match those in the original netCDF file. This function extracts those
 #' attributes and adds them to the netCDF file that is created. Note that, when subsetting,
-#' it will be necessary to preserve the attributes; see help for getNetCDF. At present, this
+#' it will be necessary to preserve the attributes; see help for getNetCDF. The code
+#' includes an inactive function transferAttributes() for this purpose. At present, this
 #' will work for low-rate and 25-Hz variables but not for multi-dimensional variables like
 #' the hydrometeor size distributions.
-#' @aliases makeNetCDF
+#' @aliases MakeNetCDF
 #' @author William Cooper
-#' @import ncdf4
 #' @export makeNetCDF
+#' @import ncdf4
 #' @param d A data.frame produced by getNetCDF() or otherwise converted to the corresponding
 #' structure from that function.
 #' @param newNetCDFname A character path name for the file to be created

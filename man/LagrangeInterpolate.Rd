@@ -27,6 +27,9 @@ to be used for interpolation of values in the second. It returns the
 value of the second variable corresponding to the provided value
 of the first variable.
 }
+\examples{
+LagrangeInterpolate (3.3, 3, data.frame (1:5, 1:5+runif(5,-0.1,0.1)))
+}
 \author{
 William Cooper
 }

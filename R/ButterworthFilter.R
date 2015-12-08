@@ -1,6 +1,9 @@
 #' @title ButterworthFilter
 #' @description Applies a low-pass Butterworth filter recursively 
-#' @details See the description in"ProcessingAlgorithms.pdf". Missing values are skipped in the recursive filter and are replicated in the output.
+#' @details See the description in"ProcessingAlgorithms.pdf". Do not use this function;
+#' it is for testing historical processing of RAF data files, but there is an error that
+#' causes an offset in the filtered values. Use signal::butter instead. 
+#' Missing values are skipped in the recursive filter and are replicated in the output.
 #' @aliases ButterworthFilter
 #' @author William Cooper
 #' @export ButterworthFilter

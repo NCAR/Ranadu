@@ -2,15 +2,16 @@
 % Please edit documentation in R/PressureAltitude.R
 \name{PressureAltitude}
 \alias{PressureAltitude}
+\alias{pressureAltitude}
 \title{PressureAltitude}
 \usage{
 PressureAltitude(P)
 }
 \arguments{
-\item{P}{A numeric representing pressure in hPa}
+\item{P}{A numeric vector representing pressure in hPa}
 }
 \value{
-The pressure altitude in meters
+A numeric vector giving the pressure altitude in meters
 }
 \description{
 Pressure altitude in the ISA standard atmosphere

@@ -2,6 +2,7 @@
 % Please edit documentation in R/Gravity.R
 \name{Gravity}
 \alias{Gravity}
+\alias{gravity}
 \title{Gravity}
 \usage{
 Gravity(latitude, altitude = 0)
@@ -9,7 +10,8 @@ Gravity(latitude, altitude = 0)
 \arguments{
 \item{latitude}{The latitude (or vector of latitudes) in units of degrees N.}
 
-\item{altitude}{The altitude in meters above the WGS-84 geoid. GPS measurements are usually appropriate to use when supplying this altitude.}
+\item{altitude}{The altitude in meters above the WGS-84 geoid. GPS measurements are 
+usually appropriate to use when supplying this altitude.}
 }
 \value{
 The acceleration of gravidy in units of m/s^2

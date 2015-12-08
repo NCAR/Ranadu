@@ -1,6 +1,6 @@
 
 #' A sample data.frame as might be constructed by getNetCDF(), 
-#' containing a short period of measurements from a NSF/NCAR GV 
+#' containing a short period of measurements from an NSF/NCAR GV 
 #' flight in a project called "IDEAS-4". The data.frame contains
 #' a set of measurements, one row per second, and a "Time"
 #' variable. 

@@ -4,14 +4,20 @@
 \alias{GV_AOAfromRadome}
 \title{GV_AOAfromRadome}
 \usage{
-GV_AOAfromRadome(ADIFR, QCXC, MACH)
+GV_AOAfromRadome(ADIFR, QCF, MACH = 0.8, CF = c(4.605, 18.44, 6.75))
 }
 \arguments{
 \item{ADIFR}{The pressure difference between top and bottom radome ports}
 
-\item{QCXC}{The dynamic pressure (use consistent units for ADIFR and QCXC)}
+\item{QCF}{The dynamic pressure (use consistent units for ADIFR and QCF.) 
+By convention, this calibration related to the uncorrected value QCF, not
+the PCorFunction()-corrected value QCFC.}
 
 \item{MACH}{The Mach number}
+
+\item{CF}{Three-coefficient vector representing the standard-formula calibration
+coefficients of the radome. Default is c(4.605, 18.44, 6.75). Cf. the document
+on ProcessingAlgorithms.pdf. These are the default values for the NSF/NCAR GV.}
 }
 \value{
 The angle of attack in degrees (possibly a vector)
@@ -20,7 +26,7 @@ The angle of attack in degrees (possibly a vector)
 Calculate angle of attack from radome pressures
 }
 \details{
-based on calibration, applies model for AOA given ADIFR, QCXC, and Mach Number
+based on calibration, applies model for AOA given ADIFR, QCF, and Mach Number
 }
 \examples{
 AOA <- GV_AOAfromRadome (RAFdata$ADIFR, RAFdata$QCXC, 

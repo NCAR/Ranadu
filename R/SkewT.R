@@ -5,10 +5,11 @@
 #' is generated separately via a "Skew-TDiagram" program, with the plot saved in
 #' "SkewT.RData" as plot definition "g". This is used by default, but another
 #' plot definition can be specified as the third parameter.
-#' @aliases SkewTSounding
+#' @aliases skewTSounding
 #' @author William Cooper
 #' @export SkewTSounding
 #' @import fields
+#' @import ggplot2
 #' @param Pressure A vector of numeric values representing the pressures [hPa] where
 #' temperature and dewpoint values will be provided in the next two parameters. 
 #' All three vectors must be of the same length. The default is NA, in which case
@@ -24,8 +25,9 @@
 #' @param BackgroundSpecs The Rdata-format file containing the ggplot definition for
 #' the Skew-T background. Default: "skewTDiagram.Rdata". This file must reside where
 #' Ranadu is installed so that it can be found at an
-#' address like paste(path.package("Ranadu", "skewTDiagram.Rdata", sep='/')).
-#' For the C-130, a suitable background is "skewTDiagramC130.Rdata".
+#' address like paste(path.package("Ranadu", "skewTDiagram.Rdata", sep='/')). Two
+#' data files are part of the Ranadu package, one suited to typical GV flights and
+#' the for the C-130. The latter is "skewTDiagramC130.Rdata".
 #' @param AverageInterval The interval in pressure (in hPa) over which to average available
 #' measurements before plotting. The default value is 0, and for that value or NA
 #' all values are plotted in a continuous "path".
@@ -37,6 +39,8 @@
 #' and sounding values included in the plot. Additions can be made to this 
 #' specification to add components to the plot (e.g, wind barbs or a hodograph).
 #' @examples 
+#' print (SkewTSounding (data.frame (Pressure=RAFdata$PSXC, Temperature=RAFdata$ATX, 
+#' DewPoint=RAFdata$DPXC)))
 #' \dontrun{
 #' Directory <- DataDirectory ()
 #' Flight <- "rf16"       	
@@ -51,8 +55,15 @@
 SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA, 
                            BackgroundSpecs="skewTDiagram.Rdata",
                            AverageInterval=0, ADD=FALSE) {
-  load (paste(path.package ("Ranadu"), BackgroundSpecs, sep='/'))
+  Bvar <- load (paste(path.package ("Ranadu"), BackgroundSpecs, sep='/'))
   # this loads skewTDiagram and tBot, tTop, pBot, pTop.
+  ## the next lines are just to satisfy devtools::check() that there is a
+  ## defined source for these variables:
+  skewTDiagram <- get (Bvar[1])
+  pBot <- get (Bvar[2])
+  pTop <- get (Bvar[3])
+  tBot <- get (Bvar[4])
+  tTop <- get (Bvar[5])
   g <- skewTDiagram     # just to save some length in later "s <- g + ..." lines
   ## print (ggplot_build(g$panel$ranges[[1]]$x.range))
   ## A function for translation between the P-T coordinates and the skew-T plot coordinates:
@@ -96,21 +107,29 @@ SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA,
     DewPoint <- AVDP$stats["mean", ]
   }
 
-DSKT <- data.frame (P=Pressure, T=Temperature, DP=DewPoint)
+DSKT <- data.frame ("P"=Pressure, "AT"=Temperature, "DP"=DewPoint)
   
   ## convert to plot coordinates:
-  DSKT$T  <- XYplot (Temperature, Pressure)$X
+  DSKT$AT  <- XYplot (Temperature, Pressure)$X
   DSKT$DP <- XYplot (DewPoint, Pressure)$X
   ## clip DP trace at left axis
   DSKT$DP[DSKT$DP < 0] <- 0
   DSKT$P  <- XYplot (Temperature, Pressure)$Y
   if (ADD) {return(DSKT)}
-  g <- g + geom_path (data=DSKT, aes(x=T,  y=P, color="T"),  lwd=1.0)
-  g <- g + geom_path (data=DSKT, aes(x=DP, y=P, color="DP"), lwd=1.0, alpha=0.8)
-  g <- g + scale_fill_discrete(breaks=c("DP","T"))
-  g <- g + theme(legend.position=c(0.2,0.85), legend.background=element_rect(fill="white"))
-  g <- g + labs(color='Measurement')
-  g <- g + scale_colour_manual(name = "Measurement", breaks=c("T", "DP"), values = c("darkgreen", "darkblue"))
+  # requireNamespace ("ggplot2", quietly=TRUE)
+  ## this is just to fool devtools into accepting that there is a
+  ## source for AT, DP, P:
+  AT <- DSKT$AT
+  DP <- DSKT$DP
+  P <- DSKT$P
+  g <- g + geom_path (data=DSKT, aes (x=AT, y=P, color="T"),  lwd=1.0)
+  g <- g + geom_path (data=DSKT, aes (x=DP, y=P, color="DP"), lwd=1.0,
+                      alpha=0.8)
+  g <- g + scale_fill_discrete (breaks=c("DP", "T"))
+  g <- g + theme (legend.position=c(0.2,0.85), legend.background=element_rect(fill="white"))
+  g <- g + labs (color='Measurement')
+  g <- g + scale_colour_manual (name = "Measurement", breaks=c("T", "DP"), 
+                                values = c("darkgreen", "darkblue"))
   #print (g)
   return (g)
 }

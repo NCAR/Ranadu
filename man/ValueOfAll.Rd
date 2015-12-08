@@ -2,9 +2,11 @@
 % Please edit documentation in R/TellAbout.R
 \name{ValueOfAll}
 \alias{ValueOfAll}
+\alias{valueOfAll,}
+\alias{valueofall}
 \title{ValueOfAll}
 \usage{
-ValueOfAll(DataFrame = Data, HHMMSS)
+ValueOfAll(DataFrame, HHMMSS)
 }
 \arguments{
 \item{DataFrame}{The specified dataframe, which must contain Time as
@@ -25,7 +27,7 @@ Returns and prints values of all variables in a specified
 dataframe that includes Time, at the time specified.
 }
 \examples{
-\dontrun{vlist <- ValueOfAll (Data, 143329)}
+vlist <- ValueOfAll (RAFdata, 201100)
 }
 \author{
 William Cooper

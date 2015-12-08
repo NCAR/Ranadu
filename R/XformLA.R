@@ -26,7 +26,7 @@
 #' newDataFrame <- XformLA (data.frame("ROLL"=1:50, "PITCH"=(3+(1:50)/50), "THDG"=91:140),
 #'                                    Avector=matrix(c(21:70, 31:80, 41:90), ncol=3))
 
-XformLA <- function (data=Data, Avector, .inverse=FALSE) { 
+XformLA <- function (data, Avector, .inverse=FALSE) { 
   # data must contain ROLL, PITCH or PITCHC, HEADING
   Cradeg <- pi/180
   if ("PITCHC" %in% names(data)) {

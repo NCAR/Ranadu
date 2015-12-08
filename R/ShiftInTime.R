@@ -16,6 +16,8 @@
 #' @aliases ShiftInTime
 #' @author William Cooper
 #' @export ShiftInTime
+#' @importFrom stats approx
+#' @importFrom signal filter sgolay
 #' @param .X A numeric vector, usually representing a measurement history.
 #' @param .rate The assumed sampling rate in Hz (default 1 Hz). 
 #' @param .shift The shift to be applied, in milliseconds. Can be positive 

@@ -1,24 +1,30 @@
 # load the csym data.frame containing symbols and definitions
 # load (file=paste (find.package ("Ranadu"), "Constants.txt", sep='/'))
-# csym is now saved in R/sysdata.rda
+# CHANGE: csym is now saved in R/sysdata.rda
 
 #' @title StandardConstant
-#' @description Provides standard values of constants as used in the Processing Algorithms document, and others.
-#' @details If one of the standard symbol names is provided, the routine returns the value associated with that constant. Otherwise, it returns NULL. For special cases described following the parameter Symbol, the returned value is a list of available symbols or an expanded explanation of a specified symbol.
-#' @aliases StandardConstant standardConstant
+#' @description Provides standard values of constants as used in the Processing Algorithms 
+#' document, and others.
+#' @details If one of the standard symbol names is provided, the routine returns the value 
+#' associated with that constant. Otherwise, it returns NULL. For special cases described 
+#' following the parameter Symbol, the returned value is a list of available symbols or an 
+#' expanded explanation of a specified symbol.
+#' @aliases standardConstant
 #' @author William Cooper
 #' @export StandardConstant
-#' @param Symbol One of a set of defined symbols. To see the available symbols, use StandardConstant('?'), and to see a full description of an available symbol, use for example StandardConstant("?Rd").
+#' @param Symbol One of a set of defined symbols. To see the available symbols, 
+#' use StandardConstant('?'), and to see a full description of an available symbol, 
+#' use for example StandardConstant("?Rd").
 #' @return The value associated with that symbol.
 #' @examples 
 #' StandardConstant ("MWW")
 StandardConstant <- function (Symbol) {
   if (!exists ("csym")) {load(file="R/sysdata.rda")}
   if (Symbol == '?') {
-    return(row.names(csym))
+    return (row.names (csym))
   }
-  if(substring(Symbol,1,1) == '?') {
-    return(csym[substring(Symbol,2,nchar(Symbol)),])
+  if(substring (Symbol, 1, 1) == '?') {
+    return (csym[substring (Symbol, 2, nchar(Symbol)), ])
   }
   return(csym[Symbol,1])
 }

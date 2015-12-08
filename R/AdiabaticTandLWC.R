@@ -7,11 +7,12 @@
 #' require this and if given a subsaturated vapor pressure will
 #' calculate reversible ascent below cloud base and produce zero LWC
 #' for final pressures below cloud base. If the optional vapor pressure
-#' at the starting point is zero or omittedthe equilibrium vapor pressure at the
+#' at the starting point is zero or omitted the equilibrium vapor pressure at the
 #' starting-point temperature will be used.
 #' @aliases AdiabaticLWC
 #' @author William Cooper
 #' @export AdiabaticTandLWC
+#' @import nleqslv
 #' @param .Pbase Starting-point pressure, hPa
 #' @param .Tbase Starting-point temperature, degC
 #' @param .Pobs Pressure at the observation level, hPa (can be length>1)
@@ -23,7 +24,10 @@
 #' (possibly length>1) values of temperature [degC] and liquid water content
 #' [g/m^3] corresponding to the pressures .pObs .
 #' @examples 
-#' {Z <- AdiabaticTandLWC (900., 20., c(900,800,700,600,500,400)) ; print(Z)}
+#' AdiabaticTandLWC (900, 20, c(900,800,700,600,500,400))
+#' \dontrun{plot(AdiabaticTandLWC (900.,20.,seq(900,200,by=-10))$ALWC, seq(900,200,by=-10), 
+#'     xlab='LWC [g/m^3]', ylab = 'Pressure [hPa]', ylim=c(1000,100), type='l', lwd=2, col='blue')}
+
 AdiabaticTandLWC <- function (.Pbase, .Tbase, .Pobs, .Ebase=0, .lwc=0) {
   ThetaQ <- WetEquivalentPotentialTemperature (.Pbase, .Tbase, .Ebase, .lwc)
   TZERO <- 273.15; CP <- SpecificHeats () # must use dry-air values
@@ -38,7 +42,7 @@ AdiabaticTandLWC <- function (.Pbase, .Tbase, .Pobs, .Ebase=0, .lwc=0) {
     e <- MurphyKoop (T1, .Pob)
     rv <- MixingRatio (e/.Pob)
     if (rtot < rv) {
-      e <- rtot * .Pob / (rtot + (StandardConstant("MWW")/StandardConstant("MWD")))
+      e <- rtot * .Pob / (rtot + (StandardConstant ("MWW") / StandardConstant ("MWD")))
       lwc <- 0
     } else {
       lwc <- 1000 * (rtot - rv) * 100. * (.Pob - e) / (CP[3] * (T1 + TZERO))
@@ -58,6 +62,5 @@ AdiabaticTandLWC <- function (.Pbase, .Tbase, .Pobs, .Ebase=0, .lwc=0) {
   alwc [rObs >= rTot] <- 0
   return (data.frame (Tobs, "ALWC"=alwc))
 }
-#plot(AdiabaticTandLWC (900.,20.,seq(900,200,by=-10))$ALWC, seq(900,200,by=-10), 
-#     xlab='LWC [g/m^3]', ylab = 'Pressure [hPa]', ylim=c(1000,100), type='l', lwd=2, col='blue')
+
 

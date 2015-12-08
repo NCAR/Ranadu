@@ -15,6 +15,7 @@
 #' minutes.
 #' @aliases CorrectRoll
 #' @author William Cooper
+#' @importFrom signal sgolayfilt
 #' @export CorrectPitch
 #' @param D a data.frame containing at least these variables: 
 #' VNS, VEW, GGVNS, GGVEW, LAT or LATC, GGALT, THDG, PITCH, ROLL

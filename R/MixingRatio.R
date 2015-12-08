@@ -1,6 +1,7 @@
 #' @title MixingRatio
 #' @description Calculate the mixing ratio of water vapor
-#' @details The dimensionless mixing ratio of water vapor is calculated from the ratio of water vapor pressure to total pressure.
+#' @details The dimensionless mixing ratio of water vapor is calculated from the ratio of 
+#' water vapor pressure to total pressure. CAVEAT: Note the units below (dimensionless, not g/kg).
 #' @aliases MixingRatio 
 #' @author William Cooper
 #' @export MixingRatio
@@ -12,7 +13,6 @@
 MixingRatio <- function (EoverP) {
 # Mixing ratio (E/P); returns the
 # dimensionless mixing ratio, *NOT* g/kg
-  r <- (StandardConstant("MWW")/StandardConstant("MWD")) * (EoverP/(1.-EoverP))
-  return (r)
+  return ((StandardConstant ("MWW") / StandardConstant ("MWD")) * (EoverP / (1 - EoverP)))
 }
 

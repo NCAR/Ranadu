@@ -8,16 +8,22 @@
 StandardConstant(Symbol)
 }
 \arguments{
-\item{Symbol}{One of a set of defined symbols. To see the available symbols, use StandardConstant('?'), and to see a full description of an available symbol, use for example StandardConstant("?Rd").}
+\item{Symbol}{One of a set of defined symbols. To see the available symbols, 
+use StandardConstant('?'), and to see a full description of an available symbol, 
+use for example StandardConstant("?Rd").}
 }
 \value{
 The value associated with that symbol.
 }
 \description{
-Provides standard values of constants as used in the Processing Algorithms document, and others.
+Provides standard values of constants as used in the Processing Algorithms 
+document, and others.
 }
 \details{
-If one of the standard symbol names is provided, the routine returns the value associated with that constant. Otherwise, it returns NULL. For special cases described following the parameter Symbol, the returned value is a list of available symbols or an expanded explanation of a specified symbol.
+If one of the standard symbol names is provided, the routine returns the value 
+associated with that constant. Otherwise, it returns NULL. For special cases described 
+following the parameter Symbol, the returned value is a list of available symbols or an 
+expanded explanation of a specified symbol.
 }
 \examples{
 StandardConstant ("MWW")

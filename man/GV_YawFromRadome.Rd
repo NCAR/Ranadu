@@ -18,7 +18,8 @@ The sideslip angle in degrees (possibly a vector)
 Calculate sideslip angle from radome pressures
 }
 \details{
-based on calibration, applies model for sideslip given BDIFR and QCXC
+based on calibration, applies model for sideslip given BDIFR and QCXC.
+This is the standard calibration in use for the NSF/NCAR GV.
 }
 \examples{
 SS <- GV_YawFromRadome (RAFdata$BDIFR, RAFdata$QCXC)

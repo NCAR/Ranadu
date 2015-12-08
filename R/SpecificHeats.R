@@ -1,7 +1,7 @@
 #' @title SpecificHeats
 #' @description Specific heats and gas constant for moist or dry air
 #' @details Calculates the specific heat at constant pressure, specific heat at constant volume, and gas constant for air having ratio of water vapor pressure to total pressure of the argument EoverP
-#' @aliases SpecificHeats SpecificHeat specificheats specificheat
+#' @aliases specificHeats SpecificHeat specificheats specificheat
 #' @author William Cooper
 #' @export SpecificHeats
 #' @param EoverP A numeric giving the ratio of water vapor pressure to total pressure
@@ -9,7 +9,8 @@
 #' @examples 
 #' CP <- SpecificHeats()    # gives dry-air valuies, single row
 #' CP <- SpecificHeats(6.11/800.)
-#' \dontrun{CP <- (EWX/PSXC) # returns array if EWX and PSXC are vectors}
+#' CP <- SpecificHeats (RAFdata$EWX / RAFdata$PSXC)
+
 SpecificHeats <- function (EoverP=0.) {
 # calculate humidity-dependent gas constant and specific
 # heats, or dry-air values if EoverP is 0:

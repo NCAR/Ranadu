@@ -2,6 +2,7 @@
 % Please edit documentation in R/setVariableList.R
 \name{setVariableList}
 \alias{setVariableList}
+\alias{setVariables}
 \title{setVariableList}
 \usage{
 setVariableList(fname, VarList = vector())
@@ -16,7 +17,7 @@ This might be the result of a call to Ranadu::standardVariables(), for example.}
 A vector of character names of the selected variables.
 }
 \description{
-GUI for selecting from available netCDF variables
+GUI for selecting from available netCDF variables (under development)
 }
 \details{
 A display of buttons for all the available variables in a netCDF

@@ -5,34 +5,47 @@
 \alias{getRAFdata}
 \title{getRAFData}
 \usage{
-getRAFData(.Rdata = "Temp.Rdata.gz", .Directory = "/scr/raf_data", .Project,
-  .Flight, .Start = 0, .End = 0, .VarList = NA, .F = 0)
+getRAFData(.Rdata = "Temp", .Directory = NA, .Project, .Flight,
+  .Start = 0, .End = 0, .VarList = NA, .F = 0)
 }
 \arguments{
-\item{.Rdata}{The name to be given to the compressed data file placed on $FTP. Example: "Temp" to get "Temp.Rdata.gz". Default "Temp".}
+\item{.Rdata}{The name to be given to the data file placed on $FTP. Example: "Temp" 
+to get "Temp.Rdata". Default "Temp".}
 
-\item{.Directory}{The root directory for the data, e.g., /scr/raf/ProdData or /scr/raf_data (character string). Default is '/scr/raf_data'.}
+\item{.Directory}{The root directory for the data, e.g., /scr/raf/ProdData or 
+/scr/raf_data (character string). Default is DataDirectory ().}
 
-\item{.Project}{Project Name (e.g., CONTRAST) -- a directory on /scr/raf_data (character string)}
+\item{.Project}{Project Name (e.g., "CONTRAST") -- a directory on /scr/raf_data 
+(character string)}
 
-\item{.Flight}{Flight name (e.g., rf05) (character string)}
+\item{.Flight}{Flight name (e.g., "rf05") (character string)}
 
 \item{.Start}{Start time in HHMMSS format (numeric); default is the first time in the file}
 
 \item{.End}{End time in HHMMSS format (numeric); default is the last time in the file}
 
-\item{.VarList}{List of variables to include in the file (vector of character strings), default is the list of variables provided by 'standardVariables()'.}
+\item{.VarList}{List of variables to include in the file (vector of character strings), 
+default is the list of variables provided by 'standardVariables()'.}
 
-\item{.F}{A numeric flight number to include in the data frame as 'RF'. Defaults to 0 and, if 0, is not included.}
+\item{.F}{A numeric flight number to include in the data frame as 'RF'. Defaults to 0 
+and, if 0, is not included.}
 }
 \value{
-The full address where the compressed Rdata file was saved, or NULL in case of failure.
+The full address where the compressed Rdata file was saved, or NULL in 
+case of failure.
 }
 \description{
 Prepares RAF netCDF data, in data.frame, for FTP download
 }
 \details{
-For specified variables and time period, constructs a data.frame, saves it in Rdata format, gzipped, and places it on $FTP with a supplied name.
+For specified variables and time period, constructs a data.frame, saves it 
+in Rdata format, and places it on $FTP with a supplied name. This is probably not
+generally useful but is used by the author to facilitate data transfers to a home
+computer while reducing the size of the file that is transferred and avoiding the
+need to do this via VPN. If $FTP does not exist, the script attempts to put the
+file on "/net/ftp/pub/temp/users/cooperw" and will likely fail for users other
+than the author, so it is important to set $FTP to use this routine. CAVEAT: This
+script will overwrite the output file without warning.
 }
 \author{
 William Cooper

@@ -1,9 +1,10 @@
 #' @title ncsubset 
 #' @description Make a new netCDF file containing a subset of an existing netCDF file. 
-#' @details A smaller netCDF file is constructed by including only specified variables and a restricted time span
+#' @details A smaller netCDF file is constructed by including only specified variables and 
+#' a restricted time span. This only works for 1-Hz and 25-Hz files. It relies on the
+#' routine 'ncks' which must be present on the system.
 #' @aliases ncsubset
 #' @author William Cooper
-#' @import ncdf4
 #' @export ncsubset
 #' @param .OldFileName The path to the existing netCDF file.
 #' @param .NewFileName The path to the new subset netCDF file. Will be silently removed if present before writing the new file.
@@ -38,7 +39,7 @@ ncsubset <- function (.OldFileName, .NewFileName, .Start=NA, .End=NA, .VarList=N
   SE <- getStartEnd(.Data$Time)
   if (is.na(.Start)) {.Start <- SE[1]}
   if (is.na(.End))   {.End   <- SE[2]}
-  # is the file hrt?
+  # is the file hrt? (Only works for 25 Hz)
   .HR <- ((.Data$Time[27]-.Data$Time[26]) < .5)
   IS <- getIndex(.Data$Time, .Start)
   IE <- getIndex(.Data$Time, .End)

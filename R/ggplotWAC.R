@@ -25,9 +25,8 @@
 #' be added after the ggplotWAC call.
 #' @param ... Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt
 #' @examples 
+#' ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])
 #' \dontrun{ggplotWAC (data.frame ("Time"=Time, "TASX"=TASX), ylab="TAS")}
-#' \dontrun{plotWAC (Data[, c(Time, PSXCi)], lwd=2)}
-#' \dontrun{plotWAC (Data[, c("Time", "PSXC")])}
 ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]", 
                        ylab="", lwd=1.2, lty=1, logxy='',
                        legend.position="bottomright", ...) {
@@ -82,6 +81,8 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
     g <- g + theme_WAC()
     ## preserve .data in the parent environment for plotting
     .data <<- .data
+    
+    ## suppressMessages(ggsave (.plotfile, g))
     # suppressWarnings (print (g))
 
 ## left from plotWAC: implement someday?

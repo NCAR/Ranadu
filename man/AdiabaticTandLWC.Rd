@@ -36,11 +36,13 @@ be the cloud base, and .lwc will be zero, but the routine doesn't
 require this and if given a subsaturated vapor pressure will
 calculate reversible ascent below cloud base and produce zero LWC
 for final pressures below cloud base. If the optional vapor pressure
-at the starting point is zero or omittedthe equilibrium vapor pressure at the
+at the starting point is zero or omitted the equilibrium vapor pressure at the
 starting-point temperature will be used.
 }
 \examples{
-{Z <- AdiabaticTandLWC (900., 20., c(900,800,700,600,500,400)) ; print(Z)}
+AdiabaticTandLWC (900, 20, c(900,800,700,600,500,400))
+\dontrun{plot(AdiabaticTandLWC (900.,20.,seq(900,200,by=-10))$ALWC, seq(900,200,by=-10), 
+    xlab='LWC [g/m^3]', ylab = 'Pressure [hPa]', ylim=c(1000,100), type='l', lwd=2, col='blue')}
 }
 \author{
 William Cooper

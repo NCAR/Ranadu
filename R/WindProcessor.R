@@ -10,14 +10,22 @@
 #' SSLIP is not present then SSRD, if present, will be used.)
 #' @author Al Cooper
 #' @export WindProcessor
-#' @param data A data.frame containing these variables: 
+#' @aliases windProcessor
+#' @import zoo
+#' @param data A data.frame containing these variables (and possibly others): 
 #' TASX, ATTACK, SSLIP, GGVEW, GGVNS, GGVSPD, VEW, VNS, THDG, ROLL, and PITCH.
+#' Note that for some data archives GGVSPD may not be present, so it will be
+#' necessary to define a new data.frame variable (e.g., Data$GGVSPD <- Data$VSPD_A).
+#' Also, (ATTACK and AKRD) and (SSLIP and SSRD) are usually the same, so similar 
+#' substitution may be needed in those cases.
 #' @return The original data.frame is returned with variables WDN, WSN, WIN added. These
-#' variables are the horizontal wind direction and speed and the vertical wind.
-WindProcessor <- function (data=Data) {
+#' variables are the new horizontal wind direction and speed and the vertical wind.
+#' @examples
+#' newData <- WindProcessor (RAFdata)
+
+WindProcessor <- function (data) {
   Cradeg <- pi/180
   Names <- names (data)
-  # attach (data)
   if ("PITCHC" %in% Names) {
     PITCH <- data$PITCHC
   } else {
