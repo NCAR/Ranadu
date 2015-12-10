@@ -101,9 +101,14 @@ makeNetCDF <- function (d, newNetCDFname) {
       if ("units" == names (ATT)) {next}
       if ("class" == names (ATT)) {next}
       if ("tzone" == names (ATT)) {next}
+      if ("actual_range" == names (ATT)) {next}
       aname <- names(ATT)
-      avalue <- as.character (ATT)
-      ncatt_put (nc, V, attname=aname, attval=avalue, definemode=TRUE)
+      if ("_FillValue" == names (ATT)) {
+        ncatt_put (nc, V, attname=aname, attval=as.double(ATT), definemode=TRUE)
+      } else {
+        avalue <- as.character (ATT)
+        ncatt_put (nc, V, attname=aname, attval=avalue, definemode=TRUE)
+      }
     }
   }
   nc_enddef (nc)
