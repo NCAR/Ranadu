@@ -9,6 +9,7 @@
 #' @return A ggplot theme descriptor.
 #' @examples 
 #' \dontrun{g <- g + theme_WAC ()}
+
 theme_WAC <- function () {
   themeWAC <- theme_gdocs() + theme(
     plot.title = element_text(hjust=0.5),

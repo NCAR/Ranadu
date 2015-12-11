@@ -16,7 +16,11 @@ A numeric vector representing the dewpoint in deg. C corresponding to the input 
 Finds the dew point given the water vapor pressure
 }
 \details{
-The Murphy-Koop equation for water vapor pressure is inverted to find dew point (in deg. C) from water vapor pressure (in hPa). The inversion uses the R routine nleqslv.
+The Murphy-Koop equation for water vapor pressure is inverted to find 
+the dew point (in deg. C) from the water vapor pressure (in hPa). The inversion uses the 
+R routine nleqslv. This gives the temperature where the equilibrium vapor pressure 
+matches the supplied vapor pressure, but without consideration of the "enhancement factor"
+that changes the equilibrium pressure in the presence of air or another gas.
 }
 \examples{
 DP <- DPfromE (0.01)

@@ -4,8 +4,8 @@
 \alias{CorrectHeading}
 \title{CorrectHeading}
 \usage{
-CorrectHeading(.data = Data, .span = 21, .default = -0.08,
-  .Valid = NULL, .plotfile = NULL)
+CorrectHeading(.data, .span = 21, .default = -0.08, .Valid = NULL,
+  .plotfile = NULL)
 }
 \arguments{
 \item{.data}{A data.frame containing measurements of body accelerations (called

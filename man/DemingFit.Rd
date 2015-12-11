@@ -17,10 +17,15 @@ measurement uncertainty for the first set of measurements. Default: 1}
 \item{.sdy}{Like .sdx but for the second set of measurements.}
 }
 \value{
-c(a, b, rms) for a fit of the form y = a + b * x, or NULL if no fit is possible (e.g., too few points or zero correlation)
+c(a, b, rms) for a fit of the form y = a + b * x, or NULL if no fit is 
+possible (e.g., too few points or zero correlation). The returned value rms
+is the normalized error, the rms of distances from the line if the two standard
+deviations .sdx and .sdy are the same or else the standard error applicable to
+the variable .x (or ratio*.y where ratio is .sdy/.sdx. This requires additional
+interpretation where the values .sdx or .sdy are variable.
 }
 \description{
-Fit a line to data that minimizes the least-squared 
+Fit a line to data so that the fit minimizes the least-squared 
 distance of the data points from the line.
 }
 \details{

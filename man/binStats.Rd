@@ -12,7 +12,7 @@ binStats(.d, bins = 20, xlow = min(.d[, 2], na.rm = TRUE),
 values to partition and summarize and the second the variable used for
 defining bins. Values from the first will be grouped according to the
 bins in the second and then a mean and standard deviation will be
-calculated for each group.}
+calculated for each group. Additional column variables will be ignored.}
 
 \item{bins}{(default 20)}
 
@@ -23,10 +23,10 @@ second variable.}
 second variable.}
 }
 \value{
-A dataframe of dimension c(bins,4) that contains, for each bin,
-'xc' = the center coordinate of the bin, 'ybar' = the mean value for the bin
+A dataframe of dimension c(bins, 4) that contains, for each bin,
+'xc' = the center coordinate of the bin (2nd column), 'ybar' = the mean value for the bin
 (or NA if there are no members of the group), 'sigma' = the standard
-deviation for the bin, or NA for no members of the group, and 'N' = 
+deviation for the bin, or NA for no members of the group, and 'nb' = 
 the number of values in the bin.
 }
 \description{
@@ -34,7 +34,7 @@ bin and calculate mean and st.dev. for each bin
 }
 \details{
 Given two corresponding variables in a data frame, defines
-bins in the second, bins corresponding values of the first, and
+bins in the second, bins the values of the first, and
 calculates the mean and standard deviation of the first in each bin.
 The purpose is to provide values for error bars, e.g., for geom_errorbar
 where ymin=ybar-sigma and ymax=ybar+sigma.

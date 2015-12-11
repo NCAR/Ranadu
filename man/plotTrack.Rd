@@ -4,14 +4,15 @@
 \alias{plotTrack}
 \title{plotTrack}
 \usage{
-plotTrack(lon = Data$LONC, lat = NULL, Time = NULL, WDC = NULL,
-  WSC = NULL, .Range = 0, xc = NULL, yc = NULL, sz = NULL,
-  .Spacing = 15, .WindFlags = 0, ...)
+plotTrack(lon, lat = NULL, Time = NULL, WDC = NULL, WSC = NULL,
+  .Range = 0, xc = NULL, yc = NULL, sz = NULL, .Spacing = 15,
+  .WindFlags = 0, ...)
 }
 \arguments{
 \item{lon}{A numeric vector of longitude coordinates (degrees). Optionally,
 a data.frame containing the variables Time, LONC, LATC, WDC, WSC, in which
-case the corresponding parameters below can be omitted.}
+case the corresponding parameters below can be omitted. For a drifting plot (described
+under optional parameter xc), the data.frame also needs TASX, THDG, SSLIP}
 
 \item{lat}{A numeric vector of latitude coordinates (degrees)}
 
@@ -21,8 +22,9 @@ case the corresponding parameters below can be omitted.}
 
 \item{WSC}{A numeric vector of wind speed}
 
-\item{.Range}{A sequence of indices to use when plotting lat, lon, Time 
-(default is 0 which causes the entire range of indices to be plotted.)}
+\item{.Range}{A sequence of indices to use when plotting lat, lon, 
+Time (default is 0 which causes the entire range of indices to be 
+plotted.)}
 
 \item{xc}{An optional central longitude for the plot. If omitted, the range in 
 lon[r] is used to determine the midpoint. If NA, this is a flag to plot a
@@ -41,7 +43,8 @@ size is determined from 20\% more than the range of measurements.}
 in minutes. The default is 15 min.}
 
 \item{.WindFlags}{A scale factor for wind flags placed along the track, 
-in units of percentage of the plot size. The default is 0 which suppresses the flags. A common value is 5.}
+in units of percentage of the plot size. The default is 0 which suppresses the flags. 
+A common value is 5.}
 
 \item{...}{Additional arguments passed to the plot routine to control 
 graphics parameters etc.}
@@ -56,7 +59,8 @@ Plot a flight track in lat-lon coordinates.
 The flight track is shown with appropriate geographic boundaries, and the lat-lon scales are adjusted to give rectilinear coordinates at the center of the plot. The center coordinates and size of the plot can be specified, or if omitted will be set to cover the range of data in the supplied coordinates. The range of indices to plot can  be supplied in the argument .Range or in the range of indices supplied with the arguments (lon, lat, Time). By default, labels are placed along the track every 15 min; this can be changed by the .Spacing argument.
 }
 \examples{
-\dontrun{plotTrack (RAFdata)}
+plotTrack (RAFdata, sz=8, .Spacing=5)
+plotTrack (RAFdata, sz=1, .Spacing=1, .WindFlags=2)
 }
 \author{
 William Cooper

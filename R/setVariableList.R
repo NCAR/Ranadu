@@ -1,6 +1,6 @@
 
 #' @title setVariableList
-#' @description GUI for selecting from available netCDF variables
+#' @description GUI for selecting from available netCDF variables (under development)
 #' @details A display of buttons for all the available variables in a netCDF
 #' file is generated, with variables already in 'VarList' highlighted.
 #' Clicking on buttons highlights them also, and when the File->Set Selections
@@ -9,11 +9,10 @@
 #' work, including assuming that 'VarList' exists in the global environment
 #' and, at the end, writing to that variable list. It will over-write an 
 #' existing 'VarList'.
-#' @aliases setVariableList
+#' @aliases setVariables
 #' @author William Cooper
 #' @export setVariableList
 #' @import tcltk
-#' @import ncdf4
 #' @param fname The name of a netCDF file containing variables.
 #' @param VarList A vector of character names to be selected before user interaction. 
 #' This might be the result of a call to Ranadu::standardVariables(), for example.
@@ -22,6 +21,8 @@
 #' \dontrun{setVariableList("/scr/raf_data/WINTER/WINTERrf11.nc", c("ATX", "PSXC"))}
 
 setVariableList <- function (fname, VarList=vector()) {
+  
+  requireNamespace("tcltk")
   ## callback functions:
   varClick <- function(v) {
     # print (sprintf("entry to varClick, argument %s", v))
@@ -64,7 +65,7 @@ setVariableList <- function (fname, VarList=vector()) {
   nc_close (netCDFfile)
   VarNames <- VarList
   guiVar <- tktoplevel()
-  tktitle(guiVar) <- sprintf ("%s flight %s: Available Variables", Project, Flight)
+  tktitle(guiVar) <- sprintf ("Available Variables")
   topMenu <- tkmenu(guiVar)           # Create a menu
   tkconfigure(guiVar, menu = topMenu) # Add it to the 'guiVar' window
   #txt <- tktext(guiVar)       # Create a text widget

@@ -4,16 +4,18 @@
 #' @aliases plotTrack
 #' @author William Cooper
 #' @export plotTrack
-#' @import maps mapdata mapproj
+#' @import maps
 #' @param lon A numeric vector of longitude coordinates (degrees). Optionally,
 #' a data.frame containing the variables Time, LONC, LATC, WDC, WSC, in which
-#' case the corresponding parameters below can be omitted.
+#' case the corresponding parameters below can be omitted. For a drifting plot (described
+#' under optional parameter xc), the data.frame also needs TASX, THDG, SSLIP
 #' @param lat A numeric vector of latitude coordinates (degrees) 
 #' @param Time A POSIX-format vector of times corresponding to lat/lon
 #' @param WDC A numeric vector of wind direction
 #' @param WSC A numeric vector of wind speed
-#' @param .Range A sequence of indices to use when plotting lat, lon, Time 
-#' (default is 0 which causes the entire range of indices to be plotted.) 
+#' @param .Range A sequence of indices to use when plotting lat, lon, 
+#' Time (default is 0 which causes the entire range of indices to be 
+#' plotted.) 
 #' @param xc An optional central longitude for the plot. If omitted, the range in 
 #' lon[r] is used to determine the midpoint. If NA, this is a flag to plot a
 #' dead-reckoning plot drifting with the wind with coordinates relative to the
@@ -27,16 +29,20 @@
 #' @param .Spacing The spacing between time labels placed on the graph, 
 #' in minutes. The default is 15 min.
 #' @param .WindFlags A scale factor for wind flags placed along the track, 
-#' in units of percentage of the plot size. The default is 0 which suppresses the flags. A common value is 5.
+#' in units of percentage of the plot size. The default is 0 which suppresses the flags. 
+#' A common value is 5.
 #' @param ... Additional arguments passed to the plot routine to control 
 #' graphics parameters etc. 
 #' @return none -- The result is the plot.
 #' @examples 
-#' \dontrun{plotTrack (RAFdata)}
-plotTrack <- function (lon=Data$LONC, lat=NULL, Time=NULL, WDC=NULL, 
+#' plotTrack (RAFdata, sz=8, .Spacing=5)
+#' plotTrack (RAFdata, sz=1, .Spacing=1, .WindFlags=2)
+
+plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL, 
                        WSC=NULL, .Range=0, xc=NULL, yc=NULL, 
                        sz=NULL, .Spacing=15, .WindFlags=0, ...) {
   DRIFT <- FALSE
+  # suppressMessages (library ("maps"))
   
   if (is.data.frame (lon)) {
     df <- lon
@@ -72,8 +78,15 @@ plotTrack <- function (lon=Data$LONC, lat=NULL, Time=NULL, WDC=NULL,
       xhigh <- max (xa, na.rm=TRUE)
       ylow <- min (ya, na.rm=TRUE)
       yhigh <- max (ya, na.rm=TRUE)
-      xl <- c(xlow-0.05*(xhigh-xlow), xhigh+0.05*(xhigh-xlow))
-      yl <- c(ylow-0.05*(yhigh-ylow), yhigh+0.05*(yhigh-ylow))
+      if (is.null (sz)) {
+        xl <- c(xlow-0.05*(xhigh-xlow), xhigh+0.05*(xhigh-xlow))
+        yl <- c(ylow-0.05*(yhigh-ylow), yhigh+0.05*(yhigh-ylow))
+      } else {
+        xc <- (xhigh + xlow) / 2
+        yc <- (yhigh + ylow) / 2
+        xl <- c(xc-sz/2, xc+sz/2)
+        yl <- c(yc-sz/2, yc+sz/2)
+      }
       plot (xa, ya, type='l', xlim=xl, ylim=yl, asp=1, lwd=2, col='blue',
             xlab="distance east [km]", ylab="distance north [km]")
       ltm <- as.POSIXlt(Time)
@@ -103,41 +116,35 @@ plotTrack <- function (lon=Data$LONC, lat=NULL, Time=NULL, WDC=NULL,
     xhigh = max (lon[.Range], na.rm=TRUE)
     ylow <- min (lat[.Range], na.rm=TRUE)
     yhigh = max (lat[.Range], na.rm=TRUE)
-    if (!is.null(xc)) {
-      if (!is.null(sz)) {
-        xl <- c(xc-sz/2., xc+sz/2.)
-      } else {
-        xt <- (xhigh-xc)
-        xt <- ifelse ((xc-xlow > xt), xc-xlow, xt)
-        xl <- c (xc-xt*1.05, xc+xt*1.05)
-      }
+    if (is.null (xc)) {xc <- (xlow + xhigh) / 2}
+    if (is.null (yc)) {yc <- (ylow + yhigh) / 2}
+    if (is.null (sz)) {
+      xt <- max (xhigh - xc, xc - xlow)
+      yt <- max (yhigh - yc, yc - ylow)
+      xl <- c (xc - xt*1.1, xc + xt*1.1)
+      yl <- c (yc - yt*1.1, yc + yt*1.1)
     } else {
-      xl <- c(xlow-0.1*(xhigh-xlow), xhigh+0.1*(xhigh-xlow))
-    } 
-    if (!is.null(yc)) {
-      if (!is.null(sz)) {
-        yl <- c(yc-sz/2., yc+sz/2.)
-      } else {
-        yt <- (yhigh-yc)
-        yt <- ifelse ((yc-ylow > yt), yc-ylow, yt)
-        yl <- c (yc-yt*1.05, yc+yt*1.05)
-      }
-    } else {
-      yl <- c(ylow-0.1*(yhigh-ylow), yhigh+0.1*(yhigh-ylow))
+      xl <- c (xc-sz/2, xc+sz/2)
+      yl <- c (yc-sz/2, yc+sz/2)
     }
+    
     sz <- max (xl[2] - xl[1], yl[2] - yl[1])
     
     ap <- 1. / cos (median (lat[.Range], na.rm=TRUE)*pi/180.)
-    plot (lon[.Range], lat[.Range], type='n', xlim=xl, ylim=yl, asp=ap,
+    plot (lon[.Range], lat[.Range], type='n', xlim=xl, ylim=yl, asp=ap, pty='s',
           xlab=expression(paste("Longitude [",degree,
                                 "]")), ylab=expression(paste("Latitude [",degree,"]")))
     if ((min(lon[.Range], na.rm=TRUE) < -130) 
         | (max(lon[.Range], na.rm=TRUE) > -70.)
         | (min(lat[.Range], na.rm=TRUE) < 30.) 
         | (max(lat[.Range], na.rm=TRUE) > 50.)) {
-      maps::map("world", add=TRUE, fill=FALSE, col="black", lty=2)
+      if (requireNamespace("maps", quietly=TRUE)) {
+        maps::map("world", add=TRUE, fill=FALSE, col="black", lty=2)
+      }
     } else {
-      maps::map("state", add=TRUE, fill=FALSE, col="black", lty=2)
+      if (requireNamespace ("maps", quietly=TRUE)) {
+        maps::map('state', add=TRUE, fill=FALSE, col="black", lty=2)
+      }
     }
     points (lon[.Range], lat[.Range], type='l', col='blue', 
             xlab='Latitude [deg.]', ylab='Longitude [deg.]')

@@ -2,20 +2,20 @@
 % Please edit documentation in R/TrueAirspeed.R
 \name{TrueAirspeed}
 \alias{TrueAirspeed}
-\alias{trueairspeed}
+\alias{trueAirspeed}
 \title{TrueAirspeed}
 \usage{
 TrueAirspeed(MACH, AT, EoverP = 0)
 }
 \arguments{
-\item{MACH}{A numeric representing the Mach number, possible from MachNumber()}
+\item{MACH}{A numeric vector representing the Mach number, possible from MachNumber()}
 
-\item{AT}{A numeric representing the air temperature in deg.C}
+\item{AT}{A numeric vector representing the air temperature in deg.C}
 
-\item{EoverP}{An optional numeric representing the ratio of water vapor pressure to total pressure}
+\item{EoverP}{An optional numeric vector representing the ratio of water vapor pressure to total pressure}
 }
 \value{
-The true airspeed in m/s
+A numeric vector giving the true airspeed in m/s
 }
 \description{
 Returns the true airspeed
@@ -24,9 +24,7 @@ Returns the true airspeed
 Calculates the true airspeed from measurements of Mach number, air temperature, and optionally humidity
 }
 \examples{
-TAS <- TrueAirspeed (0.3, 10.)
-TAS <- TrueAirspeed (0.5, 0., 6.11/800.)
-TAS <- TrueAirspeed (MachNumber (RAFdata$PSXC, RAFdata$QCXC), RAFdata$ATX)
+TAS <- TrueAirspeed (MachNumber (RAFdata$PSXC, RAFdata$QCXC), RAFdata$ATX, RAFdata$EWX/RAFdata$PSXC)
 }
 \author{
 William Cooper

@@ -3,6 +3,7 @@
 \name{SpecificHeats}
 \alias{SpecificHeat}
 \alias{SpecificHeats}
+\alias{specificHeats}
 \alias{specificheat}
 \alias{specificheats}
 \title{SpecificHeats}
@@ -24,7 +25,7 @@ Calculates the specific heat at constant pressure, specific heat at constant vol
 \examples{
 CP <- SpecificHeats()    # gives dry-air valuies, single row
 CP <- SpecificHeats(6.11/800.)
-\dontrun{CP <- (EWX/PSXC) # returns array if EWX and PSXC are vectors}
+CP <- SpecificHeats (RAFdata$EWX / RAFdata$PSXC)
 }
 \author{
 William Cooper

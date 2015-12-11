@@ -2,21 +2,22 @@
 % Please edit documentation in R/TellAbout.R
 \name{ValueOf}
 \alias{ValueOf}
+\alias{valueOf}
 \title{ValueOf}
 \usage{
-ValueOf(Variable, HHMMSS, DataFrame = Data)
+ValueOf(DataFrame, Variable, HHMMSS)
 }
 \arguments{
-\item{Variable}{A variable in a dataframe named Data that also includes Time. The
-variable can be in the form Data$TASX or, if Data is attached,
-TASX, or "TASX".}
+\item{DataFrame}{A dataframe containing 'Variable' and also 'Time',
+a POSIX-format time variable used for searching for the desired time.}
+
+\item{Variable}{A variable in DataFrame. The variable can be in the 
+form DataFrame$TASX or TASX, or "TASX".}
 
 \item{HHMMSS}{A time in hour-minute-second format (e.g., 134513)}
-
-\item{DataFrame}{The dataframe containing Variable}
 }
 \value{
-The value of the supplied variable at the specified time.
+A numeric containing the value of 'Variable' at the specified time.
 }
 \description{
 Returns value of a variable at a specified time
@@ -27,8 +28,9 @@ the specified time and returns the value of the specified
 variable at that index.
 }
 \examples{
-ValueOf (RAFdata$ATX, 201100, RAFdata)
-ValueOf ("ATX", 201100, RAFdata)
+ValueOf (RAFdata, ATX, 201100)
+ValueOf (RAFdata, "ATX", 201100)
+ValueOf (RAFdata, RAFdata$ATX, 201100)
 }
 \author{
 William Cooper

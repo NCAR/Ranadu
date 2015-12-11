@@ -11,11 +11,20 @@ standardVariables(list = NULL)
 \item{list}{An optional list of variable names to add to the standard list}
 }
 \description{
-Standard set of variables, usually used in call to getNetCDF
+Standard set of variables, usually used in a call to getNetCDF
 }
 \details{
-Sets a standard list of variable names in VarList suitable for use in a call to getNetCDF. Optionally, add "list" to the variables.
-The standard variables are ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCXC, TASX, WDC, WSC, WIC.
+Sets a standard list of variable names in VarList suitable for use in a call 
+to getNetCDF. Optionally, add "list" to the variables.
+The standard variables are ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, 
+PSXC, QCXC, TASX, WDC, WSC, WIC. For NCAR/RAF-produced aircraft-data files, these
+variables are respectively the air temperature (degC), dew-point temperature (degC),
+aircraft altitude (m), aircraft latitude (deg N), aircraft longitude (deg. E),
+Mach Number, mixing ratio (g/kg), pressure altitude (m), ambient pressure (hPa),
+dynamic pressure (hPa), true airspeed (m/s), wind direction (degrees relative to 
+true north), wind speed (m/s), and vertical wind (m/s). For additional information
+on these and other variables used in those data archives, see the document 
+ProcessingAlgorithms.pdf with link in the github Wiki for this R package.
 }
 \examples{
 standardVariables (c("VEW", "PLWCC"))

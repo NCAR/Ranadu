@@ -4,7 +4,7 @@
 \alias{XformLA}
 \title{XformLA}
 \usage{
-XformLA(data = Data, Avector, .inverse = FALSE)
+XformLA(data, Avector, .inverse = FALSE)
 }
 \arguments{
 \item{data}{A data.frame containing at least ROLL, PITCH, THDG (true

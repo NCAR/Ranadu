@@ -1,11 +1,11 @@
 #' @title PressureAltitude
 #' @description Pressure altitude in the ISA standard atmosphere
 #' @details Calculates the altitude in the ISA standard atmosphere corresponding to the specified pressure
-#' @aliases PressureAltitude
+#' @aliases pressureAltitude
 #' @author William Cooper
 #' @export PressureAltitude
-#' @param P A numeric representing pressure in hPa 
-#' @return The pressure altitude in meters
+#' @param P A numeric vector representing pressure in hPa 
+#' @return A numeric vector giving the pressure altitude in meters
 #' @examples 
 #' PALT <- PressureAltitude (500.)
 #' PALT2 <- PressureAltitude (RAFdata$PSXC)
@@ -18,6 +18,6 @@ PressureAltitude <- function (P) {
 #   } else {
 #     PALT = 11000.+(8314.32*216.65)/(9.80665*28.9644)*log(226.3206/P)
 #   }
-  return (PALT)
+  return (as.vector(PALT))
 }
 

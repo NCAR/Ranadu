@@ -7,13 +7,14 @@
 #' because that function also assigns attributes to the data.frame and to the variables it
 #' contains that match those in the original netCDF file. This function extracts those
 #' attributes and adds them to the netCDF file that is created. Note that, when subsetting,
-#' it will be necessary to preserve the attributes; see help for getNetCDF. At present, this
+#' it will be necessary to preserve the attributes; see help for getNetCDF. The code
+#' includes an inactive function transferAttributes() for this purpose. At present, this
 #' will work for low-rate and 25-Hz variables but not for multi-dimensional variables like
 #' the hydrometeor size distributions.
-#' @aliases makeNetCDF
+#' @aliases MakeNetCDF
 #' @author William Cooper
-#' @import ncdf4
 #' @export makeNetCDF
+#' @import ncdf4
 #' @param d A data.frame produced by getNetCDF() or otherwise converted to the corresponding
 #' structure from that function.
 #' @param newNetCDFname A character path name for the file to be created
@@ -100,9 +101,14 @@ makeNetCDF <- function (d, newNetCDFname) {
       if ("units" == names (ATT)) {next}
       if ("class" == names (ATT)) {next}
       if ("tzone" == names (ATT)) {next}
+      if ("actual_range" == names (ATT)) {next}
       aname <- names(ATT)
-      avalue <- as.character (ATT)
-      ncatt_put (nc, V, attname=aname, attval=avalue, definemode=TRUE)
+      if ("_FillValue" == names (ATT)) {
+        ncatt_put (nc, V, attname=aname, attval=as.double(ATT), definemode=TRUE)
+      } else {
+        avalue <- as.character (ATT)
+        ncatt_put (nc, V, attname=aname, attval=avalue, definemode=TRUE)
+      }
     }
   }
   nc_enddef (nc)

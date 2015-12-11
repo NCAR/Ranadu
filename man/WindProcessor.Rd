@@ -2,17 +2,22 @@
 % Please edit documentation in R/WindProcessor.R
 \name{WindProcessor}
 \alias{WindProcessor}
+\alias{windProcessor}
 \title{WindProcessor}
 \usage{
-WindProcessor(data = Data)
+WindProcessor(data)
 }
 \arguments{
-\item{data}{A data.frame containing these variables: 
-TASX, ATTACK, SSLIP, GGVEW, GGVNS, GGVSPD, VEW, VNS, THDG, ROLL, and PITCH.}
+\item{data}{A data.frame containing these variables (and possibly others): 
+TASX, ATTACK, SSLIP, GGVEW, GGVNS, GGVSPD, VEW, VNS, THDG, ROLL, and PITCH.
+Note that for some data archives GGVSPD may not be present, so it will be
+necessary to define a new data.frame variable (e.g., Data$GGVSPD <- Data$VSPD_A).
+Also, (ATTACK and AKRD) and (SSLIP and SSRD) are usually the same, so similar 
+substitution may be needed in those cases.}
 }
 \value{
 The original data.frame is returned with variables WDN, WSN, WIN added. These
-variables are the horizontal wind direction and speed and the vertical wind.
+variables are the new horizontal wind direction and speed and the vertical wind.
 }
 \description{
 Calculates new wind variables WDN, WSN, WIN
@@ -26,6 +31,9 @@ resulting from that correction should be included in the data.frame. (If PITCHC 
 present, it will be used instead of PITCH. If TASN is present it will be used in 
 place of TASX. If ATTACK is not present then AKRD, if present, will be used. If
 SSLIP is not present then SSRD, if present, will be used.)
+}
+\examples{
+newData <- WindProcessor (RAFdata)
 }
 \author{
 Al Cooper

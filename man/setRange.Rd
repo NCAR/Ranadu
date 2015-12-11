@@ -13,6 +13,9 @@ setRange(Time, Start = 0, End = 0)
 
 \item{End}{The desired end time in HHMMSS format (defaults to the last time in the array)}
 }
+\value{
+A vector of indices corresponding to times in the requested time interval (inclusive).
+}
 \description{
 Set the index range based on requested time limits
 }
@@ -20,7 +23,7 @@ Set the index range based on requested time limits
 For time variable Time, finds indices that match the supplied start and end times and returns the result as a sequence
 }
 \examples{
-\dontrun{r <- setRange (Time, 103000, 113000)}
+r <- setRange (RAFdata, 201100, 201200)
 }
 \author{
 William Cooper

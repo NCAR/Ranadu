@@ -12,6 +12,8 @@
 #' @param .D  Data.frame containing the two variables to use for interpolation
 #' @return The interpolated value of variable #2 corresponding to the 
 #' value provided for variable #1 (.x)
+#' @examples
+#' LagrangeInterpolate (3.3, 3, data.frame (1:5, 1:5+runif(5,-0.1,0.1)))
 
 LagrangeInterpolate <- function (.x, .n, .D) {
   if (.n < 2 || .n > 10) {return(NA)}

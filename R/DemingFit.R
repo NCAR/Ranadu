@@ -2,10 +2,9 @@
 ## ----deming-fit, echo=TRUE, tidy=TRUE, tidy.opts=list(width.cutoff=60)----
 ####
 #' @title Deming Fit
-#' @description  Fit a line to data that minimizes the least-squared 
+#' @description  Fit a line to data so that the fit minimizes the least-squared 
 #' distance of the data points from the line.
 #' @details See the detailed description in DemingFit.pdf
-#' @aliases DemingFit
 #' @author William Cooper
 #' @export DemingFit
 #' @param .x A numeric vector of measurements from one source.
@@ -13,7 +12,12 @@
 #' @param .sdx A numeric vector specifying the standard 
 #' measurement uncertainty for the first set of measurements. Default: 1
 #' @param .sdy Like .sdx but for the second set of measurements.
-#' @return c(a, b, rms) for a fit of the form y = a + b * x, or NULL if no fit is possible (e.g., too few points or zero correlation)
+#' @return c(a, b, rms) for a fit of the form y = a + b * x, or NULL if no fit is 
+#' possible (e.g., too few points or zero correlation). The returned value rms
+#' is the normalized error, the rms of distances from the line if the two standard
+#' deviations .sdx and .sdy are the same or else the standard error applicable to
+#' the variable .x (or ratio*.y where ratio is .sdy/.sdx. This requires additional
+#' interpretation where the values .sdx or .sdy are variable.
 #' @examples 
 #' DemingFit ((1:5+rnorm(5,0,0.5)), (1:5+rnorm(5,0,0.5)))
 #' DemingFit (RAFdata$RTH1, RAFdata$RTH2)

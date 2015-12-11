@@ -1,11 +1,12 @@
 #' @title Gravity
 #' @description Provides the acceleration caused by gravity.
 #' @details The formula used incorporates the dependence on latitude and on altitude above the WGS-84 geoid.
-#' @aliases Gravity
+#' @aliases gravity
 #' @author William Cooper
 #' @export Gravity
 #' @param latitude The latitude (or vector of latitudes) in units of degrees N.
-#' @param altitude The altitude in meters above the WGS-84 geoid. GPS measurements are usually appropriate to use when supplying this altitude.
+#' @param altitude The altitude in meters above the WGS-84 geoid. GPS measurements are 
+#' usually appropriate to use when supplying this altitude.
 #' @return The acceleration of gravidy in units of m/s^2
 #' @examples 
 #' G <- Gravity (RAFdata$GGLAT, RAFdata$GGALT)

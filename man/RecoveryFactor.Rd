@@ -2,6 +2,7 @@
 % Please edit documentation in R/RecoveryFactor.R
 \name{RecoveryFactor}
 \alias{RecoveryFactor}
+\alias{recoveryFactor}
 \alias{recoveryfactor}
 \title{RecoveryFactor}
 \usage{

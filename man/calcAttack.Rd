@@ -18,10 +18,14 @@ Calculate angle-of-attack
 }
 \details{
 Assumes vertical wind = 0, finds AOA from pitch, VSPD and TASX. Used to
-provide a reference value for calibrating gust probes.
+provide a reference value for calibrating gust probes. The radome "calibration"
+coefficients are usually determined by fitting to reference values provided by
+this function, so it should be used where it is expected that the vertical wind
+is zero or averages to zero.
 }
 \examples{
 AOAREF <- calcAttack (RAFdata$PITCH, RAFdata$GGVSPD, RAFdata$TASX)
+plot (RAFdata$ATTACK, calcAttack (RAFdata$PITCH, RAFdata$GGVSPD, RAFdata$TASX))
 }
 \author{
 William Cooper

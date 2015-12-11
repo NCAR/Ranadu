@@ -1,6 +1,8 @@
 #' @title DataDirectory
 #' @description Returns the location of the local data directory. 
-#' @details This is intended to make it easier to write programs that work on different computers where the netCDF files by convention are stored in different locations. It returns the local location, or NA if none of the standard locations are found.
+#' @details This is intended to make it easier to write programs that work on different 
+#' computers where the netCDF files by convention are stored in different locations. 
+#' It returns the local location, or NA if none of the standard locations are found.
 #' @aliases DataDirectory
 #' @author William Cooper
 #' @export DataDirectory
@@ -16,30 +18,30 @@ DataDirectory <- function() {
   #    RAF ground station: /home/data/
   # add others as needed
   
-  DataDir <- Sys.getenv ("DATA_DIR")
-  if (file.exists(DataDir)){
-    return(paste(DataDir,'/',sep=''))
+  DataDir <- Sys.getenv ("DATA_DIR")  ## EOL systems have this environment variable
+  if (file.exists (DataDir)){
+    return (paste (DataDir, '/', sep=''))
   }
   DataDir <- "/scr/raf_data/"
-  if (file.exists(DataDir)){
-    return(DataDir)
+  if (file.exists (DataDir)){
+    return (DataDir)
   }
   DataDir <- "/home/data/"
-  if (file.exists(DataDir)){
-    return(DataDir)
+  if (file.exists (DataDir)){
+    return (DataDir)
   }
   DataDir <- "/home/Data/"
-  if (file.exists(DataDir)){
-    return(DataDir)
+  if (file.exists (DataDir)){
+    return (DataDir)
   }
 
   DataDir <- "/Data/"
-  if (file.exists(DataDir)){
-    return(DataDir)
+  if (file.exists (DataDir)){
+    return (DataDir)
   }
   DataDir <- "~/Data/"
-  if (file.exists(DataDir)){
-    return(DataDir)
+  if (file.exists (DataDir)){
+    return (DataDir)
   }
   return(NA)
 } 
