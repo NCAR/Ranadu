@@ -96,14 +96,18 @@ makeNetCDF <- function (d, newNetCDFname) {
     ATV <- attributes (eval (parse (text=sprintf ("d$%s", V))))
     for (i in 1:length(ATV)) {
       ATT <- ATV[i]
-      if ("dim" == names (ATT)) {next}
-      if ("Dimensions" == names (ATT)) {next}
-      if ("units" == names (ATT)) {next}
-      if ("class" == names (ATT)) {next}
-      if ("tzone" == names (ATT)) {next}
-      if ("actual_range" == names (ATT)) {next}
       aname <- names(ATT)
-      if ("_FillValue" == names (ATT)) {
+      if (length (ATT) < 1) {
+        ncatt_put (nc, V, attname="_FillValue", attval=as.double(-32767), definemode=TRUE)
+        next
+      }
+      if ("dim" == aname) {next}
+      if ("Dimensions" == aname) {next}
+      if ("units" == aname) {next}
+      if ("class" == aname) {next}
+      if ("tzone" == aname) {next}
+      if ("actual_range" == aname) {next}
+      if ("_FillValue" == aname) {
         ncatt_put (nc, V, attname=aname, attval=as.double(ATT), definemode=TRUE)
       } else {
         avalue <- as.character (ATT)

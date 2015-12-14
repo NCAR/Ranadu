@@ -1,3 +1,19 @@
+Version 2.3-15-12-15
+  Additions:
+      OpenInProgram.R       -- opens ncplot or Xanadu or another program with variables
+                               from an R data.frame, for easy viewing
+      Rsubset.R             -- Creates subset R data.frame while preserving, so far as
+                               reasonable, the attributes of the original data.frame
+      DataFileInfo.R        -- provides information on a netCDF archive file (project,
+                               flight number, times, variables, etc.)
+      RanaduManual.pdf      -- Added a manual and tutorial, residing in the 'inst'
+                               subdirectory
+  Modifications:
+      [conventions]         -- Made changes needed to pass 'devtools' checks without
+                               errors, notes, or warnings. Reviewed all the code and
+                               made cosmetic improvements in many places.
+      makeNetCDF.R          -- modifications permit better functioning with added
+                               data.frame columns, e.g., by assigning minimal attributes.
 Version 2.2-15-10-26
   Modifications:
                             -- fixed examples, added data.frame sample, and generally
