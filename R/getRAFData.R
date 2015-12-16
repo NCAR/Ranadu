@@ -42,7 +42,7 @@
 getRAFData <- function (.Rdata="Temp", .Directory=NA, .Project, .Flight, 
                         .Start=0, .End=0, .VarList=NA, .F=0) {
   if (is.na(.Directory)) {.Directory <- DataDirectory ()}
-  if (is.na(.VarList)) {
+  if (length (.VarList) < 2 && is.na(.VarList)) {
     .VarList <- standardVariables ()
   }
   fname <- sprintf ("%s/%s/%s%s.nc", .Directory, .Project, .Project, .Flight)
