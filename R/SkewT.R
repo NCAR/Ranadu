@@ -1,6 +1,6 @@
 #' @title SkewTSounding
 #' @description Plots a specified segment of data from a netCDF file on a skew-T background
-#' @details Superimposes a sound plot on a skew-T diagram. The sounding data can either be
+#' @details Superimposes a sounding plot on a skew-T diagram. The sounding data can either be
 #' plotted as a continuous path or averaged in intervals before plotting. The diagram
 #' is generated separately via a "Skew-TDiagram" program, with the plot saved in
 #' "SkewT.RData" as plot definition "g". This is used by default, but another
