@@ -8,7 +8,7 @@
 TrueAirspeed(MACH, AT, EoverP = 0)
 }
 \arguments{
-\item{MACH}{A numeric vector representing the Mach number, possible from MachNumber()}
+\item{MACH}{A numeric vector representing the Mach number, possibly from MachNumber()}
 
 \item{AT}{A numeric vector representing the air temperature in deg.C}
 

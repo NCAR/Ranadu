@@ -4,7 +4,7 @@
 #' @aliases trueAirspeed
 #' @author William Cooper
 #' @export TrueAirspeed
-#' @param MACH A numeric vector representing the Mach number, possible from MachNumber()
+#' @param MACH A numeric vector representing the Mach number, possibly from MachNumber()
 #' @param AT A numeric vector representing the air temperature in deg.C
 #' @param EoverP An optional numeric vector representing the ratio of water vapor pressure to total pressure
 #' @return A numeric vector giving the true airspeed in m/s
