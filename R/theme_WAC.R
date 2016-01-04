@@ -4,7 +4,7 @@
 #' @aliases theme_WAC
 #' @author William Cooper
 #' @import ggplot2
-#' @import ggthemes grid reshape2
+#' @import ggthemes 
 #' @export theme_WAC
 #' @return A ggplot theme descriptor.
 #' @examples 

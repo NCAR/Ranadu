@@ -55,15 +55,16 @@
 SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA, 
                            BackgroundSpecs="skewTDiagram.Rdata",
                            AverageInterval=0, ADD=FALSE) {
+  ## the next lines are just to satisfy devtools::check() that there is a
+  ## defined source for these variables; they are overwritten by 'load'
+  skewTDiagram <- NA
+  pBot <- 1000
+  pTop <- 100
+  tBot <- -40
+  tTop <- 40
   Bvar <- load (paste(path.package ("Ranadu"), BackgroundSpecs, sep='/'))
   # this loads skewTDiagram and tBot, tTop, pBot, pTop.
-  ## the next lines are just to satisfy devtools::check() that there is a
-  ## defined source for these variables:
-  skewTDiagram <- get (Bvar[1])
-  pBot <- get (Bvar[2])
-  pTop <- get (Bvar[3])
-  tBot <- get (Bvar[4])
-  tTop <- get (Bvar[5])
+
   g <- skewTDiagram     # just to save some length in later "s <- g + ..." lines
   ## print (ggplot_build(g$panel$ranges[[1]]$x.range))
   ## A function for translation between the P-T coordinates and the skew-T plot coordinates:
