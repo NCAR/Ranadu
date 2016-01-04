@@ -59,11 +59,11 @@ makeNetCDF <- function (d, newNetCDFname) {
     if (HR > 1) {
       vd <- ncvar_def (V,
                  units=var_units,
-                 dim=Dim, missval=as.single(-32767.), prec='float')
+                 dim=Dim, missval=as.double(-32767.), prec='float')
     } else {
       vd <- ncvar_def (V, 
                 units=var_units, 
-                Dimensions[["Time"]], missval=as.single(-32767.), prec='float')
+                Dimensions[["Time"]], missval=as.double(-32767.), prec='float')
     }
     vdef[[length(vdef)+1]] <- vd
   }
