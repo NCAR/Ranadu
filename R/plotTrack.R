@@ -74,10 +74,10 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
       }
       xa <- xa * 0.001
       ya <- ya * 0.001
-      xlow <- min (xa, na.rm=TRUE)
-      xhigh <- max (xa, na.rm=TRUE)
-      ylow <- min (ya, na.rm=TRUE)
-      yhigh <- max (ya, na.rm=TRUE)
+      xlow <- suppressWarnings (min (xa, na.rm=TRUE))
+      xhigh <- suppressWarnings (max (xa, na.rm=TRUE))
+      ylow <- suppressWarnings (min (ya, na.rm=TRUE))
+      yhigh <- suppressWarnings (max (ya, na.rm=TRUE))
       if (is.null (sz)) {
         xl <- c(xlow-0.05*(xhigh-xlow), xhigh+0.05*(xhigh-xlow))
         yl <- c(ylow-0.05*(yhigh-ylow), yhigh+0.05*(yhigh-ylow))
@@ -112,10 +112,10 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
     if (length(.Range) < 2) {
       .Range <- 1:length(Time)
     }
-    xlow <- min (lon[.Range], na.rm=TRUE)
-    xhigh = max (lon[.Range], na.rm=TRUE)
-    ylow <- min (lat[.Range], na.rm=TRUE)
-    yhigh = max (lat[.Range], na.rm=TRUE)
+    xlow <- suppressWarnings (min (lon[.Range], na.rm=TRUE))
+    xhigh = suppressWarnings (max (lon[.Range], na.rm=TRUE))
+    ylow <- suppressWarnings (min (lat[.Range], na.rm=TRUE))
+    yhigh = suppressWarnings (max (lat[.Range], na.rm=TRUE))
     if (is.null (xc)) {xc <- (xlow + xhigh) / 2}
     if (is.null (yc)) {yc <- (ylow + yhigh) / 2}
     if (is.null (sz)) {
