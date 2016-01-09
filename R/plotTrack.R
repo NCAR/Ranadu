@@ -51,7 +51,7 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
     if (length(.Range) < 2) {
       .Range <- 1:length(Time)
     }
-
+    
     WDC <- df$WDC
     WSC <- df$WSC
     lon <- df$LONC
@@ -134,18 +134,20 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
     plot (lon[.Range], lat[.Range], type='n', xlim=xl, ylim=yl, asp=ap, pty='s',
           xlab=expression(paste("Longitude [",degree,
                                 "]")), ylab=expression(paste("Latitude [",degree,"]")))
-    if ((min(lon[.Range], na.rm=TRUE) < -130) 
-        | (max(lon[.Range], na.rm=TRUE) > -70.)
-        | (min(lat[.Range], na.rm=TRUE) < 30.) 
-        | (max(lat[.Range], na.rm=TRUE) > 50.)) {
-      if (requireNamespace("maps", quietly=TRUE)) {
-        maps::map("world", add=TRUE, fill=FALSE, col="black", lty=2)
+    suppressWarnings (
+      if ((min(lon[.Range], na.rm=TRUE) < -130) 
+          | (max(lon[.Range], na.rm=TRUE) > -70.)
+          | (min(lat[.Range], na.rm=TRUE) < 30.) 
+          | (max(lat[.Range], na.rm=TRUE) > 50.)) {
+        if (requireNamespace("maps", quietly=TRUE)) {
+          maps::map("world", add=TRUE, fill=FALSE, col="black", lty=2)
+        }
+      } else {
+        if (requireNamespace ("maps", quietly=TRUE)) {
+          maps::map('state', add=TRUE, fill=FALSE, col="black", lty=2)
+        }
       }
-    } else {
-      if (requireNamespace ("maps", quietly=TRUE)) {
-        maps::map('state', add=TRUE, fill=FALSE, col="black", lty=2)
-      }
-    }
+    )
     points (lon[.Range], lat[.Range], type='l', col='blue', 
             xlab='Latitude [deg.]', ylab='Longitude [deg.]')
     ltm <- as.POSIXlt(Time)
