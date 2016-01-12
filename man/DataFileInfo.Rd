@@ -20,7 +20,9 @@ Brief information on the contents of a netCDF data file
 }
 \details{
 Reads the flight number, project, date/time, position, and variables from
-the netCDF file and returns a list of properties.
+the netCDF file and returns a list of properties. Alternately, produces similar
+information for a saved (.Rdata-format) data.frame produced by reading such a
+netCDF file.
 }
 \examples{
 FI <-DataFileInfo (sprintf ("\%s/extdata/RAFdata.nc", path.package ("Ranadu")))

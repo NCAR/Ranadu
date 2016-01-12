@@ -85,7 +85,7 @@ getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
   for (V in VarList) {
     if (is.na(V)) {next}
     if (length (which (grepl (V, namesCDF)))) {next}
-    cat (sprintf ("requested variable %s not in netCDF file;\n ---->ngetNetCDF returning with error", V))
+    cat (sprintf ("requested variable %s not in netCDF file;\n ----> getNetCDF returning with error", V))
     return (-1)
   }
   Time <- ncvar_get (netCDFfile, "Time")
