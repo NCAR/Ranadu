@@ -1,12 +1,14 @@
 #' @title getIndex
 #' @description Returns the index in 'Time' matching HHMMSS
 #' @details Find the index in a POSIXct time variable that corresponds to a specified time in HHMMSS format.
+#' Returns -1 if the requested time is outside the range in 'Time'
 #' @aliases getIndex
 #' @author William Cooper
 #' @export getIndex
 #' @param Time A POSIXct-format vector or a data.frame containing a similar variable 'Time"
 #' @param HHMMSS An integer representing time in HHMMSS format 
-#' @return A numeric index in the Time vector corresponding to the requested time
+#' @return A numeric index in the Time vector corresponding to the requested time,
+#' or -1 if there is no match.
 #' @examples 
 #' idx <- getIndex (RAFdata, 201130)
 
@@ -27,8 +29,8 @@ getIndex <- function (Time, HHMMSS) {
   if (t$hour < hour1) {
     tc <- tc + 86400
   }
-  index <- idx[abs(tr-tc) < 0.005]
   index <- which(abs(tr-tc) < 0.02)
+  if (length (index) < 1) {index <- -1}
   return (index)
 }
 
