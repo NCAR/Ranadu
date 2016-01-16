@@ -12,13 +12,15 @@ getIndex(Time, HHMMSS)
 \item{HHMMSS}{An integer representing time in HHMMSS format}
 }
 \value{
-A numeric index in the Time vector corresponding to the requested time
+A numeric index in the Time vector corresponding to the requested time,
+or -1 if there is no match.
 }
 \description{
 Returns the index in 'Time' matching HHMMSS
 }
 \details{
 Find the index in a POSIXct time variable that corresponds to a specified time in HHMMSS format.
+Returns -1 if the requested time is outside the range in 'Time'
 }
 \examples{
 idx <- getIndex (RAFdata, 201130)
