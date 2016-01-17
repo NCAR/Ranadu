@@ -35,7 +35,7 @@ ncsubset <- function (.OldFileName, .NewFileName, .Start=NA, .End=NA, .VarList=N
 #   .NewFileName <- "/home/Data/CONTRAST/work.nc"
 #   .VarList <- standardVariables()
 
-  .Data <- getNetCDF(.OldFileName, "Time")
+  .Data <- getNetCDF(.OldFileName, "TASX")
   SE <- getStartEnd(.Data$Time)
   if (is.na(.Start)) {.Start <- SE[1]}
   if (is.na(.End))   {.End   <- SE[2]}
@@ -47,10 +47,12 @@ ncsubset <- function (.OldFileName, .NewFileName, .Start=NA, .End=NA, .VarList=N
     IS = IS %/% 25
     IE = IE %/% 25
   }
+  if (IE >= nrow (.Data)) {IE <- IE - 1}
   if (length(.VarList) == 0) {
     Cmd <- sprintf("ncks -d Time,%d,%d %s %s", IS, IE, .OldFileName, .NewFileName)
   } else {
-    Cmd <- sprintf("ncks -v %s -d Time,%d,%d %s %s",  paste(list=.VarList, collapse=','), IS, IE, .OldFileName, .NewFileName)
+    Cmd <- sprintf("ncks -v %s -d Time,%d,%d %s %s",  
+                   paste(list=.VarList, collapse=','), IS, IE, .OldFileName, .NewFileName)
     print(sprintf("Cmd=%s",Cmd))
     print(sprintf(" .VarList=%s", paste(list=.VarList)))
     print(sprintf(" start and end indices are %d, %d", getIndex(.Data$Time, .Start), getIndex(.Data$Time, .End)))
