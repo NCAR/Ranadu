@@ -9,6 +9,7 @@ suppressMessages (suppressWarnings (
   library(Ranadu, quietly=TRUE, warn.conflicts=FALSE))
 )
 
+source ('R/plotTrack.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
@@ -50,7 +51,7 @@ trackSpecs <- function () {
   specs$panel <- list (var=.var)
   return (specs)
 }
-
+ltyps <- c('solid', 'dashed', 'dotted', 'd-dot', 'lg dash') ## in order, line types 1:5
 # graphSpecs <- function () {
 #   specs <- list()
 #   specs$type <- 'history'
@@ -159,16 +160,13 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   }
 }
 
-times <- c(as.POSIXct(0, origin='2012-05-29', tz='UTC'),
-           as.POSIXct(3600*8, origin='2012-05-29', tz='UTC'))
-
 # functions used later:
 hline <<- function(y, col='black', lwd=1, lty=2) {
   abline(h=y, col=col, lwd=lwd, lty=lty)
 }
 
 formatTime <- function (time) {
-  t <- as.POSIXlt (time)
+  t <- as.POSIXlt (time, tz='UTC')
   tt <- sprintf ("%d:%02d:%02d", t$hour, t$min, t$sec)
   return (tt)
 }
@@ -214,7 +212,7 @@ limitData <- function (Data, inp, lim=NA) {
   DataV <- Data
   namesV <- names(DataV)
   namesV <- namesV[namesV != "Time"]
-  if (is.na (lim)) {lim <- inp$limits}
+  if (is.na (lim)) {lim <- inp$restrict}
   if (lim) {
     t <- rep (FALSE, nrow(DataV))
     for (i in 1:nrow(Restrictions)) {
@@ -234,11 +232,6 @@ limitData <- function (Data, inp, lim=NA) {
   return (DataV)
 }
 
-# source ('PlotFunctions/RPlot1.R')
-# source ('PlotFunctions/RPlot2.R')
-
-
-VarList <- standardVariables (c('ROLL', 'VSPD', 'PS_A', 'QC_A'))
 
 chooseVar <- function (fname, inp) {
   VarList <<- setVariableList (fname, VarList)
@@ -252,9 +245,34 @@ loadConfig <- function (inp) {
   plotSpec <<- plotSpec
   Restrictions <<- Restrictions
   print (sprintf ('loadConfig, file=%s', inp$restore))
-  print (plotSpec[[1]]$panels)
 }
-load (file='plotSpec.def')
+load (file='plotSpec.def')  ## this loads initial values of plotSpec and Restrictions
+makeVarList <- function () {
+  VarList <- 'GGALT'
+  for (plt in 1:length(plotSpec$Plot)) {
+    for (pnl in 1:plotSpec$Plot[[plt]]$panels) {
+      VarList <- c(VarList, plotSpec$Plot[[plt]]$panel[[pnl]]$var)
+    }
+  }
+  VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 
+                          'DPXC', 'TASX', 'ROLL', 'VSPD',
+                          'THDG', 'SSLIP'))
+  VarList <- unique (VarList)
+  return (VarList)
+}
+VarList <- makeVarList()
+
+Data <- getNetCDF (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project, 
+                            plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight), VarList)
+
+times <- c(Data$Time[1], Data$Time[nrow(Data)])
+    step <- 60
+    minT <- Data$Time[1]
+    minT <- minT - as.integer (minT) %% step
+    maxT <- Data$Time[nrow(Data)]
+    maxT <- maxT - as.integer (maxT) %% step + step
+    times <- c(minT, maxT)
+
 # Restrictions <- data.frame()
 # Restrictions[1, 'RVAR'] <- 'TASX'
 # Restrictions[1, 'apply'] <- TRUE

@@ -63,11 +63,11 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     }
     if (!("ylim" %in% names(list(...))) && (yrange[1] != yrange[2])) {
       plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
-          lwd=lwd, lty=lty, type=type, col=col, xaxs="r", yaxs="r", 
+          lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
           log=logxy, ylim=c(yrange[1], yrange[2]), ...)
     } else {
       plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
-            lwd=lwd, lty=lty, type=type, col=col, xaxs="r", yaxs="r", 
+            lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
             log=logxy, ...)
     }
     if ('y' %in% logxy) {

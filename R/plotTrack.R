@@ -64,6 +64,9 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
       df <- df[.Range, ]
       THDG <- (df$THDG + df$SSLIP) * pi / 180
       TASX <- df$TASX
+      ## try to interpolate for missing values
+      TASX <- zoo::na.approx (as.vector(TASX), maxgap=1000, na.rm = TRUE)
+      THDG <- zoo::na.approx (as.vector(THDG), maxgap=1000, na.rm = TRUE)
       xp <- 0
       yp <- 0
       xa <- vector ("numeric", nrow(df))

@@ -60,7 +60,7 @@ setVariableList <- function (fname, VarList=vector()) {
   }
   ## start of main tcltk function
   netCDFfile <- nc_open (fname)
-  vn <- names (netCDFfile$var)
+  vn <- sort (names (netCDFfile$var))
   vnSel <- vector ("logical", length(vn))
   nc_close (netCDFfile)
   VarNames <- VarList
