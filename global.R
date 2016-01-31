@@ -8,13 +8,15 @@ suppressMessages (
 suppressMessages (suppressWarnings (
   library(Ranadu, quietly=TRUE, warn.conflicts=FALSE))
 )
+library(gtable)
+library(grid)
 
 source ('R/plotTrack.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
 Trace <- FALSE
-Trace <- TRUE
+# Trace <- TRUE
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
@@ -187,6 +189,7 @@ if (!file.exists (fn)) {
   if (Trace) {print (sprintf ('%s not found', fn))}
   fn <- sub ('\\.nc', '.Rdata', fn)
 }
+fname <- fn
 ## if Production load production-file info
 if (Production) {
   print (sprintf ('production section in global, Production=%d',
@@ -215,6 +218,7 @@ limitData <- function (Data, inp, lim=NA) {
   if (is.na (lim)) {lim <- inp$restrict}
   if (lim) {
     t <- rep (FALSE, nrow(DataV))
+    Restrictions <- plotSpec$Restrictions
     for (i in 1:nrow(Restrictions)) {
       if (Restrictions$apply[i]) {
         t <- t | (!is.na (DataV[, Restrictions$RVAR[i]]) & 
@@ -232,21 +236,22 @@ limitData <- function (Data, inp, lim=NA) {
   return (DataV)
 }
 
-
-chooseVar <- function (fname, inp) {
-  VarList <<- setVariableList (fname, VarList)
-}
-
 saveConfig <- function (inp) {
-  save (plotSpec, Restrictions, file=inp$save, ascii=TRUE)
+  save (plotSpec, file=inp$save, ascii=TRUE)
 }
 loadConfig <- function (inp) {
   load (file=inp$restore)
   plotSpec <<- plotSpec
-  Restrictions <<- Restrictions
   print (sprintf ('loadConfig, file=%s', inp$restore))
 }
 load (file='plotSpec.def')  ## this loads initial values of plotSpec and Restrictions
+
+chooseVar <- function (fname, inp) {
+  sVarList <<- setVariableList (fname, sVarList)
+}
+
+sVarList <- c('ATX', 'DPXC', 'GGALT', 'WIC')
+
 makeVarList <- function () {
   VarList <- 'GGALT'
   for (plt in 1:length(plotSpec$Plot)) {
@@ -256,21 +261,23 @@ makeVarList <- function () {
   }
   VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 
                           'DPXC', 'TASX', 'ROLL', 'VSPD',
-                          'THDG', 'SSLIP'))
+                          'THDG', 'SSLIP', sVarList))
   VarList <- unique (VarList)
   return (VarList)
 }
 VarList <- makeVarList()
 
+
+
 Data <- getNetCDF (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project, 
                             plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight), VarList)
 
-times <- c(Data$Time[1], Data$Time[nrow(Data)])
+# times <- c(Data$Time[1], Data$Time[nrow(Data)])
     step <- 60
     minT <- Data$Time[1]
-    minT <- minT - as.integer (minT) %% step
+    minT <- minT - as.integer (minT) %% step + step
     maxT <- Data$Time[nrow(Data)]
-    maxT <- maxT - as.integer (maxT) %% step + step
+    maxT <- maxT - as.integer (maxT) %% step 
     times <- c(minT, maxT)
 
 # Restrictions <- data.frame()
