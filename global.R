@@ -12,11 +12,12 @@ library(gtable)
 library(grid)
 
 source ('R/plotTrack.R')
+source ('R/PlotWAC.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
 Trace <- FALSE
-# Trace <- TRUE
+Trace <- TRUE
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
@@ -53,7 +54,101 @@ trackSpecs <- function () {
   specs$panel <- list (var=.var)
   return (specs)
 }
+graphSpecs <- function () {
+  specs <- list()
+  specs$type <- 'history'
+  specs$panels <- 6
+  specs$columns <- 1
+  specs$restrict <- FALSE
+  .var <- c('GGALT', 'PALT')
+  .col <- c('blue','darkgreen')
+  .lw <- c(1,1.5)
+  .lt <- c(1,2)
+  .lab <- .var
+  .ylim <- c(NA,NA)
+  .logY <- FALSE
+  .stamp <- FALSE
+  .fixed <- FALSE
+  sf <- function (.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed) {
+    list(var=.var, col=.col, lw=.lw, lt=.lt,
+         lab=.lab, ylim=.ylim, logY=.logY, 
+         stamp=.stamp, fixed=.fixed)
+  }
+  s1 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  .var <- c('ATX', 'DPXC')
+  .lab <- .var
+  s2 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  .var <- c('PSXC', 'PS_A')
+  .lab <- .var
+  s3 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  .var <- c('QCXC', 'QC_A')
+  .lab <- .var
+  s4 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  .var <- c('WSC', 'WIC')
+  .lab <- .var
+  s5 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  .var <- c('WDC', 'THDG')
+  .lab <- .var
+  s6 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  specs$panel <- list(s1, s2, s3, s4, s5, s6)
+  return (specs)
+}
+scatSpecs <- function () {
+  specs <- list()
+  specs$type <- 'scatterplot'
+  specs$panels <- 6
+  specs$columns <- 2
+  specs$restrict <- FALSE
+  .varx <- c('GGALT')
+  .vary <- c('ATX', 'DPXC')
+  .col <- c('blue','darkgreen')
+  .size <- c(4,4)
+  .symbol <- c(20,20)
+  .lab <- .vary
+  .xlim <- c(NA,NA)
+  .ylim <- c(NA,NA)
+  .logX <- FALSE
+  .logY <- FALSE
+  .fixed <- FALSE
+  s <- function (.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, .logX, .logY, .fixed) {
+    list(varx=.varx, vary=.vary, col=.col, size=.size, symbol=.symbol, lab=.lab,
+         xlim=.xlim, ylim=.ylim, logX=.logX, logY=.logY, fixed=.fixed)
+  }
+  s1 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
+          .logX, .logY, .fixed)
+  .varx <- 'PSXC'
+  .vary <- c('ATX', 'DPXC')
+  .lab <- .vary
+  s2 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
+          .logX, .logY, .fixed)
+  .varx <- 'GGALT'
+  .vary <- c('WSC','TASX')
+  .lab <- .vary
+  s3 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
+          .logX, .logY, .fixed)
+  .vary <- c('QCXC', 'QC_A')
+  .lab <- .vary
+  s4 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
+          .logX, .logY, .fixed)
+  .vary <- c('WSC', 'WIC')
+  .lab <- .vary
+  s5 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
+          .logX, .logY, .fixed)
+  .vary <- c('WDC', 'THDG')
+  .lab <- .vary
+  s6 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
+          .logX, .logY, .fixed)
+  specs$panel <- list (s1, s2, s3, s4, s5, s6)
+  return (specs)
+}
 ltyps <- c('solid', 'dashed', 'dotted', 'd-dot', 'lg dash') ## in order, line types 1:5
+
+netCDFfile <- NA
+CCDP <- NA
+CFSSP <- NA
+CUHSAS <- NA
+CPCASP <- NA
+C1DC <- NA
 # graphSpecs <- function () {
 #   specs <- list()
 #   specs$type <- 'history'
@@ -173,6 +268,7 @@ formatTime <- function (time) {
   return (tt)
 }
 
+
 Project <- PJ[1]
 Flight <- 1
 Production <- FALSE
@@ -251,18 +347,43 @@ chooseVar <- function (fname, inp) {
 }
 
 sVarList <- c('ATX', 'DPXC', 'GGALT', 'WIC')
+addedVariables <- 'PITCH'
 
 makeVarList <- function () {
-  VarList <- 'GGALT'
+  VarList <- standardVariables (addedVariables)
   for (plt in 1:length(plotSpec$Plot)) {
     for (pnl in 1:plotSpec$Plot[[plt]]$panels) {
       VarList <- c(VarList, plotSpec$Plot[[plt]]$panel[[pnl]]$var)
+    }
+  }
+  for (plt in 1:length(plotSpec$Hist)) {
+    for (pnl in 1:plotSpec$Hist[[plt]]$panels) {
+      VarList <- c(VarList, plotSpec$Hist[[plt]]$panel[[pnl]]$var)
+    }
+  }
+  for (plt in 1:length(plotSpec$Scat)) {
+    for (pnl in 1:plotSpec$Scat[[plt]]$panels) {
+      VarList <- c(VarList, plotSpec$Scat[[plt]]$panel[[pnl]]$varx)
+      VarList <- c(VarList, plotSpec$Scat[[plt]]$panel[[pnl]]$vary)
+    }
+  }
+  for (plt in 1:length(plotSpec$Bin)) {
+    for (pnl in 1:plotSpec$Bin[[plt]]$panels) {
+      VarList <- c(VarList, plotSpec$Bin[[plt]]$panel[[pnl]]$varx)
+      VarList <- c(VarList, plotSpec$Bin[[plt]]$panel[[pnl]]$vary)
     }
   }
   VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 
                           'DPXC', 'TASX', 'ROLL', 'VSPD',
                           'THDG', 'SSLIP', sVarList))
   VarList <- unique (VarList)
+  ## if variable is in specialData, exclude it:
+  if (exists ('specialData')) {
+    vwh <- which (VarList %in% names (specialData))
+    if (length(vwh) > 0) {
+      VarList <- VarList [-vwh]
+    }
+  }
   return (VarList)
 }
 VarList <- makeVarList()

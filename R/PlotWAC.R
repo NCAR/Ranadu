@@ -37,7 +37,7 @@
 #' \dontrun{plotWAC (subset (Data,,c(ATX,DPXC)))}
 
 plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]", 
-                     ylab="", lwd=2, type="l", lty=1, logxy='',
+                     ylab="", lwd=2, type="l", lty=1, logxy='', pch=20, cex=1, 
                      legend.position="bottomright", ...) {
   if (is.data.frame (x)) {
     if (!is.expression(ylab) && (ylab == "")) {
@@ -61,19 +61,28 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
         }
       }
     }
+
     if (!("ylim" %in% names(list(...))) && (yrange[1] != yrange[2])) {
       plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
-          lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
-          log=logxy, ylim=c(yrange[1], yrange[2]), ...)
+            lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
+            log=logxy, ylim=c(yrange[1], yrange[2]), pch=pch[1], cex=cex[1], ...)
     } else {
       plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
             lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
-            log=logxy, ...)
+            log=logxy, pch=pch[1], cex=cex[1], ...)
     }
-    if ('y' %in% logxy) {
+    if (grepl ('x', logxy)) {
+      atx <- axTicks(1)
+      labs <- sapply(
+        log10(atx),function(i)
+          as.expression(bquote(10^ .(i)))
+      )
+    }
+    if (grepl ('y', logxy)) {
       aty <- axTicks(2)
-      labs <- sapply(log10(aty),function(i)
-      as.expression(bquote(10^ .(i)))
+      labs <- sapply(
+        log10(aty),function(i)
+          as.expression(bquote(10^ .(i)))
       )
     }
     if (length(x) > 2) {
@@ -81,7 +90,11 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       lwd <- c(lwd, rep(1,5))
       lty <- c(lty, rep(1,5))
       for (j in 3:min(7, length(x))) {
-        lines(x[ ,1], x[ ,j], lwd=lwd[j-1], lty=lty[j-1], col=colrs[j-1], ...)
+        if (type == 'l') {
+          lines(x[ ,1], x[ ,j], lwd=lwd[j-1], lty=lty[j-1], col=colrs[j-1], ...)
+        } else {
+          points (x[, 1], x[, j], col=colrs[j-1], pch=pch[j-1], cex=cex[j-1], ...)
+        }
       }
       if (!is.na(legend.position)) {
         legend (legend.position, legend=names (x)[2:length(x)], 
@@ -95,7 +108,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       itg <- x[!is.na(x[,1]), 1]  # protect against missing values at start
       if ((itg[2]-itg[1]) <= 0.04) {data.rate <- 25}
       if ((itg[2]-itg[1]) <= 0.02) {data.rate <- 50}
-
+      
       # print (sprintf (" data.rate is %d", data.rate))
       if (xlab == "TIME [UTC]") {
         if (length(x[, 1]) < 180*data.rate+2) {          # needs revision for high-rate data
@@ -121,7 +134,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
   } else {
     plot(x, y, xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, lwd=lwd, 
          type=type, col=col, xaxs="r", yaxs="r", log=logxy, ...)
-  
+    
     if (!is.expression(xlab)) {
       if (xlab == "TIME [UTC]") {
         # get data.rate

@@ -161,6 +161,8 @@ shinyUI(
                                           width=2),
                              mainPanel(dataTableOutput ('statistics')))
                  ),
+                 
+                 navbarMenu ('more plots', 
                  tabPanel ('histogram',
                            sidebarLayout(
                              sidebarPanel(h4('histogram definition'), 
@@ -176,7 +178,7 @@ shinyUI(
                                             column (6, numericInput ('hpanel', 'panel', 1, min=1, max=5,width='50px')),
                                             column (6, checkboxInput ('hlogY', 'log? (NA)'),
                                                     checkboxInput ('hfixed', 'set xlim?', 
-                                                                   value=plotSpec$Plot[[1]]$panel[[1]]$fixed)
+                                                                   value=plotSpec$Hist[[1]]$panel[[1]]$fixed)
                                             )),
                                           fluidRow (
                                             column (6, numericInput ('hpanelMin', 'xmin', plotSpec$Hist[[1]]$panel[[1]]$ylim[1])),
@@ -203,49 +205,186 @@ shinyUI(
                  ),
                  tabPanel ('scatterplot',
                            sidebarLayout(
-                             sidebarPanel(h4('scatterplot definition'), 
-                                          checkboxInput ('limits4','apply restrictions'), 
-                                          width=2),
+                             sidebarPanel(h4('scatterplot'),  
+                                          fluidRow (
+                                            column (7, checkboxInput ('limits4','restrictions')),
+                                            column (5, checkboxInput ('sfooter','footer? (NA)'))),
+                                          fluidRow (
+                                            column (6, numericInput ('spanels', 'panels', 
+                                                                     plotSpec$Scat[[1]]$panels, width='60px')),
+                                            column (6, numericInput ('scols', 'cols', plotSpec$Scat[[1]]$columns, min=1, width='60px'))),
+                                          fluidRow (
+                                            column (6, numericInput ('spanel', 'panel', 1, min=1, max=5,width='50px')),
+                                            column (6, checkboxInput ('slogX', 'log x?'),
+                                                    checkboxInput ('slogY', 'log y?'),
+                                                    checkboxInput ('sfixed', 'fixed?', 
+                                                                   value=plotSpec$Scat[[1]]$panel[[1]]$fixed)
+                                            )),
+                                          
+                                          wellPanel (
+                                            fluidRow (
+                                              column (5, h4('pair:')),
+                                              column (7, numericInput ('slineV', NULL, 1, width='90px'))),
+                                            fluidRow (
+                                              column (2, 'x'),
+                                              column (10, selectInput ('saddVarP1', label=NULL,
+                                                                       choices=c('select', 'omit',sort(FI$Variables)), 
+                                                                       selected=plotSpec$Scat[[1]]$panel[[1]]$varx))),
+                                            fluidRow (
+                                              column (2, 'y'),
+                                              column (10, selectInput ('saddVarP2', label=NULL,
+                                                                       choices=c('select', 'omit',sort(FI$Variables)), 
+                                                                       selected=plotSpec$Scat[[1]]$panel[[1]]$vary[1]))),
+                                            selectInput ('svarColor', NULL, c('blue', 'darkgreen', 'red',
+                                                                              'cyan', 'violet', 'darkorange',
+                                                                              'brown', 'black')),
+                                            fluidRow (
+                                              column (6, 'symbol size:'),
+                                              column (6, numericInput ('ssize', NULL, 1, width='90px'))),
+                                            numericInput ('symbol', 'symbol', plotSpec$Scat[[1]]$panel[[1]]$symbol[1], width='90px'),
+                                            fluidRow (
+                                              column (6, numericInput ('spanelMinx', 'xmin', plotSpec$Scat[[1]]$panel[[1]]$xlim[1])),
+                                              column (6, numericInput ('spanelMaxx', 'xmax', plotSpec$Scat[[1]]$panel[[1]]$lim[2]))),
+                                            fluidRow (
+                                              column (6, numericInput ('spanelMiny', 'ymin', plotSpec$Scat[[1]]$panel[[1]]$ylim[1])),
+                                              column (6, numericInput ('spanelMaxy', 'ymax', plotSpec$Scat[[1]]$panel[[1]]$ylim[2])))),
+                                          width=3),
                              
-                             mainPanel())
+                             mainPanel(plotOutput (outputId='scatterplot')))
                  ),
-                 tabPanel ('bar-vs-height',
+                 tabPanel ('bin-average plots',    
                            sidebarLayout(
-                             sidebarPanel(h4('box-whisker definition'), 
-                                          checkboxInput ('limits5','apply restrictions'), 
-                                          width=2),
+                             sidebarPanel(h4('bin averages'),
+                                          checkboxInput ('limits5','apply restrictions'),
+                                          fluidRow (
+                                            column (5, checkboxInput ('bfooter','footer? (NA)'))),
+                                          fluidRow (
+                                            column (6, numericInput ('bpanels', 'panels', 
+                                                                     plotSpec$Bin[[1]]$panels, width='60px')),
+                                            column (6, numericInput ('bcols', 'cols', plotSpec$Bin[[1]]$columns, min=1, width='60px'))),
+                                          fluidRow (
+                                            column (6, numericInput ('bpanel', 'panel', 1, min=1, max=5,width='50px'),
+                                                    checkboxInput ('bhoriz', 'horizontal?')),
+                                            
+                                            column (6, checkboxInput ('blogX', 'log x?'),
+                                                    checkboxInput ('blogY', 'log y?'),
+                                                    checkboxInput ('bfixed', 'fixed?', 
+                                                                   value=plotSpec$Bin[[1]]$panel[[1]]$fixed)
+                                            )),
+                                          
+                                          wellPanel (
+                                            fluidRow (
+                                              column (5, h4('pair:')),
+                                              column (7, numericInput ('blineV', NULL, 1, width='90px'))),
+                                            fluidRow (
+                                              column (2, 'x'),
+                                              column (10, selectInput ('baddVarP1', label=NULL,
+                                                                       choices=c('select', 'omit',sort(FI$Variables)), 
+                                                                       selected=plotSpec$Bin[[1]]$panel[[1]]$varx))),
+                                            fluidRow (
+                                              column (2, 'y'),
+                                              column (10, selectInput ('baddVarP2', label=NULL,
+                                                                       choices=c('select', 'omit',sort(FI$Variables)), 
+                                                                       selected=plotSpec$Bin[[1]]$panel[[1]]$vary[1]))),
+                                            selectInput ('bvarColor', NULL, c('blue', 'darkgreen', 'red',
+                                                                              'cyan', 'violet', 'darkorange',
+                                                                              'brown', 'black')),
+                                            fluidRow (
+                                              column (6, 'symbol size:'),
+                                              column (6, numericInput ('bsize', NULL, 1, width='90px'))),
+                                            numericInput ('bsymbol', 'symbol', plotSpec$Bin[[1]]$panel[[1]]$symbol[1], width='90px'),
+                                            fluidRow (
+                                              column (6, numericInput ('bpanelMinx', 'xmin', plotSpec$Bin[[1]]$panel[[1]]$xlim[1])),
+                                              column (6, numericInput ('bpanelMaxx', 'xmax', plotSpec$Bin[[1]]$panel[[1]]$lim[2]))),
+                                            fluidRow (
+                                              column (6, numericInput ('bpanelMiny', 'ymin', plotSpec$Bin[[1]]$panel[[1]]$ylim[1])),
+                                              column (6, numericInput ('bpanelMaxy', 'ymax', plotSpec$Bin[[1]]$panel[[1]]$ylim[2])))),
+                                          width=3),
                              
-                             mainPanel())
-                 ),
+                             mainPanel(plotOutput (outputId='binplot')))
+                 )),
+                 
+                 navbarMenu ('particles',
+                             tabPanel ('size distributions',
+                                       sidebarLayout(
+                                         sidebarPanel(h4('define size distributions'), 
+                                                      checkboxInput ('limits7','apply restrictions'), 
+                                                      selectInput ('sdtype', 'type of axes',
+                                                                   choices=c('linear', 'log-y', 'log-x', 'both log'),
+                                                                   selected='both log'),
+                                                      checkboxGroupInput ('probe', 'probe?', c('CDP', 'FSSP', 'UHSAS', 'PCASP', '2DC')),
+                                                      width=2),
+                                         
+                                         mainPanel(plotOutput (outputId='sdplot')))
+                             ),
+                             tabPanel ('particle images',
+                                       sidebarLayout (
+                                         sidebarPanel (h4('particle image selections'), 
+                                                       
+                                                       width=2),
+                                         mainPanel()))),
                  tabPanel ('skewT diagram',
                            sidebarLayout(
                              sidebarPanel(h4('skew-T definition'), 
                                           checkboxInput ('limits6', 'apply restrictions'), 
+                                          checkboxInput ('hodograph', 'show hodograph?'),
                                           checkboxInput ('footer6', 'footer?'),
                                           width=2),
                              
                              mainPanel(plotOutput (outputId='skewT')))
                  ),
-                 tabPanel ('size distributions',
-                           sidebarLayout(
-                             sidebarPanel(h4('define size distributions'), 
-                                          checkboxInput ('limits7','apply restrictions'), 
-                                          width=2),
-                             
-                             mainPanel())
-                 ),
                  tabPanel ('variance spectra',
                            sidebarLayout(
                              sidebarPanel(h4('spectral analysis definition'), 
-                                          checkboxInput ('limits8','apply restrictions'), 
-                                          width=2),
+                                          checkboxInput ('limits8','apply restrictions'),
+                                          selectInput('specvar', 'variable', choices=c(sort(FI$Variables)), 
+                                                      selected=plotSpec$Var[[1]]$var),
+                                          selectInput('speccovar', 'co-variable', choices=c(sort(FI$Variables)), 
+                                                      selected=plotSpec$Var[[1]]$cvar),
+                                          tabsetPanel (type='pills',
+                                                       tabPanel ('fft',
+                                                                 numericInput ('fftpts', 'pts to average', 512),
+                                                                 selectInput ('fftwindow', label=NULL, choices=c('Parzen', 'square', 'Welch', 'Hanning')),
+                                                                 numericInput ('fftavg', 'log avg intervals', 50),
+                                                                 checkboxInput ('ffterrbar', 'error bars?'),
+                                                                 selectInput ('ffttype', label=NULL, choices=c('fp(f)', 'p(f)', 'co-variable fp(f)', 
+                                                                                                               'cospectrum', 'quadrature', 'coherence', 'phase'))),
+                                                       tabPanel ('acv',
+                                                                 numericInput ('acvtau', 'smoothing time', 600),
+                                                                 selectInput ('acvwindow', label=NULL, choices=c('Parzen', 'square', 'Welch', 'Hanning')),
+                                                                 numericInput ('acvavg', 'log avg intervals', 50),
+                                                                 selectInput ('acvtype', label=NULL, choices=c('fp(f)', 'p(f)', 'autocorrelation'))),
+                                                       tabPanel ('maxE',
+                                                                 numericInput ('poles', 'poles', 100),
+                                                                 numericInput ('memres', 'resoln', 0.0005),
+                                                                 numericInput ('memavg', 'log avg intervals', 50)
+                                                                 )),
+                                          width=3),
                              
-                             mainPanel())
+                             mainPanel(plotOutput (outputId='varplot')))
                  ),
-                 tabPanel ('particle images',
-                           sidebarLayout (
-                             sidebarPanel (h4('particle image selections'), width=2),
-                             mainPanel()))
+                 navbarMenu ('utilities',
+                             tabPanel ('run other programs',
+                                       selectInput ('otherprogram', label=NULL, 
+                                                    choices=c('ncplot', 'Xanadu', 'python', 
+                                                              'NCL', 'IDL', 'IDV'))),
+                             tabPanel ('fits to data'),
+                             tabPanel ('create new variable',
+                                       actionButton ('createV', 'create new variable'),
+                                       helpText (h4('Usage:'), 
+                                                 'Provide a name for the new variable,',
+                                                 'then give a formula for calculating it. The',
+                                                 'formula can use names of existing variables',
+                                                 'if they are separated by spaces from other',
+                                                 'text or numbers, and it can use standard',
+                                                 'math operations like +-*/ or math functions',
+                                                 'like sin(). An example is shown. Click the',
+                                                 'top button once the formula is ready.', 
+                                                 h4('Warning:'), 'If the',
+                                                 'variable already exists it will be replaced.'),
+                                       textInput ('newvar', 'name of new variable', value='AOAREF'),
+                                       textInput ('formla', 'formula for new variable', 
+                                                  value='PITCH - GGVSPD / TASX * 180 / pi')))
     )
   )
 )
