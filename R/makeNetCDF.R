@@ -15,29 +15,31 @@
 #' @author William Cooper
 #' @export makeNetCDF
 #' @import ncdf4
-#' @param d A data.frame produced by getNetCDF() or otherwise converted to the corresponding
+#' @param .d A data.frame produced by getNetCDF() or otherwise converted to the corresponding
 #' structure from that function.
 #' @param newNetCDFname A character path name for the file to be created
-#' @return none The result is the file on disk
+#' @return a text message indicating successful creation of the new file.
 #' @examples 
 #' makeNetCDF (RAFdata, "RAFdata.nc")
 #' \dontrun{makeNetCDF (Data, "./newFile.nc")}
 
-makeNetCDF <- function (d, newNetCDFname) {
+makeNetCDF <- function (.d, newNetCDFname) {
   if (file.exists (newNetCDFname)) {
     cat (sprintf ("file %s exists. \nmakeNetCDF won't overwrite; quitting\n", newNetCDFname))
     return ("makeNetCDF returned without file creation")
   }
+  ## modify the data.frame, hoping to force a copy:
+  attr (.d, "R_dataframe_date") <- date()
   ## get the dimensions
-  Dimensions <- attr(d, "Dimensions")
+  Dimensions <- attr(.d, "Dimensions")
   if (is.null(Dimensions)) {
     print ("error in makeNetCDF: No Dimensions in data.frame")
     return (-1)
   }
   ## fix missing vals in Time dimension:
   tref <- sub ("seconds since ", "", Dimensions[["Time"]]$units)
-  tstart <- as.integer(difftime (d$Time[1], tref, units='secs', tz='UTC'))
-  tend   <- as.integer(difftime (d$Time[nrow(d)],tref, units='secs', tz='UTC'))
+  tstart <- as.integer(difftime (.d$Time[1], tref, units='secs', tz='UTC'))
+  tend   <- as.integer(difftime (.d$Time[nrow(.d)],tref, units='secs', tz='UTC'))
   Dimensions[["Time"]]$vars <- tstart:tend
   Dimensions[["Time"]]$len <- tend - tstart + 1
   ## must redefine Time to get it to be integer as is convention in RAF netCDF
@@ -52,25 +54,25 @@ makeNetCDF <- function (d, newNetCDFname) {
     Dim <- list(Dimensions[["sps50"]], Dimensions[["Time"]])
   }
   vdef <- list()   # start with empty list, add variables to it
-  for (V in names(d)) {
+  for (V in names(.d)) {
     if (V == "Time") {next}
-    var_units <- attr (eval (parse (text=sprintf ("d$%s", V))), "units")
+    var_units <- attr (eval (parse (text=sprintf (".d$%s", V))), "units")
     if (is.null(var_units)) {var_units <- "not defined"}
     if (HR > 1) {
       vd <- ncvar_def (V,
                  units=var_units,
-                 dim=Dim, missval=as.double(-32767.), prec='float')
+                 dim=Dim, missval=as.integer(-32767), prec='float')
     } else {
       vd <- ncvar_def (V, 
                 units=var_units, 
-                Dimensions[["Time"]], missval=as.double(-32767.), prec='float')
+                Dimensions[["Time"]], missval=as.integer(-32767), prec='float')
     }
     vdef[[length(vdef)+1]] <- vd
   }
   nc <- nc_create (newNetCDFname, vdef)
   ## global attributes
   ##  (but skip row.names, names, Dimensions, class)
-  ATG <- attributes (d)
+  ATG <- attributes (.d)
   for (i in 1:length(ATG)) {
     ATT <- ATG[i]
     if (grepl ("row.names", names(ATT)))   {next}
@@ -79,8 +81,8 @@ makeNetCDF <- function (d, newNetCDFname) {
     if (grepl ("class", names (ATT)))      {next}
     ## fix the time interval
     if (grepl ("TimeInterval", names (ATT))) {
-      Start <- as.POSIXlt (d$Time[1])
-      End <- as.POSIXlt (d$Time[nrow(d)])
+      Start <- as.POSIXlt (.d$Time[1])
+      End <- as.POSIXlt (.d$Time[nrow(.d)])
       av <- sprintf("%02d:%02d:%02d-%02d:%02d:%02d", Start$hour, Start$min, 
                     as.integer(Start$sec), End$hour, End$min, as.integer (End$sec))
       ATT[[1]] <- av
@@ -92,13 +94,13 @@ makeNetCDF <- function (d, newNetCDFname) {
     }
   }
   nc_redef (nc)
-  for (V in names(d)) {
-    ATV <- attributes (eval (parse (text=sprintf ("d$%s", V))))
+  for (V in names(.d)) {
+    ATV <- attributes (eval (parse (text=sprintf (".d$%s", V))))
     for (i in 1:length(ATV)) {
       ATT <- ATV[i]
       aname <- names(ATT)
       if (length (ATT) < 1) {
-        ncatt_put (nc, V, attname="_FillValue", attval=as.double(-32767), definemode=TRUE)
+        ncatt_put (nc, V, attname="_FillValue", attval=as.integer(-32767), definemode=TRUE)
         next
       }
       if ("dim" == aname) {next}
@@ -108,7 +110,7 @@ makeNetCDF <- function (d, newNetCDFname) {
       if ("tzone" == aname) {next}
       if ("actual_range" == aname) {next}
       if ("_FillValue" == aname) {
-        ncatt_put (nc, V, attname=aname, attval=as.double(ATT), definemode=TRUE)
+        ncatt_put (nc, V, attname=aname, attval=as.integer(ATT), definemode=TRUE)
       } else {
         avalue <- as.character (ATT)
         ncatt_put (nc, V, attname=aname, attval=avalue, definemode=TRUE)
@@ -117,8 +119,8 @@ makeNetCDF <- function (d, newNetCDFname) {
   }
   nc_enddef (nc)
   ## revise time to be RAF-netCDF convention:
-  dT <- as.integer (d$Time - as.integer(as.POSIXct(strptime (attr (d$Time, "units"), 
-                                                     attr (d$Time, "strptime_format"), 
+  dT <- as.integer (.d$Time - as.integer(as.POSIXct(strptime (attr (.d$Time, "units"), 
+                                                     attr (.d$Time, "strptime_format"), 
                                                      tz="UTC"))))
   transferAttributes <- function (dsub, d) {    ## unused function, just saved here
     ds <- dsub
@@ -136,21 +138,26 @@ makeNetCDF <- function (d, newNetCDFname) {
   }
   #HR <- ("sps25" %in% names (Dimensions))
   if (HR == 25) {
-    dT <- dT[seq(1, length(d), by=25)]
+    dT <- dT[seq(1, nrow(.d), by=25)]
   } else if (HR == 50) {
-    dT <- dT[seq(1, length(d), by=50)]
+    dT <- dT[seq(1, nrow(.d), by=50)]
   }
-  for (V in names (d)) {
+  for (V in names (.d)) {
     if (V == "Time") {
       ncvar_put (nc, V, dT, count=length(dT))
     } else {
       if (HR == 25) {
-        ncvar_put (nc, V, eval (parse (text=sprintf ("d$%s", V))), count=c(25, nrow(d)/25))
+        ncvar_put (nc, V, eval (parse (text=sprintf (".d$%s", V))), count=c(25, nrow(.d)/25))
       } else if (HR == 50) {
-        ncvar_put (nc, V, eval (parse (text=sprintf ("d$%s", V))), count=c(50, nrow(d)/50))
+        ncvar_put (nc, V, eval (parse (text=sprintf (".d$%s", V))), count=c(50, nrow(.d)/50))
       } else {
-        ncvar_put (nc, V, eval (parse (text=sprintf ("d$%s", V))))
+        Vvalue <- eval (parse (text=sprintf ('.d$%s', V)))
+        Vvalue[is.na(Vvalue)] <- -32767
+        ncvar_put (nc, V, Vvalue)
       }
+      ## Note: strangely, the following puts -32767 into .d data.frame, so fix it:
+      # ncvar_put (nc, V, eval (parse (text=sprintf (".d$%s", V))))
+      # .d[abs (.d[,V]+32767) < 1, V] <- NA
     }
   }
   nc_close (nc)

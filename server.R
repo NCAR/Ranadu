@@ -15,6 +15,7 @@ shinyServer(function(input, output, session) {
   
   exprProject <- quote ({ 
     plotSpec$Project <<- input$Project
+    Project <<- input$Project
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 1')}
   })
@@ -43,6 +44,7 @@ shinyServer(function(input, output, session) {
     isolate (reac$newstats <- reac$newstats + 1)
     isolate (reac$newscat <- reac$newscat + 1)
     isolate (reac$newbin <- reac$newbin + 1)
+    isolate (reac$newvarp <- reac$newvarp + 1)
     if (Trace) {print ('reset newdisplay 20')}
   })
   obsTime <- observe (exprTime, quoted=TRUE)
@@ -887,6 +889,99 @@ shinyServer(function(input, output, session) {
   })
   obsRvar <- observe (exprRvar, quoted=TRUE)
   
+  exprVvar <- quote ({
+    plt <- isolate(input$plot)
+    plotSpec$Variance[[plt]]$Definition$var <<- input$specvar
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 21')}
+  })
+  obsVvar <- observe (exprVvar, quoted=TRUE)
+  
+  exprCvar <- quote ({
+    plt <- isolate(input$plot)
+    plotSpec$Variance[[plt]]$Definition$cvar <<- input$speccovar
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 22')}
+  })
+  obsCvar <- observe (exprCvar, quoted=TRUE)
+  
+  exprFFTpts <- quote ({
+    plt <- isolate (input$plot)
+    fftpts <- input$fftpts
+    ## enforce power-of-2
+    fftpts <- 2 ^ (log (fftpts) %/% log(2))
+    plotSpec$Variance[[plt]]$Definition$fftpts <<- fftpts
+    if (fftpts != input$fftpts) {
+      updateNumericInput (session, 'fftpts', value=fftpts)
+    }
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 23')}
+  })
+  obsFFTpts <- observe (exprFFTpts, quoted=TRUE)
+  exprFFTwdw <- quote ({
+    plt <- isolate (input$plot)
+    plotSpec$Variance[[plt]]$Definition$fftwindow <<- input$fftwindow
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 24')}
+  })
+  obsFFTwdw <- observe (exprFFTwdw, quoted=TRUE)
+  exprFFTavg <- quote ({
+    plt <- isolate (input$plot)
+    plotSpec$Variance[[plt]]$Definition$fftavg <<- input$fftavg
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 25')}
+  })
+  obsFFTavg <- observe (exprFFTavg, quoted=TRUE)
+  exprFFTtype <- quote ({
+    plt <- isolate (input$plot)
+    plotSpec$Variance[[plt]]$Definition$ffttype <<- input$ffttype
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 26')}
+  })
+  obsFFTtype <- observe (exprFFTtype, quoted=TRUE)
+  exprMEMtype <- quote ({
+    plt <- isolate (input$plot)
+    plotSpec$Variance[[plt]]$Definition$MEMtype <<- input$MEMtype
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 27')}
+  })
+  obsMEMtype <- observe (exprMEMtype, quoted=TRUE)
+  exprMEMavg <- quote ({
+    plt <- isolate (input$plot)
+    plotSpec$Variance[[plt]]$Definition$MEMavg <<- input$MEMavg
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 28')}
+  })
+  obsMEMavg <- observe (exprMEMavg, quoted=TRUE)
+  exprMEMpoles <- quote ({
+    plt <- isolate (input$plot)
+    plotSpec$Variance[[plt]]$Definition$MEMpoles <<- input$MEMpoles
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 29')}
+  })
+  obsMEMpoles <- observe (exprMEMpoles, quoted=TRUE)
+  exprMEMres <- quote ({
+    plt <- isolate (input$plot)
+    plotSpec$Variance[[plt]]$Definition$MEMres <<- input$MEMres
+    isolate (reac$newvarp<- reac$newvarp + 1)
+    if (Trace) {print ('reset newvarp 30')}
+  })
+  obsMEMres <- observe (exprMEMres, quoted=TRUE)
+  
+  exprLfit <- quote ({
+    input$fformula
+    VF <- isolate (input$response)
+    VarList <<- makeVarList()
+    choices <- VarList
+    if (exists ('specialData')) {
+      specialNames <- names (specialData)
+      specialNames <- specialNames[specialNames != 'Time']
+      choices <- c(choices, specialNames)
+    }
+    updateSelectInput (session, 'response', choices=sort (choices), selected=VF)
+  })
+  obsLfit <- observe (exprLfit, quoted=TRUE)
+  
   
   observeEvent (input$specSave, saveConfig (input))
   observeEvent (input$specRead, 
@@ -955,6 +1050,30 @@ shinyServer(function(input, output, session) {
     isolate (reac$newscat <- reac$newscat + 1)
     isolate (reac$newbin <- reac$newbin + 1)
   } )
+  observeEvent (input$next2d, {
+    isolate (reac$new2d <- reac$new2d + 1)
+  })
+  observeEvent (input$prev2d, {
+    psn <- seek (cfile, where=NA, rw='rb')
+    psn <- psn - 4096*2 - 40
+    if (psn > 4096+20) {
+      seek (cfile, where=psn, 'rb', origin='start')
+    }
+    psn <- seek (cfile, where=NA, rw='rb')
+    isolate (reac$new2d <- reac$new2d + 1)
+  })
+  observeEvent (input$fname2d, {
+    newwd <- sprintf('%s%s', DataDirectory (), plotSpec$Project)
+    oldwd <- setwd (newwd)
+    while(getwd() != normalizePath(newwd)) {
+      Sys.sleep(0.02)
+    }
+    fname2 <<- file.choose ()
+    rm(cfile, pos=1)
+    setwd (oldwd)
+    updateTextInput (session, 'fnametext', value=fname2)
+    isolate(reac$new2d <- reac$new2d + 1)
+  })
   observeEvent (input$createV, {
     TX <- input$formla
     m <- gregexpr('[[:alnum:]]+', TX)
@@ -1003,6 +1122,8 @@ shinyServer(function(input, output, session) {
     updateSelectInput (session, 'speccovar', choices=choices)
     updateSelectInput (session, 'rvar', choices=choices,
                        selected=plotSpec$Restrictions$RVAR[rlv])
+    VF <- isolate (input$response)
+    updateSelectInput (session, 'response', choices=sort(VarList), selected=VF)
     ## force re-read to get this variable added to data:
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print (str(specialData))}
@@ -1018,10 +1139,47 @@ shinyServer(function(input, output, session) {
     }
     isolate (reac$newstats <- reac$newstats + 1)
   })
-  observeEvent (input$ncplot, OpenInProgram (data(), warnOverwrite=FALSE))
+  observeEvent (input$xfrVariables, {
+    chooseXfrVar (fname, inp=input)
+    ## check if any requested variables not present in Data:
+    if (any (!(sVarList %in% VarList))) {
+      VarList <<- unique (c(VarList, sVarList))
+      print (c(VarList, sVarList))
+      isolate (reac$newdata <- reac$newdata + 1)
+    }
+  })
+  observeEvent (input$lfit, {
+    TX <- input$fformula
+    m <- gregexpr('[[:alnum:]]+', TX)
+    V <- regmatches(TX, m)[[1]]
+    V <- V[grepl('[[:upper:]]', V)]
+    V <- V[V != 'I']
+    ## if a requested variable is not present, get new data:
+    nms <- names (data ())
+    for (VV in V) {
+      if (!(VV %in% nms)) {
+        if (VV %in% FI$Variables) {
+          addedVariables <<- c(addedVariables, VV)
+          isolate (reac$newdata <- reac$newdata + 1)
+        } else {
+          print (sprintf ('error, requested variable %s not found'), VV)
+          return ()
+        }
+      }
+    }
+    DataF <- limitData (data (), input, lim=input$limitsFit)
+    DataF <- DataF[DataF$Time >= times[1] & DataF$Time < times[2], ]
+    fitm <<- lm(paste(parse (text=isolate(input$response)), '~',  parse (text=isolate(input$fformula)),
+                      sep=''), data=DataF, y=TRUE)
+    print (summary (fitm))
+    print (anova (fitm))
+    isolate (reac$updatefit <- reac$updatefit + 1)
+  })
+  observeEvent (input$ncplot, OpenInProgram (data(), Program=input$otherprogram, warnOverwrite=FALSE))
   observeEvent (input$Xanadu, OpenInProgram (data(), 'Xanadu', warnOverwrite=FALSE))
   observeEvent (input$maneuvers, SeekManeuvers (data ()))
   observeEvent (input$manual, seeManual ())
+  
   
   
   
@@ -1029,7 +1187,7 @@ shinyServer(function(input, output, session) {
   
   reac <- reactiveValues (newdata=0, newdisplay=0, newtrack=0, 
                           newstats=0, newhistogram=0, newscat=0, 
-                          newbin=0, newvarp=0)
+                          newbin=0, newvarp=0, updatefit=0, new2d=0)
   
   flightType <- reactive ({              ## typeFlight
     ## reset typeFlight to rf
@@ -1041,7 +1199,7 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print (c('entered data, newdata is ', reac$newdata))
     }
-    # Project <<- Project <- input$Project
+    # Project <<- Project <- isolate(input$Project)
     reac$newdata
     isolate (reac$newdisplay <- reac$newdisplay + 1)
     ## these would be needed for translation to new cal coefficients
@@ -1561,6 +1719,83 @@ shinyServer(function(input, output, session) {
     }
   }, width=920, height=640)
   
+  output$fittext <- renderUI ({
+    reac$updatefit
+    TXT <- 
+      sprintf (
+        paste('response variable: %s',
+              'fit formula: %s',
+              'Residual standard deviation: %.3f, dof=%d',
+              'R-squared %.3f', 
+              'Coefficients:', sep='<br/>'), 
+        input$response,
+        input$fformula,
+        summary(fitm)$sigma, summary(fitm)$df[2],
+        summary(fitm)$r.squared)
+    HTML(TXT)
+    # summary(fitm)$coefficients
+  })
+  
+  output$coeftable <- renderTable ({
+    reac$updatefit
+    input$times
+    summary(fitm)$coefficients
+    # anova(fitm)
+  }, digits=5)
+  
+  output$fitplot <- renderPlot ({  ## fitplot
+    Project <- plotSpec$Project
+    Flight <- plotSpec$Flight
+    tf <- plotSpec$TypeFlight
+    input$response
+    input$fformula
+    reac$updatefit
+    input$times  ## make sensitive to time changes
+    op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
+    if (Trace) {
+      print ('entered fitplot')
+      # Sys.sleep(5)
+    }
+    Data <- data()
+    if (nrow (Data) <= 1) {
+      plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
+      text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
+      reac$newdata <- reac$newdata + 1
+      if (Trace) {print ('exiting fitplot for new data')}
+      return()
+    }
+    namesV <- names(Data)  
+    namesV <- namesV[namesV != "Time"]
+    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    ## see global.R functions:
+    DataV <- limitData (DataR, input, input$limitsFit)
+    ndv <- names (DataV)
+    SE <- getStartEnd (DataR$Time)
+    i <- getIndex (DataR$Time, SE[1])
+    isolate (
+      FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+                            plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+                            strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                            strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+                                     format="%H:%M:%S", tz='UTC'))
+    )
+    FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
+    AddFooter <<- function() {
+      isolate (
+        mtext(paste(FigFooter,'generated by Ranadu plot ', input$plot,
+                    FigDatestr),1,outer=T,cex=0.75)
+      )
+    }
+    plotWAC (data.frame(x=fitm$y, y=fitm$fitted.values), 
+             col='blue', type='p', 
+             xlab=input$response,
+             ylab='fit value',
+             pch=20, cex=0.8, legend.position=NA) 
+    V <- DataV[, input$response]
+    pts <- c(min(V, na.rm=TRUE), max(V, na.rm=TRUE))
+    lines (pts, pts, col='darkorange', lty=2, lwd=2)
+  })
+  
   output$sdplot <- renderPlot ({  ## CDP
     Project <- plotSpec$Project
     Flight <- plotSpec$Flight
@@ -1759,8 +1994,8 @@ shinyServer(function(input, output, session) {
         ## this call just sets appropriate axes:
         yl <- expression (paste("concentration [cm"^"-3", mu, 'm'^'-1', ']'), sep='')
         plot (xp, yp, type='p', log=logT,
-            xlab=expression (paste('diameter [',mu,'m]', sep='')),
-                             ylab=yl, col='white', cex.lab=2, cex.axis=1.4)
+              xlab=expression (paste('diameter [',mu,'m]', sep='')),
+              ylab=yl, col='white', cex.lab=2, cex.axis=1.4)
       }
       ttl <- sprintf ("Time=%s--%s ", strftime (Time[idx1], format="%H:%M:%S", tz='UTC'), 
                       strftime (Time[idx2], format="%H:%M:%S", tz='UTC'))
@@ -1782,7 +2017,7 @@ shinyServer(function(input, output, session) {
       }
       if ('CDP' %in% input$probe && (length (nm1) > 0)) {
         points (CellLimitsD[2:nbC], CDP[2:nbC], type='s', 
-              col='blue', lwd=2)
+                col='blue', lwd=2)
         legend.names <- c(legend.names, 'CDP')
         legend.colors <- c(legend.colors, 'blue')
         ttl <- paste (ttl, sprintf("CONCD=%.1f", CDPtot), sep=' ')
@@ -1801,7 +2036,7 @@ shinyServer(function(input, output, session) {
         legend.colors <- c(legend.colors, 'red')
         ttl <- paste (ttl, sprintf("CONC1DC=%.4f", S1DCtot), sep=' ')
       }
-
+      
       if (length (input$probe) > 0) {
         title (ttl)
         legend ("topright", legend=legend.names, col=legend.colors,
@@ -1813,6 +2048,7 @@ shinyServer(function(input, output, session) {
   output$varplot <- renderImage ({  ## varplot
     reac$newvarp
     Project <- plotSpec$Project
+    print (sprintf ('spectype is %s', input$spectype))
     # spec <- plotSpec$Var[[input$plot]]
     if (Trace) {
       print ('entered varplot')
@@ -1827,16 +2063,31 @@ shinyServer(function(input, output, session) {
     if (nrow (Data) <= 1) {
       plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
-      reac$newvarp <- reac$newvarp + 1 #<- TRUE
+      reac$newvarp <- reac$newvarp + 1 
       reac$newdata <- reac$newdata + 1
       if (Trace) {print ('exiting varplot for new data')}
       return()
     }
+    transferAttributes <- function (dsub, d) {    ## unused function, just saved here
+      ds <- dsub
+      for (nm in names (ds)) {
+        var <- sprintf ("d$%s", nm)
+        A <- attributes (eval (parse (text=var)))
+        A[[1]] <- nrow (ds)
+        if (!grepl ('Time', nm)) {
+          A$dim <- NULL
+          A$class <- NULL
+        }
+        attributes (ds[,nm]) <- A
+      }
+      return(ds)
+    }
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
     DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- transferAttributes (DataR, Data)
     ## see global.R functions:
-    DataV <- limitData (DataR, input, plotSpec$Scat[[input$plot]]$restrict)
+    DataV <- limitData (DataR, input, plotSpec$Variance[[input$plot]]$restrict)
     ndv <- names (DataV)
     SE <- getStartEnd (DataR$Time)
     i <- getIndex (DataR$Time, SE[1])
@@ -1855,67 +2106,293 @@ shinyServer(function(input, output, session) {
       )
     }
     fnew <- "./R-toXanadu.nc"
+    if (Trace) {print (summary (DataR$WIC))}
     unlink(fnew)
-    Z <- makeNetCDF (Data, fnew)
-    ## the following function writes some configuration for interaction with
-    ## 'Xanadu' where the spectral analysis is performed.
-    setXanadu <- function (fnew, start, end, var, wlow, whigh) {
-      ## edit the .def files for the Xanadu call
-      lines <- readLines ("Xanadu.def")
-      newlines <- vector ("character")
-      for (line in lines) {
-        if (grepl ("XANFILE", line)) {
-          line <- gsub ("=.*", sprintf ("=%s", gsub ("\\.nc", '', fnew)), line)
-        }
-        newlines[length (newlines) + 1] <- line
-      }
-      writeLines (newlines, "Xanadu.def")
-      ## and the otto.def file
-      lines <- readLines ("otto.def.template")
-      newlines <- vector ("character")
-      for (line in lines) {
-        if (grepl ("START", line)) {
-          line <- gsub (" [0-9]*", sprintf (" %d", start), line)
-        }
-        if (grepl ("END", line)) {
-          line <- gsub (" [0-9]*", sprintf (" %d", end), line)
-        }
-        if (substr (line, 1, 4) == "VAR ") {
-          line <- gsub (" [A-Z]*", sprintf (" %s", var), line)
-        }
-        if (substr (line, 1, 4) == "WLOW") {
-          line <- gsub (" .*", sprintf (" %f", wlow), line)
-        }
-        if (substr (line, 1, 5) == "WHIGH") {
-          line <- gsub (" .*", sprintf (" %f", whigh), line)
-        }
-        newlines[length (newlines) + 1] <- line
-      }
-      writeLines (newlines, "otto.def")
-      return()
-    }
-    wlow <- 0.0001; whigh <- 0.1
-    # spec$var <- 'WIC'
+    Z <- makeNetCDF (DataR, fnew)
+    if (Trace) {print(Z)}
+    ## don't know why this is needed, but makeNetCDF modifies DataR;
+    ## need to fix that routine
+    # DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    if (Trace) {print (c('after makeNetCDF: ', summary (DataR$WIC)))}
+    Data2 <<- Data
+    wlow <- 0.0001; whigh <- 10.
+    # spec$var <- 'WIC
     ts <- formatTime(times[1])
     te <- formatTime(times[2])
     ts <- as.integer(gsub (':', '', ts))
     te <- as.integer (gsub (':', '', te))
-    setXanadu (fnew, ts, te, 'WIC', wlow, whigh)
-    unlink ("MEMPlot.png")
-    XanaduOut <- system ("Xanadu otto", intern=TRUE)
-    while (!file.exists ("MEMPlot.png")) {Sys.sleep (1)}
-    file.rename ("MEMPlot.png", "SpecialGraphics/PSD1.png")
-    
-    #     if (is.null(input$picture))
-    #       return(NULL)
-    
-    # if (input$picture == "face") {
+    if (input$spectype == 'MEM') {
+      unlink ("MEMPlot.png")
+    }
+    if (input$spectype == 'fft') {
+      unlink ("FFTPlot.png")
+    }
+    if (input$spectype == 'acv') {
+      lagMax <- min(3600, nrow (data ()))
+      gname <- 'SpecialGraphics/ACVPlot.png'
+      unlink ('SpecialGraphics/ACVPlot.png')
+      v <- plotSpec$Variance[[1]]$Definition$var 
+      cv <- plotSpec$Variance[[1]]$Definition$cvar 
+      vdt <- DataR[, v]
+      cvdt <- DataR[, cv]
+      ## remove the mean and linear trend
+      if (input$acvdetrend) {
+        dt <- as.numeric(difftime(DataR$Time, DataR$Time[1]))
+        ff1 <- lm (vdt ~ dt)
+        ff2 <- lm (cvdt ~ dt)
+        vdt <- vdt-ff1$coefficients[2]*dt
+        cvdt <- cvdt-ff2$coefficients[2]*dt
+        vdt <- vdt - mean (vdt, na.rm=TRUE)
+        cvdt <- cvdt - mean (cvdt, na.rm=TRUE)
+      }
+      variance <- var (vdt, na.rm=TRUE)
+      if (input$acvtype == 'data') {
+        png (gname)
+        layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+        op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+        plotWAC (DataR$Time, vdt, ylab=v)
+        if (input$acvdetrend) {
+          title (sprintf ('<%s x %s> = %.3f', v, cv, mean(vdt*cvdt, na.rm=TRUE)), cex=0.75)
+        }
+        op <- par (mar=c(5,4,1,2)+0.1)
+        plotWAC (DataR$Time, cvdt, ylab=cv)
+        if (input$acvdetrend) {
+          title('mean and trend removed')
+        }
+        dev.off ()
+      } else if (input$acvtype == 'crosscorrelation') {
+        ccfp <- ccf (vdt, cvdt, lag.max=lagMax, na.action=na.pass, 
+                     plot=FALSE)
+        gname <- 'SpecialGraphics/ACVPlot.png'
+        png (gname)
+        plot (ccfp, type='l', lwd=1.5, col='blue', xlab='lag [s]', 
+              ylab=sprintf ('ccf for %s x %s', v, cv),
+              main=sprintf ('zero-lag correlation is %.2f', 
+                            cor (vdt, cvdt, use='pairwise.complete')))
+        dev.off ()
+      } else {  ## this calculation is needed for autocor or spectra
+        variance1 <- var (vdt, na.rm=TRUE)
+        variance2 <- var (cvdt, na.rm=TRUE)
+        acfp <- acf (vdt, lag.max=lagMax, na.action=na.pass, 
+                     plot=FALSE)        
+        acfpc <- acf (cvdt, lag.max=lagMax, na.action=na.pass, 
+                      plot=FALSE)
+        ## smoothed version
+        acfps <- acfp$acf
+        acfpcs <- acfpc$acf
+        gname <- 'SpecialGraphics/ACVPlot.png'
+        png (gname)
+        tau <- input$acvtau
+        lacf <- min (length (acfps), tau)
+        acfps[1:lacf] <- acfps[1:lacf]*(1-((0:(lacf-1))/tau))
+        acfpcs[1:lacf] <- acfpcs[1:lacf]*(1-((0:(lacf-1))/tau))
+        if (tau < length (acfp$acf)) {
+          acfps[(tau+1):length (acfps)] <- 0
+          acfpcs[(tau+1):length (acfps)] <- 0
+        }
+        if (input$acvtype == 'autocorrelation') {
+          layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+          op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+          plot (acfp, type='l', lwd=1.5, col='blue', xlab='lag [s]', 
+                ylab=sprintf('%s acf', plotSpec$Variance[[1]]$Definition$var))
+          points (acfps, type='l', col='darkgreen', lty=2)
+          legend ('topright', legend=c('ACF', 'smoothed'), col=c('blue', 'darkgreen'),
+                  lwd=c(1.5,1), lty=c(1,2))
+          op <- par (mar=c(5,4,1,2)+0.1)
+          plot (acfpc, type='l', lwd=1.5, col='blue', xlab='lag [s]', 
+                ylab=sprintf ('%s acf', plotSpec$Variance[[1]]$Definition$cvar))
+          points (acfpcs, type='l', col='darkgreen', lty=2)
+          legend ('topright', legend=c('ACF', 'smoothed'), col=c('blue', 'darkgreen'),
+                  lwd=c(1.5,1), lty=c(1,2))
+          dev.off ()
+        } else {
+          mx <- length(acfps)
+          ps <- vector(length=mx/2)
+          ps2 <- ps
+          pss <- ps
+          pss2 <- ps
+          freq <- (1:(mx/2)) / mx
+          f2pi = freq * 2 * pi
+          for (i in 1:(mx/2)) {
+            ps[i] <-  (1 + 2 * sum(acfp$acf[2:mx] * cos (f2pi[i] * (1:(mx-1))), na.rm=TRUE)) * variance1
+            pss[i] <- (1 + 2 * sum(acfps[2:lacf] * cos (f2pi[i] * (1:(lacf-1))), na.rm=TRUE)) * variance1
+            ps2[i] <-  (1 + 2 * sum(acfpc$acf[2:mx] * cos (f2pi[i] * (1:(mx-1))), na.rm=TRUE)) * variance2
+            pss2[i] <- (1 + 2 * sum(acfpcs[2:lacf] * cos (f2pi[i] * (1:(lacf-1))), na.rm=TRUE)) * variance2
+          }
+          if (grepl('fp\\(f\\)', input$acvtype)) {
+            ps <-  ps * freq
+            ps2 <- ps2 * freq
+            pss <- pss * freq
+            pss2 <- pss2 * freq
+          }
+          df <- data.frame(V1=log10 (pss), V2=log10(freq))
+          df2 <- data.frame(V1=log10 (pss2), V2=log10(freq))
+          pf <- binStats(df, bins=input$acvavg)
+          pf2 <- binStats(df2, bins=input$acvavg)
+          df$V1 <- 10^df$V1
+          df$V2 <- 10^df$V2
+          df$V3 <- 10^df2$V1
+          df$psa <- 10^pf$ybar
+          df$fa <- 10^pf$xc
+          df$psa2 <- 10^pf2$ybar
+          df$fa2 <- 10^pf2$xc
+          # df$fps <- freq*ps
+          df$freq <- freq
+          p <- ggplot (df, aes(x=V2, y=V1), log='xy')
+          if (grepl ('var2', input$acvtype)) {
+            p <- p + geom_path (aes(y=V3), colour='darkgreen', lwd=1.5) + geom_path (aes(x=fa2, y=psa2), colour='darkorange', lwd=0.8)
+          } else {
+            p <- p + geom_path (colour='blue', lwd=1.5) + geom_path (aes(x=fa, y=psa), colour='red', lwd=0.8)
+          }
+          # p <- p + geom_path (aes(x=freq, y=fps), colour='darkgreen')
+          xln <- c(10^-2.5, 10^-1)
+          if (grepl ('fp\\(f\\)', input$acvtype)) {
+            yln <- c(1, 10^-1)
+          } else {
+            yln <- c(1, 10^-2.5)
+          }
+          dr <- data.frame (x=xln, y=yln)
+          p <- p + geom_line (data=dr, aes(x=x, y=y), colour='black', lty=3, lwd=0.7)
+          p <- p + xlab('frequency [Hz]')
+          if (grepl ('fp\\(f\\)', input$acvtype)) {
+            if (grepl ('var2', input$acvtype)) {
+              p <- p + ylab (sprintf ('%s:  fp(f)', cv))
+            } else {
+              p <- p + ylab(sprintf ('%s:  fp(f)', v))
+            }
+          } else {
+            if (grepl ('var2', input$acvtype)) {
+              p <- p + ylab (sprintf ('%s:  p(f)', cv))
+            } else {
+              p <- p + ylab(sprintf ('%s:  p(f)', v))
+            }
+          }
+          p <- p + scale_y_log10() + scale_x_log10() 
+          p <- p + theme_WAC()
+          print(p)
+          dev.off ()
+        }
+      }
+    } else {  ## end of acv section; others need Xanadu routine 'otto'
+      v <- plotSpec$Variance[[1]]$Definition$var
+      cv <- plotSpec$Variance[[1]]$Definition$cvar
+      setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype)
+      XanaduOut <- system ("Xanadu otto", intern=TRUE)
+      if (input$spectype == 'MEM') {
+        while (!file.exists ("MEMPlot.png")) {Sys.sleep (1)}
+        gname <- "SpecialGraphics/PSDMEM.png"
+        file.rename ("MEMPlot.png", gname)
+      }
+      if (input$spectype == 'fft') {
+        if (input$ffttype == 'fp(f)' || input$ffttype == 'p(f)') {
+          while (!file.exists ("FFTPlot.png")) {Sys.sleep (1)}
+          gname <- "SpecialGraphics/PSDFFT.png"
+          file.rename ("FFTPlot.png", gname)
+        } else {  ## cospec / quad / coherence / phase
+          gname <- 'SpecialGraphics/FFTPlot.png'
+          png (gname, width=600, height=600)
+          writeOutput <- FALSE
+          cospecOutput <- vector ('character')
+          fps <- vector ('numeric')
+          fpsc <- vector ('numeric')
+          p <- vector ('numeric')
+          q <- vector ('numeric')
+          coh <- vector ('numeric')
+          for (line in XanaduOut) {
+            if (grepl ('end of cospec', line)) {writeOutput <- FALSE}
+            line <- sub('^ ', '', line)
+            if (writeOutput) {
+              cospecOutput <- c(cospecOutput, line)
+              a <- as.numeric (as.vector (strsplit(line, split=' ')[[1]]))
+              # i <- as.integer(a[1])
+              fps <- c(fps, a[2])
+              fpsc <- c(fpsc, a[3])
+              p <- c(p, a[4])
+              q <- c(q, a[5])
+              coh <- c(coh, a[6])
+              
+            }
+            if (grepl ('start of cospec', line)) {writeOutput <- TRUE}
+          }  ## end of lines in XanaduOut
+          segl <- plotSpec$Variance[[1]]$Definition$fftpts
+          freq <- (1:(segl/2))/segl
+          layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+          nbins <- plotSpec$Variance[[1]]$Definition$fftavg
+          if (grepl('both', input$ffttype)) {
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            df <- data.frame(fxf=segl*freq*fps, V2=log10(freq))
+            df2 <- data.frame(fxf=segl*freq*fpsc, V2=log10(freq))
+            pf <- binStats(df, bins=nbins)
+            pf2 <- binStats(df2, bins=nbins)
+            plotWAC (freq, segl*freq*fps,  type='l', xlab='frequency', col='blue', 
+                     log='xy', ylab=sprintf ('%s:  fp(f)', v))
+            pf <- pf[!is.na(pf$ybar),]
+            lines (10^pf$xc, pf$ybar, col='red', lwd=2)
+            op <- par (mar=c(5,4,1,2)+0.1)
+            plotWAC (freq, segl*freq*fpsc, type='l', xlab='frequency', col='blue', 
+                     log='xy', ylab=sprintf ('%s:  fp(f)', cv))
+            pf2 <- pf2[!is.na(pf2$ybar),]
+            lines (10^pf2$xc, pf2$ybar, col='red', lwd=2)
+          } else if (grepl ('data', input$ffttype)) {
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            plotWAC (DataR[, c('Time', v)])
+            op <- par (mar=c(5,4,1,2)+0.1)
+            plotWAC (DataR[, c('Time', cv)])
+          } else {
+            df <- data.frame(fxpf=segl*freq*p, V2=log10(freq))
+            df2 <- data.frame(fxqf=segl*freq*q, V2=log10(freq))
+            pf <- binStats(df, bins=nbins)
+            pf2 <- binStats(df2, bins=nbins)
+            df$fxqf <- df2$fxqf
+            df$freq <- freq
+          }
+          if (grepl('cosp', input$ffttype)) {
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            plotWAC (df[, c('freq', 'fxpf')], type='l', xlab='frequency', col='blue', 
+                     log='x', ylab=sprintf ('%s x %s:  f x cospectrum', v, cv))
+            pf <- pf[!is.na(pf$ybar),]
+            lines (10^pf$xc, pf$ybar, col='red', lwd=2)
+            abline(h=0, lty=3, lwd=0.7)
+            legend('topright', legend=c('f C[f]', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
+            op <- par (mar=c(5,4,1,2)+0.1)
+            plotWAC (df[, c('freq', 'fxqf')], type='l', xlab='frequency', col='blue', 
+                     log='x', ylab=sprintf ('%s x %s:  f x quadrature', v, cv))
+            pf2 <- pf2[!is.na(pf2$ybar),]
+            lines (10^pf2$xc, pf2$ybar, col='red', lwd=2)
+            abline(h=0, lty=3, lwd=0.7)
+            legend('topright', legend=c('f Q[f]', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
+          } 
+          if (grepl('coher', input$ffttype)) {
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            plotWAC(freq, coh, log='x', xlab='frequency', col='blue', 
+                    ylab='coherence', ylim=c(0,1))
+            df <- data.frame(coh=coh, V2=log10(freq))
+            pf3 <- binStats(df, bins=nbins)
+            pf3 <- pf3[!is.na (pf3$ybar), ]
+            lines (10^pf3$xc, pf3$ybar, col='red', lwd=2)
+            legend('topleft', legend=c('coherence', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
+            phase <- atan2 (q, p) * 180/pi
+            phase[phase > 180] <- phase[phase > 180] - 360
+            phase[phase < -180] <- phase[phase < -180] + 360
+            ## proper averaging of the phase must account for wrap-around
+            ## better: average q and p, then find phase; already have these from above
+            op <- par (mar=c(5,4,1,2)+0.1)
+            plotWAC (freq, phase, xlab='frequency', type='l', col='blue', 
+                     log='x', ylab='phase [deg.]', ylim=c(-180,180))
+            avgphase <- atan2 (pf2$ybar, pf$ybar) * 180/pi
+            lines (10^pf2$xc, avgphase, col='red', lwd=2)
+            abline(h=0, lty=3, lwd=0.7)
+            legend('topleft', legend=c('phase', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
+          }
+          dev.off ()
+        }
+      }
+    }
     return(list(
-      src = "SpecialGraphics/PSD1.png",
+      src = gname,
       contentType = "image/png",
       alt = "PSD"
     ))
-    
   }, deleteFile = FALSE)
   
   
@@ -2566,6 +3043,162 @@ shinyServer(function(input, output, session) {
     Ds$Time <- formatTime(Ds$Time)
     Ds
   }, options=list(paging=TRUE, searching=TRUE))
+  
+  output$image2d <- renderPlot ({
+    reac$new2d
+    mode <- 'page'
+    mode <- 'record'
+    if (!exists ('cfile')) {
+      # fname2 <<- '/Data/DC3/20120526_191349_rf05.2d'
+      if (!exists ('fname2')) {
+        print ('must select a 2D file to get the 2D display')
+        return ()
+      }
+      cfile <<- file(fname2, 'rb')
+      xmlinfo <- readBin(cfile, character(), 1)
+      probe <<- sub('.*\\n', '', xmlinfo)
+      xmlinfo <- sub(sprintf ('\\n%s$',probe), '\n', xmlinfo)
+      xmlD <- xmlParse (xmlinfo)
+      probeXML <- toString.XMLNode(xmlRoot(xmlD)[['probe']])
+      p1 <- sub ('.*resolution=\"', '', probeXML)
+      resltion <<- as.numeric(sub('\".*', '', p1))
+      ## there may be multiple probes...  need fix here
+      p2 <- sub ('.*nDiodes=\"', '', probeXML)
+      nDiodes <<- as.numeric(sub('\".*', '', p2))
+      hour <- as.integer (readBin(cfile, raw(), 1))
+      a <- readBin(cfile, integer(), 8, size=2, signed=FALSE, endian='swap')
+      minute <- a[1]
+      second <- a[2]
+      year <<- a[3]
+      month <<- a[4]
+      day <<- a[5]
+      tas <- a[6]
+      msec <- a[7]
+      overld <- a[8]
+      end2d <<- c(hour, minute, second)
+      nextday <<- ifelse (end2d[1] >= 12, TRUE, FALSE)
+      #     
+      #     print (sprintf ('date %d-%02d-%02d time %d:%02d:%02d.%03d probe %s resltion %d diodes %d tas %d overld %d',
+      #                     year, month, day, hour, minute, second, msec, probe, resltion, nDiodes, tas, overld))
+      image <- readBin(cfile, raw(), 4096, endian='swap')
+    }
+    np <- 0
+    i <- 0
+    
+    ## function used for bit masking 
+    bits <- function(i,m) {
+      ifelse (bitwAnd (i,m), 1, 0.05)
+    }
+    mask <- c(0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01)
+    
+    while (TRUE) {  ## this uses breaks to end after a record or a page
+      i <- i + 1
+      if (TRUE) {
+        # ptm <- proc.time ()
+        img <- as.integer (readRecord (cfile))
+        if (length(img) < 10) {break}
+        l2d <- last2d[1]*3600 + last2d[2]*60 + last2d[3]
+        s2d <- start2d[1]*3600 + start2d[2]*60 + start2d[3]
+        ## bug here: this doesn't work right for max2d!=0 and the 'prev2d' button
+        if ((input$max2d != 0) && (s2d-l2d < input$max2d)) {next}
+        ## convert input$times[1] to HHMMSS format for comparison to the 2D time
+        Ttest <- as.integer (gsub(':', '', formatTime(input$times[1])))
+        if (Ttest < 120000 && nextday) {Ttest <- Ttest + 240000}
+        stest <- start2d
+        if ((stest[1] < 12) && nextday) stest[1] <- stest[1] + 24
+        if (Ttest >= (10000*stest[1] + 100*stest[2] + stest[3])) {next}
+        last2d <<- start2d
+        # print (proc.time () - ptm)
+        
+        ## this is the image processor -- bits is a function, defined above
+        m <- unlist (lapply(img, bits, mask))
+        dim(m) <- c(64,512)
+        
+        # print (proc.time () - ptm)
+        if (input$mode2d == 'page') {
+          if (np == 0) {
+            op <- par(bg = "thistle")
+            op <- par (bg = 'grey70')
+            # op <- par (bg = 'lightyellow')
+            plot (c(1,512), c(1,512), type='n', xaxt='n', yaxt='n', xlab='', ylab='', asp=0.5)
+            pageStart <- start2d
+          }
+          xi <- 1+(np %% 2) * 256
+          yi <- 512 - 64 + 1 - (np %/% 2) * 64
+          rasterImage (m, xi, yi, xi+255, yi+63)
+          np <- (np + 1) %% 16
+          if (np == 0) {
+            title (sprintf ('%d-%02d-%-2d probe %s resolution %d diodes %d %d:%02d:%02d -- %d:%02d:%02d', 
+                            year, month, day, probe, resltion, nDiodes, 
+                            pageStart[1], pageStart[2], pageStart[3], end2d[1], end2d[2], end2d[3]), 
+                   col.main='blue',cex.main=0.8)
+            break
+          }
+          # print (c('p', prot.time() - ptm))
+        } else {
+          op <- par(bg = "thistle")
+          op <- par (bg = 'grey70')
+          # op <- par (bg = 'lightyellow')
+          plot(c(1,256),c(1,256), type='n', xaxt='n', yaxt='n', xlab='', ylab='', asp=0.5)
+          #       m[,64] <- FALSE
+          #       m[,128] <- FALSE
+          rasterImage (m[, 1:256], 1, 131, 256, 256)
+          rasterImage (m[, 257:512], 1, 1, 256, 126)
+          title (sprintf ('%d-%02d-%-2d probe %s resolution %dum diodes %d %d:%02d:%02d -- %d:%02d:%02d', 
+                          year, month, day, probe, resltion, nDiodes, 
+                          start2d[1], start2d[2], start2d[3], end2d[1], end2d[2], end2d[3]), 
+                 col.main='blue',cex.main=0.8)
+          break
+        }
+      } else {
+        readRecord (cfile)
+      }
+    }
+    #     if (mode == 'page') {
+    #       title (sprintf ('%d-%02d-%-2d probe %s resolution %d diodes %d %d:%02d:%02d -- %d:%02d:%02d', 
+    #                       year, month, day, probe, resltion, nDiodes, 
+    #                       pageStart[1], pageStart[2], pageStart[3], end2d[1], end2d[2], end2d[3]), 
+    #              col.main='blue',cex.main=0.8)
+    #     }
+    
+    # plot(c(1,512),c(1,256), type='n', xaxt='n', yaxt='n', xlab='', ylab='', asp=1)
+    # ptm <- proc.time()
+    # img <- readRecord (cfile, i, resltion, nDiodes)
+    # writeBin(img, 'twod.image.gray')
+    # unlink ('twod.image.png')
+    # system ('convert -size 64x512 -depth 1 -rotate -90 twod.image.gray twod.image.png', wait=TRUE)
+    # img.native <- readPNG('twod.image.png', native=TRUE)
+    # rasterImage(img.native, 0,0,512,64)
+    # proc.time() - ptm
+    
+    
+    
+    ## /* Values currently in use for the 'id' field. */
+    #define PMS2D_C1         0x4331		// First PMS-2DC
+    #define PMS2D_C2         0x4332		// Second PMS-2DC
+    #define PMS2D_C4         0x4334         // RAF 64 diode 25 um Fast 2DC
+    #define PMS2D_C6         0x4336         // RAF 64 diode 10 um Fast 2DC
+    #define PMS2D_G1         0x4731		// First 2D Greyscale; unused to date
+    #define PMS2D_H1         0x4831		// SPEC HVPS
+    #define PMS2D_P1         0x5031		// First PMS-2DP
+    #define PMS2D_P2         0x5032		// Second PMS-2DP
+    
+    #   struct P2d_rec {
+    #     short id;                             /* 'P1','C1','P2','C2', H1, etc */
+    #       short hour;
+    #     short minute;
+    #     short second;
+    #     short year;                           /* starting in 2007 w/ PACDEX */
+    #       short month;                          /* starting in 2007 w/ PACDEX */
+    #       short day;                            /* starting in 2007 w/ PACDEX */
+    #       short tas;                            /* true air speed	*/
+    #       short msec;                           /* msec of this record	*/
+    #       short overld;                         /* overload time, msec	*/
+    #       unsigned char data[4096];		/* image buffer		*/
+    #   };
+    # typedef struct P2d_rec P2d_rec;
+    
+  })
   
   outputOptions (output, 'display', priority=-10)
   outputOptions (output, 'stats', priority=-10)

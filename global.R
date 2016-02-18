@@ -10,9 +10,12 @@ suppressMessages (suppressWarnings (
 )
 library(gtable)
 library(grid)
+library(XML)
 
 source ('R/plotTrack.R')
 source ('R/PlotWAC.R')
+source ('R/getNetCDF.R')
+source ('R/makeNetCDF.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
@@ -332,6 +335,168 @@ limitData <- function (Data, inp, lim=NA) {
   return (DataV)
 }
 
+end2d <- c(0, 0, 0)
+last2d <- end2d
+## function to read a 2D record
+readRecord <- function (cfile) {
+  a <- readBin(cfile, integer(), 10, size=2, signed=FALSE, endian='swap')
+  if (length (a) < 10) {return (-1)}
+  probe <- a[1]
+  hour <- a[2]
+  minute <- a[3]
+  second <- a[4]
+  year <- a[5]
+  month <- a[6]
+  day <- a[7]
+  tas <- a[8]
+  msec <- a[9]
+  overld <- a[10]
+  #   print (sprintf ('record %d date %d-%02d-%02d time %d:%02d:%02d.%03d probe %x resltion %d diodes %d tas %d overld %d',
+  #                   i, year, month, day, hour, minute, second, msec, probe, resltion, nDiodes, tas, overld))
+  start2d <<- end2d
+  end2d <<- c(hour, minute, second)
+  image <- readBin(cfile, raw(), 4096, endian='swap')
+}
+
+## the following function writes some configuration for interaction with
+## 'Xanadu' where the spectral analysis is performed.
+setXanadu <- function (fnew, start, end, var, cvar, wlow, whigh, type) {
+  ## edit the .def files for the Xanadu call
+  lines <- readLines ("Xanadu.def")
+  newlines <- vector ("character")
+  for (line in lines) {
+    if (grepl ("XANFILE", line)) {
+      line <- gsub ("=.*", sprintf ("=%s", gsub ("\\.nc", '', fnew)), line)
+    }
+    newlines[length (newlines) + 1] <- line
+  }
+  writeLines (newlines, "Xanadu.def")
+  ## and the otto.def file
+  lines <- readLines ("otto.def.template")
+  newlines <- vector ("character")
+  for (line in lines) {
+    if (grepl ("START", line)) {
+      line <- gsub (" [0-9]*", sprintf (" %d", start), line)
+    }
+    if (grepl ("END", line)) {
+      line <- gsub (" [0-9]*", sprintf (" %d", end), line)
+    }
+    if (substr (line, 1, 4) == "VAR ") {
+      line <- gsub (" [A-Z]*", sprintf (" %s", var), line)
+    }
+    if (substr (line, 1, 6) == "COVAR ") {
+      line <- gsub (" [A-Z]*", sprintf (" %s", cvar), line)
+    }
+    if (substr (line, 1, 4) == "WLOW") {
+      line <- gsub (" .*", sprintf (" %f", wlow), line)
+    }
+    if (substr (line, 1, 5) == "WHIGH") {
+      line <- gsub (" .*", sprintf (" %f", whigh), line)
+    }
+    if (substr (line, 1, 6) == 'BATMEM') {
+      n <- ifelse (type == 'MEM', 1, 0)
+      line <- gsub (' .*', sprintf(' %d', n), line)
+    }
+    if (substr (line, 1, 6) == 'BATFFT') {
+      n <- ifelse (type == 'fft', 1, 0)
+      line <- gsub (' .*', sprintf(' %d', n), line)
+    }
+    if (substr (line, 1, 6) == 'BATACV') {
+      n <- ifelse (type == 'acv', 1, 0)
+      line <- gsub (' .*', sprintf(' %d', n), line)
+    }
+    if (type == 'fft') {
+      if (substr (line, 1, 4) == 'SEGL') {
+        line <- sub (' .*', sprintf (' %d', 
+                                     plotSpec$Variance[[1]]$Definition$fftpts), line)
+      }
+      if (substr (line, 1, 6) == 'WINDOW') {
+        window <- switch (plotSpec$Variance[[1]]$Definition$fftwindow,
+                          Parzen=1,
+                          Welch=3,
+                          Hanning=4,
+                          2)
+        line <- sub (' .*', sprintf (' %d', window-1), line)
+      }
+      if (substr (line, 1, 7) == 'SMOOTHB') {
+        line <- sub (' .*', sprintf (' %d', 
+                                     plotSpec$Variance[[1]]$Definition$fftavg), line)
+      }
+      if (substr (line, 1, 7) == 'SHOWFFT') {
+        typ <- switch (plotSpec$Variance[[1]]$Definition$ffttype,
+                       'fp(f)'=4,
+                       'p(f)'=2,
+                       'eps(f)'=8,
+                       0)
+        line <- sub (' .*', sprintf (' %d', typ), line)
+      }
+      if (substr (line, 1, 8) == 'SHOWCFFT') {
+        typ <- switch (plotSpec$Variance[[1]]$Definition$ffttype,
+                       'cospec. / quad.'=32,
+                       'coherence / phase'=16,
+                       'both fp(f)'=48,
+                       1)
+        line <- sub (' .*', sprintf (' %d', typ), line)
+      }
+    }
+    if (type == 'acv') {
+      if (substr (line, 1, 7) == 'SHOWACV') {
+        typ <- switch (plotSpec$Variance[[1]]$Definition$acvtype,
+                       'fp(f)'=4,
+                       'p(f)'=2,
+                       'autocorrelation'=16,
+                       1)
+        line <- sub (' .*', sprintf (' %d', typ), line)
+      }
+      if (substr (line, 1, 7) == 'SMOOTHS') {
+        line <- sub (' .*', sprintf (' %d', plotSpec$Variance[[1]]$Definition$acvtau), line)
+      }
+      if (substr (line, 1, 7) == 'SMOOTHB') {
+        line <- sub (' .*', sprintf (' %d', 
+                                     plotSpec$Variance[[1]]$Definition$acvavg), line)
+      }
+      if (substr (line, 1, 6) == 'WINDOW') {
+        window <- switch (plotSpec$Variance[[1]]$Definition$acvwindow,
+                          Parzen=1,
+                          Welch=3,
+                          Hanning=4,
+                          2)
+        line <- sub (' .*', sprintf (' %d', window-1), line)
+      }
+    }
+    if (type == 'MEM') {
+      if (substr (line, 1, 7) == 'SHOWMEM') {
+        typ <- switch (plotSpec$Variance[[1]]$Definition$MEMtype,
+                       'fp(f)'=4,
+                       'p(f)'=2,
+                       1)
+        line <- sub (' .*', sprintf (' %d', typ), line)
+      }
+      if (substr (line, 1, 5) == 'POLES') {
+        line <- sub (' .*', sprintf (' %d', 
+                                     plotSpec$Variance[[1]]$Definition$MEMpoles), line)
+      }
+      if (substr (line, 1, 7) == 'SMOOTHB') {
+        line <- sub (' .*', sprintf (' %d', 
+                                     plotSpec$Variance[[1]]$Definition$MEMavg), line)
+      }
+      if (substr (line, 1, 4) == 'RESN') {
+        line <- sub (' .*', sprintf (' %f', plotSpec$Variance[[1]]$Definition$MEMres), line)
+      }
+    }
+    
+    newlines[length (newlines) + 1] <- line
+  }
+  writeLines (newlines, "otto.def")
+  return()
+}
+
+choose2Dfile <- function () {
+  oldwd <- setwd ('/Data')
+  fname2 <<- file.choose ()
+  setwd (oldwd)
+}
+
 saveConfig <- function (inp) {
   save (plotSpec, file=inp$save, ascii=TRUE)
 }
@@ -344,6 +509,9 @@ load (file='plotSpec.def')  ## this loads initial values of plotSpec and Restric
 
 chooseVar <- function (fname, inp) {
   sVarList <<- setVariableList (fname, sVarList)
+}
+chooseXfrVar <- function (fname, inp) {
+  sVarList <<- setVariableList (fname, VarList)
 }
 
 sVarList <- c('ATX', 'DPXC', 'GGALT', 'WIC')

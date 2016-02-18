@@ -50,7 +50,9 @@ standardVariables <- function (list=NULL) {
 #' @export getNetCDF
 #' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
 #' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load 
-#' everything. (May produce quite large data.frames.) SPECIAL NOTE: Some variable names
+#' everything. (May produce quite large data.frames.) The default is the list given by
+#' standardVariables (). 
+#' SPECIAL NOTE: Some variable names
 #' have a suffix indicating the location on the aircraft, like _LWI (left-wing inboard).
 #' To avoid having to supply these, a partial name can be supplied, like "CONCD_", and
 #' the routine will find the first matching variable and use that variable name. These
@@ -67,7 +69,7 @@ standardVariables <- function (list=NULL) {
 #' @examples 
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2"), 133000, 143000, 5)}
-getNetCDF <- function (fname, VarList, Start=0, End=0, F=0) {
+getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) {
   # This function reads the netCDF file 'fname' and extracts 
   # the variables specified in 'VarList', returning the
   # results in a data.frame. It includes the flight number F

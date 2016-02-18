@@ -14,6 +14,9 @@ Version 2.3-15-12-15
                                made cosmetic improvements in many places.
       makeNetCDF.R          -- modifications permit better functioning with added
                                data.frame columns, e.g., by assigning minimal attributes.
+                               Further mods 160218 to avoid changes to the supplied
+                               data.frame as a result of evaluation in ncdf4 calls.
+      getNetCDF.R           -- Made the default variable list standardVariables().
 Version 2.2-15-10-26
   Modifications:
                             -- fixed examples, added data.frame sample, and generally
