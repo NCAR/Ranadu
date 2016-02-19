@@ -10,7 +10,7 @@ shinyUI(
     navlistPanel (tabPanel (strong('data & plot'), fluidRow (
       column (4, wellPanel (
         selectInput (inputId='Project', label=NULL,
-                     choices=PJ, width='100px'),
+                     choices=PJ, selected=plotSpec$Project, width='100px'),
         fluidRow (
           column (4, downloadButton ('savePDF', label='PDF')), # icon=icon('file-pdf-o'))),
           column (4, downloadButton (outputId='savePNG', label='PNG')), # icon=icon('file-image-o'))),
@@ -322,7 +322,7 @@ shinyUI(
                                        sidebarLayout (
                                          sidebarPanel (h4('2D probe images'), 
                                                        actionButton ('fname2d', 'select input file'),
-                                                       textInput ('fnametext', 'file selected:'),
+                                                       textInput ('fnametext', 'file selected:', value=plotSpec$fname2d),
                                                        radioButtons ('mode2d', 'type of display:',
                                                                      choices=c('record', 'page', 'second (max)', 'image')),
                                                        fluidRow (

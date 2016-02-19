@@ -14,8 +14,10 @@ shinyServer(function(input, output, session) {
   }, priority=0)
   
   exprProject <- quote ({ 
-    plotSpec$Project <<- input$Project
-    Project <<- input$Project
+    if (input$Project != plotSpec$Project) {
+      plotSpec$Project <<- input$Project
+      plotSpec$fname2d <<- NULL
+    }
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 1')}
   })
@@ -1095,10 +1097,11 @@ shinyServer(function(input, output, session) {
     while(getwd() != normalizePath(newwd)) {
       Sys.sleep(0.02)
     }
-    fname2 <<- file.choose ()
+    Sys.sleep (0.5)
+    plotSpec$fname2d <<- file.choose ()
     rm(cfile, pos=1)
     setwd (oldwd)
-    updateTextInput (session, 'fnametext', value=fname2)
+    updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
     isolate(reac$new2d <- reac$new2d + 1)
   })
   observeEvent (input$createV, {
@@ -3078,12 +3081,12 @@ shinyServer(function(input, output, session) {
     mode <- 'page'
     mode <- 'record'
     if (!exists ('cfile')) {
-      # fname2 <<- '/Data/DC3/20120526_191349_rf05.2d'
-      if (!exists ('fname2')) {
+      # plotSpec$fname2d <<- '/Data/DC3/20120526_191349_rf05.2d'
+      if (!('fname2d' %in% names (plotSpec))) {
         print ('must select a 2D file to get the 2D display')
         return ()
       }
-      cfile <<- file(fname2, 'rb')
+      cfile <<- file(plotSpec$fname2d, 'rb')
       xmlinfo <- readBin(cfile, character(), 1)
       probe <<- sub('.*\\n', '', xmlinfo)
       xmlinfo <- sub(sprintf ('\\n%s$',probe), '\n', xmlinfo)

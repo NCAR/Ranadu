@@ -20,7 +20,7 @@ library(XML)
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
 Trace <- FALSE
-Trace <- TRUE
+# Trace <- TRUE
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
@@ -271,11 +271,23 @@ formatTime <- function (time) {
   return (tt)
 }
 
+saveConfig <- function (inp) {
+  save (plotSpec, file=inp$save, ascii=TRUE)
+}
+loadConfig <- function (inp) {
+  load (file=inp$restore)
+  plotSpec <<- plotSpec
+  print (sprintf ('loadConfig, file=%s', inp$restore))
+}
+load (file='plotSpec.def')  ## this loads initial values of plotSpec and Restrictions
 
-Project <- PJ[1]
-Flight <- 1
+
+Project <- plotSpec$Project
+Flight <- plotSpec$Flight
+TypeFlight <- plotSpec$TypeFlight
 Production <- FALSE
-fn <- sprintf ('%s%s/%srf%02d.nc', DataDirectory (), Project, Project, Flight)
+fn <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), Project, 
+               Project, TypeFlight, Flight)
 if (!file.exists (fn)) {
   if (Trace) {print (sprintf ('%s not found', fn))}
   fn <- sub ('\\.nc', '.Rdata', fn)
@@ -496,16 +508,6 @@ choose2Dfile <- function () {
   fname2 <<- file.choose ()
   setwd (oldwd)
 }
-
-saveConfig <- function (inp) {
-  save (plotSpec, file=inp$save, ascii=TRUE)
-}
-loadConfig <- function (inp) {
-  load (file=inp$restore)
-  plotSpec <<- plotSpec
-  print (sprintf ('loadConfig, file=%s', inp$restore))
-}
-load (file='plotSpec.def')  ## this loads initial values of plotSpec and Restrictions
 
 chooseVar <- function (fname, inp) {
   sVarList <<- setVariableList (fname, sVarList)
