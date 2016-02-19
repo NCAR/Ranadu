@@ -36,51 +36,68 @@ shinyServer(function(input, output, session) {
   obsTypeFlight <- observe (exprTypeFlight, quoted=TRUE)
   
   exprTime <- quote ({
-    times <<- input$times
-    updateTextInput (session, 'tstart', value=formatTime(times[1]))
-    updateTextInput (session, 'tend', value=formatTime(times[2]))
+    plotSpec$Times <<- input$times
+    updateTextInput (session, 'tstart', value=formatTime(plotSpec$Times[1]))
+    updateTextInput (session, 'tend', value=formatTime(plotSpec$Times[2]))
     isolate (reac$newdisplay <- reac$newdisplay + 1)
     isolate (reac$newhistogram <- reac$newhistogram + 1)
     isolate (reac$newstats <- reac$newstats + 1)
     isolate (reac$newscat <- reac$newscat + 1)
     isolate (reac$newbin <- reac$newbin + 1)
     isolate (reac$newvarp <- reac$newvarp + 1)
-    if (Trace) {print ('reset newdisplay 20')}
+    if (Trace) {
+      print ('reset newdisplay 20')
+      print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
+    }
   })
   obsTime <- observe (exprTime, quoted=TRUE)
   
   exprTstart <- quote ({
+    ## ignore it if before start or after finish
+    if (Trace) {print (sprintf ('input$tstart=%s, min/maxT=%s %s',
+                                input$tstart, minT, maxT))}
     txt <- input$tstart
-    hhmmss <- as.integer (gsub (':', '', txt))
-    i1 <- getIndex (Data, hhmmss)
-    if (i1 < 1) {i1 <- 1}
-    tms <- times
-    tms[1] <- Data$Time[i1]
-    updateSliderInput (session, 'times', value=tms)
-    times <<- tms
-    #     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    #     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    #     isolate (reac$newstats <- reac$newstats + 1)
-    #     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset new times 25')}
+    ## protect against typing errors that insert a character:
+    if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
+      hhmmss <- as.integer (gsub (':', '', txt))
+      i1 <- getIndex (Data, hhmmss)
+      if (i1 > 0) {
+        plotSpec$Times[1] <<- Data$Time[i1]
+        updateSliderInput (session, 'times', value=plotSpec$Times)
+        #     isolate (reac$newdisplay <- reac$newdisplay + 1)
+        #     isolate (reac$newhistogram <- reac$newhistogram + 1)
+        #     isolate (reac$newstats <- reac$newstats + 1)
+        #     isolate (reac$newscat <- reac$newscat + 1)
+        if (Trace) {
+          print ('reset new times 25')
+          print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
+        }
+      }
+    }
   })
   obsTstart <- observe (exprTstart, quoted=TRUE)
   
   exprTend <- quote ({
+    ## ignore it if before start or after finish
     txt <- input$tend
-    hhmmss <- as.integer (gsub (':', '', txt))
-    i2 <- getIndex (Data, hhmmss)
-    if (i2 < 1) {i2 <- nrow (Data)}
-    tms <- times
-    tms[2] <- Data$Time[i2]
-    if (Trace) {print (c('updating time to', formatTime(tms[1]), formatTime(tms[2])))}
-    updateSliderInput (session, 'times', value=tms)
-    times <<- tms
-    #     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    #     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    #     isolate (reac$newstats <- reac$newstats + 1)
-    #     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset new times 26')}
+    ## protect against typing errors that insert a character:
+    if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
+      hhmmss <- as.integer (gsub (':', '', txt))
+      i2 <- getIndex (Data, hhmmss)
+      if (i2 > 0) {
+        plotSpec$Times[2] <<- Data$Time[i2]
+        updateSliderInput (session, 'times', value=plotSpec$Times)
+        if (Trace) {print (c('updating time to', formatTime(plotSpec$Times[1]), formatTime(plotSpec$Times[2])))}
+        #     isolate (reac$newdisplay <- reac$newdisplay + 1)
+        #     isolate (reac$newhistogram <- reac$newhistogram + 1)
+        #     isolate (reac$newstats <- reac$newstats + 1)
+        #     isolate (reac$newscat <- reac$newscat + 1)
+        if (Trace) {
+          print ('reset new times 26')
+          print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
+        }
+      }
+    }
   })
   obsTend <- observe (exprTend, quoted=TRUE)
   
@@ -806,6 +823,16 @@ shinyServer(function(input, output, session) {
   })
   obsLineColor <- observe (exprLineColor, quoted=TRUE)
   
+  exprsLineColor <- quote ({
+    plt <- isolate (input$plot)
+    pnl <- isolate (input$spanel)
+    lv <- isolate (input$slineV)
+    plotSpec$Scat[[plt]]$panel[[pnl]]$col[lv] <<- input$svarColor
+    isolate (reac$newscat <- reac$newscat + 1)
+    if (Trace) {print ('reset newscat 15')}
+  })
+  obssLineColor <- observe (exprsLineColor, quoted=TRUE)
+  
   exprLineWidth <- quote ({
     plt <- isolate (input$plot)
     pnl <- isolate (input$panel)
@@ -1025,12 +1052,12 @@ shinyServer(function(input, output, session) {
   observeEvent (input$saveRdata,
                 saveRdata (Data=data(), inp=input))
   observeEvent (input$nextT, {
-    dt <- difftime (times[2], times[1])
-    times[1] <<- times[1] + dt
-    times[2] <<- times[2] + dt
-    updateSliderInput (session, 'times', value=times)
-    updateTextInput (session, 'tstart', value=formatTime (times[1]))
-    updateTextInput (session, 'tend',   value=formatTime (times[2]))
+    dt <- difftime (plotSpec$Times[2], plotSpec$Times[1])
+    plotSpec$Times[1] <<- plotSpec$Times[1] + dt
+    plotSpec$Times[2] <<- plotSpec$Times[2] + dt
+    updateSliderInput (session, 'times', value=plotSpec$Times)
+    updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+    updateTextInput (session, 'tend',   value=formatTime (plotSpec$Times[2]))
     isolate (reac$newdisplay <- reac$newdisplay + 1)
     isolate (reac$newhistogram <- reac$newhistogram + 1)
     isolate (reac$newstats <- reac$newstats + 1)
@@ -1038,12 +1065,12 @@ shinyServer(function(input, output, session) {
     isolate (reac$newbin <- reac$newbin + 1)
   } )
   observeEvent (input$prevT, {
-    dt <- difftime (times[2], times[1])
-    times[1] <<- times[1] - dt
-    times[2] <<- times[2] - dt
-    updateSliderInput (session, 'times', value=times)
-    updateTextInput (session, 'tstart', value=formatTime (times[1]))
-    updateTextInput (session, 'tend',   value=formatTime (times[2]))
+    dt <- difftime (plotSpec$Times[2], plotSpec$Times[1])
+    plotSpec$Times[1] <<- plotSpec$Times[1] - dt
+    plotSpec$Times[2] <<- plotSpec$Times[2] - dt
+    updateSliderInput (session, 'times', value=plotSpec$Times)
+    updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+    updateTextInput (session, 'tend',   value=formatTime (plotSpec$Times[2]))
     isolate (reac$newdisplay <- reac$newdisplay + 1)
     isolate (reac$newhistogram <- reac$newhistogram + 1)
     isolate (reac$newstats <- reac$newstats + 1)
@@ -1168,7 +1195,7 @@ shinyServer(function(input, output, session) {
       }
     }
     DataF <- limitData (data (), input, lim=input$limitsFit)
-    DataF <- DataF[DataF$Time >= times[1] & DataF$Time < times[2], ]
+    DataF <- DataF[DataF$Time >= plotSpec$Times[1] & DataF$Time < plotSpec$Times[2], ]
     fitm <<- lm(paste(parse (text=isolate(input$response)), '~',  parse (text=isolate(input$fformula)),
                       sep=''), data=DataF, y=TRUE)
     print (summary (fitm))
@@ -1232,20 +1259,21 @@ shinyServer(function(input, output, session) {
     # reac$newdisplay <- reac$newdisplay + 1
     if (file.exists(fname)) {
       D <- getNetCDF (fname, VarList)
-      # times <<- c(D$Time[1], D$Time[nrow(D)])
+      # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
       step <- 60
       minT <- D$Time[1]
-      minT <- minT - as.integer (minT) %% step + step
+      minT <<- minT - as.integer (minT) %% step + step
       maxT <- D$Time[nrow(D)]
-      maxT <- maxT - as.integer (maxT) %% step
-      times <<- c(minT, maxT)
-      updateSliderInput (session, 'times', value=c(minT,maxT), min=minT, max=maxT)
+      maxT <<- maxT - as.integer (maxT) %% step
+      updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
       if (exists ('specialData')) {
         SD <- specialData
         if ('Time' %in% names (SD)) {
           SD$Time <- NULL
         }
+        DS <- D
         D <- cbind (D, SD)
+        D <- transferAttributes (DS, D)
       }
       if (length (D) > 1) {
         fname.last <<- fname
@@ -1290,7 +1318,7 @@ shinyServer(function(input, output, session) {
   
   plotMain <- function (input) {
     
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Plot[[input$plot]]$restrict)
     plt <- isolate (input$plot)
@@ -1355,8 +1383,8 @@ shinyServer(function(input, output, session) {
     }
     if (Trace) {
       print (c('newdisplay is', reac$newdisplay))
-      print (sprintf ('global times are %s %s',
-                      formatTime (times[1]), formatTime (times[2])))
+      print (sprintf ('in display, global plotSpec$Times are %s %s',
+                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -1369,7 +1397,7 @@ shinyServer(function(input, output, session) {
     }
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Plot[[input$plot]]$restrict)
     ndv <- names (DataV)
@@ -1399,7 +1427,7 @@ shinyServer(function(input, output, session) {
   
   plotScat <- function (input) {
     
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Scat[[input$plot]]$restrict)
     plt <- isolate (input$plot)
@@ -1484,7 +1512,7 @@ shinyServer(function(input, output, session) {
   
   plotBin <- function (input) {
     
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Bin[[input$plot]]$restrict)
     plt <- isolate (input$plot)
@@ -1564,6 +1592,7 @@ shinyServer(function(input, output, session) {
         dz <- zmax-zmin
         DB <- data.frame ('Z1'=DataX[, nm])
         DB[DataX[, varx] > zmax, 'Z1'] <- NA
+        mean.loc[1] <- mean (DB[, 'Z1'], na.rm=TRUE)
         for (j in 2:nbns) {
           zmin <- zmax
           zmax <- zmax + dz
@@ -1626,8 +1655,8 @@ shinyServer(function(input, output, session) {
     }
     if (Trace) {
       print (c('newscat is', reac$newscat))
-      print (sprintf ('global times are %s %s',
-                      formatTime (times[1]), formatTime (times[2])))
+      print (sprintf ('global plotSpec$Times are %s %s',
+                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -1640,7 +1669,7 @@ shinyServer(function(input, output, session) {
     }
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Bin[[input$plot]]$restrict)
     ndv <- names (DataV)
@@ -1677,8 +1706,8 @@ shinyServer(function(input, output, session) {
     }
     if (Trace) {
       print (c('newbin is', reac$newbin))
-      print (sprintf ('global times are %s %s',
-                      formatTime (times[1]), formatTime (times[2])))
+      print (sprintf ('global plotSpec$Times are %s %s',
+                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -1691,7 +1720,7 @@ shinyServer(function(input, output, session) {
     }
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Scat[[input$plot]]$restrict)
     ndv <- names (DataV)
@@ -1766,7 +1795,7 @@ shinyServer(function(input, output, session) {
     }
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, input$limitsFit)
     ndv <- names (DataV)
@@ -1812,9 +1841,9 @@ shinyServer(function(input, output, session) {
       time_units <- ncatt_get (netCDFfile, "Time", "units")
       tref <<- sub ('seconds since ', '', time_units$value)
       Time <<- Time <- as.POSIXct(as.POSIXct(tref, tz='UTC')+Time, tz='UTC')
-      idx1 <- getIndex (Time, as.integer (gsub(':', '', formatTime(times[1]))))
+      idx1 <- getIndex (Time, as.integer (gsub(':', '', formatTime(plotSpec$Times[1]))))
       if (idx1 < 1) {idx1 <- 1}
-      idx2 <- getIndex (Time, as.integer (gsub(':', '', formatTime(times[2]))))
+      idx2 <- getIndex (Time, as.integer (gsub(':', '', formatTime(plotSpec$Times[2]))))
       if (idx1 < 1) {idx2 <- length(Time)}
       if ('UHSAS' %in% input$probe) {
         nm3 <- namesCDF[grepl("CUHSAS_", namesCDF)]
@@ -2056,8 +2085,8 @@ shinyServer(function(input, output, session) {
     }
     if (Trace) {
       print (c('newvarp is', reac$newvarp))
-      print (sprintf ('global times are %s %s',
-                      formatTime (times[1]), formatTime (times[2])))
+      print (sprintf ('global plotSpec$Times are %s %s',
+                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -2084,7 +2113,7 @@ shinyServer(function(input, output, session) {
     }
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     DataR <- transferAttributes (DataR, Data)
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Variance[[input$plot]]$restrict)
@@ -2112,13 +2141,13 @@ shinyServer(function(input, output, session) {
     if (Trace) {print(Z)}
     ## don't know why this is needed, but makeNetCDF modifies DataR;
     ## need to fix that routine
-    # DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    # DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     if (Trace) {print (c('after makeNetCDF: ', summary (DataR$WIC)))}
     Data2 <<- Data
     wlow <- 0.0001; whigh <- 10.
     # spec$var <- 'WIC
-    ts <- formatTime(times[1])
-    te <- formatTime(times[2])
+    ts <- formatTime(plotSpec$Times[1])
+    te <- formatTime(plotSpec$Times[2])
     ts <- as.integer(gsub (':', '', ts))
     te <- as.integer (gsub (':', '', te))
     if (input$spectype == 'MEM') {
@@ -2440,15 +2469,15 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print (sprintf ('input$times %s %s', formatTime (input$times[1]),
                       formatTime (input$times[2])))
-      print (sprintf ('global times are %s %s',
-                      formatTime (times[1]), formatTime (times[2])))
+      print (sprintf ('in track, global plotSpec$Times are %s %s',
+                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     namesV <- names(Data)
     namesV <- namesV[namesV != "Time"]
     #       for (nm in namesV) {
     #         
     #       }
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, input$limits2)
     ndv <- names (DataV)
@@ -2458,7 +2487,7 @@ shinyServer(function(input, output, session) {
     #         Data[!is.na(Data[ ,n]) & (abs(Data[,n]+32767) < 1), n] <- NA
     #       }
     #       # Data <- Data[(Data$Time >= input$times[1]) & (Data$Time < input$times[2]), ]
-    #       Data <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    #       Data <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     #       if (nrow (Data) <= 1) {
     #         plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
     #         text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
@@ -2543,8 +2572,8 @@ shinyServer(function(input, output, session) {
       if (Trace) {
         print (sprintf ('input$times %s %s', formatTime (input$times[1]),
                         formatTime (input$times[2])))
-        print (sprintf ('global times are %s %s',
-                        formatTime (times[1]), formatTime (times[2])))
+        print (sprintf ('in thite, global plotSpec$Times are %s %s',
+                        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
       namesV <- names(Data)
       namesV <- namesV[namesV != "Time"]
@@ -2552,7 +2581,7 @@ shinyServer(function(input, output, session) {
         Data[!is.na(Data[ ,n]) & (abs(Data[,n]+32767) < 1), n] <- NA
       }
       # Data <- Data[(Data$Time >= input$times[1]) & (Data$Time < input$times[2]), ]
-      Data <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+      Data <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
       if (nrow (Data) <= 0) {
         plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
         text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
@@ -2620,8 +2649,8 @@ shinyServer(function(input, output, session) {
       if (Trace) {
         print (sprintf ('input$times %s %s', formatTime (input$times[1]),
                         formatTime (input$times[2])))
-        print (sprintf ('global times are %s %s',
-                        formatTime (times[1]), formatTime (times[2])))
+        print (sprintf ('in skewT, global plotSpec$Times are %s %s',
+                        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
       namesV <- names(Data)
       namesV <- namesV[namesV != "Time"]
@@ -2629,7 +2658,7 @@ shinyServer(function(input, output, session) {
         Data[!is.na(Data[ ,n]) & (abs(Data[,n]+32767) < 1), n] <- NA
       }
       # Data <- Data[(Data$Time >= input$times[1]) & (Data$Time < input$times[2]), ]
-      Data <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+      Data <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
       if (nrow (Data) <= 0) {
         plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
         text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
@@ -2727,7 +2756,7 @@ shinyServer(function(input, output, session) {
     }
     plotV <- unique (plotV)
     Ds <- Ds[, c('Time', plotV)]
-    Ds <- Ds[(Ds$Time >= times[1]) & (Ds$Time < times[2]), ]
+    Ds <- Ds[(Ds$Time >= plotSpec$Times[1]) & (Ds$Time < plotSpec$Times[2]), ]
     Dstats <- data.frame ()
     Dstats['Time', 1] <- 'Time'
     Dstats['Time', 2] <- NA
@@ -2769,7 +2798,7 @@ shinyServer(function(input, output, session) {
     #     }
     #     plotV <- unique (plotV)
     Ds <- Ds[, c('Time', sVarList)]
-    Ds <- Ds[(Ds$Time >= times[1]) & (Ds$Time < times[2]), ]
+    Ds <- Ds[(Ds$Time >= plotSpec$Times[1]) & (Ds$Time < plotSpec$Times[2]), ]
     Dstats <- data.frame ()
     Dstats['Time', 1] <- 'Time'
     Dstats['Time', 2] <- NA
@@ -2808,7 +2837,7 @@ shinyServer(function(input, output, session) {
     }
     plotV <- unique (plotV)
     Ds <- Ds[, c('Time', plotV)]
-    Ds <- Ds[(Ds$Time >= times[1]) & (Ds$Time < times[2]), ]
+    Ds <- Ds[(Ds$Time >= plotSpec$Times[1]) & (Ds$Time < plotSpec$Times[2]), ]
     kount <- 0
     for (nm in names (Ds)) {
       if (nm == 'Time') {next}
@@ -2820,7 +2849,7 @@ shinyServer(function(input, output, session) {
   }, width=780, height=640)
   
   plotHist <- function (inp) {  ## plotHist
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, inp, inp$limits3)
     plt <- inp$plot
@@ -2954,8 +2983,8 @@ shinyServer(function(input, output, session) {
     if (Trace) {print ('entered histogram')}
     if (Trace) {
       print (c('newhistogram is', reac$newhistogram))
-      print (sprintf ('global times are %s %s',
-                      formatTime (times[1]), formatTime (times[2])))
+      print (sprintf ('in histogram, global plotSpec$Times are %s %s',
+                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -2968,7 +2997,7 @@ shinyServer(function(input, output, session) {
     }
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
-    DataR <- Data[(Data$Time >= times[1]) & (Data$Time < times[2]), ]
+    DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, input$limits3)
     ndv <- names (DataV)
@@ -3006,7 +3035,7 @@ shinyServer(function(input, output, session) {
     }
     plotV <- unique (plotV)
     Ds <- Ds[, c('Time', plotV)]
-    Ds <- Ds[(Ds$Time >= times[1]) & (Ds$Time < times[2]), ]
+    Ds <- Ds[(Ds$Time >= plotSpec$Times[1]) & (Ds$Time < plotSpec$Times[2]), ]
     Ds <- Ds[!is.na (Ds$GGALT), ]
     kount <- 0
     for (nm in names (Ds)) {
@@ -3039,7 +3068,7 @@ shinyServer(function(input, output, session) {
     }
     plotV <- unique (plotV)
     Ds <- Ds[, c('Time', plotV)]
-    Ds <- Ds[(Ds$Time >= times[1]) & (Ds$Time < times[2]), ]
+    Ds <- Ds[(Ds$Time >= plotSpec$Times[1]) & (Ds$Time < plotSpec$Times[2]), ]
     Ds$Time <- formatTime(Ds$Time)
     Ds
   }, options=list(paging=TRUE, searching=TRUE))

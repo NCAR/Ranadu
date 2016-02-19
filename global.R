@@ -12,10 +12,10 @@ library(gtable)
 library(grid)
 library(XML)
 
-source ('R/plotTrack.R')
-source ('R/PlotWAC.R')
-source ('R/getNetCDF.R')
-source ('R/makeNetCDF.R')
+# source ('R/plotTrack.R')
+# source ('R/PlotWAC.R')
+# source ('R/getNetCDF.R')
+# source ('R/makeNetCDF.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
@@ -562,12 +562,14 @@ Data <- getNetCDF (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Proje
                             plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight), VarList)
 
 # times <- c(Data$Time[1], Data$Time[nrow(Data)])
-    step <- 60
-    minT <- Data$Time[1]
-    minT <- minT - as.integer (minT) %% step + step
-    maxT <- Data$Time[nrow(Data)]
-    maxT <- maxT - as.integer (maxT) %% step 
-    times <- c(minT, maxT)
+step <- 60
+minT <- Data$Time[1]
+minT <- minT - as.integer (minT) %% step + step
+maxT <- Data$Time[nrow(Data)]
+maxT <- maxT - as.integer (maxT) %% step 
+times <- c(minT, maxT)
+if (plotSpec$Times[1] > times[1]) {times <- c(plotSpec$Times[1], maxT)}
+if (plotSpec$Times[2] < times[2]) {times <- c(times[1], plotSpec$Times[2])}
 
 # Restrictions <- data.frame()
 # Restrictions[1, 'RVAR'] <- 'TASX'
@@ -575,6 +577,28 @@ Data <- getNetCDF (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Proje
 # Restrictions[1, 'min'] <- 130
 # Restrictions[1, 'max'] <- 300
 defFiles <- list.files(pattern = "^plotSpec")
+
+transferAttributes <- function (d, dsub) {    
+  ds <- dsub
+  for (nm in names (d)) {
+    if (nm %in% names (dsub)) {
+      var <- sprintf ("d$%s", nm)
+      A <- attributes (eval (parse (text=var)))
+      A[[1]] <- nrow (ds)
+      if (!grepl ('Time', nm)) {
+        A$dim <- NULL
+        A$class <- NULL
+      }
+      attributes (ds[,nm]) <- A
+    }
+  }
+  A <- attributes (d)
+  A$Dimensions$Time$len <- nrow (ds)
+  A$row.names <- 1:nrow (ds)
+  A$names <- names (ds)
+  attributes (ds) <- A
+  return(ds)
+}
 
 saveRdata <- function (Data, inp) {
   print ('entered saveRdata')
