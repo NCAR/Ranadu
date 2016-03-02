@@ -1,4 +1,39 @@
-Version 2.3-15-12-15
+Version 2.4-16-03-01
+  Additions:
+      LCL.R                 -- Find the lifted condensation level corresponding to
+                               specified pressure, temperature, and mixing ratio
+      CAPE.R                -- Find the convective available potential energy for
+                               a supplied sounding. Also returns adiabatic and pseudo-
+                               adiabatic temperature profiles in a data.frame that
+                               can be plotted on the skew-T background.
+      global.R, ui.R,       -- A shiny app that provides interactive control of a
+      server.R                 set of plots that are useful in data analyses using
+                               aircraft data.
+      RanaduShinyManual.pdf -- A manual for the shiny application, to complement the
+                               RanaduManual.pdf, which does not cover the shiny app.
+  Modifications:
+      RanaduManual.pdf      -- Changed to incorporate the LCL and CAPE functions.
+      LagrangeInterpolation.R -- Modified to accept an array for the first argument
+                               and return an interpolated array of values.
+      plotWAC.R             -- Added arguments pch and cex for use as scatterplots, 
+                               and modified to function as a scatterplot call if a
+                               names (other than 'Time') is provided for xlab.
+      skewT.R               -- Modified to accept variable names 'PSXC', 'ATX', 'DPXC'
+                               in place of 'Pressure', 'Temperature', 'DewPoint'. (This
+                               provides the function SkewTSounding ().)
+      SpecificHeats.R       -- Modified the returned vector to have element names
+                               "CPa", "CVa", and "Ra".
+      setVariableList.R     -- Added an argument 'single' that causes the routine to
+                               return after the selection of just one variable.
+      inst/skewTDiagram.Rdata -- This data file was updated as required by changes to
+                               ggplot2 and grid.
+  Corrections:
+      DataFileInfo.R        -- For the Rdata case, changed erroneous reference to 'Data'
+                               to 'D'.
+      ggplotWAC.R           -- removed the now unnecessary reference to the 'grid' 
+                               package.
+                               
+Version 2.3-15-12-15           
   Additions:
       OpenInProgram.R       -- opens ncplot or Xanadu or another program with variables
                                from an R data.frame, for easy viewing

@@ -5,13 +5,16 @@
 \alias{setVariables}
 \title{setVariableList}
 \usage{
-setVariableList(fname, VarList = vector())
+setVariableList(fname, VarList = vector(), single = FALSE)
 }
 \arguments{
 \item{fname}{The name of a netCDF file containing variables.}
 
-\item{VarList}{A vector of character names to be selected before user interaction. 
+\item{VarList}{A vector of character names to be selected before user interaction.
 This might be the result of a call to Ranadu::standardVariables(), for example.}
+
+\item{single}{A logical flag indicating if only one selection should be returned and
+the function should return immediately after the first selection is made.}
 }
 \value{
 A vector of character names of the selected variables.

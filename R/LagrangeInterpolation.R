@@ -21,24 +21,26 @@ LagrangeInterpolate <- function (.x, .n, .D) {
   .D <- .D[!is.na(.D[, 1]), ]
   # find starting point in array
   L <- length (.D[ , 1])
+  y <- rep(NA, length(.x))
   # note: returning end points for calls outside limits
-  if (.x < .D[1, 1]) {return (.D[1, 2])}
-  if (.x > .D[L, 1]) {return(.D[L, 2])}
-  i <- 1  # get first point greater than .x in .D:
-  # if this is slow, improve this search
-  while ((i < L) && (.x > .D[i,1])) {i <- i + 1}
-  i1 <- i - ((.n+1) %/% 2)
-  while (i1+.n-1 > L) {i1 <- i1 - 1}
-  while (i1 < 1) {i1 <- i1 + 1}
-  i2 <- i1 + .n -1
-  y <- 0
-  for (i in i1:i2) {
-    p <- 1
-    for (j in i1:i2) {
-      if (j == i) {next}
-      p <- p * (.x-.D[j,1]) / (.D[i,1] - .D[j,1])
-    }
-    y <- y + .D[i,2] * p
+  y[.x < .D[1,1]] <- .D[1,2]
+  y[.x > .D[L,1]] <- .D[L,2]
+  for (k in 1:length(.x)) {
+    if (is.na(y[k])) {
+      y[k] <- 0
+      i <- which (.x[k] <= .D[,1])[1]
+      i1 <- i - ((.n+1) %/% 2)
+      i1 <- min (i1, L - .n + 1)
+      i2 <- i1 + .n -1
+      for (i in i1:i2) {
+        p <- 1
+        for (j in i1:i2) {
+          if (j == i) {next}
+          p <- p * (.x[k]-.D[j,1]) / (.D[i,1] - .D[j,1])
+        }
+        y[k] <- y[k] + .D[i,2] * p
+      }
+    }  
   }
   return (y)
 }

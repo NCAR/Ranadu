@@ -21,6 +21,7 @@ SpecificHeats <- function (EoverP=0.) {
   L <- length(EoverP)
   R <- c(cp,cv,Ra)
   dim(R) <- c(L,3)
+  colnames(R) <- c("CPa", "CVa", "Ra")
   return (R)
 }
 

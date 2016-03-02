@@ -22,6 +22,8 @@
 #' variables provided in data.frame mode.
 #' @param logxy Set to 'y' for log axes. This is provided (vs log='y') because it
 #' makes possible translation of axis labels to 10^i format.
+#' @param pch Character number to use for scatterplots. Ignored if plot type is 'l'.
+#' @param cex Character size to use for scatterplots. Ignored if plot type is 'l'.
 #' @param legend.position For multiple-line calls with a data.frame, this parameter
 #' specifies the position for the legend. The default is 'bottomright'. The legend
 #' can also be suppressed by setting this parameter to NA. Then a legend can still 

@@ -6,13 +6,16 @@
 \alias{getnetcdf}
 \title{getNetCDF}
 \usage{
-getNetCDF(fname, VarList, Start = 0, End = 0, F = 0)
+getNetCDF(fname, VarList = standardVariables(), Start = 0, End = 0,
+  F = 0)
 }
 \arguments{
 \item{fname}{string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"}
 
 \item{VarList}{vector of variable names to load from the netCDF file. Use "ALL" to load 
-everything. (May produce quite large data.frames.) SPECIAL NOTE: Some variable names
+everything. (May produce quite large data.frames.) The default is the list given by
+standardVariables (). 
+SPECIAL NOTE: Some variable names
 have a suffix indicating the location on the aircraft, like _LWI (left-wing inboard).
 To avoid having to supply these, a partial name can be supplied, like "CONCD_", and
 the routine will find the first matching variable and use that variable name. These

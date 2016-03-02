@@ -56,10 +56,10 @@ DataFileInfo <- function (fileLocation) {
     Flight$Start <- min (D$Time, na.rm=TRUE)
     Flight$End <- max (D$Time, na.rm=TRUE)
     sampleRate <- 1
-    seconds <- as.numeric(Data$Time[nrow(Data)]-Data$Time[1], units='secs')
-    if (nrow (Data) > 2 * seconds) {sampleRate <- 25}
-    if (nrow (Data) > 27 * seconds ) {sampleRate <- 50}
-    if (nrow (Data) > 55 * seconds ) {sampleRate <- 100}
+    seconds <- as.numeric(D$Time[nrow(D)]-D$Time[1], units='secs')
+    if (nrow (D) > 2 * seconds) {sampleRate <- 25}
+    if (nrow (D) > 27 * seconds ) {sampleRate <- 50}
+    if (nrow (D) > 55 * seconds ) {sampleRate <- 100}
     Flight$Rate <- sampleRate
     Flight$LatMin <- as.character (Datts[[which ("geospatial_lat_min" == nm)]])
     Flight$LatMax <- as.character (Datts[[which ("geospatial_lat_max" == nm)]])

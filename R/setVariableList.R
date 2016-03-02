@@ -14,13 +14,15 @@
 #' @export setVariableList
 #' @import tcltk
 #' @param fname The name of a netCDF file containing variables.
-#' @param VarList A vector of character names to be selected before user interaction. 
+#' @param VarList A vector of character names to be selected before user interaction.
 #' This might be the result of a call to Ranadu::standardVariables(), for example.
+#' @param single A logical flag indicating if only one selection should be returned and
+#' the function should return immediately after the first selection is made.
 #' @return A vector of character names of the selected variables.
 #' @examples 
 #' \dontrun{setVariableList("/scr/raf_data/WINTER/WINTERrf11.nc", c("ATX", "PSXC"))}
 
-setVariableList <- function (fname, VarList=vector()) {
+setVariableList <- function (fname, VarList=vector(), single=FALSE) {
   
   requireNamespace("tcltk")
   ## callback functions:
@@ -39,6 +41,7 @@ setVariableList <- function (fname, VarList=vector()) {
     #tclvalue(labelName[2]) <- paste(v,"#", sep='')
     #label1 <- tklabel(guiVar, text = tclvalue(labelText))
     #tkmessageBox (message = sprintf("Clicked button %s", v))
+    if (single) {tkdestroy (guiVar)}
   }
   GoBack <- function () {
     # assign("VarList", VarNames, envir=.GlobalEnv)

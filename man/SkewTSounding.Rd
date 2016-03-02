@@ -14,10 +14,11 @@ SkewTSounding(Pressure = NA, Temperature = NA, DewPoint = NA,
 temperature and dewpoint values will be provided in the next two parameters. 
 All three vectors must be of the same length. The default is NA, in which case
 no data will be plotted but a skew-T background will still be provided. Optionally,
-this parameter can be a data.frame containing all three variables (pressure, 
-temperature, dewpoint), in which case the second and third parameters can
+this parameter can be a data.frame containing all three variables (Pressure, 
+Temperature, DewPoint), in which case the second and third parameters can
 be omitted. The data.frame must have variables with the exact names "Pressure",
-"Temperature", and "DewPoint"; absence of any causes the function to return NA.}
+"Temperature", and "DewPoint", or the alternatives "PSXC", "ATX", "DPXC"; absence 
+of any causes the function to return NA.}
 
 \item{Temperature}{A vector of values to plot for the temperature variable [deg.C].
 The default is NA, in which case no temperature sounding will be plotted.}

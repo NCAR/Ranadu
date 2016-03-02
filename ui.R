@@ -9,8 +9,12 @@ shinyUI(
     # tags$style (type='text/css', '.well {max-height:140px;}'),
     navlistPanel (tabPanel (strong('data & plot'), fluidRow (
       column (4, wellPanel (
-        selectInput (inputId='Project', label=NULL,
-                     choices=PJ, selected=plotSpec$Project, width='100px'),
+        fluidRow (
+          column (5, selectInput (inputId='Project', label=NULL,
+                       choices=PJ, selected=plotSpec$Project, width='100px'))#,
+          # column (7, selectInput ('quick', label=NULL, choices=FI$Variables, selected='GGALT'))
+        ),
+
         fluidRow (
           column (4, downloadButton ('savePDF', label='PDF')), # icon=icon('file-pdf-o'))),
           column (4, downloadButton (outputId='savePNG', label='PNG')), # icon=icon('file-image-o'))),
@@ -22,10 +26,11 @@ shinyUI(
           column (8, numericInput (inputId='Flight', label='Flight', value=1,
                                    min=1, max=99, step=1, width='80px')),
           column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff'),
-                                   width='70px', inline=TRUE))))),
+                                   width='70px', inline=FALSE))))),
       column (1, 
               numericInput (inputId='plot', label='plot', value=1,
-                            min=1, max=49, step=1)),
+                            min=1, max=49, step=1),
+              actionButton ('check', 'quick')),
       column(5, wellPanel (
         fluidRow (
           column (6, selectInput ('restore', label=NULL, choices=defFiles, selected='plotSpec.def')),
@@ -52,8 +57,8 @@ shinyUI(
                        tags$style(type='text/css', '.well {max-height:120px;top:0px'),
                        wellPanel(
                          tags$style(type='text/css', 'irs {max-height:53px;'),
-                         sliderInput("times", label=NA, min=times[1], max=times[2],
-                                     value=times,
+                         sliderInput("times", label=NA, min=plotSpec$Times[1], max=plotSpec$Times[2],
+                                     value=plotSpec$Times,
                                      # animate=TRUE,
                                      step=step,  
                                      timeFormat='%T', dragRange=TRUE,
@@ -63,11 +68,11 @@ shinyUI(
                            #                     column (4, tags$textarea(id = "t-end", rows = "1", cols = "11")),
                            column (4, 
                                    # tags$style(type="text/css", "input.shiny-bound-input {font-size:12px; height:15px;}"),
-                                   textInput ('tstart', label=NULL, value=formatTime(times[1])), 
+                                   textInput ('tstart', label=NULL, value=formatTime(plotSpec$Times[1])), 
                                    tags$style(type='text/css', "#tstart {width: 100px; height: 22px; }")),
                            column (4, 
                                    # tags$style(type="text/css", "input.shiny-bound-input {font-size:12px; height:15px;}"),
-                                   textInput ('tend', label=NULL, value=formatTime(times[2])), 
+                                   textInput ('tend', label=NULL, value=formatTime(plotSpec$Times[2])), 
                                    tags$style(type='text/css', "#tend {width: 100px; height: 22px; }")),
                            column (2, shinyBS::bsButton ('prevT', label=NULL, icon=icon('angle-left'), size='extra-small')),
                            # tags$style(type='text/css', "#button { vertical-align: middle; height: 15px; width: 100%; font-size: 12px;}")
@@ -88,7 +93,8 @@ shinyUI(
                 ) 
                 
                 ))), widths=c(2,10)),
-    
+    bsAlert("pleasewait"),
+    bsModal("quickCheck", title=NULL, trigger='check', size = "large", plotOutput("quickPlot")),
     tabsetPanel (type='pills',
                  tabPanel ('plot vs time',
                            sidebarLayout(
@@ -98,7 +104,7 @@ shinyUI(
                                                                      plotSpec$Plot[[1]]$panels, width='60px')),
                                             column (6, numericInput ('cols', 'cols', plotSpec$Plot[[1]]$columns, min=1, width='60px'))),
                                           fluidRow (
-                                            column (6, numericInput ('panel', 'panel', 1, min=1, max=5,width='50px')),
+                                            column (6, numericInput ('panel', 'panel', 1, min=1, max=6,width='50px')),
                                             column (6, checkboxInput ('logY', 'log?'),
                                                     checkboxInput ('fixed', 'set ylim?', 
                                                                    value=plotSpec$Plot[[1]]$panel[[1]]$fixed)
@@ -153,11 +159,12 @@ shinyUI(
                                                      tabPanel ('time-height', plotOutput ('theight'))
                              )))
                  ),
-                 tabPanel ('stats',
+                 tabPanel ('stats/listing',
                            sidebarLayout(
-                             sidebarPanel(h4('statistics definition'), 
+                             sidebarPanel(h4('stats/listing definition'), 
                                           checkboxInput ('limits2a','apply restrictions'), 
                                           actionButton ('statVariables', 'select variables'),
+                                          radioButtons ('statslist', label='type of output', choices=c('stats', 'listing')),
                                           width=2),
                              mainPanel(dataTableOutput ('statistics')))
                  ),
@@ -313,12 +320,12 @@ shinyUI(
                                                                    choices=c('linear', 'log-y', 'log-x', 'both log'),
                                                                    selected='both log'),
                                                       checkboxGroupInput ('probe', 'probe?', c('CDP', 'FSSP', 'UHSAS', 'PCASP', '2DC'),
-                                                                          selected='CPD'),
+                                                                          selected='CDP'),
                                                       width=2),
                                          
                                          mainPanel(plotOutput (outputId='sdplot')))
                              ),
-                             tabPanel ('particle images',
+                             tabPanel ('hydrometeor images',
                                        sidebarLayout (
                                          sidebarPanel (h4('2D probe images'), 
                                                        actionButton ('fname2d', 'select input file'),
@@ -332,15 +339,47 @@ shinyUI(
                                                        shinyBS::bsButton ('next2d', label=NULL, icon=icon('angle-right'), size='small'),
                                                        width=3),
                                          mainPanel(plotOutput (outputId='image2d'))))),
-                 tabPanel ('skewT diagram',
+                 navbarMenu ('thermo. diagrams',
+                             tabPanel ('skewT diagram',
                            sidebarLayout(
                              sidebarPanel(h4('skew-T definition'), 
                                           checkboxInput ('limits6', 'apply restrictions'), 
+                                          numericInput ('sndbins', 'bins for sounding', value=50, min=20, max=1000),
                                           checkboxInput ('hodograph', 'show hodograph?'),
+                                          checkboxInput ('cape', 'CAPE / LCL / adiabats?'),
                                           checkboxInput ('footer6', 'footer?'),
                                           width=2),
                              
                              mainPanel(plotOutput (outputId='skewT')))
+                 ),
+                 tabPanel ('mixing and stability plots',
+                                     sidebarLayout(
+                                       sidebarPanel (h4('Paluch / sat.-point, stability diagrams'),
+                                                     checkboxInput ('limits9', 'apply restrictions'),
+                                                     selectInput ('paluchBetts', label=NULL, choices=c('Paluch', 'Betts sat. point', 'stability profiles')),
+                                                     h4('sounding times:'),
+                                                     fluidRow (
+                                                       column (6, textInput ('paluchStart', label=NULL, value=formatTime (plotSpec$PaluchTimes[1]))),
+                                                       column (6, textInput ('paluchEnd', label=NULL, value=formatTime (plotSpec$PaluchTimes[2])))
+                                                     ),
+                                                     fluidRow (
+                                                       column (2, 'bins:'),
+                                                       column (4, numericInput ('nbsa', label=NULL, value=18, min=5, width='70px')),
+                                                       column (2, 'avg:'),
+                                                       column (4, numericInput ('nbss', label=NULL, value=7, min=5, width='70px'))
+                                                     ),
+                                                     selectInput('paluchLWC', 'LWC variable', choices=c(sort(FI$Variables)), 
+                                                                 selected=plotSpec$paluchLWC),
+                                                     h4('in-cloud times for mixing diagrams:'),
+                                                     fluidRow (
+                                                       column (6, textInput ('paluchCStart', label=NULL, value=formatTime (plotSpec$PaluchCTimes[1]))),
+                                                       column (6, textInput ('paluchCEnd', label=NULL, value=formatTime (plotSpec$PaluchCTimes[2])))
+                                                     ),
+                                                     h4 ('variable for stability profiles:'),
+                                                     radioButtons ('tvORthetap', label=NULL, choices=c('THETAV', 'THETAP'), inline=TRUE),
+                                                     width=4),
+                                     mainPanel (plotOutput (outputId='paluch')))
+                                     )
                  ),
                  tabPanel ('variance spectra',
                            sidebarLayout(

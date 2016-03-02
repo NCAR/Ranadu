@@ -6,7 +6,7 @@
 \title{plotWAC}
 \usage{
 plotWAC(x, y = NA, col = "blue", xlab = "TIME [UTC]", ylab = "",
-  lwd = 2, type = "l", lty = 1, logxy = "",
+  lwd = 2, type = "l", lty = 1, logxy = "", pch = 20, cex = 1,
   legend.position = "bottomright", ...)
 }
 \arguments{
@@ -35,6 +35,10 @@ variables provided in data.frame mode.}
 
 \item{logxy}{Set to 'y' for log axes. This is provided (vs log='y') because it
 makes possible translation of axis labels to 10^i format.}
+
+\item{pch}{Character number to use for scatterplots. Ignored if plot type is 'l'.}
+
+\item{cex}{Character size to use for scatterplots. Ignored if plot type is 'l'.}
 
 \item{legend.position}{For multiple-line calls with a data.frame, this parameter
 specifies the position for the legend. The default is 'bottomright'. The legend

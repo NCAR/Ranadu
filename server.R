@@ -2,6 +2,8 @@ require (shiny)
 
 shinyServer(function(input, output, session) {
   
+  createAlert(session, 'pleasewait', alertId = 'pausing', title = 'start-up window',
+              content = 'please wait a few seconds for the application to\nfetch data and start, Proceed when this message disappears.')
   
   ################ OBSERVERS ########################
   
@@ -17,6 +19,7 @@ shinyServer(function(input, output, session) {
     if (input$Project != plotSpec$Project) {
       plotSpec$Project <<- input$Project
       plotSpec$fname2d <<- NULL
+      rm(cfile, pos=1)
     }
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 1')}
@@ -79,6 +82,48 @@ shinyServer(function(input, output, session) {
   })
   obsTstart <- observe (exprTstart, quoted=TRUE)
   
+  exprPaluchstart <- quote ({
+    ## ignore it if before start or after finish
+    if (Trace) {print (sprintf ('input$paluchStart=%s, min/maxT=%s %s',
+                                input$paluchStart, minT, maxT))}
+    txt <- input$paluchStart
+    ## protect against typing errors that insert a character:
+    if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
+      hhmmss <- as.integer (gsub (':', '', txt))
+      i1 <- getIndex (Data, hhmmss)
+      if (i1 > 0) {
+        plotSpec$PaluchTimes[1] <<- Data$Time[i1]
+        if (Trace) {
+          print ('reset Paluch times 25')
+          print (sprintf ('times are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
+        }
+      }
+      updateTextInput (session, 'paluchStart', value=formatTime(plotSpec$PaluchTimes[1]))
+    }
+  })
+  obsPaluchstart <- observe (exprPaluchstart, quoted=TRUE)
+  
+  exprPaluchCstart <- quote ({
+    ## ignore it if before start or after finish
+    if (Trace) {print (sprintf ('input$paluchCStart=%s, min/maxT=%s %s',
+                                input$paluchCStart, minT, maxT))}
+    txt <- input$paluchCStart
+    ## protect against typing errors that insert a character:
+    if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
+      hhmmss <- as.integer (gsub (':', '', txt))
+      i1 <- getIndex (Data, hhmmss)
+      if (i1 > 0) {
+        plotSpec$PaluchCTimes[1] <<- Data$Time[i1]
+        if (Trace) {
+          print ('reset Paluch times 25')
+          print (sprintf ('times are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
+        }
+      }
+      updateTextInput (session, 'paluchCStart', value=formatTime(plotSpec$PaluchCTimes[1]))
+    }
+  })
+  obsPaluchCstart <- observe (exprPaluchCstart, quoted=TRUE)
+  
   exprTend <- quote ({
     ## ignore it if before start or after finish
     txt <- input$tend
@@ -102,6 +147,62 @@ shinyServer(function(input, output, session) {
     }
   })
   obsTend <- observe (exprTend, quoted=TRUE)
+  
+  exprPaluchend <- quote ({
+    ## ignore it if before start or after finish
+    txt <- input$paluchEnd
+    ## protect against typing errors that insert a character:
+    if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
+      hhmmss <- as.integer (gsub (':', '', txt))
+      i2 <- getIndex (Data, hhmmss)
+      if (Trace) {print (sprintf ('i2 is %d, hhmmss=%d', i2, hhmmss))}
+      if (i2 > 0) {
+        plotSpec$PaluchTimes[2] <<- Data$Time[i2]
+        if (Trace) {print (c('updating time to', formatTime(plotSpec$PaluchTimes[1]), formatTime(plotSpec$PaluchTimes[2])))}
+        if (Trace) {
+          print ('reset Paluch times 26')
+          print (sprintf ('times are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
+        }
+      } else {
+        plotSpec$PaluchTimes[2] <<- Data$Time[nrow(Data)] 
+        if (Trace) {print (c('updating time to', formatTime(plotSpec$PaluchTimes[1]), formatTime(plotSpec$PaluchTimes[2])))}
+        if (Trace) {
+          print ('reset Paluch times 26')
+          print (sprintf ('times are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
+        }
+      }
+    }
+    updateTextInput (session, 'paluchEnd', value=formatTime(plotSpec$PaluchTimes[2]))
+  })
+  obsPaluchend <- observe (exprPaluchend, quoted=TRUE)
+  
+  exprPaluchCend <- quote ({
+    ## ignore it if before start or after finish
+    txt <- input$paluchCEnd
+    ## protect against typing errors that insert a character:
+    if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
+      hhmmss <- as.integer (gsub (':', '', txt))
+      i2 <- getIndex (Data, hhmmss)
+      if (Trace) {print (sprintf ('i2 is %d, hhmmss=%d', i2, hhmmss))}
+      if (i2 > 0) {
+        plotSpec$PaluchCTimes[2] <<- Data$Time[i2]
+        if (Trace) {print (c('updating time to', formatTime(plotSpec$PaluchCTimes[1]), formatTime(plotSpec$PaluchCTimes[2])))}
+        if (Trace) {
+          print ('reset Paluch times 26')
+          print (sprintf ('times are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
+        }
+      } else {
+        plotSpec$PaluchCTimes[2] <<- Data$Time[nrow(Data)] 
+        if (Trace) {print (c('updating time to', formatTime(plotSpec$PaluchCTimes[1]), formatTime(plotSpec$PaluchCTimes[2])))}
+        if (Trace) {
+          print ('reset Paluch times 26')
+          print (sprintf ('times are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
+        }
+      }
+    }
+    updateTextInput (session, 'paluchCEnd', value=formatTime(plotSpec$PaluchCTimes[2]))
+  })
+  obsPaluchCend <- observe (exprPaluchCend, quoted=TRUE)
   
   exprPanels <- quote ({
     plotSpec$Plot[[input$plot]]$panels <<- input$panels
@@ -1044,6 +1145,7 @@ shinyServer(function(input, output, session) {
                   updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[1]]$panel[[1]]$col[1])
                   updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[1]]$panel[[1]]$lw[1])
                   updateRadioButtons (session, 'hlineStyle', selected=plotSpec$Hist[[1]]$panel[[1]]$lt[1])
+                  updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
                   isolate (reac$newdisplay <- reac$newdisplay + 1)
                   isolate (reac$newhistogram <- reac$newhistogram + 1)
                 } )
@@ -1088,19 +1190,13 @@ shinyServer(function(input, output, session) {
     if (psn > 4096+20) {
       seek (cfile, where=psn, 'rb', origin='start')
     }
-    psn <- seek (cfile, where=NA, rw='rb')
+    # psn <- seek (cfile, where=NA, rw='rb')
     isolate (reac$new2d <- reac$new2d + 1)
   })
   observeEvent (input$fname2d, {
     newwd <- sprintf('%s%s', DataDirectory (), plotSpec$Project)
-    oldwd <- setwd (newwd)
-    while(getwd() != normalizePath(newwd)) {
-      Sys.sleep(0.02)
-    }
-    Sys.sleep (0.5)
-    plotSpec$fname2d <<- file.choose ()
+    plotSpec$fname2d <<- fileChoose (newwd)
     rm(cfile, pos=1)
-    setwd (oldwd)
     updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
     isolate(reac$new2d <- reac$new2d + 1)
   })
@@ -1169,6 +1265,16 @@ shinyServer(function(input, output, session) {
     }
     isolate (reac$newstats <- reac$newstats + 1)
   })
+  observeEvent (input$check, {
+    chooseQVar (fname)
+    ## check if any requested variables not present in Data:
+    if (any (!(quickPlotVar %in% VarList))) {
+      VarList <<- unique (c(VarList, quickPlotVar))
+      # print (c(VarList, quickPlotVar))
+      isolate (reac$newdata <- reac$newdata + 1)
+    }
+    isolate (reac$quick <- reac$quick + 1)
+  })
   observeEvent (input$xfrVariables, {
     chooseXfrVar (fname, inp=input)
     ## check if any requested variables not present in Data:
@@ -1217,7 +1323,7 @@ shinyServer(function(input, output, session) {
   
   reac <- reactiveValues (newdata=0, newdisplay=0, newtrack=0, 
                           newstats=0, newhistogram=0, newscat=0, 
-                          newbin=0, newvarp=0, updatefit=0, new2d=0)
+                          newbin=0, newvarp=0, updatefit=0, new2d=0, quick=0)
   
   flightType <- reactive ({              ## typeFlight
     ## reset typeFlight to rf
@@ -1235,7 +1341,6 @@ shinyServer(function(input, output, session) {
     ## these would be needed for translation to new cal coefficients
     ## VarList <- c(VarList, "RTH1", "RTH2", "RTF1")
     
-    VarList <<- makeVarList ()  ## saved as global for possible inspection
     if (grepl ('HIPPO', plotSpec$Project)) {
       fname <<- sprintf ('%sHIPPO/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
                          plotSpec$TypeFlight, plotSpec$Flight)
@@ -1260,6 +1365,8 @@ shinyServer(function(input, output, session) {
     #     }
     if (Trace) {print (sprintf ('in data, fname=%s', fname))}
     # reac$newdisplay <- reac$newdisplay + 1
+    FI <<- DataFileInfo (fname)
+    VarList <<- makeVarList ()  ## saved as global for possible inspection
     if (file.exists(fname)) {
       D <- getNetCDF (fname, VarList)
       # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
@@ -1269,6 +1376,10 @@ shinyServer(function(input, output, session) {
       maxT <- D$Time[nrow(D)]
       maxT <<- maxT - as.integer (maxT) %% step
       updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
+      updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
+      updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
+      updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
+      updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
       if (exists ('specialData')) {
         SD <- specialData
         if ('Time' %in% names (SD)) {
@@ -1326,13 +1437,14 @@ shinyServer(function(input, output, session) {
     DataV <- limitData (DataR, input, plotSpec$Plot[[input$plot]]$restrict)
     plt <- isolate (input$plot)
     spec <- plotSpec$Plot[[plt]]
-    nrws <- ceiling (spec$panels / spec$columns)
+    nrws <- ceiling ((spec$panels) / spec$columns)
     nmx <- nrws * spec$columns
     layout(matrix(1:nmx, ncol = spec$columns), widths = 1, 
            heights = c(rep(5,spec$panels-1),6))
     op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
-    for (pnl in 1:spec$panels) {
-      if ((pnl == spec$panels) || (pnl %% nrws == 0)) {
+    sp <- max (input$panel, spec$panels)
+    for (pnl in 1:sp) {
+      if ((pnl == sp) || (pnl %% nrws == 0)) {
         op <- par (mar=c(5,4,1,2)+0.1)
       } else {
         op <- par (mar=c(2,4,1,2)+0.1)
@@ -1420,6 +1532,7 @@ shinyServer(function(input, output, session) {
                     FigDatestr),1,outer=T,cex=0.75)
       )
     }
+    closeAlert(session, alertId = 'pausing')
     plotMain (input)    ## isolated in function to be able to save via PDF/PNG
     
     if (input$footer) {AddFooter ()}
@@ -1834,6 +1947,13 @@ shinyServer(function(input, output, session) {
     tf <- plotSpec$TypeFlight
     input$times    ## make sensitive to time changes
     op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
+    CH <- vector ('character')
+    if (any (grepl ('CCDP', FI$Variables))) {CH <- c(CH, 'CDP')}
+    if (any (grepl ('CSP100', FI$Variables))) {CH <- c(CH, 'FSSP')}
+    if (any (grepl ('CUHSAS', FI$Variables))) {CH <- c(CH, 'UHSAS')}
+    if (any (grepl ('CS200', FI$Variables))) {CH <- c(CH, 'PCASP')}
+    if (any (grepl ('C1DC', FI$Variables))) {CH <- c(CH, '2DC')}
+    updateCheckboxGroupInput (session, 'probe', choices=CH, selected=CH)
     if (!is.na (fname) && file.exists (fname)) {
       if (is.null (netCDFfile) || is.na (netCDFfile)) {
         netCDFfile <<- nc_open (fname)
@@ -1875,7 +1995,7 @@ shinyServer(function(input, output, session) {
         }
       }
       if ('PCASP' %in% input$probe) {
-        nm4 <- namesCDF[grepl("CPCASP_", namesCDF)]
+        nm4 <- namesCDF[grepl("CS200_", namesCDF)]
         if (length (nm4) > 0) {
           if (is.null (CPCASP) || (is.na (CPCASP))) {
             CPCASP <- ncvar_get (netCDFfile, nm4)
@@ -2040,7 +2160,7 @@ shinyServer(function(input, output, session) {
         legend.colors <- c(legend.colors, 'darkgreen')
         ttl <- paste (ttl, sprintf("CONCU=%.1f", UHSAStot), sep=' ')
       }
-      if ('PCASP' %in% input$probe && (length (nm4) > 0)) {
+      if (('PCASP' %in% input$probe) && (length (nm4) > 0) && (!is.na(PCASPtot))) {
         points (CellLimitsP[2:nbP], PCASP[2:nbP], type='s', 
                 col='darkorange', lwd=2)
         legend.names <- c(legend.names, 'PCASP')
@@ -2454,6 +2574,18 @@ shinyServer(function(input, output, session) {
     contentType='image/png'
   )
   
+  output$quickPlot <- renderPlot ({
+    reac$quick
+    if (Trace) {print ('entered quickPlot')}
+    Data <- data ()
+    if (!(quickPlotVar %in% names (Data))) {
+      isolate(reac$newdata <- reac$newdata + 1)
+      isolate (reac$quick <- reac$quick + 1)
+      return ()
+    }
+    Data <- Data[Data$Time >= plotSpec$Times[1] & Data$Time < plotSpec$Times[2], ]
+    plotWAC(Data[, c('Time', quickPlotVar)])
+  })
   
   output$track <- renderPlot ({  ## track
     reac$newtrack
@@ -2746,6 +2878,171 @@ shinyServer(function(input, output, session) {
     }
   }, width=780, height=640) 
   
+  output$paluch <- renderPlot ({
+    Data <-  limitData (data (), input, input$limits9)
+    input$paluchStart
+    input$paluchEnd
+    input$paluchCStart
+    input$paluchCEnd
+    if (Trace) {print (sprintf ('paluchStart/End %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))}
+    getMixingData <- function (Data, inp) {
+      EWX <- Data$EWX
+      EWS <- MurphyKoop (Data$ATX)
+      t <- EWX > EWS
+      ## Assume sounding measurements with supersaturation are erronous;
+      ## replace with equilibrium humidity
+      t[is.na (EWX) | is.na (EWS) | is.na (Data$THETAQ)] <- FALSE
+      EWX[t] <- EWS[t]
+      Data$THETAQ[t] <- WetEquivalentPotentialTemperature(Data$PSXC[t], Data$ATX[t], EWX[t], Data[t, inp$paluchLWC])
+      R <- 0.622 * EWX / (Data$PSXC - EWX)
+      LWC <- Data[, inp$paluchLWC]
+      EbyP <- with (Data, EWX / PSXC)
+      Ra <- SpecificHeats (EbyP)[, 3]
+      Tk <- Data$ATX + 273.15
+      Rtot <-  R + Ra * Tk * LWC * 1.e-3 / (100 * Data$PSXC)
+      Qtot <- Rtot / (1 + Rtot)
+      return (c(R, Rtot, Qtot, Tk, EWX, Data$THETAQ))
+    }
+    MD <- getMixingData (Data, input)
+    dim(MD) <- c(length(MD)/6, 6)
+    R <- MD[,1]; Rtot <- MD[,2]; Qtot <- MD[,3]; Tk <- MD[,4]; EWX <- MD[,5]
+    Data$Rtot <- Rtot
+    Data$Qtot <- Qtot
+    Data$THETAQ <- MD[,6]
+    Data$EWX <- EWX
+    Data$Tk <- Tk
+    Data$R <- R 
+    ## restrict data to period of specified environmental sounding
+    DataS <- Data[(Data$Time >= plotSpec$PaluchTimes[1]) & (Data$Time < plotSpec$PaluchTimes[2]), ]
+    ## get the saturation point:
+    if (grepl ('Betts', input$paluchBetts)) {
+      load (file='satptDiagram.Rdata')  ## this also loads rminBetts, etc, for xygraph
+      cpt <- with(DataS, SpecificHeats ()[, 1] * (1 - Qtot) + StandardConstant('Rw') * Qtot)
+      alhv <- 2.501e6
+      spt <-  with (DataS, cpt * log (Tk/273.15) - (1-Qtot) * SpecificHeats()[, 3] * log ((PSXC-EWX) / 1000.) + alhv * R / ((1+R)*Tk))
+      ## transformation function
+      xygraph <- function (r, s) { ## returns pairs of x,y coordinates to plot
+        return (c(calpha * (r-rminBetts)/(rmaxBetts-rminBetts) + salpha * (s-sminBetts)/(smaxBetts-sminBetts),
+                  -salpha * (r-rminBetts)/(rmaxBetts-rminBetts) + calpha * (s-sminBetts)/(smaxBetts-sminBetts)))
+      }
+      g <- satptDiagram
+      R <- SmoothInterp (DataS$R)
+      spt <- SmoothInterp (spt)
+      XP <- xygraph (R*1000, spt)
+      dim(XP) <- c(length(XP)/2, 2)
+      DS <- data.frame (X=XP[,1], Y=XP[,2], spt=spt)
+      g <- g + geom_path (data=DS, aes(x=X, y=Y), colour='chocolate', lwd=1)
+    }
+    if (grepl ('Paluch', input$paluchBetts)) {
+      DataS$Rtot <- 1000 * DataS$Rtot
+      RT <- binStats (DataS[, c('Rtot', 'PSXC')], xlow=125, xhigh=1025,bins=input$nbsa)
+      TQ <- binStats (DataS[, c('THETAQ', 'PSXC')], xlow=125, xhigh=1025, bins=input$nbsa)
+      DF2 <- data.frame ('RT'=RT$ybar, 'TQ'=TQ$ybar, 'P'=RT$xc)
+      g <- ggplot (DF2, aes (x=TQ, y=RT))
+      g <- g + geom_path (col='blue', lwd=2) 
+      g <- g + geom_point (col='blue', size=4) 
+      ry <- range (RT$ybar, na.rm=TRUE)
+      ny <- (ry[2]-ry[1]) * 0.03
+      g <- g + geom_text (aes (label=P), size=4, nudge_y=ny)
+      g <- g + ylim(rev(range(RT)))
+      g <- g + xlab('wet-equivalent potential temperature [K]') + ylab('total water mixing ratio [g/kg]') 
+      DataS$Rtot <- DataS$Rtot * 0.001
+    }
+    if (grepl ('stab', input$paluchBetts)) {
+      ## need THETA, GGALT, WDC, WSC, EWX, PSXC
+      needVariables <- c ('THETA', 'GGALT', 'WSC', 'WDC', 'EWX', 'PSXC')
+      ## not requiring THETAV or THETAP; will calculate them from the above
+      if (!all (needVariables %in% names (DataS))) {
+        if (Trace) {print ('returning to data () for new variables')}
+        addedVariables <<- needVariables
+        isolate (reac$newdata <- reac$newdata + 1)
+        return ()
+      }
+      ## get profiles of THETAV, THETAE, u, v
+      DataS$THETAV <- VirtualPotentialTemperature (VirtualTemperature (DataS$ATX, DataS$R), DataS$PSXC, DataS$EWX)
+      DataS$THETAP <- EquivalentPotentialTemperature (DataS$PSXC, DataS$ATX, DataS$EWX)
+      DataS$U <- -DataS$WSC * sin (DataS$WDC * pi/180)
+      DataS$V <- -DataS$WSC * cos (DataS$WDC * pi/180)
+      RI1 <- binStats (DataS[, c('THETAV', 'GGALT')], bins=input$nbsa)
+      RI2 <- binStats (DataS[, c('THETAP', 'GGALT')], bins=input$nbsa)
+      RI3 <- binStats (DataS[, c('U', 'GGALT')], bins=input$nbsa)
+      RI4 <- binStats (DataS[, c('V', 'GGALT')], bins=input$nbsa)
+      layout(matrix(1:4, ncol = 2), widths = c(5,5), heights = c(8,8))
+      op <- par (mar=c(5.2,5,1,1)+0.1,oma=c(1.1,0,0,0))      
+      plotWAC (RI1$ybar, RI1$xc, xlab='virtual potential temperature', ylab='altitude [m]', type='b', pch=20)
+      SmoothDeriv <- function (.timeSeries, .maxGap=10, .Length=61, .order=3) {
+        ## skip if there are fewer than 10 measurements
+        if (length (.timeSeries[!is.na(.timeSeries)]) < 10) {return (.timeSeries)}
+        d <- zoo::na.approx (as.vector(.timeSeries), maxgap=.maxGap, na.rm = FALSE)
+        if (!(.Length %% 2)) {.Length <- .Length + 1}
+        d[is.na(d)] <- 0
+        return (as.vector (signal::filter(signal::sgolay(.order, .Length, m=1), d)))
+      }
+        
+      RI1S <- SmoothDeriv (RI1$ybar, .Length=input$nbss)
+      RI2S <- SmoothDeriv (RI2$ybar, .Length=input$nbss)
+      lineWAC (RI2$ybar, RI2$xc, type='b', col='darkgreen')
+      legend ('topleft', legend=c('THETAV', 'THETAE'), col=c('blue', 'darkgreen'), lwd=2)
+      wmin <- min (c(RI3$ybar, RI4$ybar), na.rm=TRUE)
+      wmax <- max (c(RI3$ybar, RI4$ybar), na.rm=TRUE)
+      plotWAC (RI3$ybar, RI3$xc, xlab='wind component [m/s]', ylab='altitude [m]', type='b', col='blue', xlim=c(wmin, wmax))
+      RI3S <- SmoothDeriv (RI3$ybar, .Length=input$nbss)
+      lineWAC (RI4$ybar, RI4$xc, type='b', col='darkgreen')
+      legend ('top', legend=c('U', 'V'), col=c('blue', 'darkgreen'), lwd=2)
+      RI4S <- SmoothDeriv (RI4$ybar, .Length=input$nbss)
+#       plotWAC (RI1S, RI1$xc, xlab='smoothed THETAV derivative', type='b', col='darkorange')
+#       plotWAC (RI3S, RI3$xc, xlab='smoothed dUdz', type='b', col='darkorange')
+      ## now calculate the Ri and N numbers:
+      binNorm <- (max (DataS$GGALT, na.rm=TRUE) - min (Data$GGALT, na.rm=TRUE)) / 50
+      if (grepl ('V', input$tvORthetap)) {
+        Ri <- (StandardConstant ('g_standard') * (RI1S / binNorm) / RI1$ybar) /
+              ((RI3S/binNorm)^2 + (RI4S/binNorm)^2)
+      } else {
+        Ri <- (StandardConstant ('g_standard') * (RI2S / binNorm) / RI2$ybar) /
+          ((RI3S/binNorm)^2 + (RI4S/binNorm)^2)
+      }
+      plotWAC (Ri, RI3$xc, xlab='Richardson Number', type='b', col='blue', xlim=c(-2,5))
+      lineWAC (c(0,0,NA,0.25,0.25), c(0,15000,NA,0,15000), col='skyblue', lwd=0.8)
+      if (grepl ('V', input$tvORthetap)) {
+        Nbv2 <- StandardConstant ('g_standard') * (RI1S  / binNorm) / RI1$ybar
+      } else {
+        Nbv2 <- StandardConstant ('g_standard') * (RI2S  / binNorm) / RI2$ybar
+      }
+      Nbv2[is.na (Nbv2) | (Nbv2 < 0)] <- 0
+      Nbv <- sqrt (Nbv2)
+      bvmax <- max (Nbv, na.rm=TRUE)
+      plotWAC (Nbv, RI3$xc, xlab='Brunt-Vaisala number', type='b', col='blue', xlim=c(0,bvmax))
+      lineWAC (c(0,0), c(0,15000), col='skyblue', lwd=0.8)
+      title (sprintf ('based on %s', input$tvORthetap))
+    }
+    ## now add in-cloud points
+    CDPconc <- names(Data)[which (grepl ('CONCD_', names(Data)))]
+    DIC <- Data[Data[, CDPconc] > 5, ]
+    
+    DIC <- DIC[(DIC$Time >= plotSpec$PaluchCTimes[1]) & (DIC$Time < plotSpec$PaluchCTimes[2]), ]
+    if (grepl ('Betts', input$paluchBetts)) {
+      cpt <- with(DIC, SpecificHeats ()[, 1] * (1 - Qtot) + StandardConstant('Rw') * Qtot)
+      alhv <- 2.501e6
+      spt <- with (DIC, cpt * log (Tk/273.15) - (1-Qtot) * SpecificHeats()[, 3] * log ((PSXC-EWX) / 1000.) + alhv * R / ((1+R)*Tk))
+      XP <- xygraph (DIC$Rtot*1000, spt)
+      dim(XP) <- c(length(XP)/2, 2)
+      DSC <- data.frame (X=XP[,1], Y=XP[,2], spt=spt)
+      g <- g + geom_point (data=DSC, aes(x=X, y=Y), colour='red', pch=20, size=1)
+    }
+    if (grepl ('Paluch', input$paluchBetts)) {
+      DIC$Rtot <- DIC$Rtot * 1000
+      g <- g + geom_point (data=DIC, aes(x=THETAQ, y=Rtot), colour='red', pch=20)
+      g <- g + theme_WAC()
+    }
+    if (!grepl ('stab', input$paluchBetts)) {
+      vp <- viewport()
+      suppressWarnings (print (g, vp=vp))
+    }
+    #     with (Data, plotWAC (THETAQ, Rtot, type='l', xlab='wet-equivalent potential temperature',
+    #                          ylim=rev(range(Rtot, na.rm=TRUE)),
+    #                          ylab='total water mixing ratio [g/kg]', col='blue', cex.lab=2))
+  }, width=640, height=640)
+  
   
   output$stats <- renderDataTable ({    ## stats
     if (Trace) {print ('entered stats')}
@@ -2823,8 +3120,12 @@ shinyServer(function(input, output, session) {
       Dstats[2:nrow(Dstats), k] <- sprintf('%.3f', as.numeric(Dstats[2:nrow(Dstats), k]))
     }
     if (Trace) {print (str(Dstats))}
-    Dstats
-  }, options=list(paging=FALSE, searching=FALSE))
+    if (grepl ('stat', input$statslist)) {
+      print (Dstats)
+    } else {
+      print (Ds)
+    }
+  }, options=list(paging=TRUE, searching=TRUE))
   
   output$hist <- renderPlot ({  ## hist
     input$panels
@@ -3087,6 +3388,7 @@ shinyServer(function(input, output, session) {
         return ()
       }
       cfile <<- file(plotSpec$fname2d, 'rb')
+      updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
       xmlinfo <- readBin(cfile, character(), 1)
       probe <<- sub('.*\\n', '', xmlinfo)
       xmlinfo <- sub(sprintf ('\\n%s$',probe), '\n', xmlinfo)

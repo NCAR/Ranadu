@@ -3,7 +3,7 @@
 #' @details Sets some plot defaults and calls ggplot and theme_WAC()
 #' @aliases ggplotWAC
 #' @author William Cooper
-#' @import ggplot2 ggthemes grid 
+#' @import ggplot2 ggthemes
 #' @export ggplotWAC
 #' @param .data A data.frame containing vectors to plot. The first will be the
 #' abscissa and the remainder ordinate vectors to plot vs the abscissa.

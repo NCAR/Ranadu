@@ -5,22 +5,25 @@ rm(list=ls(all=TRUE))
 suppressMessages (
   library(shiny, quietly=TRUE, warn.conflicts=FALSE)
 )
+library(shinyBS, quietly=TRUE, warn.conflicts=FALSE)
 suppressMessages (suppressWarnings (
   library(Ranadu, quietly=TRUE, warn.conflicts=FALSE))
 )
 library(gtable)
 library(grid)
 library(XML)
+library(tcltk)
 
 # source ('R/plotTrack.R')
 # source ('R/PlotWAC.R')
 # source ('R/getNetCDF.R')
 # source ('R/makeNetCDF.R')
+source ('R/setVariableList.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
 Trace <- FALSE
-# Trace <- TRUE
+Trace <- TRUE
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
@@ -281,6 +284,19 @@ loadConfig <- function (inp) {
 }
 load (file='plotSpec.def')  ## this loads initial values of plotSpec and Restrictions
 
+fileChoose <- function (newwd) {
+  oldwd <- setwd (newwd)
+#   while(getwd() != normalizePath(newwd)) {
+#     Sys.sleep(0.02)
+#   }
+#   print (c('wd:', getwd(), newwd, oldwd))
+#   Z <- list.files()
+#   print (Z)
+  try(fn <- file.choose (), silent=TRUE)
+  # if (!exists('fn')) {fn <- NULL}
+  setwd (oldwd)
+  return (fn)
+}
 
 Project <- plotSpec$Project
 Flight <- plotSpec$Flight
@@ -320,7 +336,8 @@ if (!file.exists (fn)) {
   return (VRPlot)
 }
 # print (sprintf ('setting chp/slp from %s', fn))
-FI <<- DataFileInfo (fn)
+FI <- DataFileInfo (fn)
+quickPlotVar <- 'GGALT'
 
 limitData <- function (Data, inp, lim=NA) {
   DataV <- Data
@@ -512,14 +529,18 @@ choose2Dfile <- function () {
 chooseVar <- function (fname, inp) {
   sVarList <<- setVariableList (fname, sVarList)
 }
+chooseQVar <- function (fname, inp) {
+  quickPlotVar <<- setVariableList (fname, single=TRUE)
+}
 chooseXfrVar <- function (fname, inp) {
   sVarList <<- setVariableList (fname, VarList)
 }
 
 sVarList <- c('ATX', 'DPXC', 'GGALT', 'WIC')
-addedVariables <- 'PITCH'
+addedVariables <- c('PITCH', 'THETA', 'THETAP')
 
 makeVarList <- function () {
+  if (Trace) {print ('entered VarList')}
   VarList <- standardVariables (addedVariables)
   for (plt in 1:length(plotSpec$Plot)) {
     for (pnl in 1:plotSpec$Plot[[plt]]$panels) {
@@ -543,9 +564,18 @@ makeVarList <- function () {
       VarList <- c(VarList, plotSpec$Bin[[plt]]$panel[[pnl]]$vary)
     }
   }
+  for (iv in 1:length(plotSpec$Variance)) {
+    VarList <- c(VarList, plotSpec$Variance[[iv]]$var, plotSpec$Variance[[iv]]$cvar)
+  }
+  if (plotSpec$paluchLWC %in% FI$Variables) {VarList <- c(VarList, plotSpec$paluchLWC)}
+  if ('THETAQ' %in% FI$Variables) {VarList <- c(VarList, 'THETAQ')}
+  if (length(nwc <- which (grepl ('CONCD_', FI$Variables))) == 1) {
+    VarList <- c(VarList, FI$Variables[nwc])
+    if (Trace) {print (sprintf ('added %s to VarList', FI$Variables[nwc]))}
+  }
   VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 
                           'DPXC', 'TASX', 'ROLL', 'VSPD',
-                          'THDG', 'SSLIP', sVarList))
+                          'THDG', 'SSLIP', sVarList), quickPlotVar)
   VarList <- unique (VarList)
   ## if variable is in specialData, exclude it:
   if (exists ('specialData')) {

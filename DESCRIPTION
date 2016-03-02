@@ -1,11 +1,15 @@
 Package: Ranadu
 Title: Functions for use with RAF aircraft data files
-Version: 2.3-15-12-15
+Version: 2.4-16-03-01
 Author: William Cooper
 Maintainer: William Cooper <cooperw@ucar.edu>
 Description: This package contains a function for loading a portion of a netCDF
     data file into a data.frame, and it contains a number of functions that
-    implement algorithms described in ProcessingAlgorithms.pdf. The package
+    implement algorithms described in ProcessingAlgorithms.pdf. Two manuals are
+    included, 'RanaduManual.pdf' (which describes the functions and includes a
+    very short introduction to R) and 'RanaduShinyManual.pdf' which describes 
+    the accompanying shiny application that provides a variety of interactive
+    plot capabilities for data analysis using NCAR/RAF data files. The package
     depends on the ncdf4 and nleqslv packages. Functions included are: GetNetCDF
     (to load the data.frame), GetIndex to find the index corresponding to a
     particular time, GetStartEnd to find the time limits of the data,
