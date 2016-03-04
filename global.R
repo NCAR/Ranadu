@@ -18,12 +18,13 @@ library(tcltk)
 # source ('R/PlotWAC.R')
 # source ('R/getNetCDF.R')
 # source ('R/makeNetCDF.R')
-source ('R/setVariableList.R')
+# source ('R/setVariableList.R')
+source ('R/CAPE.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
 Trace <- FALSE
-Trace <- TRUE
+# Trace <- TRUE
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
@@ -317,6 +318,7 @@ if (!file.exists (fn)) {
   fn <- sub ('\\.nc', '.Rdata', fn)
 }
 fname <- fn
+fname.last <- ''
 ## if Production load production-file info
 if (Production) {
   print (sprintf ('production section in global, Production=%d',
@@ -589,9 +591,9 @@ makeVarList <- function () {
 VarList <- makeVarList()
 
 
-
-Data <- getNetCDF (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project, 
-                            plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight), VarList)
+fname.last <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project, 
+                       plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+Data <- getNetCDF (fname.last, VarList)
 
 # times <- c(Data$Time[1], Data$Time[nrow(Data)])
 step <- 60

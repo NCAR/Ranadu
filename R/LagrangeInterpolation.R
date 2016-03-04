@@ -20,7 +20,7 @@ LagrangeInterpolate <- function (.x, .n, .D) {
   .D <- .D[order(.D[,1]), ] # require increasing order
   .D <- .D[!is.na(.D[, 1]), ]
   # find starting point in array
-  L <- length (.D[ , 1])
+  L <- length (.D[, 1])
   y <- rep(NA, length(.x))
   # note: returning end points for calls outside limits
   y[.x < .D[1,1]] <- .D[1,2]
@@ -28,8 +28,9 @@ LagrangeInterpolate <- function (.x, .n, .D) {
   for (k in 1:length(.x)) {
     if (is.na(y[k])) {
       y[k] <- 0
-      i <- which (.x[k] <= .D[,1])[1]
-      i1 <- i - ((.n+1) %/% 2)
+      m <- which (.x[k] <= .D[,1])[1]
+      i1 <- m - ((.n+1) %/% 2)
+      if (i1 < 1) {i1 <- 1}
       i1 <- min (i1, L - .n + 1)
       i2 <- i1 + .n -1
       for (i in i1:i2) {

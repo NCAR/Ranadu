@@ -237,6 +237,10 @@ CAPE <- function (SND, nbins=50, player=50) {
     iplow <- which (plow == NEWSND$Pressure)
     plow <- plow - Buoyancy[iplow] / (Buoyancy[iplow] - Buoyancy [iplow + 1]) * (plow - NEWSND$Pressure[iplow + 1])
   }
+  if (is.na(phigh) || is.na(phighQ)) {
+    print ('no points with positive buoyancy; returning only original sounding')
+    return (NEWSND[, c('Pressure', 'Temperature', 'DewPoint')])
+  }
   if (phigh < max (NEWSND$Pressure, na.rm=TRUE)) {
     iphigh <- which (phigh == NEWSND$Pressure)
     phigh <- NEWSND$Pressure[iphigh-1] - Buoyancy[iphigh-1] / (Buoyancy[iphigh] - Buoyancy [iphigh - 1]) * 

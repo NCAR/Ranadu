@@ -2,9 +2,9 @@ require (shiny)
 
 shinyServer(function(input, output, session) {
   
-  createAlert(session, 'pleasewait', alertId = 'pausing', title = 'start-up window',
-              content = 'please wait a few seconds for the application to\nfetch data and start, Proceed when this message disappears.')
-  
+#   createAlert(session, 'pleasewait', alertId = 'pausing', title = 'start-up window',
+#               content = 'please wait a few seconds for the application to\nfetch data and start, Proceed when this message disappears.')
+#   
   ################ OBSERVERS ########################
   
   ## use an observer for each item in the plot definition:
@@ -19,7 +19,7 @@ shinyServer(function(input, output, session) {
     if (input$Project != plotSpec$Project) {
       plotSpec$Project <<- input$Project
       plotSpec$fname2d <<- NULL
-      rm(cfile, pos=1)
+      if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
     }
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 1')}
@@ -28,6 +28,8 @@ shinyServer(function(input, output, session) {
   
   exprFlight <- quote ({
     plotSpec$Flight <<- input$Flight
+    plotSpec$fname2d <<- NULL
+    if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 2')}
   })
@@ -35,6 +37,8 @@ shinyServer(function(input, output, session) {
   
   exprTypeFlight <- quote ({
     plotSpec$TypeFlight <<- input$typeFlight
+    plotSpec$fname2d <<- NULL
+    if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 3')}
   })
@@ -50,12 +54,13 @@ shinyServer(function(input, output, session) {
     isolate (reac$newscat <- reac$newscat + 1)
     isolate (reac$newbin <- reac$newbin + 1)
     isolate (reac$newvarp <- reac$newvarp + 1)
+    isolate (reac$newskewT <- reac$newskewT + 1)
     if (Trace) {
       print ('reset newdisplay 20')
       print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
     }
   })
-  obsTime <- observe (exprTime, quoted=TRUE)
+  obsTime <- observe (exprTime, quoted=TRUE, priority=101)
   
   exprTstart <- quote ({
     ## ignore it if before start or after finish
@@ -252,6 +257,44 @@ shinyServer(function(input, output, session) {
     if (Trace) {print ('reset newdisplay 10')}
   })
   obsRestrict <- observe (exprRestrict, quoted=TRUE)
+  
+  
+  exprPlotVar <- quote ({
+    input$addVarP
+    isolate (plt <- input$plot)
+    isolate (pnl <- input$panel)
+    isolate (lv <- input$lineV)
+    
+    if (input$addVarP != plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]) {
+      isolate (reac$newdisplay <- reac$newdisplay + 1)
+      if (Trace) {print ('reset newdisplay 14')}
+      if (input$addVarP != 'omit') {
+        if (input$addVarP == 'select') {
+        } else {
+          plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv] <<- input$addVarP
+          if (lv == 1) {
+            plotSpec$Plot[[plt]]$panel[[pnl]]$lab[lv] <<- input$addVarP
+            updateTextInput (session, 'ylbl', value=input$addVarP)
+          }
+          if ((length(data ()) < 2) || (!(input$addVarP %in% names (Data)))) {
+            if (exists ('specialData') && (input$addVarP %in% names (specialData))) {
+            } else {
+              print ('need new data to include new variable - 4')
+              reac$newdata <- reac$newdata + 1
+            }
+          }
+        }
+      } else {
+        v <- plotSpec$Plot[[plt]]$panel[[pnl]]$var
+        v <- v[-lv]
+        if (Trace) {print (sprintf ('new var list is %s', v))}
+        plotSpec$Plot[[plt]]$panel[[pnl]]$var <<- v
+        # nms <- names (data ())  ## just a data ref to get reset
+        updateSelectInput (session, 'addVarP', selected='select')  
+      }
+    }
+  })
+  obsPlotVar <- observe (exprPlotVar, quoted=TRUE, priority=0)
   
   exprhPanels <- quote ({
     plotSpec$Hist[[input$plot]]$panels <<- input$hpanels
@@ -739,15 +782,15 @@ shinyServer(function(input, output, session) {
   
   exprHistVar <- quote ({
     
-    plt <- isolate (input$plot)
-    pnl <- isolate (input$hpanel)
-    lv <- isolate (input$hlineV)
+    isolate (plt <- input$plot)
+    isolate (pnl <- input$hpanel)
+    isolate (lv <- input$hlineV)
     
     if (input$haddVarP != 'omit') {
       if (input$haddVarP == 'select') {
       } else {
         plotSpec$Hist[[plt]]$panel[[pnl]]$var[lv] <<- input$haddVarP
-        if (((ld <- length(data ())) < 2) || (!(input$haddVarP %in% (nms <- names (data ()))))) {
+        if (((ld <- length(Data)) < 2) || (!(input$haddVarP %in% (nms <- names (Data))))) {
           if (exists ('specialData') && (input$haddVarP %in% names (specialData))) {
           } else {
             print ('need new data to include new variable - 1')
@@ -782,7 +825,7 @@ shinyServer(function(input, output, session) {
       if (input$saddVarP1 == 'select') {
       } else {
         plotSpec$Scat[[plt]]$panel[[pnl]]$varx <<- input$saddVarP1
-        if (((ld <- length(data ())) < 2) || (!(input$saddVarP1 %in% (nms <- names (data ()))))) {
+        if (((ld <- length(Data)) < 2) || (!(input$saddVarP1 %in% (nms <- names (Data))))) {
           if (exists ('specialData') && (input$saddVarP1 %in% names (specialData))) {
           } else {
             print ('need new data to include new variable - 2')
@@ -809,7 +852,7 @@ shinyServer(function(input, output, session) {
       if (input$saddVarP2 == 'select') {
       } else {
         plotSpec$Scat[[plt]]$panel[[pnl]]$vary[lv] <<- input$saddVarP2
-        if (((ld <- length(data ())) < 2) || (!(input$saddVarP2 %in% (nms <- names (data ()))))) {
+        if (((ld <- length(Data)) < 2) || (!(input$saddVarP2 %in% (nms <- names (Data))))) {
           if (exists ('specialData') && (input$saddVarP2 %in% names (specialData))) {
           } else {
             print ('need new data to include new variable - 3')
@@ -833,44 +876,13 @@ shinyServer(function(input, output, session) {
   })
   obsScatVar2 <- observe (exprScatVar2, priority=10, quoted=TRUE)
   
-  exprPlotVar <- quote ({
-    
-    plt <- isolate (input$plot)
-    pnl <- isolate (input$panel)
-    lv <- isolate (input$lineV)
-    
-    if (input$addVarP != 'omit') {
-      if (input$addVarP == 'select') {
-      } else {
-        plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv] <<- input$addVarP
-        if ((length(data ()) < 2) || (!(input$addVarP %in% names (data ())))) {
-          if (exists ('specialData') && (input$addVarP %in% names (specialData))) {
-          } else {
-            print ('need new data to include new variable - 4')
-            reac$newdata <- reac$newdata + 1
-          }
-        }
-      }
-    } else {
-      v <- plotSpec$Plot[[plt]]$panel[[pnl]]$var
-      v <- v[-lv]
-      if (Trace) {print (sprintf ('new var list is %s', v))}
-      plotSpec$Plot[[plt]]$panel[[pnl]]$var <<- v
-      # nms <- names (data ())  ## just a data ref to get reset
-      updateSelectInput (session, 'addVarP', selected='select')  
-    }
-    isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 14')}
-  })
-  obsPlotVar <- observe (exprPlotVar, quoted=TRUE)
-  
   exprbPlotVarX <- quote ({
     
     plt <- isolate (input$plot)
     pnl <- isolate (input$bpanel)
     lv <- isolate (input$blineV)
     plotSpec$Bin[[plt]]$panel[[pnl]]$varx <<- input$baddVarP1
-    if (((ld <- length(data ())) < 2) || (!(input$baddVarP1 %in% (nms <- names (data ()))))) {
+    if (((ld <- length(Data)) < 2) || (!(input$baddVarP1 %in% (nms <- names (Data))))) {
       if (exists ('specialData') && (input$baddVarP1 %in% names (specialData))) {
       } else {
         print ('need new data to include new variable - 5')
@@ -881,9 +893,9 @@ shinyServer(function(input, output, session) {
       }
     }
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 14')}
+    if (Trace) {print ('reset newbin 14a')}
   })
-  obsbPlotVarX <- observe (exprbPlotVarX, quoted=TRUE)
+  obsbPlotVarX <- observe (exprbPlotVarX, quoted=TRUE, priority=-9)
   
   exprbPlotVar <- quote ({
     
@@ -895,7 +907,7 @@ shinyServer(function(input, output, session) {
       if (input$baddVarP2 == 'select') {
       } else {
         plotSpec$Bin[[plt]]$panel[[pnl]]$vary[lv] <<- input$baddVarP2
-        if ((length(data ()) < 2) || (!(input$baddVarP2 %in% names (data ())))) {
+        if ((length(Data) < 2) || (!(input$baddVarP2 %in% names (Data)))) {
           if (exists ('specialData') && (input$baddVarP2 %in% names (specialData))) {
           } else {
             print ('need new data to include new variable - 6')
@@ -912,9 +924,19 @@ shinyServer(function(input, output, session) {
       # updateSelectInput (session, 'saddVarP2', selected='select')  
     }
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 14')}
+    if (Trace) {print ('reset newbin 14b')}
   })
-  obsbPlotVar <- observe (exprbPlotVar, quoted=TRUE)
+  obsbPlotVar <- observe (exprbPlotVar, quoted=TRUE, priority=-9)
+  
+  exprylbl <- quote ({
+    plt <- isolate (input$plot)
+    pnl <- isolate (input$panel)
+    lv <- isolate (input$lineV)
+    plotSpec$Plot[[plt]]$panel[[pnl]]$lab[lv] <<- input$ylbl
+    isolate (reac$newdisplay <- reac$newdisplay + 1)
+    if (Trace) {print ('reset newdisplay 14c')}
+  })
+  obsylbl <- observe (exprylbl, quoted=TRUE, priority=-9)
   
   exprLineColor <- quote ({
     plt <- isolate (input$plot)
@@ -1193,6 +1215,7 @@ shinyServer(function(input, output, session) {
     # psn <- seek (cfile, where=NA, rw='rb')
     isolate (reac$new2d <- reac$new2d + 1)
   })
+  
   observeEvent (input$fname2d, {
     newwd <- sprintf('%s%s', DataDirectory (), plotSpec$Project)
     plotSpec$fname2d <<- fileChoose (newwd)
@@ -1200,6 +1223,7 @@ shinyServer(function(input, output, session) {
     updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
     isolate(reac$new2d <- reac$new2d + 1)
   })
+  
   observeEvent (input$createV, {
     TX <- input$formla
     m <- gregexpr('[[:alnum:]]+', TX)
@@ -1254,6 +1278,7 @@ shinyServer(function(input, output, session) {
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print (str(specialData))}
   })
+  
   # observeEvent (input$prev, Repeat (-1))
   observeEvent (input$statVariables, {
     chooseVar (fname, inp=input)
@@ -1323,7 +1348,7 @@ shinyServer(function(input, output, session) {
   
   reac <- reactiveValues (newdata=0, newdisplay=0, newtrack=0, 
                           newstats=0, newhistogram=0, newscat=0, 
-                          newbin=0, newvarp=0, updatefit=0, new2d=0, quick=0)
+                          newbin=0, newskewT=0, newvarp=0, updatefit=0, new2d=0, quick=0)
   
   flightType <- reactive ({              ## typeFlight
     ## reset typeFlight to rf
@@ -1338,6 +1363,7 @@ shinyServer(function(input, output, session) {
     # Project <<- Project <- isolate(input$Project)
     reac$newdata
     isolate (reac$newdisplay <- reac$newdisplay + 1)
+    # isolate (reac$newskewT <- reac$newskewT + 1)
     ## these would be needed for translation to new cal coefficients
     ## VarList <- c(VarList, "RTH1", "RTH2", "RTF1")
     
@@ -1365,21 +1391,30 @@ shinyServer(function(input, output, session) {
     #     }
     if (Trace) {print (sprintf ('in data, fname=%s', fname))}
     # reac$newdisplay <- reac$newdisplay + 1
-    FI <<- DataFileInfo (fname)
     VarList <<- makeVarList ()  ## saved as global for possible inspection
     if (file.exists(fname)) {
-      D <- getNetCDF (fname, VarList)
+      if (fname != fname.last) {
+        FI <<- DataFileInfo (fname)
+        D <- getNetCDF (fname, VarList)
+        if (Trace) {print (sprintf ('loaded data.frame from %s', fname))}
+      } else {
+        D <- Data
+      }
       # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
       step <- 60
       minT <- D$Time[1]
       minT <<- minT - as.integer (minT) %% step + step
       maxT <- D$Time[nrow(D)]
       maxT <<- maxT - as.integer (maxT) %% step
+      plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
+      if (Trace) {print (sprintf ('in data, setting plotSpec$Times to %s %s', 
+                                  formatTime (D$Time[1]), formatTime (D$Time[nrow(D)])))}
       updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
       updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
       updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
       updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
       updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
+      
       if (exists ('specialData')) {
         SD <- specialData
         if ('Time' %in% names (SD)) {
@@ -1464,23 +1499,34 @@ shinyServer(function(input, output, session) {
       if (plotSpec$Plot[[input$plot]]$restrict) {
         if (is.null (yl)) {
           plotWAC (DataV[, c('Time', spec$panel[[pnl]]$var)], log=logY,
+                   ylab=spec$panel[[pnl]]$lab[1],
                    col=spec$panel[[pnl]]$col,
                    lwd=spec$panel[[pnl]]$lw,
                    lty=spec$panel[[pnl]]$lt)  
         } else {
           plotWAC (DataV[, c('Time', spec$panel[[pnl]]$var)], ylim=yl, log=logY,
+                   ylab=spec$panel[[pnl]]$lab[1],
                    col=spec$panel[[pnl]]$col,
                    lwd=spec$panel[[pnl]]$lw,
                    lty=spec$panel[[pnl]]$lt)  
         }
       } else {
         if (is.null (yl)) {
+          ## allow expressions in y-axis label:
+          ylabel <- spec$panel[[pnl]]$lab[1]
+          if (grepl('^expr:', ylabel)) {
+            ylabel <- sub('expr:', '', ylabel)
+            ylabel <- parse(text=ylabel)
+            print (ylabel)
+          } 
           plotWAC (DataR[, c('Time', spec$panel[[pnl]]$var)], log=logY,
+                   ylab=ylabel,
                    col=spec$panel[[pnl]]$col,
                    lwd=spec$panel[[pnl]]$lw,
                    lty=spec$panel[[pnl]]$lt) 
         } else {
           plotWAC (DataR[, c('Time', spec$panel[[pnl]]$var)], ylim=yl, log=logY,
+                   ylab=spec$panel[[pnl]]$lab[1],
                    col=spec$panel[[pnl]]$col,
                    lwd=spec$panel[[pnl]]$lw,
                    lty=spec$panel[[pnl]]$lt) 
@@ -1506,25 +1552,21 @@ shinyServer(function(input, output, session) {
       plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
       reac$newdisplay <- reac$newdisplay + 1 #<- TRUE
-      reac$newdata <- reac$newdata + 1
+      isolate (reac$newdata <- reac$newdata + 1)
       if (Trace) {print ('exiting display for new data')}
       return()
     }
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
+
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Plot[[input$plot]]$restrict)
-    ndv <- names (DataV)
-    SE <- getStartEnd (DataR$Time)
-    i <- getIndex (DataR$Time, SE[1])
-    isolate (
+    # i <- getIndex (DataR$Time, SE[1])
       FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                            plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                            strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                            strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                     format="%H:%M:%S", tz='UTC'))
-    )
+                            plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
+                            strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
+                            strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
@@ -1532,10 +1574,11 @@ shinyServer(function(input, output, session) {
                     FigDatestr),1,outer=T,cex=0.75)
       )
     }
-    closeAlert(session, alertId = 'pausing')
-    plotMain (input)    ## isolated in function to be able to save via PDF/PNG
-    
-    if (input$footer) {AddFooter ()}
+    # closeAlert(session, alertId = 'pausing')
+    if (nrow(DataR) > 0) {
+      plotMain (input)    ## isolated in function to be able to save via PDF/PNG
+      if (input$footer) {AddFooter ()}
+    }
     if (Trace) {
       print ('finished plot generation')
     }
@@ -2554,8 +2597,16 @@ shinyServer(function(input, output, session) {
       paste('Figures/Ranadu.', Sys.time(), '.pdf', sep='')
     },
     content = function(file) {
+      print ( sprintf ('saving to file %s', file))
       pdf (file)
-      print (plotMain (input))
+      if (grepl ('plot vs', input$whichTab)) {
+        plotMain (input)
+      }
+      if (grepl ('more plots', input$whichTab)) {
+        print (plotHist (input))
+        print (plotScat (input))
+        print (plotBin (input))
+      }
       dev.off ()
     },
     contentType='image/pdf'
@@ -2567,7 +2618,18 @@ shinyServer(function(input, output, session) {
     },
     content <- function(file) {
       png (file)
-      print (plotMain (input))
+      if (grepl ('plot vs', input$whichTab)) {
+        print (plotMain (input))
+      }
+      if (grepl ('more plots', input$whichTab)) {
+        print (plotHist (input))
+        dev.off ()
+        png (sub ('.png', 'Scat.png', file))
+        print (plotScat (input))
+        dev.off ()
+        png (sub ('.png', 'Bar.png', file))
+        print (plotBin (input))
+      }
       dev.off ()
       print ('in PNG download handler')
     },
@@ -2602,7 +2664,7 @@ shinyServer(function(input, output, session) {
     }
     
     if (Trace) {
-      print (sprintf ('input$times %s %s', formatTime (input$times[1]),
+      print (sprintf ('in track, input$times %s %s', formatTime (input$times[1]),
                       formatTime (input$times[2])))
       print (sprintf ('in track, global plotSpec$Times are %s %s',
                       formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
@@ -2764,12 +2826,11 @@ shinyServer(function(input, output, session) {
       return ()
     }
     if (Trace) {
-      print ('skewT entry, reac$newdisplay is:')
-      print (reac$newdisplay)
+      print (sprintf ('skewT entry, reac$newskewT is %d', reac$newskewT))
     }
     # input$PlotVar
     Project <- input$Project
-    if (reac$newdisplay) {
+    if (reac$newskewT) {
       # VRPlot <- VRP ()
       if (Trace) {print ('entered skewT')}
       # VRPlot <<- VRPlot
@@ -2782,8 +2843,8 @@ shinyServer(function(input, output, session) {
       }
       
       if (Trace) {
-        print (sprintf ('input$times %s %s', formatTime (input$times[1]),
-                        formatTime (input$times[2])))
+        isolate (print (sprintf ('in skewT, input$times %s %s', formatTime (input$times[1]),
+                        formatTime (input$times[2]))))
         print (sprintf ('in skewT, global plotSpec$Times are %s %s',
                         formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
@@ -2797,8 +2858,8 @@ shinyServer(function(input, output, session) {
       if (nrow (Data) <= 0) {
         plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
         text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
-        reac$newdisplay <- reac$newdisplay + 1
-        reac#newdata <- reac$newdata + 1
+        reac$newskewT <- reac$newskewT + 1
+        reac$newdata <- reac$newdata + 1
         return()
       }
       ## see global.R functions:
@@ -2807,8 +2868,8 @@ shinyServer(function(input, output, session) {
       
       SE <- getStartEnd (Data$Time)
       i <- getIndex (Data$Time, SE[1])
-      FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, input$typeFlight,
-                        input$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+      FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+                        plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
                         strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
                         strftime(Data$Time[getIndex(Data$Time,SE[2])],
                                  format="%H:%M:%S", tz='UTC'))
@@ -2825,8 +2886,37 @@ shinyServer(function(input, output, session) {
         DF <- Data[, c("PSXC", "ATX", "DPXC")]
       }
       colnames(DF) <- c("Pressure", "Temperature", "DewPoint")
-      suppressWarnings (print(SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagram.Rdata")
-                              +ggtitle(sprintf("Flight %s", Flight))))
+      suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagram.Rdata")
+                        + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
+                                          formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
+      if (input$cape) {
+        NSND <- CAPE (Data)
+        if (length (names (NSND)) > 3) {
+          gg <- SkewTSounding (NSND)
+          S2 <- SkewTSounding (data.frame (Pressure=NSND$Pressure, Temperature=NSND$TP, DewPoint=-120), ADD=TRUE)
+          S3 <- SkewTSounding (data.frame (Pressure=NSND$Pressure, Temperature=NSND$TQ, DewPoint=-120), ADD=TRUE)
+          gg <- gg + geom_path (data=S2, aes (x=AT, y=P), colour='red', lwd=1.0)
+          gg <- gg + geom_path (data=S3, aes (x=AT, y=P), colour='green', lwd=1.0)
+          plcl <- attr (NSND, 'LCLp'); tlcl <- attr (NSND, 'LCLt')
+          maxLWC <- attr (NSND, 'MaxLWC'); pmaxLWC <- attr (NSND, 'pMaxLWC')
+          SP <- SkewTSounding (data.frame(Pressure=plcl, Temperature=tlcl, DewPoint=-120), ADD=TRUE)
+          gg <- gg + geom_point (data=SP, aes(x=AT, y=P), pch=19, colour='darkorange', size=4)
+          labelText <<- paste(sprintf('orange dot: LCL %.1f hPa %.2f degC', plcl, tlcl), 
+                              'red line: pseudo-adiabatic ascent', 
+                              'bright green line: wet-adiabatic ascent',
+                              sprintf ('max LWC: %.2f g/m3 at %.1f hPa', maxLWC, pmaxLWC),
+                              sprintf ('cape=%.0f J/kg (adiabatic cape=%.0f)', 
+                                       attr(NSND, 'CAPE'), attr (NSND, 'CAPEW')),
+                              sprintf ('conv. inh. %.0f J/kg, LFC=%.0f hPa', 
+                                       attr(NSND, 'CIN'), attr(NSND, 'LFC')), sep='\n')
+          if (Trace) {print (labelText)}
+          gg <- gg + geom_label (aes(x=0, y=2.85, label=labelText), size=4.5, fill='ivory', hjust='left')
+        } else {
+          gg <- gg + geom_label (aes (x=0, y=2.85, label='no region of positive buoyancy'), size=5,
+                                 fill='ivory', hjust='left')
+        }
+      }
+      suppressWarnings (print (gg))
       if (input$hodograph) {
         
         circle.draw <- function (radius) {
@@ -2869,12 +2959,16 @@ shinyServer(function(input, output, session) {
         print (q, vp=vp)
       }
       
-      if (input$footer6) {AddFooter ()}
-      
-      # }
-      #       si <- input$plot
-      #       updateSelectInput (session, 'Rplot', selected=st[si])
-      
+      if (input$footer6) {
+        plot.new()
+        vpbase <- viewport(width = 1, height = 0.95, x = 0.5, y = 0.5)
+        print (gg, vp=vpbase)
+        if (input$hodograph) {
+          print (q, vp=vp)
+        }
+        popViewport (0)
+        AddFooter ()
+      }
     }
   }, width=780, height=640) 
   
@@ -2978,7 +3072,7 @@ shinyServer(function(input, output, session) {
         d[is.na(d)] <- 0
         return (as.vector (signal::filter(signal::sgolay(.order, .Length, m=1), d)))
       }
-        
+      
       RI1S <- SmoothDeriv (RI1$ybar, .Length=input$nbss)
       RI2S <- SmoothDeriv (RI2$ybar, .Length=input$nbss)
       lineWAC (RI2$ybar, RI2$xc, type='b', col='darkgreen')
@@ -2990,13 +3084,13 @@ shinyServer(function(input, output, session) {
       lineWAC (RI4$ybar, RI4$xc, type='b', col='darkgreen')
       legend ('top', legend=c('U', 'V'), col=c('blue', 'darkgreen'), lwd=2)
       RI4S <- SmoothDeriv (RI4$ybar, .Length=input$nbss)
-#       plotWAC (RI1S, RI1$xc, xlab='smoothed THETAV derivative', type='b', col='darkorange')
-#       plotWAC (RI3S, RI3$xc, xlab='smoothed dUdz', type='b', col='darkorange')
+      #       plotWAC (RI1S, RI1$xc, xlab='smoothed THETAV derivative', type='b', col='darkorange')
+      #       plotWAC (RI3S, RI3$xc, xlab='smoothed dUdz', type='b', col='darkorange')
       ## now calculate the Ri and N numbers:
       binNorm <- (max (DataS$GGALT, na.rm=TRUE) - min (Data$GGALT, na.rm=TRUE)) / 50
       if (grepl ('V', input$tvORthetap)) {
         Ri <- (StandardConstant ('g_standard') * (RI1S / binNorm) / RI1$ybar) /
-              ((RI3S/binNorm)^2 + (RI4S/binNorm)^2)
+          ((RI3S/binNorm)^2 + (RI4S/binNorm)^2)
       } else {
         Ri <- (StandardConstant ('g_standard') * (RI2S / binNorm) / RI2$ybar) /
           ((RI3S/binNorm)^2 + (RI4S/binNorm)^2)
@@ -3534,12 +3628,13 @@ shinyServer(function(input, output, session) {
     
   })
   
-  outputOptions (output, 'display', priority=-10)
-  outputOptions (output, 'stats', priority=-10)
-  outputOptions (output, 'listing', priority=-10)
-  outputOptions (output, 'hist', priority=-10)
-  outputOptions (output, 'barWvsZ', priority=-10)
-  outputOptions (output, 'statistics', -10)
-  outputOptions (output, 'histogram', -10)
+  outputOptions (output, 'display', priority=-110)
+  outputOptions (output, 'stats', priority=-20)
+  outputOptions (output, 'listing', priority=-20)
+  outputOptions (output, 'hist', priority=-20)
+  outputOptions (output, 'barWvsZ', priority=-20)
+  outputOptions (output, 'statistics', priority=-20)
+  outputOptions (output, 'histogram', priority=-20)
+  outputOptions (output, 'skewT', priority=-20)
 })
 

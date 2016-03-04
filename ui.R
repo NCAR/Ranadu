@@ -95,7 +95,7 @@ shinyUI(
                 ))), widths=c(2,10)),
     bsAlert("pleasewait"),
     bsModal("quickCheck", title=NULL, trigger='check', size = "large", plotOutput("quickPlot")),
-    tabsetPanel (type='pills',
+    tabsetPanel (id='whichTab', type='pills',
                  tabPanel ('plot vs time',
                            sidebarLayout(
                              sidebarPanel(h4('define plot'), 
@@ -117,17 +117,25 @@ shinyUI(
                                             column (5, checkboxInput ('footer','footer?'))),
                                           wellPanel (
                                             fluidRow (
-                                              column (6, h4('line:')),
-                                              column (6, numericInput ('lineV', NULL, 1, width='90px'))),
-                                            selectInput ('addVarP', label=NULL,
-                                                         choices=c('select', 'omit',sort(FI$Variables)), 
-                                                         selected=plotSpec$Plot[[1]]$panel[[1]]$var[1]),
+                                              column (2, 'line:'),
+                                              column (4, numericInput ('lineV', NULL, 1, width='70px')),
+                                              column (2, 'lwd:'),
+                                              column (4, numericInput ('lineW', NULL, 1, width='70px'))),
+                                            
+                                            fluidRow (
+                                              column (1, 'v:'),
+                                              column (11, selectInput ('addVarP', label=NULL,
+                                                         choices=c('select', 'omit', sort(FI$Variables)), 
+                                                         selected=plotSpec$Plot[[1]]$panel[[1]]$var[1]))),
+                                            fluidRow(
+                                              column (1, 'l:'),
+                                              column (11, textInput ('ylbl', label=NULL, value=plotSpec$Plot[[1]]$panel[[1]]$var[1]))),
                                             selectInput ('varColor', NULL, c('blue', 'darkgreen', 'red',
                                                                              'cyan', 'violet', 'darkorange',
                                                                              'brown', 'black')),
-                                            fluidRow (
-                                              column (6, 'width:'),
-                                              column (6, numericInput ('lineW', NULL, 1, width='90px'))),
+#                                             fluidRow (
+#                                               column (6, 'width:'),
+#                                               column (6, numericInput ('lineW', NULL, 1, width='90px'))),
                                             radioButtons ('lineStyle', label='line type', choices=ltyps, inline=TRUE, 
                                                           selected=ltyps[plotSpec$Plot[[1]]$panel[[1]]$lt[1]],
                                                           width='90px')),
