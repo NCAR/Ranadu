@@ -45,19 +45,21 @@ shinyServer(function(input, output, session) {
   obsTypeFlight <- observe (exprTypeFlight, quoted=TRUE)
   
   exprTime <- quote ({
-    plotSpec$Times <<- input$times
-    updateTextInput (session, 'tstart', value=formatTime(plotSpec$Times[1]))
-    updateTextInput (session, 'tend', value=formatTime(plotSpec$Times[2]))
-    isolate (reac$newdisplay <- reac$newdisplay + 1)
-    isolate (reac$newhistogram <- reac$newhistogram + 1)
-    isolate (reac$newstats <- reac$newstats + 1)
-    isolate (reac$newscat <- reac$newscat + 1)
-    isolate (reac$newbin <- reac$newbin + 1)
-    isolate (reac$newvarp <- reac$newvarp + 1)
-    isolate (reac$newskewT <- reac$newskewT + 1)
-    if (Trace) {
-      print ('reset newdisplay 20')
-      print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
+    if (any (input$times != plotSpec$Times)) {
+      plotSpec$Times <<- input$times
+      updateTextInput (session, 'tstart', value=formatTime(plotSpec$Times[1]))
+      updateTextInput (session, 'tend', value=formatTime(plotSpec$Times[2]))
+      isolate (reac$newdisplay <- reac$newdisplay + 1)
+      isolate (reac$newhistogram <- reac$newhistogram + 1)
+      isolate (reac$newstats <- reac$newstats + 1)
+      isolate (reac$newscat <- reac$newscat + 1)
+      isolate (reac$newbin <- reac$newbin + 1)
+      isolate (reac$newvarp <- reac$newvarp + 1)
+      isolate (reac$newskewT <- reac$newskewT + 1)
+      if (Trace) {
+        print ('reset newdisplay 20')
+        print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
+      }
     }
   })
   obsTime <- observe (exprTime, quoted=TRUE, priority=101)
@@ -936,7 +938,7 @@ shinyServer(function(input, output, session) {
     isolate (reac$newdisplay <- reac$newdisplay + 1)
     if (Trace) {print ('reset newdisplay 14c')}
   })
-  obsylbl <- observe (exprylbl, quoted=TRUE, priority=-9)
+  obsylbl <- observe (exprylbl, quoted=TRUE)
   
   exprLineColor <- quote ({
     plt <- isolate (input$plot)
@@ -1362,7 +1364,7 @@ shinyServer(function(input, output, session) {
     }
     # Project <<- Project <- isolate(input$Project)
     reac$newdata
-    isolate (reac$newdisplay <- reac$newdisplay + 1)
+    # isolate (reac$newdisplay <- reac$newdisplay + 1)
     # isolate (reac$newskewT <- reac$newskewT + 1)
     ## these would be needed for translation to new cal coefficients
     ## VarList <- c(VarList, "RTH1", "RTH2", "RTF1")
@@ -1391,10 +1393,10 @@ shinyServer(function(input, output, session) {
     #     }
     if (Trace) {print (sprintf ('in data, fname=%s', fname))}
     # reac$newdisplay <- reac$newdisplay + 1
-    VarList <<- makeVarList ()  ## saved as global for possible inspection
     if (file.exists(fname)) {
+      FI <<- DataFileInfo (fname)
+      VarList <<- makeVarList ()  ## saved as global for possible inspection
       if (fname != fname.last) {
-        FI <<- DataFileInfo (fname)
         D <- getNetCDF (fname, VarList)
         if (Trace) {print (sprintf ('loaded data.frame from %s', fname))}
       } else {
@@ -3375,7 +3377,7 @@ shinyServer(function(input, output, session) {
   output$histogram <- renderPlot ({  ## histogram
     input$hpanels
     input$hcols
-    input$times
+    # input$times
     reac$newhistogram
     Project <- plotSpec$Project
     if (Trace) {print ('entered histogram')}

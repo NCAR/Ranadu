@@ -698,7 +698,7 @@ saveRdata <- function (Data, inp) {
 
 seeManual <- function () {
   if (suppressWarnings(library(rstudio, logical.return=TRUE))) {
-    rstudio::viewer ('DataReviewManual.pdf', height='maximize')
+    rstudio::viewer (paste (path.package ('Ranadu'), 'RanaduShinyManual.pdf', sep='/'), height='maximize')
   }
 }
 

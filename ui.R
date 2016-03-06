@@ -10,9 +10,9 @@ shinyUI(
     navlistPanel (tabPanel (strong('data & plot'), fluidRow (
       column (4, wellPanel (
         fluidRow (
-          column (5, selectInput (inputId='Project', label=NULL,
-                       choices=PJ, selected=plotSpec$Project, width='100px'))#,
-          # column (7, selectInput ('quick', label=NULL, choices=FI$Variables, selected='GGALT'))
+          column (6, selectInput (inputId='Project', label=NULL,
+                       choices=PJ, selected=plotSpec$Project, width='100px')),
+          column (6, actionButton (inputId='manual', label = 'see\nmanual'))
         ),
 
         fluidRow (
