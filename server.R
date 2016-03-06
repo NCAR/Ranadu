@@ -2599,15 +2599,18 @@ shinyServer(function(input, output, session) {
       paste('Figures/Ranadu.', Sys.time(), '.pdf', sep='')
     },
     content = function(file) {
-      print ( sprintf ('saving to file %s', file))
       pdf (file)
       if (grepl ('plot vs', input$whichTab)) {
         plotMain (input)
       }
-      if (grepl ('more plots', input$whichTab)) {
-        print (plotHist (input))
-        print (plotScat (input))
-        print (plotBin (input))
+      if (grepl ('histogram', input$whichTab)) {
+        plotHist (input)
+      }
+      if (grepl ('scatter', input$whichTab)) {
+        plotScat (input)
+      }
+      if (grepl ('bin-average', input$whichTab)) {
+          plotBin (input)
       }
       dev.off ()
     },
@@ -2621,19 +2624,18 @@ shinyServer(function(input, output, session) {
     content <- function(file) {
       png (file)
       if (grepl ('plot vs', input$whichTab)) {
-        print (plotMain (input))
+        plotMain (input)
       }
-      if (grepl ('more plots', input$whichTab)) {
-        print (plotHist (input))
-        dev.off ()
-        png (sub ('.png', 'Scat.png', file))
-        print (plotScat (input))
-        dev.off ()
-        png (sub ('.png', 'Bar.png', file))
-        print (plotBin (input))
+      if (grepl ('histogram', input$whichTab)) {
+        plotHist (input)
+      }
+      if (grepl ('scatter', input$whichTab)) {
+        plotScat (input)
+      }
+      if (grepl ('bin-average', input$whichTab)) {
+        plotBin (input)
       }
       dev.off ()
-      print ('in PNG download handler')
     },
     contentType='image/png'
   )
@@ -3248,11 +3250,11 @@ shinyServer(function(input, output, session) {
     }
   }, width=780, height=640)
   
-  plotHist <- function (inp) {  ## plotHist
+  plotHist <- function (input) {  ## plotHist
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
-    DataV <- limitData (DataR, inp, inp$limits3)
-    plt <- inp$plot
+    DataV <- limitData (DataR, input, input$limits3)
+    plt <- input$plot
     if (Trace) {
       print (sprintf ('entered plotHist, plt=%d', plt))
     }
@@ -3275,7 +3277,7 @@ shinyServer(function(input, output, session) {
       if (spec$panel[[pnl]]$fixed) {yl <- spec$panel[[pnl]]$ylim}
       vr <- var[[pnl]]
       Var1 <- spec$panel[[pnl]]$var[1]
-      if (inp$limits3) {
+      if (input$limits3) {
         DataX <- DataV[, vr]
       } else {
         DataX <- DataR[, vr]
@@ -3303,7 +3305,7 @@ shinyServer(function(input, output, session) {
                                   values = fill.colors[1:length(var[[pnl]])])
       g <- g + xlab(vr[1]) + theme_WAC()
       ## add cumulative distribution
-      if (inp$cdf) {
+      if (input$cdf) {
         a <- ggplot_build(g)
         yrange <- a$panel$ranges[[1]]$y.range
         xrange <- a$panel$ranges[[1]]$x.range
