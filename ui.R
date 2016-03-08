@@ -173,6 +173,7 @@ shinyUI(
                                           checkboxInput ('limits2a','apply restrictions'), 
                                           actionButton ('statVariables', 'select variables'),
                                           radioButtons ('statslist', label='type of output', choices=c('stats', 'listing')),
+                                          numericInput ('avgsec', label='for listing, ave. seconds:', value=1, min=1),
                                           width=2),
                              mainPanel(dataTableOutput ('statistics')))
                  ),
@@ -181,7 +182,10 @@ shinyUI(
                              tabPanel ('histogram',
                                        sidebarLayout(
                                          sidebarPanel(h4('histogram definition'), 
-                                                      checkboxInput ('limits3','apply restrictions'), 
+                                                      fluidRow (
+                                                        column (6, checkboxInput ('limits3','apply restrictions')),
+                                                        column (6, checkboxInput ('densityH', 'plot density?'))
+                                                      ),
                                                       fluidRow (
                                                         column (6, checkboxInput ('cdf', 'include CDF')),
                                                         column (6, checkboxInput ('hfooter','footer? (NA)'))),
@@ -190,8 +194,9 @@ shinyUI(
                                                                                  plotSpec$Hist[[1]]$panels, width='60px')),
                                                         column (6, numericInput ('hcols', 'cols', plotSpec$Hist[[1]]$columns, min=1, width='60px'))),
                                                       fluidRow (
-                                                        column (6, numericInput ('hpanel', 'panel', 1, min=1, max=5,width='50px')),
-                                                        column (6, checkboxInput ('hlogY', 'log? (NA)'),
+                                                        column (4, numericInput ('hpanel', 'panel', 1, min=1, max=5,width='50px')),
+                                                        column (4, numericInput ('hbins', 'bins', 50, min=10)),
+                                                        column (4, checkboxInput ('hlogY', 'log? (NA)'),
                                                                 checkboxInput ('hfixed', 'set xlim?', 
                                                                                value=plotSpec$Hist[[1]]$panel[[1]]$fixed)
                                                         )),

@@ -24,7 +24,7 @@ source ('R/CAPE.R')
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
 Trace <- FALSE
-# Trace <- TRUE
+Trace <- TRUE
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
@@ -529,16 +529,15 @@ choose2Dfile <- function () {
 }
 
 chooseVar <- function (fname, inp) {
-  sVarList <<- setVariableList (fname, sVarList)
+  plotSpec$StatVar <<- setVariableList (fname, plotSpec$StatVar)
 }
 chooseQVar <- function (fname, inp) {
   quickPlotVar <<- setVariableList (fname, single=TRUE)
 }
 chooseXfrVar <- function (fname, inp) {
-  sVarList <<- setVariableList (fname, VarList)
+  xVarList <<- setVariableList (fname, VarList)
 }
 
-sVarList <- c('ATX', 'DPXC', 'GGALT', 'WIC')
 addedVariables <- c('PITCH', 'THETA', 'THETAP')
 
 makeVarList <- function () {
@@ -577,7 +576,7 @@ makeVarList <- function () {
   }
   VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 
                           'DPXC', 'TASX', 'ROLL', 'VSPD',
-                          'THDG', 'SSLIP', sVarList), quickPlotVar)
+                          'THDG', 'SSLIP'), plotSpec$StatVar, quickPlotVar)
   VarList <- unique (VarList)
   ## if variable is in specialData, exclude it:
   if (exists ('specialData')) {
@@ -589,6 +588,7 @@ makeVarList <- function () {
   return (VarList)
 }
 VarList <- makeVarList()
+VarListLast <- VarList
 
 
 fname.last <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project, 

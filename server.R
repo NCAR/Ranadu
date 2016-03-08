@@ -20,6 +20,11 @@ shinyServer(function(input, output, session) {
       plotSpec$Project <<- input$Project
       plotSpec$fname2d <<- NULL
       if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
+      ## clear Paluch times
+      updateTextInput (session, 'paluchStart', value='0')
+      updateTextInput (session, 'paluchEnd', value='36:00:00')
+      updateTextInput (session, 'paluchCStart', value='0')
+      updateTextInput (session, 'paluchCEnd', value='36:00:00')
     }
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 1')}
@@ -27,9 +32,16 @@ shinyServer(function(input, output, session) {
   obsProject <- observe (exprProject, quoted=TRUE)
   
   exprFlight <- quote ({
-    plotSpec$Flight <<- input$Flight
-    plotSpec$fname2d <<- NULL
-    if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
+    if (input$Flight != plotSpec$Flight) {
+      plotSpec$Flight <<- input$Flight
+      plotSpec$fname2d <<- NULL
+      if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
+      ## clear Paluch times
+      updateTextInput (session, 'paluchStart', value='0')
+      updateTextInput (session, 'paluchEnd', value='36:00:00')
+      updateTextInput (session, 'paluchCStart', value='0')
+      updateTextInput (session, 'paluchCEnd', value='36:00:00')
+    }
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 2')}
   })
@@ -74,7 +86,10 @@ shinyServer(function(input, output, session) {
       hhmmss <- as.integer (gsub (':', '', txt))
       i1 <- getIndex (Data, hhmmss)
       if (i1 > 0) {
-        plotSpec$Times[1] <<- Data$Time[i1]
+        if (plotSpec$Times[1] != Data$Time[i1]) {
+          plotSpec$Times[1] <<- Data$Time[i1]
+          updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+        }
         updateSliderInput (session, 'times', value=plotSpec$Times)
         #     isolate (reac$newdisplay <- reac$newdisplay + 1)
         #     isolate (reac$newhistogram <- reac$newhistogram + 1)
@@ -139,7 +154,10 @@ shinyServer(function(input, output, session) {
       hhmmss <- as.integer (gsub (':', '', txt))
       i2 <- getIndex (Data, hhmmss)
       if (i2 > 0) {
-        plotSpec$Times[2] <<- Data$Time[i2]
+        if (plotSpec$Times[2] != Data$Time[i2]) {
+          plotSpec$Times[2] <<- Data$Time[i2]
+          updateTextInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
+        }
         updateSliderInput (session, 'times', value=plotSpec$Times)
         if (Trace) {print (c('updating time to', formatTime(plotSpec$Times[1]), formatTime(plotSpec$Times[2])))}
         #     isolate (reac$newdisplay <- reac$newdisplay + 1)
@@ -1122,6 +1140,15 @@ shinyServer(function(input, output, session) {
   })
   obsMEMres <- observe (exprMEMres, quoted=TRUE)
   
+  exprHistBins <- quote({
+    isolate (plt <- input$plot)
+    isolate (pnl <- input$hpanel)
+    plotSpec$Hist[[plt]]$panel[[pnl]]$bins <<- input$hbins
+    isolate (reac$newhistogram <- reac$newhistogram + 1)
+    if (Trace) {print ('reset newhist 40')}
+  })
+  obsHistBins <- observe (exprHistBins, quoted=TRUE)
+  
   exprLfit <- quote ({
     input$fformula
     VF <- isolate (input$response)
@@ -1285,9 +1312,9 @@ shinyServer(function(input, output, session) {
   observeEvent (input$statVariables, {
     chooseVar (fname, inp=input)
     ## check if any requested variables not present in Data:
-    if (any (!(sVarList %in% VarList))) {
-      VarList <<- unique (c(VarList, sVarList))
-      print (c(VarList, sVarList))
+    if (any (!(plotSpec$StatVar %in% VarList))) {
+      VarList <<- unique (c(VarList, plotSpec$StatVar))
+      # print (c(VarList, plotSpec$StatVar))
       isolate (reac$newdata <- reac$newdata + 1)
     }
     isolate (reac$newstats <- reac$newstats + 1)
@@ -1305,9 +1332,9 @@ shinyServer(function(input, output, session) {
   observeEvent (input$xfrVariables, {
     chooseXfrVar (fname, inp=input)
     ## check if any requested variables not present in Data:
-    if (any (!(sVarList %in% VarList))) {
-      VarList <<- unique (c(VarList, sVarList))
-      print (c(VarList, sVarList))
+    if (any (!(xVarList %in% VarList))) {
+      VarList <<- unique (c(VarList, xVarList))
+      # print (c(VarList, xVarList))
       isolate (reac$newdata <- reac$newdata + 1)
     }
   })
@@ -1396,7 +1423,7 @@ shinyServer(function(input, output, session) {
     if (file.exists(fname)) {
       FI <<- DataFileInfo (fname)
       VarList <<- makeVarList ()  ## saved as global for possible inspection
-      if (fname != fname.last) {
+      if ((fname != fname.last) || (any(!(VarList %in% VarListLast)))) {
         D <- getNetCDF (fname, VarList)
         if (Trace) {print (sprintf ('loaded data.frame from %s', fname))}
       } else {
@@ -1405,13 +1432,15 @@ shinyServer(function(input, output, session) {
       # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
       step <- 60
       minT <- D$Time[1]
-      minT <<- minT - as.integer (minT) %% step + step
+      minT <<- minT <- minT - as.integer (minT) %% step + step
       maxT <- D$Time[nrow(D)]
-      maxT <<- maxT - as.integer (maxT) %% step
+      maxT <<- maxT <- maxT - as.integer (maxT) %% step
       plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
       if (Trace) {print (sprintf ('in data, setting plotSpec$Times to %s %s', 
                                   formatTime (D$Time[1]), formatTime (D$Time[nrow(D)])))}
       updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
+      updateNumericInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+      updateNumericInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
       updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
       updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
       updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
@@ -1428,6 +1457,7 @@ shinyServer(function(input, output, session) {
       }
       if (length (D) > 1) {
         fname.last <<- fname
+        VarListLast <<- VarList
         Data <<- D
         return (D)
       } else {
@@ -2655,6 +2685,7 @@ shinyServer(function(input, output, session) {
   
   output$track <- renderPlot ({  ## track
     reac$newtrack
+    input$times
     Project <- plotSpec$Project
     if (Trace) {
       print (c('track entry, reac$newtrack is:', reac$newtrack))
@@ -3036,6 +3067,7 @@ shinyServer(function(input, output, session) {
       RT <- binStats (DataS[, c('Rtot', 'PSXC')], xlow=125, xhigh=1025,bins=input$nbsa)
       TQ <- binStats (DataS[, c('THETAQ', 'PSXC')], xlow=125, xhigh=1025, bins=input$nbsa)
       DF2 <- data.frame ('RT'=RT$ybar, 'TQ'=TQ$ybar, 'P'=RT$xc)
+      if (Trace) {print (DF2)}
       g <- ggplot (DF2, aes (x=TQ, y=RT))
       g <- g + geom_path (col='blue', lwd=2) 
       g <- g + geom_point (col='blue', size=4) 
@@ -3045,6 +3077,7 @@ shinyServer(function(input, output, session) {
       g <- g + ylim(rev(range(RT)))
       g <- g + xlab('wet-equivalent potential temperature [K]') + ylab('total water mixing ratio [g/kg]') 
       DataS$Rtot <- DataS$Rtot * 0.001
+      gtest <<- g
     }
     if (grepl ('stab', input$paluchBetts)) {
       ## need THETA, GGALT, WDC, WSC, EWX, PSXC
@@ -3182,11 +3215,13 @@ shinyServer(function(input, output, session) {
   output$statistics <- renderDataTable ({    ## statistics
     if (Trace) {print ('entered statistics')}
     input$times
-    reac$stats
+    reac$newstats
     ## check if any requested variables not present in Data:
-    if (any (!(sVarList %in% VarList))) {
-      VarList <<- unique (c(VarList, sVarList))
+    if (any (!(plotSpec$StatVar %in% VarList))) {
+      VarList <<- unique (c(VarList, plotSpec$StatVar))
       isolate (reac$newdata <- reac$newdata + 1)
+      isolate (reac$newstats <- reac$newstats + 1)
+      return()
     }
     Ds <- limitData (data(), input, input$limits2a)
     # Ds <- Ds[, c('Time', slp[[input$plot]])]
@@ -3195,33 +3230,54 @@ shinyServer(function(input, output, session) {
     #       plotV <- c(plotV, plotSpec$Plot[[input$plot]]$panel[[i]]$var)
     #     }
     #     plotV <- unique (plotV)
-    Ds <- Ds[, c('Time', sVarList)]
+    Ds <- Ds[, c('Time', sort(plotSpec$StatVar))]
     Ds <- Ds[(Ds$Time >= plotSpec$Times[1]) & (Ds$Time < plotSpec$Times[2]), ]
-    Dstats <- data.frame ()
-    Dstats['Time', 1] <- 'Time'
-    Dstats['Time', 2] <- NA
-    Dstats['Time', 3] <- NA
-    Dstats['Time', 4] <- formatTime (Ds$Time[1])
-    Dstats['Time', 5] <- formatTime (Ds$Time[nrow(Ds)])
-    for (nm in names(Ds)) {
-      if (nm == 'Time') {next}
-      Dstats[nm, 1] <- nm
-      Dstats[nm, 2] <- mean (Ds[, nm], na.rm=TRUE)
-      Dstats[nm, 3]   <- sd   (Ds[, nm], na.rm=TRUE)
-      Dstats[nm, 4]  <- min  (Ds[, nm], na.rm=TRUE)
-      Dstats[nm, 5]  <- max  (Ds[, nm], na.rm=TRUE)
-    }
-    names(Dstats) <- c('variable', 'mean', 'sd', 'min', 'max')
-    row.names (Dstats) <- names(Ds)
-    # Dstats[2:nrow(Dstats), 2:5] <- format(Dstats[2:nrow(Dstats),2:5], digits=5, scientific=FALSE)
-    for (k in 2:5) {
-      Dstats[2:nrow(Dstats), k] <- sprintf('%.3f', as.numeric(Dstats[2:nrow(Dstats), k]))
-    }
-    if (Trace) {print (str(Dstats))}
-    if (grepl ('stat', input$statslist)) {
-      print (Dstats)
+    if (grepl ('list', input$statslist)) {
+      ## average in NAVE-second intervals
+      NAVE <- input$avgsec
+      if (NAVE <= 1) {
+        DsA <- Ds
+      } else {
+        NC <- ncol (Ds)
+        isq <- seq (1, nrow(Ds), by=NAVE)
+        DsA <- Ds[isq, ]
+        for (j in 1:length(isq)) {
+          DsA[j, 2:NC] <- apply (Ds[isq[j]:(isq[j]+NAVE-1), 2:NC], 2, function (x) mean (x, na.rm=TRUE)) 
+        }
+        ## assign factor to Ds: -- commented because this was slower
+        # Ds$FCTR <- findInterval (Ds$Time, Ds$Time[1]+seq (0, nrow(Ds), by=NAVE), all.inside=TRUE)
+        # for (ifctr in 1:max(Ds$FCTR)) {
+        #   DsA[ifctr, 2:NC] <- apply(Ds[Ds$FCTR == ifctr, 2:NC], 2, function (x) mean (x, na.rm=TRUE))
+        # }
+      }
+      DsA$Time <- formatTime(DsA$Time)
+      options(digits=5)
+      return (DsA)
     } else {
-      print (Ds)
+      Dstats <- data.frame ()
+      Dstats['Time', 1] <- '  Time'
+      Dstats['Time', 2] <- NA
+      Dstats['Time', 3] <- NA
+      Dstats['Time', 4] <- formatTime (Ds$Time[1])
+      Dstats['Time', 5] <- formatTime (Ds$Time[nrow(Ds)])
+      nms <- names(Ds)
+      nms <- nms[nms != 'Time']
+      for (nm in nms) {
+        Dstats[nm, 1] <- nm
+        Dstats[nm, 2] <- mean (Ds[, nm], na.rm=TRUE)
+        Dstats[nm, 3]   <- sd   (Ds[, nm], na.rm=TRUE)
+        Dstats[nm, 4]  <- min  (Ds[, nm], na.rm=TRUE)
+        Dstats[nm, 5]  <- max  (Ds[, nm], na.rm=TRUE)
+      }
+      names(Dstats) <- c('variable', 'mean', 'sd', 'min', 'max')
+      ## alphabetical order:
+      Dstats <- Dstats[do.call (order, Dstats), ] 
+      # Dstats[2:nrow(Dstats), 2:5] <- format(Dstats[2:nrow(Dstats),2:5], digits=5, scientific=FALSE)
+      for (k in 2:5) {
+        Dstats[2:nrow(Dstats), k] <- sprintf('%.3f', as.numeric(Dstats[2:nrow(Dstats), k]))
+      }  
+      if (Trace) {print (str(Dstats))}
+      return (Dstats)
     }
   }, options=list(paging=TRUE, searching=TRUE))
   
@@ -3285,10 +3341,15 @@ shinyServer(function(input, output, session) {
       g <- ggplot (data=DataX)
       for (i in 1:length(vr)) {
         v <- sprintf ('var1[%d]', i)
-        b <- sprintf ("aes (x=%s, colour='%s', size='%s', fill='%s', lty='%s')", 
+        if (input$densityH) {
+          b <- sprintf ("aes (x=%s, ..density.., colour='%s', size='%s', fill='%s', lty='%s')", 
                       vr[i], vr[i], vr[i], vr[i], vr[i])
+        } else {
+          b <- sprintf ("aes (x=%s, colour='%s', size='%s', fill='%s', lty='%s')", 
+                        vr[i], vr[i], vr[i], vr[i], vr[i])
+        }
         g <- g + geom_histogram (eval(parse(text=b)),
-                                 bins=50, na.rm=TRUE)          
+                                 bins=plotSpec$Hist[[plt]]$panel[[pnl]]$bins, na.rm=TRUE)          
         
       }
       if (!is.null (yl)) {
