@@ -26,6 +26,15 @@ shinyServer(function(input, output, session) {
       updateTextInput (session, 'paluchCStart', value='0')
       updateTextInput (session, 'paluchCEnd', value='36:00:00')
     }
+    ## set list of available probes
+    CH <- vector ('character')
+    if (any (grepl ('CCDP', FI$Variables))) {CH <- c(CH, 'CDP')}
+    if (any (grepl ('CSP100', FI$Variables))) {CH <- c(CH, 'FSSP')}
+    if (any (grepl ('CUHSAS', FI$Variables))) {CH <- c(CH, 'UHSAS')}
+    if (any (grepl ('CS200', FI$Variables))) {CH <- c(CH, 'PCASP')}
+    if (any (grepl ('C1DC', FI$Variables))) {CH <- c(CH, '2DC')}
+    updateCheckboxGroupInput (session, 'probe', choices=CH, selected=CH)
+    if (Trace) {print (sprintf ('choices are %s', CH))}
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('reset newdata 1')}
   })
@@ -57,6 +66,8 @@ shinyServer(function(input, output, session) {
   obsTypeFlight <- observe (exprTypeFlight, quoted=TRUE)
   
   exprTime <- quote ({
+    if (Trace) {print (sprintf ('Times %s %s times %s %s', plotSpec$Times[1], plotSpec$Times[2],
+                                input$times[1], input$times[2]))}
     if (any (input$times != plotSpec$Times)) {
       plotSpec$Times <<- input$times
       updateTextInput (session, 'tstart', value=formatTime(plotSpec$Times[1]))
@@ -89,12 +100,13 @@ shinyServer(function(input, output, session) {
         if (plotSpec$Times[1] != Data$Time[i1]) {
           plotSpec$Times[1] <<- Data$Time[i1]
           updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+          isolate (reac$newdisplay <- reac$newdisplay + 1)
+          isolate (reac$newhistogram <- reac$newhistogram + 1)
+          isolate (reac$newstats <- reac$newstats + 1)
+          isolate (reac$newscat <- reac$newscat + 1)
+          isolate (reac$newskewT <- reac$newskewT + 1)
         }
         updateSliderInput (session, 'times', value=plotSpec$Times)
-        #     isolate (reac$newdisplay <- reac$newdisplay + 1)
-        #     isolate (reac$newhistogram <- reac$newhistogram + 1)
-        #     isolate (reac$newstats <- reac$newstats + 1)
-        #     isolate (reac$newscat <- reac$newscat + 1)
         if (Trace) {
           print ('reset new times 25')
           print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
@@ -157,6 +169,11 @@ shinyServer(function(input, output, session) {
         if (plotSpec$Times[2] != Data$Time[i2]) {
           plotSpec$Times[2] <<- Data$Time[i2]
           updateTextInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
+          isolate (reac$newdisplay <- reac$newdisplay + 1)
+          isolate (reac$newhistogram <- reac$newhistogram + 1)
+          isolate (reac$newstats <- reac$newstats + 1)
+          isolate (reac$newscat <- reac$newscat + 1)
+          isolate (reac$newskewT <- reac$newskewT + 1)
         }
         updateSliderInput (session, 'times', value=plotSpec$Times)
         if (Trace) {print (c('updating time to', formatTime(plotSpec$Times[1]), formatTime(plotSpec$Times[2])))}
@@ -443,7 +460,7 @@ shinyServer(function(input, output, session) {
     updateSelectInput (session, 'saddVarP2', selected=plotSpec$Scat[[plt]]$panel[[pnl]]$vary[1])
     updateSelectInput (session, 'svarColor', selected=plotSpec$Scat[[plt]]$panel[[pnl]]$col[1])
     updateNumericInput (session, 'ssize', value=plotSpec$Scat[[plt]]$panel[[pnl]]$size[1])
-    updateRadioButtons (session, 'symbol', selected=ltyps[plotSpec$Scat[[plt]]$panel[[pnl]]$symbol[1]])
+    updateNumericInput (session, 'symbol', value=plotSpec$Scat[[plt]]$panel[[pnl]]$symbol[1])
     isolate (reac$newscat <- reac$newscat + 1)
     if (Trace) {print ('reset newscat 12')}
   })
@@ -514,7 +531,7 @@ shinyServer(function(input, output, session) {
       updateSelectInput (session, 'saddVarP2', selected=plotSpec$Scat[[plt]]$panel[[pnl]]$vary[lv])
       updateSelectInput (session, 'svarColor', selected=plotSpec$Scat[[plt]]$panel[[pnl]]$col[lv])
       updateNumericInput (session, 'ssize', value=plotSpec$Scat[[plt]]$panel[[pnl]]$size[lv])
-      updateRadioButtons (session, 'symbol', selected=ltyps[plotSpec$Scat[[plt]]$panel[[pnl]]$symbol[lv]])
+      updateNumericInput (session, 'symbol', value=plotSpec$Scat[[plt]]$panel[[pnl]]$symbol[lv])
     } else {
       vy <- plotSpec$Scat[[plt]]$panel[[pnl]]$vary
       vy <- c(vy, vy[length(vy)])
@@ -593,7 +610,7 @@ shinyServer(function(input, output, session) {
     updateSelectInput (session, 'baddVarP2', selected=plotSpec$Bin[[plt]]$panel[[pnl]]$vary[1])
     updateSelectInput (session, 'bvarColor', selected=plotSpec$Bin[[plt]]$panel[[pnl]]$col[1])
     updateNumericInput (session, 'bsize', value=plotSpec$Bin[[plt]]$panel[[pnl]]$size[1])
-    updateRadioButtons (session, 'bsymbol', selected=ltyps[plotSpec$Bin[[plt]]$panel[[pnl]]$symbol[1]])
+    updateNumericInput (session, 'bsymbol', value=plotSpec$Bin[[plt]]$panel[[pnl]]$symbol[1])
     isolate (reac$newbin <- reac$newbin + 1)
     if (Trace) {print ('reset newbin 12')}
   })
@@ -664,7 +681,7 @@ shinyServer(function(input, output, session) {
       updateSelectInput (session, 'baddVarP2', selected=plotSpec$Bin[[plt]]$panel[[pnl]]$vary[lv])
       updateSelectInput (session, 'bvarColor', selected=plotSpec$Bin[[plt]]$panel[[pnl]]$col[lv])
       updateNumericInput (session, 'bsize', value=plotSpec$Bin[[plt]]$panel[[pnl]]$size[lv])
-      updateRadioButtons (session, 'bsymbol', selected=ltyps[plotSpec$Bin[[plt]]$panel[[pnl]]$symbol[lv]])
+      updateNumericInput (session, 'bsymbol', value=plotSpec$Bin[[plt]]$panel[[pnl]]$symbol[lv])
     } else {
       vy <- plotSpec$Bin[[plt]]$panel[[pnl]]$vary
       vy <- c(vy, vy[length(vy)])
@@ -817,7 +834,7 @@ shinyServer(function(input, output, session) {
             if (Trace) {print (c('haddVarP is ', input$haddVarP))}
             if (Trace) {print (c('length of data is ', ld))}
             if (Trace) {print (c('names in data are', nms))}
-            reac$newdata <- reac$newdata + 1
+            isolate(reac$newdata <- reac$newdata + 1)
           }
         }
       }
@@ -852,7 +869,7 @@ shinyServer(function(input, output, session) {
             if (Trace) {print (c('saddVarP1 is ', input$saddVarP1))}
             if (Trace) {print (c('length of data is ', ld))}
             if (Trace) {print (c('names in data are', nms))}
-            reac$newdata <- reac$newdata + 1
+            isolate(reac$newdata <- reac$newdata + 1)
           }
         }
       }
@@ -879,7 +896,7 @@ shinyServer(function(input, output, session) {
             if (Trace) {print (c('saddVarP2 is ', input$saddVarP2))}
             if (Trace) {print (c('length of data is ', ld))}
             if (Trace) {print (c('names in data are', nms))}
-            reac$newdata <- reac$newdata + 1
+            isolate(reac$newdata <- reac$newdata + 1)
           }
         }
       }
@@ -1377,7 +1394,7 @@ shinyServer(function(input, output, session) {
   
   reac <- reactiveValues (newdata=0, newdisplay=0, newtrack=0, 
                           newstats=0, newhistogram=0, newscat=0, 
-                          newbin=0, newskewT=0, newvarp=0, updatefit=0, new2d=0, quick=0)
+                          newbin=0, newskewT=1, newvarp=0, updatefit=0, new2d=0, quick=0)
   
   flightType <- reactive ({              ## typeFlight
     ## reset typeFlight to rf
@@ -1435,9 +1452,10 @@ shinyServer(function(input, output, session) {
       minT <<- minT <- minT - as.integer (minT) %% step + step
       maxT <- D$Time[nrow(D)]
       maxT <<- maxT <- maxT - as.integer (maxT) %% step
-      plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
+      # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
+      plotSpec$Times <<- c(minT, maxT)
       if (Trace) {print (sprintf ('in data, setting plotSpec$Times to %s %s', 
-                                  formatTime (D$Time[1]), formatTime (D$Time[nrow(D)])))}
+                                  formatTime (minT), formatTime (maxT)))}
       updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
       updateNumericInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
       updateNumericInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
@@ -1595,10 +1613,10 @@ shinyServer(function(input, output, session) {
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Plot[[input$plot]]$restrict)
     # i <- getIndex (DataR$Time, SE[1])
-      FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                            plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
-                            strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
-                            strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
+    FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+                          plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
+                          strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
+                          strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
@@ -2022,13 +2040,6 @@ shinyServer(function(input, output, session) {
     tf <- plotSpec$TypeFlight
     input$times    ## make sensitive to time changes
     op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
-    CH <- vector ('character')
-    if (any (grepl ('CCDP', FI$Variables))) {CH <- c(CH, 'CDP')}
-    if (any (grepl ('CSP100', FI$Variables))) {CH <- c(CH, 'FSSP')}
-    if (any (grepl ('CUHSAS', FI$Variables))) {CH <- c(CH, 'UHSAS')}
-    if (any (grepl ('CS200', FI$Variables))) {CH <- c(CH, 'PCASP')}
-    if (any (grepl ('C1DC', FI$Variables))) {CH <- c(CH, '2DC')}
-    updateCheckboxGroupInput (session, 'probe', choices=CH, selected=CH)
     if (!is.na (fname) && file.exists (fname)) {
       if (is.null (netCDFfile) || is.na (netCDFfile)) {
         netCDFfile <<- nc_open (fname)
@@ -2883,6 +2894,7 @@ shinyServer(function(input, output, session) {
         print (sprintf ('in skewT, global plotSpec$Times are %s %s',
                         formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
+      if ((input$times[1] != plotSpec$Times[1]) || (input$times[2] != plotSpec$Times[2])) {return()}
       namesV <- names(Data)
       namesV <- namesV[namesV != "Time"]
       for (n in namesV) {
@@ -2893,8 +2905,8 @@ shinyServer(function(input, output, session) {
       if (nrow (Data) <= 0) {
         plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
         text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
-        reac$newskewT <- reac$newskewT + 1
-        reac$newdata <- reac$newdata + 1
+        isolate(reac$newskewT <- reac$newskewT + 1)
+        isolate(reac$newdata <- reac$newdata + 1)
         return()
       }
       ## see global.R functions:
@@ -3374,7 +3386,7 @@ shinyServer(function(input, output, session) {
           yc <- cumsum (a$data[[j]]$density) * (a$data[[j]]$x[3] - a$data[[j]]$x[2])
           yc <- yc * yrange[2]
           dt <- data.frame (x=a$data[[1]]$x[-1], y=yc[-1])
-          dt[nrow(dt), ] <- NA
+          # dt[nrow(dt), ] <- NA
           g <- g + geom_line (data=dt, aes(x,y), colour=colrs[[pnl]][j], lty=lts[[pnl]][j], lwd=0.6, na.rm=TRUE)
         }
         gsave <<- g

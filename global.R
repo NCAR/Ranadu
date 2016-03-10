@@ -20,6 +20,7 @@ library(tcltk)
 # source ('R/makeNetCDF.R')
 # source ('R/setVariableList.R')
 source ('R/CAPE.R')
+source ('R/setVariableList.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
