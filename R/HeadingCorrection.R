@@ -113,16 +113,17 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
   vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
   vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
   G <- Gravity (D1$LAT, D1$GGALT)
-  AV <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame
-  LV <- XformLA (D1, AV)                                    #l-frame
+  AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame
+  VL <- matrix(c(D1$VNS, D1$VEW, D1$VSPD), ncol=3) 
+  AL <- XformLA (D1, AB)                                    #l-frame
   ## now corrected for angular effects
   ## See Noureldin et al, 2013, Eq. (5.55)
-  LV <- LV - RotationCorrection (D1, LV)
+  AL <- AL + RotationCorrection (D1, VL)
   
   ## the resulting l-frame accelerations
-  D1$LACCX <- LV[, 1]
-  D1$LACCY <- LV[, 2]
-  D1$LACCZ <- LV[, 3] + G
+  D1$LACCX <- AL[, 1]
+  D1$LACCY <- AL[, 2]
+  D1$LACCZ <- AL[, 3] + G
   
   ## smooth to match GPS-velocity derivatives
   D1$LACCX <- signal::sgolayfilt (D1$LACCX, 3, .span, m=0)

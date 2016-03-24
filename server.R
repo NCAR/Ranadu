@@ -34,9 +34,9 @@ shinyServer(function(input, output, session) {
     if (any (grepl ('CS200', FI$Variables))) {CH <- c(CH, 'PCASP')}
     if (any (grepl ('C1DC', FI$Variables))) {CH <- c(CH, '2DC')}
     updateCheckboxGroupInput (session, 'probe', choices=CH, selected=CH)
-    if (Trace) {print (sprintf ('choices are %s', CH))}
+    if (Trace) {print (sprintf ('Project: choices are %s', CH))}
     isolate (reac$newdata <- reac$newdata + 1)
-    if (Trace) {print ('reset newdata 1')}
+    if (Trace) {print ('Project: reset newdata')}
   })
   obsProject <- observe (exprProject, quoted=TRUE)
   
@@ -52,7 +52,7 @@ shinyServer(function(input, output, session) {
       updateTextInput (session, 'paluchCEnd', value='36:00:00')
     }
     isolate (reac$newdata <- reac$newdata + 1)
-    if (Trace) {print ('reset newdata 2')}
+    if (Trace) {print ('Flight: reset newdata')}
   })
   obsFlight <- observe (exprFlight, quoted=TRUE)
   
@@ -61,12 +61,12 @@ shinyServer(function(input, output, session) {
     plotSpec$fname2d <<- NULL
     if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
     isolate (reac$newdata <- reac$newdata + 1)
-    if (Trace) {print ('reset newdata 3')}
+    if (Trace) {print ('TypeFlight: reset newdata')}
   })
   obsTypeFlight <- observe (exprTypeFlight, quoted=TRUE)
   
   exprTime <- quote ({
-    if (Trace) {print (sprintf ('Times %s %s times %s %s', plotSpec$Times[1], plotSpec$Times[2],
+    if (Trace) {print (sprintf ('Time: Times %s %s times %s %s', plotSpec$Times[1], plotSpec$Times[2],
                                 input$times[1], input$times[2]))}
     if (any (input$times != plotSpec$Times)) {
       plotSpec$Times <<- input$times
@@ -80,16 +80,53 @@ shinyServer(function(input, output, session) {
       isolate (reac$newvarp <- reac$newvarp + 1)
       isolate (reac$newskewT <- reac$newskewT + 1)
       if (Trace) {
-        print ('reset newdisplay 20')
-        print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
+        print ('Time: reset newdisplay')
+        print (sprintf ('Time: times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
       }
     }
   })
   obsTime <- observe (exprTime, quoted=TRUE, priority=101)
   
+  exprPlotVar <- quote ({
+    input$addVarP
+    isolate (plt <- input$plot)
+    isolate (pnl <- input$panel)
+    isolate (lv <- input$lineV)
+    
+    if (input$addVarP != plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]) {
+      isolate (reac$newdisplay <- reac$newdisplay + 1)
+      if (Trace) {print ('PlotVar: reset newdisplay')}
+      if (input$addVarP != 'omit') {
+        if (input$addVarP == 'select') {
+        } else {
+          plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv] <<- input$addVarP
+          if (lv == 1) {
+            plotSpec$Plot[[plt]]$panel[[pnl]]$lab[lv] <<- input$addVarP
+            updateTextInput (session, 'ylbl', value=input$addVarP)
+          }
+          if ((length(data ()) < 2) || (!(input$addVarP %in% names (Data)))) {
+            if (exists ('specialData') && (input$addVarP %in% names (specialData))) {
+            } else {
+              print ('need new data to include new variable - 4')
+              reac$newdata <- reac$newdata + 1
+            }
+          }
+        }
+      } else {
+        v <- plotSpec$Plot[[plt]]$panel[[pnl]]$var
+        v <- v[-lv]
+        if (Trace) {print (sprintf ('PlotVar: new var list is %s', v))}
+        plotSpec$Plot[[plt]]$panel[[pnl]]$var <<- v
+        # nms <- names (data ())  ## just a data ref to get reset
+        updateSelectInput (session, 'addVarP', selected='select')  
+      }
+    }
+  })
+  obsPlotVar <- observe (exprPlotVar, quoted=TRUE, priority=100)
+  
   exprTstart <- quote ({
     ## ignore it if before start or after finish
-    if (Trace) {print (sprintf ('input$tstart=%s, min/maxT=%s %s',
+    if (Trace) {print (sprintf ('Tstart: input$tstart=%s, min/maxT=%s %s',
                                 input$tstart, minT, maxT))}
     txt <- input$tstart
     ## protect against typing errors that insert a character:
@@ -105,11 +142,12 @@ shinyServer(function(input, output, session) {
           isolate (reac$newstats <- reac$newstats + 1)
           isolate (reac$newscat <- reac$newscat + 1)
           isolate (reac$newskewT <- reac$newskewT + 1)
+          isolate (reac$newvarp <- reac$newvarp + 1)
         }
         updateSliderInput (session, 'times', value=plotSpec$Times)
         if (Trace) {
-          print ('reset new times 25')
-          print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
+          print ('Tstart: reset times')
+          print (sprintf ('Tstart: Times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
         }
       }
     }
@@ -118,7 +156,7 @@ shinyServer(function(input, output, session) {
   
   exprPaluchstart <- quote ({
     ## ignore it if before start or after finish
-    if (Trace) {print (sprintf ('input$paluchStart=%s, min/maxT=%s %s',
+    if (Trace) {print (sprintf ('Paluchstart: input$paluchStart=%s, min/maxT=%s %s',
                                 input$paluchStart, minT, maxT))}
     txt <- input$paluchStart
     ## protect against typing errors that insert a character:
@@ -128,8 +166,8 @@ shinyServer(function(input, output, session) {
       if (i1 > 0) {
         plotSpec$PaluchTimes[1] <<- Data$Time[i1]
         if (Trace) {
-          print ('reset Paluch times 25')
-          print (sprintf ('times are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
+          print ('Paluchstart: reset Paluch times')
+          print (sprintf ('Paluchstart: times are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
         }
       }
       updateTextInput (session, 'paluchStart', value=formatTime(plotSpec$PaluchTimes[1]))
@@ -139,7 +177,7 @@ shinyServer(function(input, output, session) {
   
   exprPaluchCstart <- quote ({
     ## ignore it if before start or after finish
-    if (Trace) {print (sprintf ('input$paluchCStart=%s, min/maxT=%s %s',
+    if (Trace) {print (sprintf ('PaluchCstart: input$paluchCStart=%s, min/maxT=%s %s',
                                 input$paluchCStart, minT, maxT))}
     txt <- input$paluchCStart
     ## protect against typing errors that insert a character:
@@ -149,8 +187,8 @@ shinyServer(function(input, output, session) {
       if (i1 > 0) {
         plotSpec$PaluchCTimes[1] <<- Data$Time[i1]
         if (Trace) {
-          print ('reset Paluch times 25')
-          print (sprintf ('times are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
+          print ('PaluchCstart: reset PaluchCTimes')
+          print (sprintf ('PaluchCstart: PaluchCTimes are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
         }
       }
       updateTextInput (session, 'paluchCStart', value=formatTime(plotSpec$PaluchCTimes[1]))
@@ -174,16 +212,17 @@ shinyServer(function(input, output, session) {
           isolate (reac$newstats <- reac$newstats + 1)
           isolate (reac$newscat <- reac$newscat + 1)
           isolate (reac$newskewT <- reac$newskewT + 1)
+          isolate (reac$newvarp <- reac$newvarp + 1)
         }
         updateSliderInput (session, 'times', value=plotSpec$Times)
-        if (Trace) {print (c('updating time to', formatTime(plotSpec$Times[1]), formatTime(plotSpec$Times[2])))}
+        if (Trace) {print (sprintf ('Tend:, updating time to %s %s', formatTime(plotSpec$Times[1]), formatTime(plotSpec$Times[2])))}
         #     isolate (reac$newdisplay <- reac$newdisplay + 1)
         #     isolate (reac$newhistogram <- reac$newhistogram + 1)
         #     isolate (reac$newstats <- reac$newstats + 1)
         #     isolate (reac$newscat <- reac$newscat + 1)
         if (Trace) {
-          print ('reset new times 26')
-          print (sprintf ('times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
+          print ('Tend: reset new times')
+          print (sprintf ('Tend: Times are %s %s', plotSpec$Times[1], plotSpec$Times[2]))
         }
       }
     }
@@ -197,20 +236,20 @@ shinyServer(function(input, output, session) {
     if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
       hhmmss <- as.integer (gsub (':', '', txt))
       i2 <- getIndex (Data, hhmmss)
-      if (Trace) {print (sprintf ('i2 is %d, hhmmss=%d', i2, hhmmss))}
+      if (Trace) {print (sprintf ('Paluchend: i2 is %d, hhmmss=%d', i2, hhmmss))}
       if (i2 > 0) {
         plotSpec$PaluchTimes[2] <<- Data$Time[i2]
-        if (Trace) {print (c('updating time to', formatTime(plotSpec$PaluchTimes[1]), formatTime(plotSpec$PaluchTimes[2])))}
+        if (Trace) {print (sprintf ('Paluchend b1: updating time to %s %s', formatTime(plotSpec$PaluchTimes[1]), formatTime(plotSpec$PaluchTimes[2])))}
         if (Trace) {
-          print ('reset Paluch times 26')
-          print (sprintf ('times are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
+          print ('Paluchend b1: reset Paluch times')
+          print (sprintf ('Paluchend b1: PaluchTimes are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
         }
       } else {
         plotSpec$PaluchTimes[2] <<- Data$Time[nrow(Data)] 
-        if (Trace) {print (c('updating time to', formatTime(plotSpec$PaluchTimes[1]), formatTime(plotSpec$PaluchTimes[2])))}
+        if (Trace) {print (sprintf ('Paluchend b2: updating time to %s %s', formatTime(plotSpec$PaluchTimes[1]), formatTime(plotSpec$PaluchTimes[2])))}
         if (Trace) {
-          print ('reset Paluch times 26')
-          print (sprintf ('times are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
+          print ('Paluchend b2: reset Paluch times')
+          print (sprintf ('Paluchend b2: PaluchTimes are %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
         }
       }
     }
@@ -225,20 +264,20 @@ shinyServer(function(input, output, session) {
     if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
       hhmmss <- as.integer (gsub (':', '', txt))
       i2 <- getIndex (Data, hhmmss)
-      if (Trace) {print (sprintf ('i2 is %d, hhmmss=%d', i2, hhmmss))}
+      if (Trace) {print (sprintf ('PaluchCend: i2 is %d, hhmmss=%d', i2, hhmmss))}
       if (i2 > 0) {
         plotSpec$PaluchCTimes[2] <<- Data$Time[i2]
-        if (Trace) {print (c('updating time to', formatTime(plotSpec$PaluchCTimes[1]), formatTime(plotSpec$PaluchCTimes[2])))}
+        if (Trace) {print (sprintf ('PaluchCend b1: updating PaluchCTimes to %s %s', formatTime(plotSpec$PaluchCTimes[1]), formatTime(plotSpec$PaluchCTimes[2])))}
         if (Trace) {
-          print ('reset Paluch times 26')
-          print (sprintf ('times are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
+          print ('PaluchCend b1: reset PaluchCTimes')
+          print (sprintf ('PaluchCend: PaluchCTimes are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
         }
       } else {
         plotSpec$PaluchCTimes[2] <<- Data$Time[nrow(Data)] 
-        if (Trace) {print (c('updating time to', formatTime(plotSpec$PaluchCTimes[1]), formatTime(plotSpec$PaluchCTimes[2])))}
+        if (Trace) {print (sprintf ('PaluchCend b2: updating PaluchCTimes to %s %s', formatTime(plotSpec$PaluchCTimes[1]), formatTime(plotSpec$PaluchCTimes[2])))}
         if (Trace) {
-          print ('reset Paluch times 26')
-          print (sprintf ('times are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
+          print ('PaluchCend: reset PaluchCTimes')
+          print (sprintf ('PaluchCTimes are %s %s', plotSpec$PaluchCTimes[1], plotSpec$PaluchCTimes[2]))
         }
       }
     }
@@ -249,101 +288,63 @@ shinyServer(function(input, output, session) {
   exprPanels <- quote ({
     plotSpec$Plot[[input$plot]]$panels <<- input$panels
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 4')}
+    if (Trace) {print ('Panels: reset newdisplay')}
   })
   obsPanels <- observe (exprPanels, quoted=TRUE)
   
   exprCols <- quote ({
     plotSpec$Plot[[input$plot]]$columns <<- input$cols
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 5')}
+    if (Trace) {print ('Cols: reset newdisplay')}
   })
   obsCols <- observe (exprCols, quoted=TRUE)
   
   exprlogY <- quote ({
     plotSpec$Plot[[input$plot]]$panel[[input$panel]]$logY <<- input$logY
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 6')}
+    if (Trace) {print ('logY: reset newdisplay')}
   })
   obsLogY <- observe (exprlogY, quoted=TRUE)
   
   exprFixed <- quote ({
     plotSpec$Plot[[input$plot]]$panel[[input$panel]]$fixed <<- input$fixed
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 7')}
+    if (Trace) {print ('Fixed: reset newdisplay')}
   })
   obsFixed <- observe (exprFixed, quoted=TRUE)
   
   exprPanelMin <- quote ({
     plotSpec$Plot[[input$plot]]$panel[[input$panel]]$ylim[1] <<- input$panelMin
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 8')}
+    if (Trace) {print ('PanelMin: reset newdisplay')}
   })
   obsPanelMin <- observe (exprPanelMin, quoted=TRUE)
   
   exprPanelMax <- quote ({
     plotSpec$Plot[[input$plot]]$panel[[input$panel]]$ylim[2] <<- input$panelMax
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 9')}
+    if (Trace) {print ('PanelMax: reset newdisplay')}
   })
   obsPanelMax <- observe (exprPanelMax, quoted=TRUE)
   
   exprRestrict <- quote ({
     plotSpec$Plot[[input$plot]]$restrict <<- input$restrict
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 10')}
+    if (Trace) {print ('Restrict: reset newdisplay')}
   })
   obsRestrict <- observe (exprRestrict, quoted=TRUE)
-  
-  
-  exprPlotVar <- quote ({
-    input$addVarP
-    isolate (plt <- input$plot)
-    isolate (pnl <- input$panel)
-    isolate (lv <- input$lineV)
-    
-    if (input$addVarP != plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]) {
-      isolate (reac$newdisplay <- reac$newdisplay + 1)
-      if (Trace) {print ('reset newdisplay 14')}
-      if (input$addVarP != 'omit') {
-        if (input$addVarP == 'select') {
-        } else {
-          plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv] <<- input$addVarP
-          if (lv == 1) {
-            plotSpec$Plot[[plt]]$panel[[pnl]]$lab[lv] <<- input$addVarP
-            updateTextInput (session, 'ylbl', value=input$addVarP)
-          }
-          if ((length(data ()) < 2) || (!(input$addVarP %in% names (Data)))) {
-            if (exists ('specialData') && (input$addVarP %in% names (specialData))) {
-            } else {
-              print ('need new data to include new variable - 4')
-              reac$newdata <- reac$newdata + 1
-            }
-          }
-        }
-      } else {
-        v <- plotSpec$Plot[[plt]]$panel[[pnl]]$var
-        v <- v[-lv]
-        if (Trace) {print (sprintf ('new var list is %s', v))}
-        plotSpec$Plot[[plt]]$panel[[pnl]]$var <<- v
-        # nms <- names (data ())  ## just a data ref to get reset
-        updateSelectInput (session, 'addVarP', selected='select')  
-      }
-    }
-  })
-  obsPlotVar <- observe (exprPlotVar, quoted=TRUE, priority=0)
   
   exprhPanels <- quote ({
     plotSpec$Hist[[input$plot]]$panels <<- input$hpanels
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 30')}
+    if (Trace) {print ('hPanels: reset newhistogram')}
   })
   obshPanels <- observe (exprhPanels, quoted=TRUE)
   
   exprhCols <- quote ({
     plotSpec$Hist[[input$plot]]$columns <<- input$hcols
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 31')}
+    if (Trace) {print ('hCols: reset newhistogram')}
   })
   obshCols <- observe (exprhCols, quoted=TRUE)
   
@@ -358,42 +359,42 @@ shinyServer(function(input, output, session) {
     updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[plt]]$panel[[pnl]]$lw[1])
     updateRadioButtons (session, 'hlineStyle', selected=ltyps[plotSpec$Hist[[plt]]$panel[[pnl]]$lt[1]])
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 12')}
+    if (Trace) {print ('hPanel: reset newhistogram')}
   })
   obshPanel <- observe (exprhPanel, priority=8, quoted=TRUE)    
   
   exprhlogY <- quote ({
     plotSpec$Hist[[input$plot]]$panel[[input$hpanel]]$logY <<- input$hlogY
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 6')}
+    if (Trace) {print ('hlogY: reset newhistogram')}
   })
   obshLogY <- observe (exprhlogY, priority=2, quoted=TRUE)
   
   exprhFixed <- quote ({
     plotSpec$Hist[[input$plot]]$panel[[input$hpanel]]$fixed <<- input$hfixed
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 7')}
+    if (Trace) {print ('hFixed: reset newhistogram')}
   })
   obshFixed <- observe (exprhFixed, priority=2, quoted=TRUE)
   
   exprhPanelMin <- quote ({
     plotSpec$Hist[[input$plot]]$panel[[input$hpanel]]$ylim[1] <<- input$hpanelMin
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 8')}
+    if (Trace) {print ('hPanelMin: reset newhistogram')}
   })
   obshPanelMin <- observe (exprhPanelMin, priority=2, quoted=TRUE)
   
   exprhPanelMax <- quote ({
     plotSpec$Hist[[input$plot]]$panel[[input$hpanel]]$ylim[2] <<- input$hpanelMax
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 9')}
+    if (Trace) {print ('hPanelMax: reset newhistogram')}
   })
   obshPanelMax <- observe (exprhPanelMax, priority=2, quoted=TRUE)
   
   exprhRestrict <- quote ({
     plotSpec$Hist[[input$plot]]$restrict <<- input$limits3
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 10')}
+    if (Trace) {print ('hRestrict: reset newhistogram')}
   })
   obshRestrict <- observe (exprhRestrict, priority=2, quoted=TRUE)
   
@@ -410,7 +411,7 @@ shinyServer(function(input, output, session) {
       v <- plotSpec$Hist[[plt]]$panel[[pnl]]$var
       v <- c(v, v[length(v)])
       plotSpec$Hist[[plt]]$panel[[pnl]]$var <<- v
-      if (Trace) {print (c('var set to ', v))}
+      if (Trace) {print (sprintf ('hlineV: var set to %s', v))}
       lbl <- plotSpec$Hist[[plt]]$panel[[pnl]]$lab
       lbl <- c(lbl, lbl[length(lbl)])
       plotSpec$Hist[[plt]]$panel[[pnl]]$lab <<- lbl
@@ -428,7 +429,7 @@ shinyServer(function(input, output, session) {
       updateNumericInput (session, 'hlineW', value=lw[length(lw)])
       updateNumericInput (session, 'hlineStyle', value=lt[length(lt)])
     }
-    if (Trace) {print ('processed hlineV [13]')}
+    if (Trace) {print ('hlineV: updated specs')}
     # isolate (reac$newhistogram <- reac$newhistogram + 1)
     # if (Trace) {print ('reset newhistogram 13')}
   })
@@ -438,14 +439,14 @@ shinyServer(function(input, output, session) {
   exprsPanels <- quote ({
     plotSpec$Scat[[input$plot]]$panels <<- input$spanels
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 30')}
+    if (Trace) {print ('sPanels: reset newscat')}
   })
   obssPanels <- observe (exprsPanels, quoted=TRUE)
   
   exprsCols <- quote ({
     plotSpec$Scat[[input$plot]]$columns <<- input$scols
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 31')}
+    if (Trace) {print ('sCols: reset newscat')}
   })
   obssCols <- observe (exprsCols, quoted=TRUE)
   
@@ -462,63 +463,63 @@ shinyServer(function(input, output, session) {
     updateNumericInput (session, 'ssize', value=plotSpec$Scat[[plt]]$panel[[pnl]]$size[1])
     updateNumericInput (session, 'symbol', value=plotSpec$Scat[[plt]]$panel[[pnl]]$symbol[1])
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 12')}
+    if (Trace) {print ('sPanel: reset newscat')}
   })
   obssPanel <- observe (exprsPanel, priority=8, quoted=TRUE)    
   
   exprslogX <- quote ({
     plotSpec$Scat[[input$plot]]$panel[[input$spanel]]$logX <<- input$slogX
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 6')}
+    if (Trace) {print ('slogX: reset newscat')}
   })
   obssLogX <- observe (exprslogX, priority=2, quoted=TRUE)  
   
   exprslogY <- quote ({
     plotSpec$Scat[[input$plot]]$panel[[input$spanel]]$logY <<- input$slogY
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 6')}
+    if (Trace) {print ('slogY: reset newscat')}
   })
   obssLogY <- observe (exprslogY, priority=2, quoted=TRUE)
   
   exprsFixed <- quote ({
     plotSpec$Scat[[input$plot]]$panel[[input$spanel]]$fixed <<- input$sfixed
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 7')}
+    if (Trace) {print ('sFixed: reset newscat')}
   })
   obssFixed <- observe (exprsFixed, priority=2, quoted=TRUE)
   
   exprsPanelMinx <- quote ({
     plotSpec$Scat[[input$plot]]$panel[[input$spanel]]$xlim[1] <<- input$spanelMinx
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 8')}
+    if (Trace) {print ('sPanelMinx: reset newscat')}
   })
   obssPanelMinx <- observe (exprsPanelMinx, priority=2, quoted=TRUE)
   
   exprsPanelMaxx <- quote ({
     plotSpec$Scat[[input$plot]]$panel[[input$spanel]]$xlim[2] <<- input$spanelMaxx
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 9')}
+    if (Trace) {print ('sPanelMaxx: reset newscat')}
   })
   obssPanelMaxx <- observe (exprsPanelMaxx, priority=2, quoted=TRUE)
   
   exprsPanelMiny <- quote ({
     plotSpec$Scat[[input$plot]]$panel[[input$spanel]]$ylim[1] <<- input$spanelMiny
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 8')}
+    if (Trace) {print ('sPanelMiny: reset newscat')}
   })
   obssPanelMiny <- observe (exprsPanelMiny, priority=2, quoted=TRUE)
   
   exprsPanelMaxy <- quote ({
     plotSpec$Scat[[input$plot]]$panel[[input$spanel]]$ylim[2] <<- input$spanelMaxy
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 9')}
+    if (Trace) {print ('sPanelMaxy: reset newscat')}
   })
   obssPanelMaxy <- observe (exprsPanelMaxy, priority=2, quoted=TRUE)
   
   exprsRestrict <- quote ({
     plotSpec$Scat[[input$plot]]$restrict <<- input$limits4
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 10')}
+    if (Trace) {print ('sRestrict: reset newscat')}
   })
   obssRestrict <- observe (exprsRestrict, priority=2, quoted=TRUE)
   
@@ -537,7 +538,7 @@ shinyServer(function(input, output, session) {
       vy <- c(vy, vy[length(vy)])
       plotSpec$Scat[[plt]]$panel[[pnl]]$vary <<- vy
       ## varx remains the same
-      if (Trace) {print (c('vary set to ', vy))}
+      if (Trace) {print (sprintf ('slineV: vary set to %s', vy))}
       lbl <- plotSpec$Scat[[plt]]$panel[[pnl]]$lab
       lbl <- c(lbl, lbl[length(lbl)])
       plotSpec$Scat[[plt]]$panel[[pnl]]$lab <<- lbl
@@ -555,7 +556,7 @@ shinyServer(function(input, output, session) {
       updateNumericInput (session, 'ssize', value=size[length(size)])
       updateNumericInput (session, 'symbol', value=symb[length(symb)])
     }
-    if (Trace) {print ('processed slineV [13]')}
+    if (Trace) {print ('slineV: saved specs')}
     # isolate (reac$newscat <- reac$newscat + 1)
     # if (Trace) {print ('reset newscat 13')}
   })
@@ -568,8 +569,8 @@ shinyServer(function(input, output, session) {
     plotSpec$Scat[[plt]]$panel[[pnl]]$symbol[lv] <<- input$symbol
     isolate (reac$newscat <- reac$newscat + 1)
     if (Trace) {
-      print ('reset newscat 41')
-      print (c('plt,pnl,lv,symbol:',plt,pnl,lv,input$symbol))
+      print ('ssymbol: reset newscat')
+      print (sprintf ('ssymbol: plt,pnl,lv,symbol: %d %d %d %d',plt,pnl,lv,input$symbol))
     }
   })
   obsssymbol <- observe (exprssymbol, quoted=TRUE)
@@ -580,7 +581,7 @@ shinyServer(function(input, output, session) {
     lv <- input$slineV
     plotSpec$Scat[[plt]]$panel[[pnl]]$size[lv] <<- input$ssize
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 40')}
+    if (Trace) {print ('ssize: reset newscat')}
   })
   obsssize <- observe (exprssize, quoted=TRUE)
   
@@ -588,14 +589,14 @@ shinyServer(function(input, output, session) {
   exprbPanels <- quote ({
     plotSpec$Bin[[input$plot]]$panels <<- input$bpanels
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 30')}
+    if (Trace) {print ('bPanels: reset newbin')}
   })
   obsbPanels <- observe (exprbPanels, quoted=TRUE)
   
   exprbCols <- quote ({
     plotSpec$Bin[[input$plot]]$columns <<- input$bcols
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 31')}
+    if (Trace) {print ('bCols: reset newbin')}
   })
   obsbCols <- observe (exprbCols, quoted=TRUE)
   
@@ -612,63 +613,63 @@ shinyServer(function(input, output, session) {
     updateNumericInput (session, 'bsize', value=plotSpec$Bin[[plt]]$panel[[pnl]]$size[1])
     updateNumericInput (session, 'bsymbol', value=plotSpec$Bin[[plt]]$panel[[pnl]]$symbol[1])
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 12')}
+    if (Trace) {print ('bPanel: reset newbin')}
   })
   obsbPanel <- observe (exprbPanel, priority=8, quoted=TRUE)    
   
   exprblogX <- quote ({
     plotSpec$Bin[[input$plot]]$panel[[input$bpanel]]$logX <<- input$blogX
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 6')}
+    if (Trace) {print ('blogX: reset newbin')}
   })
   obsbLogX <- observe (exprblogX, priority=2, quoted=TRUE)  
   
   exprblogY <- quote ({
     plotSpec$Bin[[input$plot]]$panel[[input$bpanel]]$logY <<- input$blogY
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 6')}
+    if (Trace) {print ('blogY: reset newbin')}
   })
   obsbLogY <- observe (exprblogY, priority=2, quoted=TRUE)
   
   exprbFixed <- quote ({
     plotSpec$Bin[[input$plot]]$panel[[input$bpanel]]$fixed <<- input$bfixed
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 7')}
+    if (Trace) {print ('bFixed: reset newbin')}
   })
   obsbFixed <- observe (exprbFixed, priority=2, quoted=TRUE)
   
   exprbPanelMinx <- quote ({
     plotSpec$Bin[[input$plot]]$panel[[input$bpanel]]$xlim[1] <<- input$bpanelMinx
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 8')}
+    if (Trace) {print ('bPanelMinx: reset newbin')}
   })
   obsbPanelMinx <- observe (exprbPanelMinx, priority=2, quoted=TRUE)
   
   exprbPanelMaxx <- quote ({
     plotSpec$Bin[[input$plot]]$panel[[input$bpanel]]$xlim[2] <<- input$bpanelMaxx
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 9')}
+    if (Trace) {print ('bPanelMaxx: reset newbin')}
   })
   obsbPanelMaxx <- observe (exprbPanelMaxx, priority=2, quoted=TRUE)
   
   exprbPanelMiny <- quote ({
     plotSpec$Bin[[input$plot]]$panel[[input$bpanel]]$ylim[1] <<- input$bpanelMiny
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 8')}
+    if (Trace) {print ('bPanelMiny: reset newbin')}
   })
   obsbPanelMiny <- observe (exprbPanelMiny, priority=2, quoted=TRUE)
   
   exprbPanelMaxy <- quote ({
     plotSpec$Bin[[input$plot]]$panel[[input$bpanel]]$ylim[2] <<- input$bpanelMaxy
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 9')}
+    if (Trace) {print ('bPanelMaxy: reset newbin')}
   })
   obsbPanelMaxy <- observe (exprbPanelMaxy, priority=2, quoted=TRUE)
   
   exprbRestrict <- quote ({
     plotSpec$Bin[[input$plot]]$restrict <<- input$limits4
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 10')}
+    if (Trace) {print ('bRestrict: reset newbin')}
   })
   obsbRestrict <- observe (exprbRestrict, priority=2, quoted=TRUE)
   
@@ -687,7 +688,7 @@ shinyServer(function(input, output, session) {
       vy <- c(vy, vy[length(vy)])
       plotSpec$Bin[[plt]]$panel[[pnl]]$vary <<- vy
       ## varx remains the same
-      if (Trace) {print (c('vary set to ', vy))}
+      if (Trace) {print (sprintf ('blineV: vary set to %s', vy))}
       lbl <- plotSpec$Bin[[plt]]$panel[[pnl]]$lab
       lbl <- c(lbl, lbl[length(lbl)])
       plotSpec$Bin[[plt]]$panel[[pnl]]$lab <<- lbl
@@ -705,7 +706,7 @@ shinyServer(function(input, output, session) {
       updateNumericInput (session, 'bsize', value=size[length(size)])
       updateNumericInput (session, 'bsymbol', value=symb[length(symb)])
     }
-    if (Trace) {print ('processed blineV [13]')}
+    if (Trace) {print ('blineV: set specs')}
     # isolate (reac$newbin <- reac$newbin + 1)
     # if (Trace) {print ('reset newbin 13')}
   })
@@ -718,8 +719,8 @@ shinyServer(function(input, output, session) {
     plotSpec$Bin[[plt]]$panel[[pnl]]$symbol[lv] <<- input$bsymbol
     isolate (reac$newbin <- reac$newbin + 1)
     if (Trace) {
-      print ('reset newbin 41')
-      print (c('plt,pnl,lv,symbol:',plt,pnl,lv,input$bsymbol))
+      print ('bsymbol: reset newbin')
+      print (sprintf ('bsymbol: plt,pnl,lv,symbol: %d %d %d %d',plt,pnl,lv,input$bsymbol))
     }
   })
   obsbsymbol <- observe (exprbsymbol, quoted=TRUE)
@@ -730,7 +731,7 @@ shinyServer(function(input, output, session) {
     lv <- input$blineV
     plotSpec$Bin[[plt]]$panel[[pnl]]$size[lv] <<- input$bsize
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 40')}
+    if (Trace) {print ('bsize: reset newbin')}
   })
   obsbsize <- observe (exprbsize, quoted=TRUE)
   
@@ -759,9 +760,14 @@ shinyServer(function(input, output, session) {
     updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[plt]]$panel[[1]]$col[1])
     updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[plt]]$panel[[1]]$lw[1])
     updateRadioButtons (session, 'hlineStyle', selected=ltyps[plotSpec$Hist[[plt]]$panel[[1]]$lt[1]])
+    updateSelectInput (session, 'specvar', selected=plotSpec$Variance[[plt]]$Definition$var)
+    updateSelectInput (session, 'speccovar', selected=plotSpec$Variance[[plt]]$Definition$cvar)
     isolate (reac$newdisplay <- reac$newdisplay + 1)
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newdisplay 11')}
+    isolate (reac$newscat <- reac$newscat + 1)
+    isolate (reac$newbin <- reac$newbin + 1)
+    isolate (reac$newvarp <- reac$newvarp + 1)
+    if (Trace) {print ('Plot: reset newdisplay etc.')}
   })
   obsPlot <- observe (exprPlot, quoted=TRUE)
   
@@ -776,7 +782,10 @@ shinyServer(function(input, output, session) {
     updateNumericInput (session, 'lineW', value=plotSpec$Plot[[plt]]$panel[[pnl]]$lw[1])
     updateRadioButtons (session, 'lineStyle', selected=ltyps[plotSpec$Plot[[plt]]$panel[[pnl]]$lt[1]])
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 12')}
+    isolate (reac$newhistogram <- reac$newhistogram + 1)
+    isolate (reac$newbin <- reac$newbin + 1)
+    isolate (reac$newscat <- reac$newscat + 1)
+    if (Trace) {print ('Panel: reset newdisplay etc.')}
   })
   obsPanel <- observe (exprPanel, quoted=TRUE)
   
@@ -793,7 +802,7 @@ shinyServer(function(input, output, session) {
       v <- plotSpec$Plot[[plt]]$panel[[pnl]]$var
       v <- c(v, v[length(v)])
       plotSpec$Plot[[plt]]$panel[[pnl]]$var <<- v
-      if (Trace) {print (c('var set to ', v))}
+      if (Trace) {print (sprintf ('LineV: var set to %s', v))}
       lbl <- plotSpec$Plot[[plt]]$panel[[pnl]]$lab
       lbl <- c(lbl, lbl[length(lbl)])
       plotSpec$Plot[[plt]]$panel[[pnl]]$lab <<- lbl
@@ -812,7 +821,10 @@ shinyServer(function(input, output, session) {
       updateNumericInput (session, 'lineStyle', value=lt[length(lt)])
     }
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 13')}
+    isolate (reac$newhistogram <- reac$newhistogram + 1)
+    isolate (reac$newbin <- reac$newbin + 1)
+    isolate (reac$newscat <- reac$newscat + 1)
+    if (Trace) {print ('LineV: reset newdisplay')}
   })
   obsLineV <- observe (exprLineV, quoted=TRUE)
   
@@ -831,9 +843,10 @@ shinyServer(function(input, output, session) {
           if (exists ('specialData') && (input$haddVarP %in% names (specialData))) {
           } else {
             print ('need new data to include new variable - 1')
-            if (Trace) {print (c('haddVarP is ', input$haddVarP))}
-            if (Trace) {print (c('length of data is ', ld))}
-            if (Trace) {print (c('names in data are', nms))}
+            if (Trace) {print (sprintf ('HistVar: haddVarP is %s', input$haddVarP))}
+            if (Trace) {print (sprintf ('HistVar: length of data is %d', ld))}
+            if (Trace) {print ('HistVar: names in data'); print (nms)}
+            if (Trace) {print ('HistVar: reset newdata')}
             isolate(reac$newdata <- reac$newdata + 1)
           }
         }
@@ -841,13 +854,13 @@ shinyServer(function(input, output, session) {
     } else {
       v <- plotSpec$Hist[[plt]]$panel[[pnl]]$var
       v <- v[-lv]
-      if (Trace) {print (sprintf ('new var list is %s', v))}
+      if (Trace) {print (sprintf ('HistVar: new var list is %s', v))}
       plotSpec$Hist[[plt]]$panel[[pnl]]$var <<- v
       # nms <- names (data ())  ## just a data ref to get reset
       updateSelectInput (session, 'haddVarP', selected='select')  
     }
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 14')}
+    if (Trace) {print ('HistVar: reset newhistogram')}
   })
   obsHistVar <- observe (exprHistVar, priority=10, quoted=TRUE)
   
@@ -865,17 +878,18 @@ shinyServer(function(input, output, session) {
         if (((ld <- length(Data)) < 2) || (!(input$saddVarP1 %in% (nms <- names (Data))))) {
           if (exists ('specialData') && (input$saddVarP1 %in% names (specialData))) {
           } else {
-            print ('need new data to include new variable - 2')
-            if (Trace) {print (c('saddVarP1 is ', input$saddVarP1))}
-            if (Trace) {print (c('length of data is ', ld))}
-            if (Trace) {print (c('names in data are', nms))}
+            print ('ScatVar1: need new data to include new variable - 2')
+            if (Trace) {print (sprintf ('ScatVar1: saddVarP1 is %s', input$saddVarP1))}
+            if (Trace) {print (sprintf ('ScatVar1: length of data is %d', ld))}
+            if (Trace) {print ('ScatVar1: names in data are'); print (nms)}
+            if (Trace) {print (sprintf ('ScatVar1: reset newdata'))}
             isolate(reac$newdata <- reac$newdata + 1)
           }
         }
       }
     } 
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 14x')}
+    if (Trace) {print ('ScatVar1: reset newscat')}
   })
   obsScatVar1 <- observe (exprScatVar1, priority=10, quoted=TRUE)
   
@@ -893,9 +907,10 @@ shinyServer(function(input, output, session) {
           if (exists ('specialData') && (input$saddVarP2 %in% names (specialData))) {
           } else {
             print ('need new data to include new variable - 3')
-            if (Trace) {print (c('saddVarP2 is ', input$saddVarP2))}
-            if (Trace) {print (c('length of data is ', ld))}
-            if (Trace) {print (c('names in data are', nms))}
+            if (Trace) {print (sprintf ('ScatVar2: saddVarP2 is %s', input$saddVarP2))}
+            if (Trace) {print (sprintf ('ScatVar2: length of data is %d', ld))}
+            if (Trace) {print ('ScatVar2: names in data are'); print (nms)}
+            if (Trace) {print ('ScatVar2: reset newdata')}
             isolate(reac$newdata <- reac$newdata + 1)
           }
         }
@@ -903,13 +918,13 @@ shinyServer(function(input, output, session) {
     } else {
       v <- plotSpec$Scat[[plt]]$panel[[pnl]]$vary
       v <- v[-lv]
-      if (Trace) {print (sprintf ('new var list is %s', v))}
+      if (Trace) {print (sprintf ('ScatVar2: new var list is %s', v))}
       plotSpec$Scat[[plt]]$panel[[pnl]]$vary <<- v
       # nms <- names (data ())  ## just a data ref to get reset
       updateSelectInput (session, 'saddVarP2', selected='select')  
     } 
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 14y')}
+    if (Trace) {print ('ScatVar2: reset newscat')}
   })
   obsScatVar2 <- observe (exprScatVar2, priority=10, quoted=TRUE)
   
@@ -924,13 +939,16 @@ shinyServer(function(input, output, session) {
       } else {
         print ('need new data to include new variable - 5')
         reac$newdata <- reac$newdata + 1
-        if (Trace) {print (c('baddVarP1 is ', input$baddVarP1))}
-        if (Trace) {print (c('length of data is ', ld))}
-        if (Trace) {print (c('names in data are', nms))}
+        if (Trace) {
+          print (sprintf ('bPlotVarX: baddVarP1 is %s', input$baddVarP1))
+          print (sprintf ('bPlotVarX: length of data is %d', ld))
+          print ('bPlotVarX: names in data are'); print (nms)
+          print ('bPlotVarX: reset newdata')
+        }
       }
     }
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 14a')}
+    if (Trace) {print ('bPlotVarX: reset newbin')}
   })
   obsbPlotVarX <- observe (exprbPlotVarX, quoted=TRUE, priority=-9)
   
@@ -955,13 +973,13 @@ shinyServer(function(input, output, session) {
     } else {
       v <- plotSpec$Bin[[plt]]$panel[[pnl]]$vary
       v <- v[-lv]
-      if (Trace) {print (sprintf ('new vary list is %s', v))}
+      if (Trace) {print (sprintf ('bPlotVar: new vary list is %s', v))}
       plotSpec$Bin[[plt]]$panel[[pnl]]$vary <<- v
       # nms <- names (data ())  ## just a data ref to get reset
       # updateSelectInput (session, 'saddVarP2', selected='select')  
     }
     isolate (reac$newbin <- reac$newbin + 1)
-    if (Trace) {print ('reset newbin 14b')}
+    if (Trace) {print ('bPlotVar: reset newbin')}
   })
   obsbPlotVar <- observe (exprbPlotVar, quoted=TRUE, priority=-9)
   
@@ -971,7 +989,7 @@ shinyServer(function(input, output, session) {
     lv <- isolate (input$lineV)
     plotSpec$Plot[[plt]]$panel[[pnl]]$lab[lv] <<- input$ylbl
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 14c')}
+    if (Trace) {print ('ylbl: reset newdisplay')}
   })
   obsylbl <- observe (exprylbl, quoted=TRUE)
   
@@ -981,7 +999,7 @@ shinyServer(function(input, output, session) {
     lv <- isolate (input$lineV)
     plotSpec$Plot[[plt]]$panel[[pnl]]$col[lv] <<- input$varColor
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 15')}
+    if (Trace) {print ('LineColor: reset newdisplay')}
   })
   obsLineColor <- observe (exprLineColor, quoted=TRUE)
   
@@ -991,7 +1009,7 @@ shinyServer(function(input, output, session) {
     lv <- isolate (input$slineV)
     plotSpec$Scat[[plt]]$panel[[pnl]]$col[lv] <<- input$svarColor
     isolate (reac$newscat <- reac$newscat + 1)
-    if (Trace) {print ('reset newscat 15')}
+    if (Trace) {print ('sLineColor: reset newscat')}
   })
   obssLineColor <- observe (exprsLineColor, quoted=TRUE)
   
@@ -1001,7 +1019,7 @@ shinyServer(function(input, output, session) {
     lv <- isolate (input$lineV)
     plotSpec$Plot[[plt]]$panel[[pnl]]$lw[lv] <<- input$lineW
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 16')}
+    if (Trace) {print ('LineWidth: reset newdisplay')}
   })
   obsLineWidth <- observe (exprLineWidth, quoted=TRUE)
   
@@ -1011,7 +1029,7 @@ shinyServer(function(input, output, session) {
     lv <- isolate (input$lineV)
     plotSpec$Plot[[plt]]$panel[[pnl]]$lt[lv] <<- which (input$lineStyle == ltyps)
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 17')}
+    if (Trace) {print ('LineStyle: reset newdisplay')}
   })
   obsLineStyle <- observe (exprLineStyle, quoted=TRUE)
   
@@ -1021,7 +1039,7 @@ shinyServer(function(input, output, session) {
     lv <- isolate (input$hlineV)
     plotSpec$Hist[[plt]]$panel[[pnl]]$col[lv] <<- input$hvarColor
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 15')}
+    if (Trace) {print ('hLineColor: reset newhistogram')}
   })
   obshLineColor <- observe (exprhLineColor, quoted=TRUE)
   
@@ -1031,7 +1049,7 @@ shinyServer(function(input, output, session) {
     lv <- isolate (input$hlineV)
     plotSpec$Hist[[plt]]$panel[[pnl]]$lw[lv] <<- input$hlineW
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 16')}
+    if (Trace) {print ('hLineWidth: reset newhistogram')}
   })
   obshLineWidth <- observe (exprhLineWidth, quoted=TRUE)
   
@@ -1039,10 +1057,10 @@ shinyServer(function(input, output, session) {
     plt <- isolate (input$plot)
     pnl <- isolate(input$hpanel)
     lv <- isolate (input$hlineV)
-    if (Trace) {print (c('lineStyle is ', input$hlineStyle))}
+    if (Trace) {print (sprintf ('hLineStyle: lineStyle is %s', input$hlineStyle))}
     plotSpec$Hist[[plt]]$panel[[pnl]]$lt[lv] <<- which (input$hlineStyle == ltyps)
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhistogram 17')}
+    if (Trace) {print ('hLineStyle: reset newhistogram')}
   })
   obshLineStyle <- observe (exprhLineStyle, quoted=TRUE)
   
@@ -1074,15 +1092,19 @@ shinyServer(function(input, output, session) {
     plotSpec$Restrictions$max[rvN] <<- input$rmax
     isolate (reac$newdata <- reac$newdata + 1)
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('reset newdisplay 21')}
+    isolate (reac$newhistogram <- reac$newhistogram + 1)
+    isolate (reac$newscat <- reac$newscat + 1)
+    isolate (reac$newbin <- reac$newbin + 1)
+    if (Trace) {print ('Rvar: reset newdisplay etc.')}
   })
   obsRvar <- observe (exprRvar, quoted=TRUE)
   
   exprVvar <- quote ({
     plt <- isolate(input$plot)
     plotSpec$Variance[[plt]]$Definition$var <<- input$specvar
-    isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 21')}
+    isolate (reac$newvarp <- reac$newvarp + 1)
+    isolate (reac$newdata <- reac$newdata + 1)  ## may not be necessary?
+    if (Trace) {print (sprintf ('Vvar: reset newvarp, specvar is %s', input$specvar))}
   })
   obsVvar <- observe (exprVvar, quoted=TRUE)
   
@@ -1090,7 +1112,8 @@ shinyServer(function(input, output, session) {
     plt <- isolate(input$plot)
     plotSpec$Variance[[plt]]$Definition$cvar <<- input$speccovar
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 22')}
+    isolate (reac$newdata <- reac$newdata + 1)
+    if (Trace) {print ('Cvar: reset newvarp')}
   })
   obsCvar <- observe (exprCvar, quoted=TRUE)
   
@@ -1104,56 +1127,63 @@ shinyServer(function(input, output, session) {
       updateNumericInput (session, 'fftpts', value=fftpts)
     }
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 23')}
+    if (Trace) {print ('VVTpts: reset newvarp')}
   })
   obsFFTpts <- observe (exprFFTpts, quoted=TRUE)
+  
   exprFFTwdw <- quote ({
     plt <- isolate (input$plot)
     plotSpec$Variance[[plt]]$Definition$fftwindow <<- input$fftwindow
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 24')}
+    if (Trace) {print ('FFTwdw: reset newvarp')}
   })
   obsFFTwdw <- observe (exprFFTwdw, quoted=TRUE)
+  
   exprFFTavg <- quote ({
     plt <- isolate (input$plot)
     plotSpec$Variance[[plt]]$Definition$fftavg <<- input$fftavg
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 25')}
+    if (Trace) {print ('FFTavg: reset newvarp')}
   })
   obsFFTavg <- observe (exprFFTavg, quoted=TRUE)
+  
   exprFFTtype <- quote ({
     plt <- isolate (input$plot)
     plotSpec$Variance[[plt]]$Definition$ffttype <<- input$ffttype
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 26')}
+    if (Trace) {print ('FFTtype: reset newvarp')}
   })
   obsFFTtype <- observe (exprFFTtype, quoted=TRUE)
+  
   exprMEMtype <- quote ({
     plt <- isolate (input$plot)
     plotSpec$Variance[[plt]]$Definition$MEMtype <<- input$MEMtype
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 27')}
+    if (Trace) {print ('MEMtype: reset newvarp')}
   })
   obsMEMtype <- observe (exprMEMtype, quoted=TRUE)
+  
   exprMEMavg <- quote ({
     plt <- isolate (input$plot)
     plotSpec$Variance[[plt]]$Definition$MEMavg <<- input$MEMavg
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 28')}
+    if (Trace) {print ('MEMavg: reset newvarp')}
   })
   obsMEMavg <- observe (exprMEMavg, quoted=TRUE)
+  
   exprMEMpoles <- quote ({
     plt <- isolate (input$plot)
     plotSpec$Variance[[plt]]$Definition$MEMpoles <<- input$MEMpoles
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 29')}
+    if (Trace) {print ('MEMpoles: reset newvarp')}
   })
   obsMEMpoles <- observe (exprMEMpoles, quoted=TRUE)
+  
   exprMEMres <- quote ({
     plt <- isolate (input$plot)
     plotSpec$Variance[[plt]]$Definition$MEMres <<- input$MEMres
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('reset newvarp 30')}
+    if (Trace) {print ('MEMres: reset newvarp')}
   })
   obsMEMres <- observe (exprMEMres, quoted=TRUE)
   
@@ -1162,7 +1192,7 @@ shinyServer(function(input, output, session) {
     isolate (pnl <- input$hpanel)
     plotSpec$Hist[[plt]]$panel[[pnl]]$bins <<- input$hbins
     isolate (reac$newhistogram <- reac$newhistogram + 1)
-    if (Trace) {print ('reset newhist 40')}
+    if (Trace) {print ('HistBins: reset newhist')}
   })
   obsHistBins <- observe (exprHistBins, quoted=TRUE)
   
@@ -1314,15 +1344,19 @@ shinyServer(function(input, output, session) {
                        selected=plotSpec$Bin[[plt]]$panel[[bpnl]]$varx)
     updateSelectInput (session, 'baddVarP2', choices=choices,
                        selected=plotSpec$Bin[[plt]]$panel[[bpnl]]$vary[blv])
-    updateSelectInput (session, 'specvar', choices=choices)
-    updateSelectInput (session, 'speccovar', choices=choices)
+    updateSelectInput (session, 'specvar', choices=choices, selected=plotSpec$Variance[[1]]$Definition$var)
+    updateSelectInput (session, 'speccovar', choices=choices, selected=plotSpec$Variance[[1]]$Definition$cvar)
     updateSelectInput (session, 'rvar', choices=choices,
                        selected=plotSpec$Restrictions$RVAR[rlv])
     VF <- isolate (input$response)
     updateSelectInput (session, 'response', choices=sort(VarList), selected=VF)
     ## force re-read to get this variable added to data:
     isolate (reac$newdata <- reac$newdata + 1)
-    if (Trace) {print (str(specialData))}
+    if (Trace) {
+      print ('createV: reset newdata')
+      print ('createV: str(specialData is:')
+      print (str(specialData))
+    }
   })
   
   # observeEvent (input$prev, Repeat (-1))
@@ -1404,7 +1438,7 @@ shinyServer(function(input, output, session) {
   
   data <- reactive({                     ## data
     if (Trace) {
-      print (c('entered data, newdata is ', reac$newdata))
+      print (sprintf ('data: entered, newdata is %d', reac$newdata))
     }
     # Project <<- Project <- isolate(input$Project)
     reac$newdata
@@ -1435,34 +1469,37 @@ shinyServer(function(input, output, session) {
     #         fname <- sub ('.* /', '/', fl[1])
     #       }
     #     }
-    if (Trace) {print (sprintf ('in data, fname=%s', fname))}
+    if (Trace) {print (sprintf ('data: fname=%s', fname))}
     # reac$newdisplay <- reac$newdisplay + 1
     if (file.exists(fname)) {
       FI <<- DataFileInfo (fname)
       VarList <<- makeVarList ()  ## saved as global for possible inspection
       if ((fname != fname.last) || (any(!(VarList %in% VarListLast)))) {
         D <- getNetCDF (fname, VarList)
-        if (Trace) {print (sprintf ('loaded data.frame from %s', fname))}
+        if (fname != fname.last) {
+          # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
+          step <- 60
+          minT <- D$Time[1]
+          minT <<- minT <- minT - as.integer (minT) %% step + step
+          maxT <- D$Time[nrow(D)]
+          maxT <<- maxT <- maxT - as.integer (maxT) %% step
+          # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
+          plotSpec$Times <<- c(minT, maxT)
+          if (Trace) {print (sprintf ('data: setting plotSpec$Times to %s %s', 
+                                      formatTime (minT), formatTime (maxT)))}
+          updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
+          updateNumericInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+          updateNumericInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
+          updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
+          updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
+          updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
+          updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
+        }
+        if (Trace) {print (sprintf ('data: loaded data.frame from %s', fname))}
       } else {
         D <- Data
       }
-      # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
-      step <- 60
-      minT <- D$Time[1]
-      minT <<- minT <- minT - as.integer (minT) %% step + step
-      maxT <- D$Time[nrow(D)]
-      maxT <<- maxT <- maxT - as.integer (maxT) %% step
-      # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
-      plotSpec$Times <<- c(minT, maxT)
-      if (Trace) {print (sprintf ('in data, setting plotSpec$Times to %s %s', 
-                                  formatTime (minT), formatTime (maxT)))}
-      updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
-      updateNumericInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
-      updateNumericInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
-      updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
-      updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
-      updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
-      updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
+      
       
       if (exists ('specialData')) {
         SD <- specialData
@@ -1476,6 +1513,12 @@ shinyServer(function(input, output, session) {
       if (length (D) > 1) {
         fname.last <<- fname
         VarListLast <<- VarList
+        updateSelectInput (session, 'specvar', label=NULL, choices=sort(FI$Variables),  
+                           selected=plotSpec$Variance[[1]]$Definition$var)
+        updateSelectInput (session, 'speccovar', label=NULL, choices=sort(FI$Variables),  
+                           selected=plotSpec$Variance[[1]]$Definition$cvar)
+        updateSelectInput (session, 'addVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
+                           selected=plotSpec$Plot[[input$plot]]$panel[[input$panel]]$var[1])
         Data <<- D
         return (D)
       } else {
@@ -1506,7 +1549,7 @@ shinyServer(function(input, output, session) {
         typeFlight <<- 'tf'
         return (getNetCDF (fn, VarList))
       } else {
-        if (Trace) {print ('error in data, returning -1')}
+        if (Trace) {print ('data: error in data, returning -1')}
         return (-1)
       }
     }
@@ -1589,21 +1632,21 @@ shinyServer(function(input, output, session) {
     reac$newdisplay
     Project <- plotSpec$Project
     if (Trace) {
-      print ('entered display')
+      print ('display: entered')
       # Sys.sleep(5)
     }
     if (Trace) {
-      print (c('newdisplay is', reac$newdisplay))
-      print (sprintf ('in display, global plotSpec$Times are %s %s',
+      print (sprintf ('display: newdisplay is', reac$newdisplay))
+      print (sprintf ('display: global plotSpec$Times are %s %s',
                       formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
       plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
-      reac$newdisplay <- reac$newdisplay + 1 #<- TRUE
+      reac$newdisplay <- reac$newdisplay + 1 
       isolate (reac$newdata <- reac$newdata + 1)
-      if (Trace) {print ('exiting display for new data')}
+      if (Trace) {print ('data: exiting display for new data')}
       return()
     }
     namesV <- names(Data)  
@@ -1630,12 +1673,11 @@ shinyServer(function(input, output, session) {
       if (input$footer) {AddFooter ()}
     }
     if (Trace) {
-      print ('finished plot generation')
+      print ('display: finished plot generation')
     }
   }, width=920, height=640)
   
-  plotScat <- function (input) {
-    
+  plotScat <- function (input) {  ## plotScat
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Scat[[input$plot]]$restrict)
@@ -1687,7 +1729,7 @@ shinyServer(function(input, output, session) {
                  xlab=spec$panel[[pnl]]$varx, 
                  pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
                  legend.position='top')
-        if (Trace) {print (c('symbol used ', spec$panel[[pnl]]$symbol))}
+        if (Trace) {print (sprintf ('plotScat: symbol used %d', spec$panel[[pnl]]$symbol))}
       } else {
         plotWAC (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary)], 
                  log=logV, col=spec$panel[[pnl]]$col, type='p', xlim=xl,
@@ -1788,7 +1830,7 @@ shinyServer(function(input, output, session) {
           yl[2] <- ymx
         }
       }
-      if (Trace) {print (c('binPlot xl=', xl))}
+      if (Trace) {print (sprintf ('binPlot: xl=%f', xl))}
       nbns <- 20
       at.loc <- vector(length=nbns)
       mean.loc <- vector (length=nbns)
@@ -1859,12 +1901,12 @@ shinyServer(function(input, output, session) {
     reac$newscat
     Project <- plotSpec$Project
     if (Trace) {
-      print ('entered scatterplot')
+      print ('scatterplot: entered')
       # Sys.sleep(5)
     }
     if (Trace) {
-      print (c('newscat is', reac$newscat))
-      print (sprintf ('global plotSpec$Times are %s %s',
+      print (sprintf ('scatterplot: newscat is %d', reac$newscat))
+      print (sprintf ('scatterplot: global plotSpec$Times are %s %s',
                       formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
@@ -1873,7 +1915,7 @@ shinyServer(function(input, output, session) {
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
       reac$newdisplay <- reac$newdisplay + 1 #<- TRUE
       reac$newdata <- reac$newdata + 1
-      if (Trace) {print ('exiting scatterplot for new data')}
+      if (Trace) {print ('scatterplot: exiting scatterplot for new data')}
       return()
     }
     namesV <- names(Data)  
@@ -1902,7 +1944,7 @@ shinyServer(function(input, output, session) {
     
     if (input$footer) {AddFooter ()}
     if (Trace) {
-      print ('finished scatterplot generation')
+      print ('scatterplot: finished')
     }
   }, width=920, height=640)
   
@@ -1910,12 +1952,12 @@ shinyServer(function(input, output, session) {
     reac$newbin
     Project <- plotSpec$Project
     if (Trace) {
-      print ('entered binplot')
+      print ('binplot: entered')
       # Sys.sleep(5)
     }
     if (Trace) {
-      print (c('newbin is', reac$newbin))
-      print (sprintf ('global plotSpec$Times are %s %s',
+      print (sprintf ('binplot: newbin is %d', reac$newbin))
+      print (sprintf ('binplot: global plotSpec$Times are %s %s',
                       formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
@@ -1924,7 +1966,7 @@ shinyServer(function(input, output, session) {
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
       reac$newbin <- reac$newbin + 1 #<- TRUE
       reac$newdata <- reac$newdata + 1
-      if (Trace) {print ('exiting binplot for new data')}
+      if (Trace) {print ('binplot: exiting for new data')}
       return()
     }
     namesV <- names(Data)  
@@ -1953,7 +1995,7 @@ shinyServer(function(input, output, session) {
     
     if (input$footer) {AddFooter ()}
     if (Trace) {
-      print ('finished binplot generation')
+      print ('bin plot: finished')
     }
   }, width=920, height=640)
   
@@ -1991,7 +2033,7 @@ shinyServer(function(input, output, session) {
     input$times  ## make sensitive to time changes
     op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
     if (Trace) {
-      print ('entered fitplot')
+      print ('fitplot: entered')
       # Sys.sleep(5)
     }
     Data <- data()
@@ -1999,7 +2041,7 @@ shinyServer(function(input, output, session) {
       plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
       reac$newdata <- reac$newdata + 1
-      if (Trace) {print ('exiting fitplot for new data')}
+      if (Trace) {print ('fitplot: exiting for new data')}
       return()
     }
     namesV <- names(Data)  
@@ -2289,12 +2331,12 @@ shinyServer(function(input, output, session) {
     print (sprintf ('spectype is %s', input$spectype))
     # spec <- plotSpec$Var[[input$plot]]
     if (Trace) {
-      print ('entered varplot')
+      print ('varplot: entered')
       # Sys.sleep(5)
     }
     if (Trace) {
-      print (c('newvarp is', reac$newvarp))
-      print (sprintf ('global plotSpec$Times are %s %s',
+      print (sprintf ('varplot: newvarp is %d', reac$newvarp))
+      print (sprintf ('varplot: global plotSpec$Times are %s %s',
                       formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
@@ -2303,7 +2345,7 @@ shinyServer(function(input, output, session) {
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
       reac$newvarp <- reac$newvarp + 1 
       reac$newdata <- reac$newdata + 1
-      if (Trace) {print ('exiting varplot for new data')}
+      if (Trace) {print ('varplot: exiting for new data')}
       return()
     }
     transferAttributes <- function (dsub, d) {    ## unused function, just saved here
@@ -2344,14 +2386,12 @@ shinyServer(function(input, output, session) {
       )
     }
     fnew <- "./R-toXanadu.nc"
-    if (Trace) {print (summary (DataR$WIC))}
     unlink(fnew)
     Z <- makeNetCDF (DataR, fnew)
-    if (Trace) {print(Z)}
+    if (Trace) {print ('varplot:return from makeNetCDF:');print(Z)}
     ## don't know why this is needed, but makeNetCDF modifies DataR;
     ## need to fix that routine
     # DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
-    if (Trace) {print (c('after makeNetCDF: ', summary (DataR$WIC)))}
     Data2 <<- Data
     wlow <- 0.0001; whigh <- 10.
     # spec$var <- 'WIC
@@ -2515,7 +2555,7 @@ shinyServer(function(input, output, session) {
       v <- plotSpec$Variance[[1]]$Definition$var
       cv <- plotSpec$Variance[[1]]$Definition$cvar
       setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype)
-      XanaduOut <- system ("Xanadu otto", intern=TRUE)
+      XanaduOut <<- system ("Xanadu otto", intern=TRUE)
       if (input$spectype == 'MEM') {
         while (!file.exists ("MEMPlot.png")) {Sys.sleep (1)}
         gname <- "SpecialGraphics/PSDMEM.png"
@@ -2683,7 +2723,7 @@ shinyServer(function(input, output, session) {
   
   output$quickPlot <- renderPlot ({
     reac$quick
-    if (Trace) {print ('entered quickPlot')}
+    if (Trace) {print ('quickPlotVar: entered')}
     Data <- data ()
     if (!(quickPlotVar %in% names (Data))) {
       isolate(reac$newdata <- reac$newdata + 1)
@@ -2699,7 +2739,7 @@ shinyServer(function(input, output, session) {
     input$times
     Project <- plotSpec$Project
     if (Trace) {
-      print (c('track entry, reac$newtrack is:', reac$newtrack))
+      print (sprintf ('track: entry, reac$newtrack is %d', reac$newtrack))
     }
     Data <- data ()
     if (length (Data) < 2) {
@@ -2710,9 +2750,9 @@ shinyServer(function(input, output, session) {
     }
     
     if (Trace) {
-      print (sprintf ('in track, input$times %s %s', formatTime (input$times[1]),
+      print (sprintf ('track: input$times %s %s', formatTime (input$times[1]),
                       formatTime (input$times[2])))
-      print (sprintf ('in track, global plotSpec$Times are %s %s',
+      print (sprintf ('track: global plotSpec$Times are %s %s',
                       formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     namesV <- names(Data)
@@ -2791,18 +2831,17 @@ shinyServer(function(input, output, session) {
   output$theight <- renderPlot ({  ## theight
     # input$typeFlight
     if (is.null(input$times[1])) {
-      if (Trace) {print ('in theight but input time is NULL')}
+      if (Trace) {print ('theight: input time is NULL, returning')}
       return ()
     }
     if (Trace) {
-      print ('theight entry, reac$newdisplay is:')
-      print (reac$newdisplay)
+      print (sprintf ('theight: entry, reac$newdisplay is %d', reac$newdisplay))
     }
     # input$PlotVar
     Project <- input$Project
     if (reac$newdisplay) {
       # VRPlot <- VRP ()
-      if (Trace) {print ('entered theight')}
+      if (Trace) {print (sprintf ('entered theight, newdisplay is %d', reac$newdisplay))}
       # VRPlot <<- VRPlot
       Data <- data()
       if (length (Data) < 2) {
@@ -2813,9 +2852,9 @@ shinyServer(function(input, output, session) {
       }
       
       if (Trace) {
-        print (sprintf ('input$times %s %s', formatTime (input$times[1]),
+        print (sprintf ('thight: input$times %s %s', formatTime (input$times[1]),
                         formatTime (input$times[2])))
-        print (sprintf ('in thite, global plotSpec$Times are %s %s',
+        print (sprintf ('thight: global plotSpec$Times are %s %s',
                         formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
       namesV <- names(Data)
@@ -2868,17 +2907,17 @@ shinyServer(function(input, output, session) {
   output$skewT <- renderPlot ({  ## skewT
     # input$typeFlight
     if (is.null(input$times[1])) {
-      if (Trace) {print ('in skewT but input time is NULL')}
+      if (Trace) {print ('skewT: input time is NULL, returning')}
       return ()
     }
     if (Trace) {
-      print (sprintf ('skewT entry, reac$newskewT is %d', reac$newskewT))
+      print (sprintf ('skewT: entry, reac$newskewT is %d', reac$newskewT))
     }
     # input$PlotVar
     Project <- input$Project
     if (reac$newskewT) {
       # VRPlot <- VRP ()
-      if (Trace) {print ('entered skewT')}
+      if (Trace) {print ('skewT: reac$newskewT != 0')}
       # VRPlot <<- VRPlot
       Data <- data()
       if (length (Data) < 2) {
@@ -2889,9 +2928,9 @@ shinyServer(function(input, output, session) {
       }
       
       if (Trace) {
-        isolate (print (sprintf ('in skewT, input$times %s %s', formatTime (input$times[1]),
+        isolate (print (sprintf ('skewT: input$times %s %s', formatTime (input$times[1]),
                         formatTime (input$times[2]))))
-        print (sprintf ('in skewT, global plotSpec$Times are %s %s',
+        print (sprintf ('skewT: global plotSpec$Times are %s %s',
                         formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
       if ((input$times[1] != plotSpec$Times[1]) || (input$times[2] != plotSpec$Times[2])) {return()}
@@ -2956,7 +2995,9 @@ shinyServer(function(input, output, session) {
                                        attr(NSND, 'CAPE'), attr (NSND, 'CAPEW')),
                               sprintf ('conv. inh. %.0f J/kg, LFC=%.0f hPa', 
                                        attr(NSND, 'CIN'), attr(NSND, 'LFC')), sep='\n')
-          if (Trace) {print (labelText)}
+          if (Trace) {
+            print (sprintf ('skewT: labelText is %s', labelText))
+          }
           gg <- gg + geom_label (aes(x=0, y=2.85, label=labelText), size=4.5, fill='ivory', hjust='left')
         } else {
           gg <- gg + geom_label (aes (x=0, y=2.85, label='no region of positive buoyancy'), size=5,
@@ -3025,7 +3066,7 @@ shinyServer(function(input, output, session) {
     input$paluchEnd
     input$paluchCStart
     input$paluchCEnd
-    if (Trace) {print (sprintf ('paluchStart/End %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))}
+    if (Trace) {print (sprintf ('skewT: paluchStart/End %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))}
     getMixingData <- function (Data, inp) {
       EWX <- Data$EWX
       EWS <- MurphyKoop (Data$ATX)
@@ -3079,7 +3120,7 @@ shinyServer(function(input, output, session) {
       RT <- binStats (DataS[, c('Rtot', 'PSXC')], xlow=125, xhigh=1025,bins=input$nbsa)
       TQ <- binStats (DataS[, c('THETAQ', 'PSXC')], xlow=125, xhigh=1025, bins=input$nbsa)
       DF2 <- data.frame ('RT'=RT$ybar, 'TQ'=TQ$ybar, 'P'=RT$xc)
-      if (Trace) {print (DF2)}
+      if (Trace) {print (c('skewT: DF2 is', DF2))}
       g <- ggplot (DF2, aes (x=TQ, y=RT))
       g <- g + geom_path (col='blue', lwd=2) 
       g <- g + geom_point (col='blue', size=4) 
@@ -3096,7 +3137,8 @@ shinyServer(function(input, output, session) {
       needVariables <- c ('THETA', 'GGALT', 'WSC', 'WDC', 'EWX', 'PSXC')
       ## not requiring THETAV or THETAP; will calculate them from the above
       if (!all (needVariables %in% names (DataS))) {
-        if (Trace) {print ('returning to data () for new variables')}
+        if (Trace) {print ('skewT: returning to data () for new variables')}
+        if (Trace) {print ('skewT: reset newdata')}
         addedVariables <<- needVariables
         isolate (reac$newdata <- reac$newdata + 1)
         return ()
@@ -3188,7 +3230,7 @@ shinyServer(function(input, output, session) {
   
   
   output$stats <- renderDataTable ({    ## stats
-    if (Trace) {print ('entered stats')}
+    if (Trace) {print ('stats: entered')}
     input$times
     input$panels
     Ds <- limitData (data(), input)
@@ -3220,12 +3262,15 @@ shinyServer(function(input, output, session) {
     for (k in 2:5) {
       Dstats[2:nrow(Dstats), k] <- sprintf('%.3f', as.numeric(Dstats[2:nrow(Dstats), k]))
     }
-    if (Trace) {print (str(Dstats))}
+    if (Trace) {
+      print ('stats: output is')
+      print (str(Dstats))
+    }
     Dstats
   }, options=list(paging=FALSE, searching=FALSE))
   
   output$statistics <- renderDataTable ({    ## statistics
-    if (Trace) {print ('entered statistics')}
+    if (Trace) {print ('statistics: entered')}
     input$times
     reac$newstats
     ## check if any requested variables not present in Data:
@@ -3288,7 +3333,10 @@ shinyServer(function(input, output, session) {
       for (k in 2:5) {
         Dstats[2:nrow(Dstats), k] <- sprintf('%.3f', as.numeric(Dstats[2:nrow(Dstats), k]))
       }  
-      if (Trace) {print (str(Dstats))}
+      if (Trace) {
+        print ('statistics: output is')
+        print (str(Dstats))
+      }
       return (Dstats)
     }
   }, options=list(paging=TRUE, searching=TRUE))
@@ -3298,7 +3346,7 @@ shinyServer(function(input, output, session) {
     input$times
     layout(matrix(1:6, ncol = 2), widths = c(5,5), heights = c(8,8,8))
     op <- par (mar=c(5.2,5,1,1)+0.1,oma=c(1.1,0,0,0))
-    if (Trace) {print ('entered hist')}
+    if (Trace) {print ('hist: entered')}
     Ds <- limitData (data(), input)
     # Ds <- Ds[, c('Time', slp[[input$plot]])]
     plotV <- vector ()
@@ -3324,7 +3372,7 @@ shinyServer(function(input, output, session) {
     DataV <- limitData (DataR, input, input$limits3)
     plt <- input$plot
     if (Trace) {
-      print (sprintf ('entered plotHist, plt=%d', plt))
+      print (sprintf ('plotHist: entered,  plt=%d', plt))
     }
     spec <- plotSpec$Hist[[plt]]
     nrws <- ceiling (spec$panels / spec$columns)
@@ -3455,10 +3503,10 @@ shinyServer(function(input, output, session) {
     # input$times
     reac$newhistogram
     Project <- plotSpec$Project
-    if (Trace) {print ('entered histogram')}
+    if (Trace) {print ('histogram: entered')}
     if (Trace) {
-      print (c('newhistogram is', reac$newhistogram))
-      print (sprintf ('in histogram, global plotSpec$Times are %s %s',
+      print (sprintf ('histogram: newhistogram is %d', reac$newhistogram))
+      print (sprintf ('histogram: global plotSpec$Times are %s %s',
                       formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
@@ -3467,7 +3515,7 @@ shinyServer(function(input, output, session) {
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
       reac$newhistogram <- reac$newhistogram + 1 
       reac$newdata <- reac$newdata + 1
-      if (Trace) {print ('exiting histogram for new data')}
+      if (Trace) {print ('histogram: exiting for new data')}
       return()
     }
     namesV <- names(Data)  
@@ -3494,11 +3542,11 @@ shinyServer(function(input, output, session) {
     }
     plotHist (input)    ## isolated in function to be able to save via PDF/PNG
     if (input$footer) {AddFooter ()}
-    if (Trace) {print ('finished hist generation')}
+    if (Trace) {print ('histogram: finished generation')}
   }, width=780, height=640)
   
   output$barWvsZ <- renderPlot ({
-    if (Trace) {print ('entered barXvsZ')}
+    if (Trace) {print ('barXvsZ: entered')}
     input$times
     input$panels
     layout (matrix(1:6, ncol=3), widths=c(5,5,5), heights=c(8,8))
@@ -3533,7 +3581,7 @@ shinyServer(function(input, output, session) {
   }, width=780, height=640)
   
   output$listing <- renderDataTable ({
-    if (Trace) {print ('entered listing')}
+    if (Trace) {print ('listing: entered')}
     input$times
     input$panels
     Ds <- limitData (data(), input)

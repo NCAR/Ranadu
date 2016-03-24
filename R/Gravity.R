@@ -14,5 +14,8 @@ Gravity <- function (latitude, altitude=0.) {
   sl2 <- sin (latitude * StandardConstant("Cradeg"))**2
   g <- 9.780327 * ((1.+0.001931851*sl2) / 
                      (1.-0.006694380*sl2))-3.086e-6*altitude
+  ## Somigliana formula 1980 GRS:
+  # g <- 9.7803267714 * (1 + sl2 * (5.2790414e-3 + 2.32718e-5 * sl2)) 
+  #      - (3.0876910891e-6 + 4.3977311e-9 * sl2) * altitude + 7.211e-13 * altitude^2
   return(g)
 }

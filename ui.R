@@ -1,5 +1,7 @@
 # ui.R
 
+## This is the user interface for the Ranadu shinyApp.
+
 
 step <- 60
 shinyUI(

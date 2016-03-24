@@ -19,8 +19,8 @@ library(tcltk)
 # source ('R/getNetCDF.R')
 # source ('R/makeNetCDF.R')
 # source ('R/setVariableList.R')
-source ('R/CAPE.R')
-source ('R/setVariableList.R')
+# source ('R/CAPE.R')
+# source ('R/setVariableList.R')
 ## if this is set TRUE then messages will print in the console
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
@@ -394,6 +394,9 @@ readRecord <- function (cfile) {
 ## 'Xanadu' where the spectral analysis is performed.
 setXanadu <- function (fnew, start, end, var, cvar, wlow, whigh, type) {
   ## edit the .def files for the Xanadu call
+  if (end < start) {
+    end <- end + 240000
+  }
   lines <- readLines ("Xanadu.def")
   newlines <- vector ("character")
   for (line in lines) {
@@ -567,7 +570,7 @@ makeVarList <- function () {
     }
   }
   for (iv in 1:length(plotSpec$Variance)) {
-    VarList <- c(VarList, plotSpec$Variance[[iv]]$var, plotSpec$Variance[[iv]]$cvar)
+    VarList <- c(VarList, plotSpec$Variance[[iv]]$Definition$var, plotSpec$Variance[[iv]]$Definition$cvar)
   }
   if (plotSpec$paluchLWC %in% FI$Variables) {VarList <- c(VarList, plotSpec$paluchLWC)}
   if ('THETAQ' %in% FI$Variables) {VarList <- c(VarList, 'THETAQ')}

@@ -1,0 +1,2418 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\input colordvi
+\usepackage{color}
+\fancyhead{}
+\fancyfoot{}
+\newtoks{\addressee} \global\addressee={}
+\newdimen\longindent \longindent=3.5truein
+\fancyhead[L]{Memo to: \the\addressee \\ \datetoday \\ Page \thepage \hfill}
+\renewcommand{\headrulewidth}{0.0pt}
+\newenvironment{lyxlst}[1]
+{\begin{list}{}
+{\settowidth{\labelwidth}{#1}
+\setlength{\leftmargin}{\labelwidth}
+\addtolength{\leftmargin}{\labelsep}
+\renewcommand{\makelabel}[1]{##1\hfil}}}
+{\end{list}}
+\newcommand{\datetoday}{\number\day\space
+     \ifcase\month\or January\or February\or March\or April\or May\or
+     June\or July\or August\or September\or October\or November\or
+     December\fi
+     \space\number\year}
+\newcommand{\EOLmemo}{\null \vskip-1.5truein
+{\raggedright \textsf{\textsc{\large \textcolor{blue}{Earth Observing Laboratory}}}}\par
+{\raggedright \textsf{\textsl{\textcolor{blue}{Memorandum:}}}} \par \vskip6pt
+{\color{blue}{\hrule}}\par
+\vskip0.3truein \leftline{\hskip \longindent \datetoday} \vskip0.2truein
+\thispagestyle{empty}}
+\newcommand{\attachm}[1]{\begin{lyxlst}{Attachments:00}
+\item [Attachments:] {#1}
+\end{lyxlst}}
+\newcommand{\cc}[1]{\begin{lyxlst}{Attachments:00}
+\item [cc:] {#1}
+\end{lyxlst}}
+\newcommand{\attach}[1]{\begin{lyxlst}{Attachments:00}
+\item [Attachment:] {#1}
+\end{lyxlst}}
+%usage: \encl{A\\B\\C} or \cc{ma,e1\\name2\\name3}
+\end_preamble
+\use_default_options false
+\begin_modules
+knitr
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding default
+\fontencoding global
+\font_roman times
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref false
+\papersize letterpaper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 0
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.54cm
+\topmargin 3.54cm
+\rightmargin 2.54cm
+\bottommargin 2.54cm
+\headheight 1cm
+\headsep 2cm
+\footskip 0.5cm
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+EOLmemo 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+global
+\backslash
+addressee={wind uncertainty files}  % >>change "File" to the "To:" name
+ desired
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="0pt">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+To:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+the
+\backslash
+addressee
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+From:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Al Cooper
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+Subject:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+notes re Kalman filtering
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+bigskip
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<initialization,echo=FALSE,include=FALSE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+library(knitr)
+\end_layout
+
+\begin_layout Plain Layout
+
+opts_chunk$set(echo=FALSE, include=FALSE, fig.lp="fig:")
+\end_layout
+
+\begin_layout Plain Layout
+
+opts_chunk$set(fig.width=6, fig.height=5, fig.pos="center", digits=4)
+\end_layout
+
+\begin_layout Plain Layout
+
+thisFileName <- "KalmanFilterNotes"
+\end_layout
+
+\begin_layout Plain Layout
+
+require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+require(ggplot2)
+\end_layout
+
+\begin_layout Plain Layout
+
+require(ggthemes)
+\end_layout
+
+\begin_layout Plain Layout
+
+## temporary, pending revision of RANADU package
+\end_layout
+
+\begin_layout Plain Layout
+
+# source ('~/RStudio/Ranadu/R/XformLA.R')
+\end_layout
+
+\begin_layout Plain Layout
+
+Directory <- DataDirectory ()
+\end_layout
+
+\begin_layout Plain Layout
+
+Flight <- "rf15HR" 				# XXX change this
+\end_layout
+
+\begin_layout Plain Layout
+
+Project = "DWIRU"			 # XXX change this
+\end_layout
+
+\begin_layout Plain Layout
+
+ProjectDir <- "DEEPWAVE"
+\end_layout
+
+\begin_layout Plain Layout
+
+fname = sprintf("%s%s/%s%s.nc", Directory,ProjectDir,Project,Flight)
+\end_layout
+
+\begin_layout Plain Layout
+
+VarList <- c('BLATA', 'BLONGA', 'BNORMA', 'BPITCHR', 'BROLLR', 'BYAWR')
+\end_layout
+
+\begin_layout Plain Layout
+
+VarList <- c(VarList, 'LAT', 'LON', 'ALT', 'GGLAT', 'GGLON', 'GGALT')
+\end_layout
+
+\begin_layout Plain Layout
+
+VarList <- c(VarList, 'VEW', 'VNS', 'VSPD', 'GGVEW', 'GGVNS', 'GGVSPD')
+\end_layout
+
+\begin_layout Plain Layout
+
+VarList <- c(VarList, 'PITCH', 'ROLL', 'THDG')
+\end_layout
+
+\begin_layout Plain Layout
+
+Data <- getNetCDF (fname, VarList, Start=33000, End=40000)
+\end_layout
+
+\begin_layout Plain Layout
+
+SaveRData <- sprintf("%s.Rdata", thisFileName)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+General algorithm notes
+\end_layout
+
+\begin_layout Subsection
+Overview of the Kalman filter
+\end_layout
+
+\begin_layout Standard
+For a state vector 
+\begin_inset Formula $\alpha_{t}$
+\end_inset
+
+ and an observed response 
+\begin_inset Formula $y_{t}$
+\end_inset
+
+, the state equation and observed response are given by
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\alpha_{t}=c_{t}+T_{t}\alpha_{t-1}+R_{t}\eta_{t}\label{eq:1}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+y_{t}=d_{t}+Z_{t}\alpha_{t}+\epsilon_{t}\label{eq:2}
+\end{equation}
+
+\end_inset
+
+with 
+\begin_inset Formula $c_{t}$
+\end_inset
+
+ the deterministic forcing and 
+\begin_inset Formula $\eta_{t}$
+\end_inset
+
+ the stochastic forcing.
+ The standard initial assumption is that 
+\begin_inset Formula $\eta_{t}$
+\end_inset
+
+ is Gaussian with standard deviation 
+\begin_inset Formula $Q_{t}$
+\end_inset
+
+ and the measurement error 
+\begin_inset Formula $\epsilon_{t}$
+\end_inset
+
+ is Gaussian with standard deviation 
+\begin_inset Formula $H_{t}$
+\end_inset
+
+.
+ The deterministic forcing of the response vector is 
+\begin_inset Formula $d_{t}$
+\end_inset
+
+.
+ Matrices 
+\begin_inset Formula $T_{t},\,R_{t},\,Z_{t},\,Q_{t},\,H_{t}$
+\end_inset
+
+ may depend on a set of parameters 
+\begin_inset Formula $\theta$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $a_{t-1}$
+\end_inset
+
+ is the estimate of the state vector 
+\begin_inset Formula $\alpha_{t-1}$
+\end_inset
+
+, given (with the covariance matrix 
+\begin_inset Formula $P_{t}$
+\end_inset
+
+) as
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+a_{t-1}=E[\alpha_{t-1}|y_{0},\,y_{1},\,...y_{t-1}]\label{eq:3}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+P_{t-1}=E[(\alpha_{t-1}-a_{t-1})(\alpha_{t-1}-a_{t-1})^{\top}\label{eq:4}
+\end{equation}
+
+\end_inset
+
+then the time update equations are
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray}
+a_{t|t-1} & = & T_{t}a_{t-1}+c_{t}\label{eq:kf5}\\
+P_{t|t-1} & = & T_{t}P_{t-1}T_{t}^{\top}+R_{t}Q_{t}R_{t}^{\top}\label{eq:kf6}
+\end{eqnarray}
+
+\end_inset
+
+ Define 
+\begin_inset Formula $F_{t}=Z_{t}P_{t|t-1}Z_{t}^{\top}+H_{t}$
+\end_inset
+
+.
+ Then the measurement update equations are
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray}
+a_{t} & = & a_{t|t-1}+P_{t|t-1}Z_{t}^{\top}F_{t}^{-1}(y_{t}-Z_{t}a_{t|t-1}-d_{t})\label{eq:kf7}\\
+P_{t} & = & P_{t|t-1}-P_{t|t-1}Z_{t}F_{t}^{-1}Z_{t}^{\top}P_{t|t-1}\label{eq:kf8}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The equations (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:kf5"
+
+\end_inset
+
+--
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:kf8"
+
+\end_inset
+
+) then give the update from time 
+\begin_inset Formula $t-1$
+\end_inset
+
+ to time 
+\begin_inset Formula $t$
+\end_inset
+
+, for both the estimate of the state vector and the estimate of the covariance
+ matrix.
+\end_layout
+
+\begin_layout Subsection
+Stability considerations: Square root algorithms
+\end_layout
+
+\begin_layout Standard
+Define 
+\begin_inset Formula $S_{t}$
+\end_inset
+
+ such that 
+\begin_inset Formula $P_{T}=s_{T}s_{T}^{\top}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+R packages
+\end_layout
+
+\begin_layout Subsection
+dse
+\end_layout
+
+\begin_layout Section
+Mechanization in the local-level frame
+\end_layout
+
+\begin_layout Subsection
+The measurements
+\end_layout
+
+\begin_layout Standard
+Measured quantities include the three components of acceleration and of
+ rotation, the former from the acceleraometers and the latter from the rate
+ gyros.
+ In the conventional output, the variable names are BLATA, BLONGA, BNORMA,
+ BPITCHR, BROLLR, BYAWR.
+ Positive values of acceleration are respectively toward the starboard,
+ toward the nose, and upward; positive values of rotation are for the nose
+ moving upward, the starboard wing moving down, and the nose turning to
+ starboard.
+\end_layout
+
+\begin_layout Subsection
+The implementation
+\end_layout
+
+\begin_layout Standard
+The mechanization loop can be regarded as follows:
+\end_layout
+
+\begin_layout Enumerate
+The aircraft has a state vector represented by its position, velocity, and
+ attitude angles.
+ The position can be represented by latitude, longitude, and altitude (
+\begin_inset Formula $\Phi,\,\Psi,\,h$
+\end_inset
+
+), the velocity in the l-frame by (
+\begin_inset Formula $v_{e},\,v_{n},\,v_{u}$
+\end_inset
+
+) and attitude angles 
+\begin_inset Formula $\beta$
+\end_inset
+
+ (pitch, roll, yaw) in the l-frame.
+ Note that, in the convention used in Noureldin et al., yaw is the negative
+ of the heading angle.
+\end_layout
+
+\begin_layout Enumerate
+From an initial state 
+\begin_inset Formula $\Theta$
+\end_inset
+
+, the body force (transformed to the l-frame and adjusted by gravity and
+ Coriolis corrections) is integrated once to get the new velocity and twice
+ to get the new position.
+\end_layout
+
+\begin_layout Enumerate
+The transformation to the l-frame involves the attitude angles, which are
+ integrated from an initial stage in the body frame to produce the attitude
+ angles in the body frame as needed from transformation of the accelerations
+ in the body frame to accelerations in the l-frame.
+\end_layout
+
+\begin_layout Standard
+The following functions are used:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+gravity() Given position find the local acceleration of gravity.
+ This is provided by Ranadu::Gravity().
+ The quantity given by this function is that denoted by 
+\begin_inset Formula $\bar{g}$
+\end_inset
+
+ in Noureldin et al.
+\begin_inset space ~
+\end_inset
+
+and called the 'gravitational vector' there.
+ A quantity 
+\begin_inset Formula $g$
+\end_inset
+
+ called the gravity field is related to 
+\begin_inset Formula $\bar{g}$
+\end_inset
+
+ by
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\mathbf{g}=\mathbf{\bar{g}}-\Omega_{ie}\Omega_{ie}\mathbf{r}\label{eq:gravFieldVector}
+\end{equation}
+
+\end_inset
+
+In the l-frame 
+\begin_inset Formula $\mathbf{g}^{l}=[0,\,0,\,-g]^{\top}$
+\end_inset
+
+.
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+XformLA() Transform from the body frame to the local-level frame, using
+ the .inverse argument to this function.
+ This is used to transform the measured body forces to the l-frame, and
+ it implements the attitude angle transformation 
+\begin_inset Formula $R_{b}^{l}$
+\end_inset
+
+.
+ Ranadu::XformLA() provides this transformation.
+ The function XfLA() returns 
+\begin_inset Formula $R_{b}^{l}$
+\end_inset
+
+ as calculated from the attitude angles.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+RotationCorrection() Correction to apply to the l-frame body forces to account
+ for rotation of the Earth and of the l-frame.
+ [See the previous implementation in CorrectHeading().]
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+LRotation() Correction to measured body rotation rates to account for rotation
+ of the l-frame in the inertial frame.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Aintegration() Take an integration step for the attitude angles, using the
+ measured rotation rates and LRotation().
+ The result is a time-step advance for the attitude angles 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Vintegration() Take an integration step for velocity (incorporating acceleration
+s from XformLA(), gravity() and RotationCorrection()).
+ The result is a time-step advance for 
+\begin_inset Formula $v$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Rintegration() Take an integration step for position, using the velocities
+ from Vintegration.
+ The result is a time-step advance for 
+\begin_inset Formula $r$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<XfLA, echo=TRUE, include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## this duplicates the code from XformLA but returns the transformation
+ matrix instead:
+\end_layout
+
+\begin_layout Plain Layout
+
+XfLA <- function (data, .inverse=FALSE) { 
+\end_layout
+
+\begin_layout Plain Layout
+
+  # data must contain ROLL, PITCH or PITCHC, HEADING
+\end_layout
+
+\begin_layout Plain Layout
+
+  Cradeg <- pi/180
+\end_layout
+
+\begin_layout Plain Layout
+
+  if ("PITCHC" %in% names(data)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    PITCH <- data$PITCHC
+\end_layout
+
+\begin_layout Plain Layout
+
+  } else {
+\end_layout
+
+\begin_layout Plain Layout
+
+    PITCH <- data$PITCH
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+  PITCH <- PITCH * Cradeg; ROLL <- data$ROLL * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  THDG <- data$THDG * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\end_layout
+
+\begin_layout Plain Layout
+
+  cosphi <- cos (ROLL)
+\end_layout
+
+\begin_layout Plain Layout
+
+  sinphi <- sin (ROLL)
+\end_layout
+
+\begin_layout Plain Layout
+
+  costheta <- cos (PITCH)
+\end_layout
+
+\begin_layout Plain Layout
+
+  sintheta <- sin (PITCH)
+\end_layout
+
+\begin_layout Plain Layout
+
+  cospsi <- cos (THDG)
+\end_layout
+
+\begin_layout Plain Layout
+
+  sinpsi <- sin (THDG)
+\end_layout
+
+\begin_layout Plain Layout
+
+#   d <- data.frame("X" = data$BX)
+\end_layout
+
+\begin_layout Plain Layout
+
+#   d$Y <- data$BY
+\end_layout
+
+\begin_layout Plain Layout
+
+#   d$Z <- data$BZ    ## for body accels, need to add G to BZ before calling
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+#   ## it was removed from sensed accel.
+\end_layout
+
+\begin_layout Plain Layout
+
+#   A <- as.matrix(d)
+\end_layout
+
+\begin_layout Plain Layout
+
+  DL <- nrow(data)
+\end_layout
+
+\begin_layout Plain Layout
+
+  Rbl <- c(sinpsi*costheta, cospsi*cosphi+sinpsi*sintheta*sinphi, cospsi*sinphi-
+sinpsi*sintheta*cosphi,
+\end_layout
+
+\begin_layout Plain Layout
+
+           cospsi*costheta, -sinpsi*cosphi+cospsi*sintheta*sinphi, -sinpsi*sinph
+i-cospsi*sintheta*cosphi,
+\end_layout
+
+\begin_layout Plain Layout
+
+           -sintheta, costheta*sinphi, -costheta*cosphi)
+\end_layout
+
+\begin_layout Plain Layout
+
+  RblM <- aperm( array (Rbl, dim=c(DL,3,3)))
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (.inverse) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    return (t(RblM))
+\end_layout
+
+\begin_layout Plain Layout
+
+  } else {
+\end_layout
+
+\begin_layout Plain Layout
+
+    return (RblM)
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## example of use:
+\end_layout
+
+\begin_layout Plain Layout
+
+  # AA <- matrix(nrow=DL, ncol=3)
+\end_layout
+
+\begin_layout Plain Layout
+
+  # if (.inverse) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    # for (i in 1:DL) {
+\end_layout
+
+\begin_layout Plain Layout
+
+      # AA[i,] <- t(RblM[,,i]) %*% Avector[i,]
+\end_layout
+
+\begin_layout Plain Layout
+
+    # }
+\end_layout
+
+\begin_layout Plain Layout
+
+  # } else {
+\end_layout
+
+\begin_layout Plain Layout
+
+    # for (i in 1:DL) {
+\end_layout
+
+\begin_layout Plain Layout
+
+      # AA[i,] <- RblM[,,i] %*% Avector[i,]
+\end_layout
+
+\begin_layout Plain Layout
+
+    # }
+\end_layout
+
+\begin_layout Plain Layout
+
+  # }
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<rotation-correction, echo=TRUE, include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Cradeg <- pi/180
+\end_layout
+
+\begin_layout Plain Layout
+
+## The next correction calculates the correction needed to account for the
+ rotation
+\end_layout
+
+\begin_layout Plain Layout
+
+## of the Earth and of the l-frame (ENU frame).
+ See Noureldin et al., 2013, 
+\end_layout
+
+\begin_layout Plain Layout
+
+## Eqs.
+ 5.55--5.57.
+ Subtract this from the transformed accelerations before using them.
+\end_layout
+
+\begin_layout Plain Layout
+
+RotationCorrection <- function (.data, .V) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    Cradeg <- pi/180
+\end_layout
+
+\begin_layout Plain Layout
+
+    omegaE <- StandardConstant ('Omega')  ## Earth'r angular velocity
+\end_layout
+
+\begin_layout Plain Layout
+
+    Re <- StandardConstant ('Re')         ## representative Earth radius,
+ m
+\end_layout
+
+\begin_layout Plain Layout
+
+    DL <- nrow (.data)
+\end_layout
+
+\begin_layout Plain Layout
+
+    C <- vector ('numeric', 3*DL); dim(C) <- c(DL,3)
+\end_layout
+
+\begin_layout Plain Layout
+
+    lat <- .data$LAT * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+    sinLat <- sin(lat); cosLat <- cos(lat); tanLat <- tan(lat)
+\end_layout
+
+\begin_layout Plain Layout
+
+    M12 <- -2*omegaE*sinLat-.V[,1]*tanLat/Re
+\end_layout
+
+\begin_layout Plain Layout
+
+    M13 <- 2*omegaE*cosLat+.V[,1]/Re
+\end_layout
+
+\begin_layout Plain Layout
+
+    M21 <- 2*omegaE*sinLat+.V[,1]*tanLat/Re
+\end_layout
+
+\begin_layout Plain Layout
+
+    M23 <- .V[,2]/Re
+\end_layout
+
+\begin_layout Plain Layout
+
+    M31 <- -2*omegaE*cosLat-.V[,1]/Re
+\end_layout
+
+\begin_layout Plain Layout
+
+    M32 <- -.V[,2]/Re
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[,1] <- M12*.V[,2]+M13*.V[,3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[,2] <- M21*.V[,1]+M23*.V[,3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[,3] <- M31*.V[,1]+M32*.V[,2]
+\end_layout
+
+\begin_layout Plain Layout
+
+    return (C)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+Gravity <- function (latitude, altitude=0.) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  sl2 <- sin (latitude * StandardConstant("Cradeg"))**2
+\end_layout
+
+\begin_layout Plain Layout
+
+  g <- 9.780327 * ((1.+0.001931851*sl2) / 
+\end_layout
+
+\begin_layout Plain Layout
+
+                     (1.-0.006694380*sl2))-3.086e-6*altitude
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## Somigliana formula 1980 GRS:
+\end_layout
+
+\begin_layout Plain Layout
+
+  g <- 9.7803267714 * (1 + sl2 * (5.2790414e-3 + 2.32718e-5 * sl2)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+       - (3.0876910891e-6 + 4.3977311e-9 * sl2) * altitude + 7.211e-13 * altitude^2
+\end_layout
+
+\begin_layout Plain Layout
+
+  return(g)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<start-point, echo=TRUE, include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+SP <- with (Data, data.frame (LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
+ THDG))
+\end_layout
+
+\begin_layout Plain Layout
+
+SPR <- SP   ## save as reference for what IRU produced,
+\end_layout
+
+\begin_layout Plain Layout
+
+            ## then calculate mechanization in SP
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+lat <- Data$LAT[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+lon <- Data$LON[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+z   <- Data$ALT[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+vew <- Data$VEW[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+vns <- Data$VNS[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+vspd <- Data$VSPD[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## Measured accelerations:
+\end_layout
+
+\begin_layout Plain Layout
+
+G <- Gravity (Data$LAT[1], Data$ALT[1])
+\end_layout
+
+\begin_layout Plain Layout
+
+G <- G - StandardConstant('Omega')^2 * 
+\end_layout
+
+\begin_layout Plain Layout
+
+         (StandardConstant ('Re') * sin (Data$LAT * pi/180)^2 + Data$GGALT)
+\end_layout
+
+\begin_layout Plain Layout
+
+AB <- c(Data$BLONGA[1], Data$BLATA[1], Data$BNORMA[1] + G[1])
+\end_layout
+
+\begin_layout Plain Layout
+
+VB <- c(Data$VNS[1], Data$VEW[1], Data$VSPD[1])
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(AB) <- c(1,3)
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(VB) <- c(1,3)
+\end_layout
+
+\begin_layout Plain Layout
+
+RblM <- XfLA(Data[1, ])
+\end_layout
+
+\begin_layout Plain Layout
+
+AL <- t (RblM[,,1] %*% t(AB))
+\end_layout
+
+\begin_layout Plain Layout
+
+AL <- AL + RotationCorrection (Data[1, ], VB)
+\end_layout
+
+\begin_layout Plain Layout
+
+AL[3] <- AL[3] + G[1]    ## initial accelerations in l-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## Measured rotation rates:
+\end_layout
+
+\begin_layout Plain Layout
+
+AR <- c(Data$BPITCHR[1], Data$BROLLR[1], Data$BYAWR[1]) * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+RIntegration():
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $r^{l}=[\Phi,\,\Psi,\,h]^{\top}$
+\end_inset
+
+.
+ Then
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\dot{\Phi}=\frac{v_{n}}{R_{M}+h}\label{eq:PhiDot}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\dot{\Psi}=\frac{v_{e}}{(R_{N}+h)\cos\Phi}\label{eq:PsiDot}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\dot{h}=v_{u}\label{eq:Zdot}
+\end{equation}
+
+\end_inset
+
+with 
+\begin_inset Formula $R_{N}$
+\end_inset
+
+ and 
+\begin_inset Formula $R_{M}$
+\end_inset
+
+ appropriate radii for the Earth, approx.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $R_{E}$
+\end_inset
+
+.
+ Then, in the l-frame,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\dot{r}^{l}=\left[\begin{array}{ccc}
+0 & (R_{M}+h)^{-1} & 0\\
+(R_{N}+h)^{-1}(\cos\Phi)^{-1} & 0 & 0\\
+0 & 0 & 1
+\end{array}\right]\left[\begin{array}{c}
+v_{e}\\
+v_{n}\\
+v_{u}
+\end{array}\right]\equiv D^{-1}v^{l}\label{eq:Rdot}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<r-int, echo=TRUE, fig.cap=' ', include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## the derivatives of (lat, lon, h) in terms of the velocities:
+\end_layout
+
+\begin_layout Plain Layout
+
+Rm <- StandardConstant ('Re')
+\end_layout
+
+\begin_layout Plain Layout
+
+Rn <- Rm      ## refine these later
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DLAT <- Data$VNS / (Rm + Data$ALT)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DLON <- Data$VEW / ((Rn + Data$ALT) * cos (Data$LAT * pi / 180))
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DH <- Data$VSPD
+\end_layout
+
+\begin_layout Plain Layout
+
+dt <- 1/25
+\end_layout
+
+\begin_layout Plain Layout
+
+for (i in 2:nrow(SP)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$LAT[i] <- lat <- lat + 0.5 * (Data$DLAT[i-1] + Data$DLAT[i]) * dt /
+ Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$LON[i] <- lon <- lon + 0.5 * (Data$DLON[i-1] + Data$DLON[i]) * dt /
+ Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$ALT[i] <- z <- z + 0.5 * (Data$DH[i-1] + Data$DH[i]) * dt
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LATX <- SP$LAT
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LONX <- SP$LON
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$ALTX <- SP$ALT
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:2, ncol = 1), widths = 1,  heights = c(5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'LAT', 'LATX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'LON', 'LONX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:1, ncol=1), widths=1, heights=5)
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'ALT', 'ALTX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Vintegration()
+\end_layout
+
+\begin_layout Standard
+Given body forces in b-frame as measured, with 
+\begin_inset Formula $f^{b}=[f_{x},\,f_{y},\,f_{z}]^{\top}$
+\end_inset
+
+, 
+\begin_inset Formula $f^{l}=R_{b}^{l}f^{b}$
+\end_inset
+
+ , but Coriolis accelerations must be added.
+ Result is 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\dot{v}^{l}=R_{b}^{l}f^{b}-(2\Omega_{ie}^{l}+\Omega_{el}^{l})v^{l}+g^{l}\label{eq:Vdot}
+\end{equation}
+
+\end_inset
+
+where the rotation matrices are included in RotationCorrection (see notebook).
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<v-int, echo=TRUE, fig.cap=' ', include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## calculate velocity components from the accelerations, using
+\end_layout
+
+\begin_layout Plain Layout
+
+## previously calculate attitude angles:
+\end_layout
+
+\begin_layout Plain Layout
+
+RblM <- XfLA(Data)
+\end_layout
+
+\begin_layout Plain Layout
+
+G <- Gravity (Data$LAT, Data$GGALT)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$BLATA <- Data$BLATA - 0.01    ## seems to give better match to original
+\end_layout
+
+\begin_layout Plain Layout
+
+AB <- matrix(c(Data$BLONGA, Data$BLATA, Data$BNORMA+G), ncol=3) #aircraft-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+AL <- XformLA (Data, AB)                                       #l-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+## now corrected for angular effects
+\end_layout
+
+\begin_layout Plain Layout
+
+## See Noureldin et al, 2013, Eq.
+ (5.55)
+\end_layout
+
+\begin_layout Plain Layout
+
+VL <- matrix (c(Data$VNS, Data$VEW, Data$VSPD), ncol=3)
+\end_layout
+
+\begin_layout Plain Layout
+
+AL <- AL + RotationCorrection (Data, VL)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LACCX <- AL[, 1]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LACCY <- AL[, 2]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LACCZ <- AL[, 3] + G
+\end_layout
+
+\begin_layout Plain Layout
+
+dt <- 1/25
+\end_layout
+
+\begin_layout Plain Layout
+
+for (i in 2:nrow(SP)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VEW[i] <- vew <- vew + 0.5 * (Data$LACCX[i-1] + Data$LACCX[i]) * dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VNS[i] <- vns <- vns + 0.5 * (Data$LACCY[i-1] + Data$LACCY[i]) * dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VSPD[i] <- vspd <- vspd - 0.5 * (Data$LACCZ[i-1] + Data$LACCZ[i]) *
+ dt
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VEWX <- SP$VEW
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VNSX <- SP$VNS
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VSPDX <- SP$VSPD
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:2, ncol = 1), widths = 1,  heights = c(5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VEW', 'VEWX')], legend.position='topright')
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VNS', 'VNSX')], legend.position='topright')
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:1, ncol=1), widths=1, heights=5)
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VSPD', 'VSPDX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Aintegration():
+\end_layout
+
+\begin_layout Standard
+The derivative of the transformation matrix 
+\begin_inset Formula $R_{b}^{l}$
+\end_inset
+
+ that transforms from the b-frame to the l-frame is 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\dot{\mathbf{R}}_{b}^{l}=\mathbf{R}_{b}^{l}(\boldsymbol{\Omega}_{ib}^{b}-\boldsymbol{\Omega}_{il}^{b})\label{eq:xfm-dot}
+\end{equation}
+
+\end_inset
+
+(cf.
+\begin_inset space ~
+\end_inset
+
+Noureldin et al., p.
+ 180, eq.
+\begin_inset space ~
+\end_inset
+
+5.65).
+ The gyroscope measurements 
+\begin_inset Formula $\omega$
+\end_inset
+
+ are represented by the skew-symmetric matrix:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{\Omega}_{ib}^{b}=\left[\begin{array}{ccc}
+0 & -\omega_{z} & \omega_{y}\\
+\omega_{z} & 0 & -\omega_{x}\\
+-\omega_{y} & \omega_{x} & 0
+\end{array}\right]\label{eq:rotation-measurements}
+\end{equation}
+
+\end_inset
+
+where the rotation about the 
+\begin_inset Formula $x$
+\end_inset
+
+-axis is the change in pitch, that about the 
+\begin_inset Formula $y$
+\end_inset
+
+-axis is that in roll, and that about the 
+\begin_inset Formula $z$
+\end_inset
+
+-axis is that in yaw (the negative of heading).
+ The components of 
+\begin_inset Formula $\omega$
+\end_inset
+
+ then correspond respectively to {BPITCHR, BROLLR, BYAWR}.
+ 
+\end_layout
+
+\begin_layout Standard
+The calculation of 
+\begin_inset Formula $\boldsymbol{\Omega}_{il}^{b}$
+\end_inset
+
+ is more circuitous:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\omega_{il}^{b}=R_{l}^{b}\omega_{il}^{l}=R_{l}^{b}(\omega_{ie}^{l}+\omega_{el}^{l})=R_{l}^{b}(R_{e}^{l}\omega_{ie}^{e}+\omega_{el}^{l})\label{eq:omega-il}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\omega_{ie}^{l}=\left[\begin{array}{c}
+0\\
+\omega_{e}\cos\phi\\
+\omega_{e}\sin\phi
+\end{array}\right]\label{eq:omega-ie}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\omega_{el}^{l}=\left[\begin{array}{c}
+-\frac{v_{u}}{R_{m}+h}\\
+\frac{v_{e}}{R_{n}+h}\\
+\frac{v_{e}\tan\phi}{R_{n}+h}
+\end{array}\right]\label{eq:omega-el}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+clearpage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\family sans
+\color blue
+-- End of Memo --
+\end_layout
+
+\begin_layout Standard
+Reproducibility:
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+include enough info to re-run.
+ in zip, include program, pdf if not too big, and subset data, not entire
+ file.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="2">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="0pt">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+Project:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{thisFileName}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+Archive package:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{thisFileName}.zip
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+Contains:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+attachment list below
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+Program:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{thisFileName}.Rnw
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+Original Data:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+/scr/raf
+\backslash
+_data/
+\backslash
+Sexpr{Project}/
+\backslash
+Sexpr{Flight}.nc
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+Workflow:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Workflow
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{thisFileName}.pdf
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+Git:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+https://github.com/WilliamCooper/
+\backslash
+Sexpr{thisFileName}.git
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+attachm{
+\backslash
+Sexpr{thisFileName}.Rnw
+\backslash
+
+\backslash
+
+\backslash
+Sexpr{thisFileName}.pdf
+\backslash
+
+\backslash
+
+\backslash
+Sexpr{SaveRData}
+\backslash
+
+\backslash
+SessionInfo}
+\end_layout
+
+\begin_layout Plain Layout
+
+%
+\backslash
+cc{first attachment
+\backslash
+
+\backslash
+second
+\backslash
+
+\backslash
+3rd att}
+\end_layout
+
+\begin_layout Plain Layout
+
+%
+\backslash
+attach{attachment}
+\end_layout
+
+\begin_layout Plain Layout
+
+%
+\backslash
+attachm{first
+\backslash
+
+\backslash
+second} %
+\backslash
+cc{first attachment
+\backslash
+
+\backslash
+second
+\backslash
+
+\backslash
+3rd att}
+\end_layout
+
+\begin_layout Plain Layout
+
+<<save-system-info, echo=FALSE>>= 
+\end_layout
+
+\begin_layout Plain Layout
+
+cat (toLatex(sessionInfo()), file="SessionInfo")
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@ 
+\end_layout
+
+\begin_layout Plain Layout
+
+<<make-zip-archive, echo=TRUE, INCLUDE=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+system (sprintf("zip %s.zip %s.Rnw %s.pdf Workflow%s.pdf SessionInfo %s", thisFileNa
+me, thisFileName, thisFileName, thisFileName, SaveRData))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% 
+\backslash
+attach{attachment}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+% 
+\backslash
+attachm{ProgramFile
+\backslash
+
+\backslash
+Document.pdf
+\backslash
+
+\backslash
+SaveRData}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%
+\backslash
+cc{first attachment
+\backslash
+
+\backslash
+second
+\backslash
+
+\backslash
+3rd att}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
