@@ -1296,12 +1296,17 @@ G <- Gravity (Data$LAT[1], Data$ALT[1])
 
 \begin_layout Plain Layout
 
+Re <- StandardConstant ('Re')
+\end_layout
+
+\begin_layout Plain Layout
+
 G <- G - StandardConstant('Omega')^2 * 
 \end_layout
 
 \begin_layout Plain Layout
 
-         (StandardConstant ('Re') * sin (Data$LAT * pi/180)^2 + Data$GGALT)
+         (Re * sin (Data$LAT * pi/180)^2 + Data$GGALT)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1546,7 +1551,7 @@ op <- par (mar=c(2,4,1,1)+0.1)
 
 \begin_layout Plain Layout
 
-layout(matrix(1:2, ncol = 1), widths = 1,  heights = c(5,6))
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -1556,17 +1561,7 @@ plotWAC (Data[, c('Time', 'LAT', 'LATX')])
 
 \begin_layout Plain Layout
 
-op <- par (mar=c(5,4,1,1)+0.1)
-\end_layout
-
-\begin_layout Plain Layout
-
 plotWAC (Data[, c('Time', 'LON', 'LONX')])
-\end_layout
-
-\begin_layout Plain Layout
-
-layout(matrix(1:1, ncol=1), widths=1, heights=5)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1598,12 +1593,12 @@ Vintegration()
 \end_layout
 
 \begin_layout Standard
-Given body forces in b-frame as measured, with 
-\begin_inset Formula $f^{b}=[f_{x},\,f_{y},\,f_{z}]^{\top}$
+Given body forces in a-frame as measured, with 
+\begin_inset Formula $f^{a}=[f_{x},\,f_{y},\,f_{z}]^{\top}$
 \end_inset
 
 , 
-\begin_inset Formula $f^{l}=R_{b}^{l}f^{b}$
+\begin_inset Formula $f^{l}=R_{a}^{l}f^{a}$
 \end_inset
 
  , but Coriolis accelerations must be added.
@@ -1614,13 +1609,52 @@ Given body forces in b-frame as measured, with
 
 \begin_inset Formula 
 \begin{equation}
-\dot{v}^{l}=R_{b}^{l}f^{b}-(2\Omega_{ie}^{l}+\Omega_{el}^{l})v^{l}+g^{l}\label{eq:Vdot}
+\dot{v}^{l}=R_{a}^{l}f^{a}-(2\Omega_{ie}^{l}+\Omega_{el}^{l})v^{l}+g^{l}\label{eq:Vdot}
 \end{equation}
 
 \end_inset
 
-where the rotation matrices are included in RotationCorrection (see notebook).
+where the rotation matrices are included in RotationCorrection() -- (see
+ notebook).
  
+\end_layout
+
+\begin_layout Standard
+An additional rotation matrix will be used here in order to use the 'aircraft'
+ or a-frame as the reference frame where the INU measurements are made.
+ This differs from the b-frame by exchange of the x and y axes (so that
+ x is forward and y is starboard) and reversal of the z axis (so that z
+ increases downward).
+ The matrix 
+\begin_inset Formula $R_{a}^{b}$
+\end_inset
+
+ is then
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+R_{a}^{b}=\left[\begin{array}{ccc}
+0 & 1 & 0\\
+1 & 0 & 0\\
+0 & 0 & -1
+\end{array}\right]\label{eq:Rab}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The matrix 
+\begin_inset Formula $R_{a}^{l}$
+\end_inset
+
+ is then as specified in the Workflow document for AMTD_AAC and as coded
+ in XformLA() and, in matrix form, in XfLA() below.
 \end_layout
 
 \begin_layout Standard
@@ -1760,7 +1794,7 @@ op <- par (mar=c(2,4,1,1)+0.1)
 
 \begin_layout Plain Layout
 
-layout(matrix(1:2, ncol = 1), widths = 1,  heights = c(5,6))
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -1770,17 +1804,7 @@ plotWAC (Data[, c('Time', 'VEW', 'VEWX')], legend.position='topright')
 
 \begin_layout Plain Layout
 
-op <- par (mar=c(5,4,1,1)+0.1)
-\end_layout
-
-\begin_layout Plain Layout
-
 plotWAC (Data[, c('Time', 'VNS', 'VNSX')], legend.position='topright')
-\end_layout
-
-\begin_layout Plain Layout
-
-layout(matrix(1:1, ncol=1), widths=1, heights=5)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1812,18 +1836,214 @@ Aintegration():
 \end_layout
 
 \begin_layout Standard
-The derivative of the transformation matrix 
-\begin_inset Formula $R_{b}^{l}$
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<Ral-dot, echo=TRUE, include=TRUE, fig.cap=' '>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## get the rotation-rate skew-symmetric matrix from measurements (a-frame):
+\end_layout
+
+\begin_layout Plain Layout
+
+DL <- nrow(Data)
+\end_layout
+
+\begin_layout Plain Layout
+
+ZA <- rep (0,DL)
+\end_layout
+
+\begin_layout Plain Layout
+
+## Note re signs and variables:
+\end_layout
+
+\begin_layout Plain Layout
+
+##   1.
+ Here, -BPITCHR is used for omega-y, -BROLLR for omega-x, BYAWR for omega-z
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+SRR <- Cradeg * c(ZA, -Data$BYAWR, -Data$BPITCHR,
+\end_layout
+
+\begin_layout Plain Layout
+
+                  Data$BYAWR, ZA, Data$BROLLR,
+\end_layout
+
+\begin_layout Plain Layout
+
+                 Data$BPITCHR, -Data$BROLLR, ZA)
+\end_layout
+
+\begin_layout Plain Layout
+
+SRRM <- aperm( array (SRR, dim=c(DL,3,3)))
+\end_layout
+
+\begin_layout Plain Layout
+
+## now need the skew-symmetric matrix Omega_il^a
+\end_layout
+
+\begin_layout Plain Layout
+
+## omega-il-l vector:
+\end_layout
+
+\begin_layout Plain Layout
+
+h <- Data$ALT
+\end_layout
+
+\begin_layout Plain Layout
+
+Oe <- StandardConstant ('Omega')
+\end_layout
+
+\begin_layout Plain Layout
+
+omega <- matrix(c(-Data$VNS / (Re + h), 
+\end_layout
+
+\begin_layout Plain Layout
+
+           Oe*cos(Data$LAT*Cradeg)+Data$VEW/(Re+h),
+\end_layout
+
+\begin_layout Plain Layout
+
+           Oe*sin(Data$LAT*Cradeg)+Data$VEW*tan(Data$LAT*Cradeg)/(Re+h)),
+ ncol=3)
+\end_layout
+
+\begin_layout Plain Layout
+
+## transform from the l-frame to the a-frame (i.e., use the inverse of XformLA)
+\end_layout
+
+\begin_layout Plain Layout
+
+omegaA <- XformLA (Data, omega, .inverse=TRUE)
+\end_layout
+
+\begin_layout Plain Layout
+
+## skew-symmetric representation of omegaA:
+\end_layout
+
+\begin_layout Plain Layout
+
+SOA <- aperm (array (c(ZA, -omegaA[,3], omegaA[,2], 
+\end_layout
+
+\begin_layout Plain Layout
+
+         omegaA[,3], ZA, -omegaA[,1],
+\end_layout
+
+\begin_layout Plain Layout
+
+        -omegaA[,2], omegaA[,1], ZA), dim=c(DL,3,3)))
+\end_layout
+
+\begin_layout Plain Layout
+
+## find the derivative of the transformation matrix:
+\end_layout
+
+\begin_layout Plain Layout
+
+RaLM <- XfLA(Data)  ## placeholder, replaced by derivative calculation and
+ integration
+\end_layout
+
+\begin_layout Plain Layout
+
+dRLA <- array (dim=c(3,3,DL))
+\end_layout
+
+\begin_layout Plain Layout
+
+rlm <- RaLM[,,1]
+\end_layout
+
+\begin_layout Plain Layout
+
+## sign problem: + works, but theory says -; need to resolve this
+\end_layout
+
+\begin_layout Plain Layout
+
+SSM <- SRRM+SOA
+\end_layout
+
+\begin_layout Plain Layout
+
+for (i in 2:DL) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  dRLA[,,i] <- RaLM[,,i] %*% SSM[,,i]
+\end_layout
+
+\begin_layout Plain Layout
+
+  rlm <- rlm + dRLA[,,i] * dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  RaLM[,,i] <- rlm
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
 \end_inset
 
- that transforms from the b-frame to the l-frame is 
+
+\end_layout
+
+\begin_layout Standard
+The derivative of the transformation matrix 
+\begin_inset Formula $R_{a}^{l}$
+\end_inset
+
+ that transforms from the a-frame to the l-frame is 
 \begin_inset Newline newline
 \end_inset
 
 
 \begin_inset Formula 
 \begin{equation}
-\dot{\mathbf{R}}_{b}^{l}=\mathbf{R}_{b}^{l}(\boldsymbol{\Omega}_{ib}^{b}-\boldsymbol{\Omega}_{il}^{b})\label{eq:xfm-dot}
+\dot{\mathbf{R}}_{a}^{l}=\mathbf{R}_{a}^{l}(\boldsymbol{\Omega}_{ia}^{a}-\boldsymbol{\Omega}_{il}^{a})\label{eq:xfm-dot}
 \end{equation}
 
 \end_inset
@@ -1849,7 +2069,7 @@ Noureldin et al., p.
 
 \begin_inset Formula 
 \begin{equation}
-\boldsymbol{\Omega}_{ib}^{b}=\left[\begin{array}{ccc}
+\boldsymbol{\Omega}_{ia}^{a}=\left[\begin{array}{ccc}
 0 & -\omega_{z} & \omega_{y}\\
 \omega_{z} & 0 & -\omega_{x}\\
 -\omega_{y} & \omega_{x} & 0
@@ -1881,7 +2101,7 @@ where the rotation about the
 
 \begin_layout Standard
 The calculation of 
-\begin_inset Formula $\boldsymbol{\Omega}_{il}^{b}$
+\begin_inset Formula $\boldsymbol{\Omega}_{il}^{a}$
 \end_inset
 
  is more circuitous:
@@ -1891,7 +2111,7 @@ The calculation of
 
 \begin_inset Formula 
 \begin{equation}
-\omega_{il}^{b}=R_{l}^{b}\omega_{il}^{l}=R_{l}^{b}(\omega_{ie}^{l}+\omega_{el}^{l})=R_{l}^{b}(R_{e}^{l}\omega_{ie}^{e}+\omega_{el}^{l})\label{eq:omega-il}
+\omega_{il}^{a}=R_{l}^{a}\omega_{il}^{l}=R_{l}^{a}(\omega_{ie}^{l}+\omega_{el}^{l})=R_{l}^{a}(R_{e}^{l}\omega_{ie}^{e}+\omega_{el}^{l})\label{eq:omega-il}
 \end{equation}
 
 \end_inset
@@ -1912,7 +2132,7 @@ The calculation of
 \begin_inset Formula 
 \begin{equation}
 \omega_{el}^{l}=\left[\begin{array}{c}
--\frac{v_{u}}{R_{m}+h}\\
+-\frac{v_{n}}{R_{m}+h}\\
 \frac{v_{e}}{R_{n}+h}\\
 \frac{v_{e}\tan\phi}{R_{n}+h}
 \end{array}\right]\label{eq:omega-el}
@@ -1920,12 +2140,305 @@ The calculation of
 
 \end_inset
 
-
+This leads to 
 \begin_inset Newline newline
 \end_inset
 
 
+\begin_inset Formula 
+\begin{equation}
+\omega_{il}^{a}=R_{l}^{a}\left[\begin{array}{c}
+-\frac{v_{n}}{R_{m}+h}\\
+\omega_{e}\cos\phi+\frac{v_{e}}{R_{n}+h}\\
+\omega_{e}\sin\phi+\frac{v_{e}\tan\phi}{R_{n}+h}
+\end{array}\right]\label{eq:omega-ila}
+\end{equation}
+
+\end_inset
+
+and
 \begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\Omega_{il}^{a}=\left[\begin{array}{ccc}
+0 & -\omega_{il,z}^{a} & \omega_{il,y}^{a}\\
+\omega_{il,z}^{a} & 0 & -\omega_{il,x}^{a}\\
+-\omega_{il,y}^{a} & \omega_{il,x}^{a} & 0
+\end{array}\right]\label{eq:Omega-ila}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<test-rotations, echo=TRUE, include=TRUE, fig.cap=' '>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## check the rotation rates vs derivatives of the attitude angles:
+\end_layout
+
+\begin_layout Plain Layout
+
+D1 <- Data
+\end_layout
+
+\begin_layout Plain Layout
+
+MaxGap <- 1000
+\end_layout
+
+\begin_layout Plain Layout
+
+.span <- 21
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+cycle <- 0
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$THDGW <- D1$THDG
+\end_layout
+
+\begin_layout Plain Layout
+
+for (i in 2:nrow(D1)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  DH <- D1$THDG[i] - D1$THDG[i-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (DH > 180) {cycle <- cycle - 360}
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (DH < -180) {cycle <- cycle + 360}
+\end_layout
+
+\begin_layout Plain Layout
+
+  D1$THDGW[i] <- D1$THDG[i] + cycle
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+Rate <- 25
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$THDG <- D1$THDGW
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$pdot <- signal::sgolayfilt (D1$PITCH, 3, .span, m=1) * Rate  # m=1 for
+ first deriv.
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$rdot <- signal::sgolayfilt (D1$ROLL, 3, .span, m=1) * Rate  # m=1 for
+ first deriv.
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$hdot <- signal::sgolayfilt (D1$THDG, 3, .span, m=1) * Rate  # m=1 for
+ first deriv.
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (D1[, c('Time', 'BPITCHR', 'pdot')])
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(D1[, c('Time', 'BROLLR', 'rdot')])
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(D1[, c('Time', 'BYAWR', 'hdot')])
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<get-aa, echo=TRUE, include=TRUE, fig.cap=' '>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## find attitude angles from RaLM:
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$PITCHX <- asin (-RaLM[3,1,]) / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$ROLLX <- atan2 (RaLM[3,2,], -RaLM[3,3,]) / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$THDGX <- atan2 (RaLM[1,1,], RaLM[1,2,]) / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$THDGX[Data$THDGX < 0] <- Data$THDGX[Data$THDGX < 0] + 360
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'PITCH', 'PITCHX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(Data[, c('Time', 'ROLL', 'ROLLX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(Data[, c('Time', 'THDG', 'THDGX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
 \end_inset
 
 
