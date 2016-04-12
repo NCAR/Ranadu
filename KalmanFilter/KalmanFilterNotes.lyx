@@ -331,12 +331,12 @@ Directory <- DataDirectory ()
 
 \begin_layout Plain Layout
 
-Flight <- "rf15HR" 				# XXX change this
+Flight <- "rf15HR" 				# XXX change this as needed
 \end_layout
 
 \begin_layout Plain Layout
 
-Project = "DWIRU"			 # XXX change this
+Project = "DWIRU"			      # XXX change this
 \end_layout
 
 \begin_layout Plain Layout
@@ -790,7 +790,8 @@ status open
 
 \begin_layout Plain Layout
 
-XfLA <- function (data, .inverse=FALSE) { 
+XfLA <- function (data) {   ## no separate .inverse argument because inverse
+ is transpose
 \end_layout
 
 \begin_layout Plain Layout
@@ -840,11 +841,6 @@ XfLA <- function (data, .inverse=FALSE) {
 
 \begin_layout Plain Layout
 
-  
-\end_layout
-
-\begin_layout Plain Layout
-
   cosphi <- cos (ROLL)
 \end_layout
 
@@ -871,32 +867,6 @@ XfLA <- function (data, .inverse=FALSE) {
 \begin_layout Plain Layout
 
   sinpsi <- sin (THDG)
-\end_layout
-
-\begin_layout Plain Layout
-
-#   d <- data.frame("X" = data$BX)
-\end_layout
-
-\begin_layout Plain Layout
-
-#   d$Y <- data$BY
-\end_layout
-
-\begin_layout Plain Layout
-
-#   d$Z <- data$BZ    ## for body accels, need to add G to BZ before calling
- 
-\end_layout
-
-\begin_layout Plain Layout
-
-#   ## it was removed from sensed accel.
-\end_layout
-
-\begin_layout Plain Layout
-
-#   A <- as.matrix(d)
 \end_layout
 
 \begin_layout Plain Layout
@@ -928,27 +898,7 @@ i-cospsi*sintheta*cosphi,
 
 \begin_layout Plain Layout
 
-  if (.inverse) {
-\end_layout
-
-\begin_layout Plain Layout
-
-    return (t(RblM))
-\end_layout
-
-\begin_layout Plain Layout
-
-  } else {
-\end_layout
-
-\begin_layout Plain Layout
-
-    return (RblM)
-\end_layout
-
-\begin_layout Plain Layout
-
-  }
+  return (RblM)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1079,12 +1029,6 @@ RotationCorrection <- function (.data, .V) {
 
 \begin_layout Plain Layout
 
-    Re <- StandardConstant ('Re')         ## representative Earth radius,
- m
-\end_layout
-
-\begin_layout Plain Layout
-
     DL <- nrow (.data)
 \end_layout
 
@@ -1105,47 +1049,67 @@ RotationCorrection <- function (.data, .V) {
 
 \begin_layout Plain Layout
 
-    M12 <- -2*omegaE*sinLat-.V[,1]*tanLat/Re
+    Ree <- 6378137
 \end_layout
 
 \begin_layout Plain Layout
 
-    M13 <- 2*omegaE*cosLat+.V[,1]/Re
+    Ecc <- 0.08181919
 \end_layout
 
 \begin_layout Plain Layout
 
-    M21 <- 2*omegaE*sinLat+.V[,1]*tanLat/Re
+    Rn <- Ree / (1 - (Ecc * sinLat)^2)^0.5 + .data$GGALT
 \end_layout
 
 \begin_layout Plain Layout
 
-    M23 <- .V[,2]/Re
+    Rm <- Rn * (1 - Ecc^2) / (1 - (Ecc * sinLat)^2) + .data$GGALT
 \end_layout
 
 \begin_layout Plain Layout
 
-    M31 <- -2*omegaE*cosLat-.V[,1]/Re
+    M12 <- -2 * omegaE * sinLat - .V[,1] * tanLat / Rn
 \end_layout
 
 \begin_layout Plain Layout
 
-    M32 <- -.V[,2]/Re
+    M13 <- 2 * omegaE * cosLat + .V[,1] / Rn
 \end_layout
 
 \begin_layout Plain Layout
 
-    C[,1] <- M12*.V[,2]+M13*.V[,3]
+    M21 <- 2 * omegaE * sinLat + .V[,1] * tanLat / Rn
 \end_layout
 
 \begin_layout Plain Layout
 
-    C[,2] <- M21*.V[,1]+M23*.V[,3]
+    M23 <- .V[,2] / Rm
 \end_layout
 
 \begin_layout Plain Layout
 
-    C[,3] <- M31*.V[,1]+M32*.V[,2]
+    M31 <- -2 * omegaE * cosLat - .V[,1] / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M32 <- -.V[,2] / Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[,1] <- M12 * .V[,2] + M13 * .V[,3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[,2] <- M21 * .V[,1] + M23 * .V[,3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[,3] <- M31 * .V[,1] + M32 * .V[,2]
 \end_layout
 
 \begin_layout Plain Layout
@@ -1160,22 +1124,28 @@ RotationCorrection <- function (.data, .V) {
 
 \begin_layout Plain Layout
 
+\end_layout
+
+\begin_layout Plain Layout
+
 Gravity <- function (latitude, altitude=0.) {
 \end_layout
 
 \begin_layout Plain Layout
 
-  sl2 <- sin (latitude * StandardConstant("Cradeg"))**2
+  sl2 <- (sin (latitude * Cradeg))^2
 \end_layout
 
 \begin_layout Plain Layout
 
-  g <- 9.780327 * ((1.+0.001931851*sl2) / 
+  g <- 9.780327 * ((1.
+ + 0.001931851 * sl2) / 
 \end_layout
 
 \begin_layout Plain Layout
 
-                     (1.-0.006694380*sl2))-3.086e-6*altitude
+                     (1.
+ - 0.006694380 * sl2)) - 3.086e-6 * altitude
 \end_layout
 
 \begin_layout Plain Layout
@@ -1185,12 +1155,13 @@ Gravity <- function (latitude, altitude=0.) {
 
 \begin_layout Plain Layout
 
-  g <- 9.7803267714 * (1 + sl2 * (5.2790414e-3 + 2.32718e-5 * sl2)) 
+  # g <- 9.7803267714 * (1 + sl2 * (5.2790414e-3 + 2.32718e-5 * sl2)) 
 \end_layout
 
 \begin_layout Plain Layout
 
-       - (3.0876910891e-6 + 4.3977311e-9 * sl2) * altitude + 7.211e-13 * altitude^2
+  #      - (3.0876910891e-6 + 4.3977311e-9 * sl2) * altitude + 7.211e-13 *
+ altitude^2
 \end_layout
 
 \begin_layout Plain Layout
@@ -1223,7 +1194,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<start-point, echo=TRUE, include=TRUE>>=
+<<start-point, echo=FALSE, include=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1232,7 +1203,7 @@ status open
 
 \begin_layout Plain Layout
 
-SP <- with (Data, data.frame (LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
+SP <- with (Data, data.frame (LON, LAT, ALT, VNS, VEW, VSPD, ROLL, PITCH,
  THDG))
 \end_layout
 
@@ -1291,7 +1262,7 @@ vspd <- Data$VSPD[1]
 
 \begin_layout Plain Layout
 
-G <- Gravity (Data$LAT[1], Data$ALT[1])
+Data$Grav <- Gravity (Data$LAT[1], Data$ALT[1])
 \end_layout
 
 \begin_layout Plain Layout
@@ -1301,7 +1272,7 @@ Re <- StandardConstant ('Re')
 
 \begin_layout Plain Layout
 
-G <- G - StandardConstant('Omega')^2 * 
+Data$Grav <- Data$Grav - StandardConstant('Omega')^2 * 
 \end_layout
 
 \begin_layout Plain Layout
@@ -1311,7 +1282,7 @@ G <- G - StandardConstant('Omega')^2 *
 
 \begin_layout Plain Layout
 
-AB <- c(Data$BLONGA[1], Data$BLATA[1], Data$BNORMA[1] + G[1])
+AB <- c(Data$BLONGA[1], Data$BLATA[1], Data$BNORMA[1] + Data$Grav[1])
 \end_layout
 
 \begin_layout Plain Layout
@@ -1346,7 +1317,7 @@ AL <- AL + RotationCorrection (Data[1, ], VB)
 
 \begin_layout Plain Layout
 
-AL[3] <- AL[3] + G[1]    ## initial accelerations in l-frame
+AL[3] <- AL[3] + Data$Grav[1]    ## initial accelerations in l-frame
 \end_layout
 
 \begin_layout Plain Layout
@@ -1460,7 +1431,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<r-int, echo=TRUE, fig.cap=' ', include=TRUE>>=
+<<r-int, echo=FALSE, fig.cap=' ', include=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1663,7 +1634,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<v-int, echo=TRUE, fig.cap=' ', include=TRUE>>=
+<<v-int, echo=FALSE, fig.cap=' ', include=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1692,22 +1663,23 @@ G <- Gravity (Data$LAT, Data$GGALT)
 
 \begin_layout Plain Layout
 
-Data$BLATA <- Data$BLATA - 0.01    ## seems to give better match to original
+# Data$BLATA <- Data$BLATA - 0.01    ## seems to give better match to original
 \end_layout
 
 \begin_layout Plain Layout
 
-AB <- matrix(c(Data$BLONGA, Data$BLATA, Data$BNORMA+G), ncol=3) #aircraft-frame
+AA <- matrix(c(Data$BLONGA, Data$BLATA, Data$BNORMA+Data$Grav), ncol=3)
+ #aircraft-frame
 \end_layout
 
 \begin_layout Plain Layout
 
-AL <- XformLA (Data, AB)                                       #l-frame
+AL <- XformLA (Data, AA)                                       #l-frame
 \end_layout
 
 \begin_layout Plain Layout
 
-## now corrected for angular effects
+## now correct for angular effects
 \end_layout
 
 \begin_layout Plain Layout
@@ -1718,7 +1690,7 @@ AL <- XformLA (Data, AB)                                       #l-frame
 
 \begin_layout Plain Layout
 
-VL <- matrix (c(Data$VNS, Data$VEW, Data$VSPD), ncol=3)
+VL <- matrix (c(Data$VEW, Data$VNS, Data$VSPD), ncol=3)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1738,7 +1710,7 @@ Data$LACCY <- AL[, 2]
 
 \begin_layout Plain Layout
 
-Data$LACCZ <- AL[, 3] + G
+Data$LACCZ <- AL[, 3] + Data$Grav
 \end_layout
 
 \begin_layout Plain Layout
@@ -1841,7 +1813,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<Ral-dot, echo=TRUE, include=TRUE, fig.cap=' '>>=
+<<Ral-dot, echo=FALSE, include=FALSE, fig.cap=' '>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -2082,11 +2054,11 @@ where the rotation about the
 \begin_inset Formula $x$
 \end_inset
 
--axis is the change in pitch, that about the 
+-axis is the rate of change in roll, that about the 
 \begin_inset Formula $y$
 \end_inset
 
--axis is that in roll, and that about the 
+-axis is the rate of change in pitch, and that about the 
 \begin_inset Formula $z$
 \end_inset
 
@@ -2095,7 +2067,7 @@ where the rotation about the
 \begin_inset Formula $\omega$
 \end_inset
 
- then correspond respectively to {BPITCHR, BROLLR, BYAWR}.
+ then correspond respectively to {BROLLR, BPITCHR, -BYAWR}.
  
 \end_layout
 
@@ -2181,7 +2153,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<test-rotations, echo=TRUE, include=TRUE, fig.cap=' '>>=
+<<test-rotations, echo=FALSE, include=FALSE, fig.cap=' '>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -2355,7 +2327,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<get-aa, echo=TRUE, include=TRUE, fig.cap=' '>>=
+<<get-aa, echo=FALSE, include=FALSE, fig.cap=' '>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -2379,7 +2351,7 @@ Data$ROLLX <- atan2 (RaLM[3,2,], -RaLM[3,3,]) / Cradeg
 
 \begin_layout Plain Layout
 
-Data$THDGX <- atan2 (RaLM[1,1,], RaLM[1,2,]) / Cradeg
+Data$THDGX <- atan2 (RaLM[1,1,], RaLM[2,1,]) / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -2444,6 +2416,3961 @@ op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
 
 \end_layout
 
+\begin_layout Subsection
+Full mechanization step
+\end_layout
+
+\begin_layout Standard
+The code in this section uses the calculations of the previous subsection
+ but without reference to the IRS-measured quantities after initialization.
+ It therefore represents an independent mechanization scheme that determines
+ the state vector (position, velocity, attitude angles) from the fundamental
+ measurements from the IRU (accelerations and rotations in the aircraft
+ reference frame), using an assumed initial state.
+ The state variables as delivered by the INS have been transferred from
+ 'Data' to 'SP' and then saved in array SPR to have a reference for comparison
+ to this independent mechanization.
+ 
+\end_layout
+
+\begin_layout Standard
+The sequence to be used will be to calculate the derivatives for the components
+ of the state vector based on values at a specified time step, then increment
+ all components of the state vector using these derivatives to advance the
+ state vector by one time step.
+ The derivatives are as specified by (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Rdot"
+
+\end_inset
+
+), (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Vdot"
+
+\end_inset
+
+) and (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:xfm-dot"
+
+\end_inset
+
+), with the latter used to propagate the transformation matrix 
+\begin_inset Formula $R_{l}^{a}$
+\end_inset
+
+ from which the attitude angles can be determined from 
+\begin_inset Formula $\theta=\arcsin(-R_{l}^{a}[3,1])$
+\end_inset
+
+, 
+\begin_inset Formula $\phi=\arctan2(R_{l}^{a}[3,2],\,-R_{l}^{a}[3,3])$
+\end_inset
+
+, and 
+\begin_inset Formula $\psi=\arctan2(R_{l}^{a}[1,1],\,R_{l}^{a}[1,2])$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<time-step, echo=TRUE, include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+ProcessingStart <- system('date', intern=TRUE)
+\end_layout
+
+\begin_layout Plain Layout
+
+## get the derivatives, then take one step:
+\end_layout
+
+\begin_layout Plain Layout
+
+SP <- with (Data, data.frame (LON, LAT, ALT, VNS, VEW, VSPD, 
+\end_layout
+
+\begin_layout Plain Layout
+
+            ROLL, PITCH, THDG, GGALT, GGVSPD, BLATA, BLONGA, BNORMA, 
+\end_layout
+
+\begin_layout Plain Layout
+
+            GGVEW, GGVNS, Grav))
+\end_layout
+
+\begin_layout Plain Layout
+
+## then calculate mechanization in SP
+\end_layout
+
+\begin_layout Plain Layout
+
+Drot <- with (Data, data.frame (BYAWR, BPITCHR, BROLLR))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## adjustments:
+\end_layout
+
+\begin_layout Plain Layout
+
+Drot$BYAWR <- Drot$BYAWR - 0.005
+\end_layout
+
+\begin_layout Plain Layout
+
+Drot$BROLLR <- Drot$BROLLR + 0.0005
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BNORMA <- SP$BNORMA*1.005 - 0.015
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BLONGA <- SP$BLONGA * 0.96
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+DL <- nrow(Data)
+\end_layout
+
+\begin_layout Plain Layout
+
+ZA <- rep (0,DL)
+\end_layout
+
+\begin_layout Plain Layout
+
+## Note re signs and variables:
+\end_layout
+
+\begin_layout Plain Layout
+
+##   1.
+ Here, BPITCHR is used for omega-y, BROLLR for omega-x, BYAWR for omega-z
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+## These are the IRU measurements so can be stored in an array spanning
+ the full
+\end_layout
+
+\begin_layout Plain Layout
+
+## time period.
+ Permuting the matrix flips the signs, exc.
+ BYAWR which is the
+\end_layout
+
+\begin_layout Plain Layout
+
+## negative of the heading rotation rate, hence the following choice of
+ signs
+\end_layout
+
+\begin_layout Plain Layout
+
+SRR <- Cradeg * c(ZA, -Drot$BYAWR, -Drot$BPITCHR,
+\end_layout
+
+\begin_layout Plain Layout
+
+                  Drot$BYAWR, ZA, Drot$BROLLR,
+\end_layout
+
+\begin_layout Plain Layout
+
+                  Drot$BPITCHR, -Drot$BROLLR, ZA)
+\end_layout
+
+\begin_layout Plain Layout
+
+SRRM <- aperm( array (SRR, dim=c(DL,3,3)))
+\end_layout
+
+\begin_layout Plain Layout
+
+## Get the derivative of the rotation matrix:
+\end_layout
+
+\begin_layout Plain Layout
+
+## (1) need the skew-symmetric matrix Omega_il^a
+\end_layout
+
+\begin_layout Plain Layout
+
+## Unlike SRRM this must be calculated one step at a time
+\end_layout
+
+\begin_layout Plain Layout
+
+## omega-il-l vector:
+\end_layout
+
+\begin_layout Plain Layout
+
+dt <- 1/25               ## working with 25-Hz file
+\end_layout
+
+\begin_layout Plain Layout
+
+Oe <- StandardConstant ('Omega')
+\end_layout
+
+\begin_layout Plain Layout
+
+Ree <- 6378137
+\end_layout
+
+\begin_layout Plain Layout
+
+Ecc <- 0.08181919
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$Rn <- Ree / (1 - (Ecc*sin(Data$GGLAT*Cradeg))^2)^0.5 + Data$GGALT
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$Rm <- SP$Rn * (1-Ecc^2) / (1-(Ecc*sin(Data$GGLAT*Cradeg))^2) + Data$GGALT
+\end_layout
+
+\begin_layout Plain Layout
+
+SPR <- SP   ## save what INS produced, as reference
+\end_layout
+
+\begin_layout Plain Layout
+
+RaLM <- XfLA(Data)    ## these are reference values as provided by the INS
+\end_layout
+
+\begin_layout Plain Layout
+
+rlm <- RaLM[,,1]  ## initial value of transformation matrix
+\end_layout
+
+\begin_layout Plain Layout
+
+## initialize quaternion solution:
+\end_layout
+
+\begin_layout Plain Layout
+
+q4 <- 0.5 * sqrt(1+rlm[1,1]+rlm[2,2]+rlm[3,3])
+\end_layout
+
+\begin_layout Plain Layout
+
+quat <- c(0.25*(rlm[3,2]-rlm[2,3])/q4,
+\end_layout
+
+\begin_layout Plain Layout
+
+          0.25*(rlm[1,3]-rlm[3,1])/q4,
+\end_layout
+
+\begin_layout Plain Layout
+
+          0.25*(rlm[2,1]-rlm[1,2])/q4, 
+\end_layout
+
+\begin_layout Plain Layout
+
+          q4)
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(rlm) <- c(3,3)
+\end_layout
+
+\begin_layout Plain Layout
+
+Derivs <- function (sp, rlm, SRM) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  sp$LAT <- sp$LAT * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  omega <- with(sp, c(-VNS / Rm, 
+\end_layout
+
+\begin_layout Plain Layout
+
+                    Oe*cos(LAT)+VEW/(Rn),
+\end_layout
+
+\begin_layout Plain Layout
+
+                    Oe*sin(LAT)+VEW*tan(LAT)/Rn))
+\end_layout
+
+\begin_layout Plain Layout
+
+  Oill <- matrix (c(0, -omega[3], omega[2], omega[3], 0, -omega[1], -omega[2],
+ omega[1], 0), ncol=3)
+\end_layout
+
+\begin_layout Plain Layout
+
+  Oilb <- Oill %*% rlm
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## find the derivative of the transformation matrix:
+\end_layout
+
+\begin_layout Plain Layout
+
+  dRLA <- rlm %*% SRM - Oilb
+\end_layout
+
+\begin_layout Plain Layout
+
+  dR <- c(sp$VNS / sp$Rm, sp$VEW / (sp$Rn * cos (sp$LAT)), sp$VSPD)
+\end_layout
+
+\begin_layout Plain Layout
+
+  G <- sp$Grav    # * 0.9 improves pitch and roll!
+\end_layout
+
+\begin_layout Plain Layout
+
+  AA <- c(sp$BLONGA, sp$BLATA, sp$BNORMA+sp$Grav) # aircraft-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- as.vector (rlm %*% as.matrix(AA))   # l-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## now corrected for angular effects
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## See Noureldin et al, 2013, Eq.
+ (5.55)
+\end_layout
+
+\begin_layout Plain Layout
+
+  VL <- matrix(c(sp$VEW, sp$VNS, sp$VSPD), ncol=3)
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- AL - RotationCorrection (sp, VL)
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL[3] <- AL[3] + sp$Grav
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL[3] <- -AL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  return (list (dR, AL, dRLA))
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+STM <- function (sp, rlm, SRM) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  Der <- Derivs (sp, rlm, SRM)
+\end_layout
+
+\begin_layout Plain Layout
+
+  Dpitch <- Der[[3]][3,1]/sqrt(1-rlm[3,1]^2)
+\end_layout
+
+\begin_layout Plain Layout
+
+  Droll <- 1/(1+(rlm[3,2]/rlm[3,3])^2) * (rlm[3,2]/rlm[3,3]) * 
+\end_layout
+
+\begin_layout Plain Layout
+
+           (-Der[[3]][3,2]/rlm[3,2] + Der[[3]][3,3]/rlm[3,3])
+\end_layout
+
+\begin_layout Plain Layout
+
+  Dhdg <- 1/(1+(rlm[1,1]/rlm[1,2])^2) * (rlm[1,1]/rlm[1,2]) * 
+\end_layout
+
+\begin_layout Plain Layout
+
+           (Der[[3]][1,1]/rlm[1,1] - Der[[3]][1,2]/rlm[1,2])
+\end_layout
+
+\begin_layout Plain Layout
+
+  stm <- matrix(c(Der[[1]][1], rep(0,8),
+\end_layout
+
+\begin_layout Plain Layout
+
+                  0, Der[[1]][2], rep(0,7),
+\end_layout
+
+\begin_layout Plain Layout
+
+                  0,0, Der[[1]][3], rep(0,6),
+\end_layout
+
+\begin_layout Plain Layout
+
+                  rep(0,3), Der[[2]][1], rep(0,5),
+\end_layout
+
+\begin_layout Plain Layout
+
+                  rep(0,4), Der[[2]][2], rep(0,4),
+\end_layout
+
+\begin_layout Plain Layout
+
+                  rep(0,5), Der[[2]][3], rep(0,3),
+\end_layout
+
+\begin_layout Plain Layout
+
+                  rep(0,6), Dpitch, 0, 0,
+\end_layout
+
+\begin_layout Plain Layout
+
+                  rep(0,7), Droll, 0,
+\end_layout
+
+\begin_layout Plain Layout
+
+                  rep(0,8), Dhdg), ncol=9)
+\end_layout
+
+\begin_layout Plain Layout
+
+  return(stm)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+RK <- TRUE
+\end_layout
+
+\begin_layout Plain Layout
+
+RK <- FALSE
+\end_layout
+
+\begin_layout Plain Layout
+
+Der <- list()
+\end_layout
+
+\begin_layout Plain Layout
+
+for (i in 1:(DL-1)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+ if (RK) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    ## use a 4-th order Runge-Kutta scheme
+\end_layout
+
+\begin_layout Plain Layout
+
+    Der1 <- Derivs (SP[i,], rlm, SRRM[,,i])  ## k1
+\end_layout
+
+\begin_layout Plain Layout
+
+    ## take 1/2 step:
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP <- SP[i,]
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$LAT <- SP$LAT[i] + Der1[[1]][1]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$LON <- SP$LON[i] + Der1[[1]][2]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$ALT <- SP$ALT[i] + Der1[[1]][3]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VEW <- SP$VEW[i] + Der1[[2]][1]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VNS <- SP$VNS[i] + Der1[[2]][2]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VSPD <- SP$VSPD[i] + Der1[[2]][3]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    rlmP <- rlm + Der1[[3]]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SRRMP <- (SRRM[,,i]+SRRM[,,i+1])/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    Der2 <- Derivs (SPP, rlmP, SRRMP)
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP <- SP[i,]
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$LAT <- SP$LAT[i] + Der2[[1]][1]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$LON <- SP$LON[i] + Der2[[1]][2]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$ALT <- SP$ALT[i] + Der2[[1]][3]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VEW <- SP$VEW[i] + Der2[[2]][1]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VNS <- SP$VNS[i] + Der2[[2]][2]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VSPD <- SP$VSPD[i] + Der2[[2]][3]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    rlmP <- rlm + Der2[[3]]*dt/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    SRRMP <- (SRRM[,,i]+SRRM[,,i+1])/2
+\end_layout
+
+\begin_layout Plain Layout
+
+    Der3 <- Derivs (SPP, rlmP, SRRMP)
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP <- SP[i,]
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$LAT <- SP$LAT[i] + Der3[[1]][1]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$LON <- SP$LON[i] + Der3[[1]][2]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$ALT <- SP$ALT[i] + Der3[[1]][3]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VEW <- SP$VEW[i] + Der3[[2]][1]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VNS <- SP$VNS[i] + Der3[[2]][2]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+    SPP$VSPD <- SP$VSPD[i] + Der3[[2]][3]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+    rlmP <- rlm + Der3[[3]]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+    SRRMP <- SRRM[,,i+1]
+\end_layout
+
+\begin_layout Plain Layout
+
+    Der4 <- Derivs (SPP, rlmP, SRRMP)
+\end_layout
+
+\begin_layout Plain Layout
+
+    Der[[1]] <- Der1[[1]]/6 + Der2[[1]]/3 + Der3[[1]]/3 + Der4[[1]]/6
+\end_layout
+
+\begin_layout Plain Layout
+
+    Der[[2]] <- Der1[[2]]/6 + Der2[[2]]/3 + Der3[[2]]/3 + Der4[[2]]/6
+\end_layout
+
+\begin_layout Plain Layout
+
+    Der[[3]] <- Der1[[3]]/6 + Der2[[3]]/3 + Der3[[3]]/3 + Der4[[3]]/6
+\end_layout
+
+\begin_layout Plain Layout
+
+  } else {
+\end_layout
+
+\begin_layout Plain Layout
+
+    Der <- Derivs (SP[i,], rlm, SRRM[,,i])
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+  dlat <- Der[[1]][1]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dlon <- Der[[1]][2]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dh <- Der[[1]][3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- Der[[2]]
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## take the time step
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$LAT[i+1] <- SP$LAT[i] + dlat*dt/Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$LON[i+1] <- SP$LON[i] + dlon*dt/Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$ALT[i+1] <- SP$ALT[i] + dh*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$ALT[i+1] <- SP$GGALT[i+1]
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VEW[i+1] <- SP$VEW[i] + AL[1]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VNS[i+1] <- SP$VNS[i] + AL[2]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VSPD[i+1] <- SP$VSPD[i] + AL[3]*dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  # SP$VSPD[i+1] <- SP$GGVSPD[i+1]
+\end_layout
+
+\begin_layout Plain Layout
+
+  # SP$VEW[i+1] <- SP$GGVEW[i+1]
+\end_layout
+
+\begin_layout Plain Layout
+
+  # SP$VNS[i+1] <- SP$GGVNS[i+1]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dRLA <- Der[[3]]
+\end_layout
+
+\begin_layout Plain Layout
+
+  # stm <- STM(SP[i,], rlm, SRRM[,,i])
+\end_layout
+
+\begin_layout Plain Layout
+
+  rlm <- rlm + dRLA * dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$PITCH[i+1] <- asin (-rlm[3,1]) / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$ROLL[i+1] <- atan2 (rlm[3,2], -rlm[3,3]) / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$THDG[i+1] <- atan2 (rlm[1,1], rlm[2,1]) / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  # SP$PITCH[i+1] <- SP$PITCH[i] + stm[7,7]*dt/Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  # SP$ROLL[i+1] <- SP$ROLL[i] + stm[8,8]*dt/Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  # SP$THDG[i+1] <- SP$THDG[i] + stm[9,9]*dt/Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$THDG[SP$THDG < 0] <- SP$THDG[SP$THDG < 0] + 360
+\end_layout
+
+\begin_layout Plain Layout
+
+ProcessingEnd <- system('date', intern=TRUE)
+\end_layout
+
+\begin_layout Plain Layout
+
+print (c(ProcessingStart, ProcessingEnd))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<plot-results, echo=TRUE, include=TRUE, fig.lp="fig:", fig.cap=' '>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LATX <- SP$LAT
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LONX <- SP$LON
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$ALTX <- SP$ALT
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'LAT', 'LATX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'LON', 'LONX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'ALT', 'ALTX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VEWX <- SP$VEW
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VNSX <- SP$VNS
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VSPDX <- SP$VSPD
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VEW', 'VEWX')], legend.position='topright')
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VNS', 'VNSX')], legend.position='topright')
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VSPD', 'VSPDX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+## find attitude angles from RaLM:
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$PITCHX <- SP$PITCH
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$ROLLX <- SP$ROLL
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$THDGX <- SP$THDG
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DPITCH <- Data$PITCHX-Data$PITCH
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DROLL <- (Data$ROLLX-Data$ROLL)*10
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DTHDG <- 180+(Data$THDGX-Data$THDG)*10
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'PITCH', 'PITCHX', 'DPITCH')])
+\end_layout
+
+\begin_layout Plain Layout
+
+lines (c(Data$Time[1], Data$Time[DL]), c(0,0), col='green')
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(Data[, c('Time', 'ROLL', 'ROLLX', 'DROLL')])
+\end_layout
+
+\begin_layout Plain Layout
+
+lines (c(Data$Time[1], Data$Time[DL]), c(0,0), col='green')
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(Data[, c('Time', 'THDG', 'THDGX', 'DTHDG')], ylim=c(0,360))
+\end_layout
+
+\begin_layout Plain Layout
+
+lines(c(Data$Time[1], Data$Time[DL]), c(180,180), col='green')
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The calculation of derivatives is isolated to the function Derivs() for
+ further use below.
+ That function returns the position, velocity, and transformation-matrix
+ derivatives that can be used to advance the solution by one time step.
+ Simple Euler integration or fourth-order Runge-Kutta integration can be
+ used, but tests indicate that there is only a very small difference between
+ the two solutions so Euler integration will be used in the following.
+\end_layout
+
+\begin_layout Standard
+The results from this integration are shown in Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:plot-results-1}
+\end_layout
+
+\end_inset
+
+--
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:plot-results-3}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+The Kalman filter
+\end_layout
+
+\begin_layout Standard
+The mechanism step developed in the previous step can be formulated in terms
+ of a state transition matrix 
+\begin_inset Formula $\Phi_{k|k-1}$
+\end_inset
+
+ which, when applied to the estimated state vector 
+\begin_inset Formula $\hat{x}_{k-1}$
+\end_inset
+
+, advances that state vector by one time step.
+ For example, if the state vector is considered to consist of (latitude,
+ longitude, altitude, east velocity, north velocity, upward velocity) and
+ the attitude angles (pitch, roll, and heading), then 
+\begin_inset Formula $\Phi_{k|k-1}$
+\end_inset
+
+ is just (1+D
+\begin_inset Formula $\Delta t$
+\end_inset
+
+)
+\begin_inset Formula $\hat{x}_{k-1}$
+\end_inset
+
+ for the first 6 components (where 
+\begin_inset Formula $D$
+\end_inset
+
+ is the derivative matrix returned by Derivs(), with diagonal elements for
+ the first six components).
+ Derivs() also returns a 3x3 matrix representing the rate of change of 
+\begin_inset Formula $R_{a}^{l}$
+\end_inset
+
+, so that can be used similarly to advance the state of 
+\begin_inset Formula $R_{a}^{l}$
+\end_inset
+
+, from which the attitude angles can be found.
+ To represent this as a state transition matrix, recall the relationship
+ between the attitude angles and the elements of the transformation matrix:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray*}
+\theta & = & \arcsin(R_{3,1})\\
+\phi & = & \arctan2(R_{3,2},\,-R_{3,3})\\
+\psi & = & \arctan2(R_{1,1},\,R_{1,2})
+\end{eqnarray*}
+
+\end_inset
+
+or
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray*}
+\Delta\theta & = & \frac{\Delta R_{3,1}}{\sqrt{1-R_{3,1}^{2}}}\\
+\Delta\phi & = & \frac{1}{(R_{3,2}/R_{3,3})^{2}+1}\thinspace\frac{R_{3,2}}{R_{3,3}}\thinspace\left(-\frac{\Delta R_{3,2}}{R_{3,2}}+\frac{\Delta R_{3,3}}{R_{3,3}}\right)\\
+\Delta\psi & = & \frac{1}{(R_{1,1}/R_{1,2})^{2}+1}\thinspace\frac{R_{1,1}}{R_{1,2}}\thinspace\left(\frac{\Delta R_{1,1}}{R_{1,1}}-\frac{\Delta R_{1,2}}{R_{1.2}}\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The formulation here will now change to a representation of the error in
+ the state vector.
+ The result of integration as in the preceding or following approaches can
+ be used as the reference state, or the output from the INS can be used
+ for that reference.
+ The error state then consists of 15 components: the positions errors, velocity
+ errors, attitude-angle errors, rotation-rate errors, and accelerometer
+ errors.
+ The components of the error-state vector 
+\begin_inset Formula $\delta\mathbf{x}$
+\end_inset
+
+ change according to
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\dot{\delta\mathbf{x}}=\mathbf{F}\delta\mathbf{x}+\mathbf{G}\sigma_{n}\label{eq:6.3}
+\end{equation}
+
+\end_inset
+
+where the over-dot representing the time derivative refers to the time derivativ
+e of the error component and
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathbf{F}=\frac{\partial f}{\partial\mathbf{x}}
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $f$
+\end_inset
+
+ the derivative vector describing the change of the state vector, here as
+ returned by the function Derivs() or STMF().
+ The matrix 
+\begin_inset Formula $\mathbf{F}$
+\end_inset
+
+ is then the Jacobian of the function 
+\begin_inset Formula $f$
+\end_inset
+
+ and can be found numerically by evaluating the Jacobian of the function
+ STMF().
+ The matrix 
+\begin_inset Formula $\mathbf{G}$
+\end_inset
+
+ is the noise distribution vector and 
+\begin_inset Formula $\sigma_{n}$
+\end_inset
+
+ us a Gaussian-distributed random variable with unit variance and zero mean.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+dynamic coefficient matris
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $\mathbf{F}$
+\end_inset
+
+ can be obtained numerically from that function or analytically as represented
+ in the function DCM() in the code block that follows (cf.
+\begin_inset space ~
+\end_inset
+
+(6.76) or (8.14) from Noureldin et al.).
+ As a check these two can be compared for consistency.
+ The approach that follows corresponds to an open-loop implementation where
+ the independent measurements from the INS and GPS are compared in the Kalman
+ filter to obtain corrections to be applied to the INS solution.
+\end_layout
+
+\begin_layout Standard
+A measurement model for the error components is also needed as input to
+ the Kalman filter.
+ The GPS unit measures position and velocity and so provides a 6-component
+ measurement vector of the error state 
+\begin_inset Formula $\delta\mathbf{z}$
+\end_inset
+
+ which, at any specific time, is 
+\begin_inset Formula $\delta\mathbf{x}$
+\end_inset
+
+ contaminated by the measurement-noise vector 
+\begin_inset Formula $\delta\mathbf{\eta}$
+\end_inset
+
+ representing errors in the GPS measurements (expected to be very small).
+ 
+\end_layout
+
+\begin_layout Standard
+In addition, estimates of the covariance matrix 
+\begin_inset Formula $P$
+\end_inset
+
+ (representing uncertainty in the elements of the state vector) and 
+\begin_inset Formula $\mathbf{R}$
+\end_inset
+
+ (representing the variances in the measured state) are needed to initialize
+ the Kalman-filter solution.
+ The initial estimates used here is as follows:
+\end_layout
+
+\begin_layout Enumerate
+Position errors are initialized to correspond to 2 km uncertainties in the
+ horizontal and 0.5 km uncertainty in the vertical; i.e., 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\left[\begin{array}{c}
+(\delta\phi)^{2}\\
+(\delta\lambda)^{2}\\
+(\delta h)^{2}
+\end{array}\right]=\left[\begin{array}{c}
+(2000/R_{m})^{2}\\
+(2000/(R_{n}\cos\phi))^{2}\\
+500^{2}
+\end{array}\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Velocity-component errors are initialized to correspond to 2 m/s uncertainties
+ in all components.
+\end_layout
+
+\begin_layout Enumerate
+Uncertainty in attitude angles are estimated to be (0.3, 0.3, 1) degrees respectiv
+ely for pitch, roll, and heading.
+ 
+\end_layout
+
+\begin_layout Enumerate
+All are initially assumed uncorrelated.
+ 
+\end_layout
+
+\begin_layout Standard
+Additional estimates are needed for the IRU noise 
+\begin_inset Formula $Q$
+\end_inset
+
+ and the GPS measurement noise 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ The GPS measurements have very low uncertainty, better than 50 m in position
+ and 0.2
+\begin_inset space ~
+\end_inset
+
+m/s in velocity components, so these values will be used for the components
+ of 
+\begin_inset Formula $R$
+\end_inset
+
+ so that the Kalman filter will give preference to these measurements.
+ For the IRU measurements, rotation rates are assumed to have uncertainty
+ of about 0.01
+\begin_inset space \thinspace{}
+\end_inset
+
+radians/s and accelerations 0.1
+\begin_inset space \thinspace{}
+\end_inset
+
+m
+\begin_inset space \thinspace{}
+\end_inset
+
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+, all assumed uncorrelated.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<stmr, echo=TRUE, include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## reset SP
+\end_layout
+
+\begin_layout Plain Layout
+
+SP <- SPR
+\end_layout
+
+\begin_layout Plain Layout
+
+## sv is the 9-component state vector
+\end_layout
+
+\begin_layout Plain Layout
+
+## M is the 6-component IRU measurement vector
+\end_layout
+
+\begin_layout Plain Layout
+
+STMF <- function (sv, M, SRM, Rn, Rm, Grav) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  stmf <- vector('numeric', length=6)
+\end_layout
+
+\begin_layout Plain Layout
+
+  dt <- 1/25               ## working with 25-Hz file
+\end_layout
+
+\begin_layout Plain Layout
+
+  Oe <- StandardConstant ('Omega')
+\end_layout
+
+\begin_layout Plain Layout
+
+  rlm <- XfLAr(sv)    
+\end_layout
+
+\begin_layout Plain Layout
+
+  omega <- as.vector (c(-sv[5] / Rm, 
+\end_layout
+
+\begin_layout Plain Layout
+
+                    Oe*cos(sv[1])+sv[4]/(Rn),
+\end_layout
+
+\begin_layout Plain Layout
+
+                    Oe*sin(sv[1])+sv[4]*tan(sv[1])/Rn), mode='numeric')
+\end_layout
+
+\begin_layout Plain Layout
+
+  Oill <- matrix (c(0, -omega[3], omega[2], omega[3], 0, -omega[1], -omega[2],
+ omega[1], 0), ncol=3)
+\end_layout
+
+\begin_layout Plain Layout
+
+  Oilb <- Oill %*% rlm
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## find the derivative of the transformation matrix:
+\end_layout
+
+\begin_layout Plain Layout
+
+  dRLA <- rlm %*% SRM - Oilb
+\end_layout
+
+\begin_layout Plain Layout
+
+  DR <- c(sv[5] / Rm, sv[4] / (Rn * cos (sv[1])), sv[6])
+\end_layout
+
+\begin_layout Plain Layout
+
+  G <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))    # * 0.9 improves pitch
+ and roll!
+\end_layout
+
+\begin_layout Plain Layout
+
+  AA <- as.vector (c(M$BLONGA, M$BLATA, M$BNORMA+Grav), mode='numeric') #
+ aircraft-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- as.vector (rlm %*% as.matrix(AA), mode='numeric')   # l-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## now correct for angular effects
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## See Noureldin et al, 2013, Eq.
+ (5.55)
+\end_layout
+
+\begin_layout Plain Layout
+
+  VL <- c(sv$VEW, sv$VNS, sv$VSPD)
+\end_layout
+
+\begin_layout Plain Layout
+
+    C <- vector ('numeric', 3)
+\end_layout
+
+\begin_layout Plain Layout
+
+    lat <- sv$LAT
+\end_layout
+
+\begin_layout Plain Layout
+
+    sinLat <- sin(lat); cosLat <- cos(lat); tanLat <- tan(lat)
+\end_layout
+
+\begin_layout Plain Layout
+
+    M12 <- -2 * Oe * sinLat - VL[1] * tanLat / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M13 <- 2 * Oe * cosLat + VL[1] / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M21 <- 2 * Oe * sinLat + VL[1] * tanLat / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M23 <- VL[2] / Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+    M31 <- -2 * Oe * cosLat - VL[1] / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M32 <- -VL[2] / Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[1] <- M12 * VL[2] + M13 * VL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[2] <- M21 * VL[1] + M23 * VL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[3] <- M31 * VL[1] + M32 * VL[2]
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- as.vector (AL - C, mode='numeric')
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL[3] <- AL[3] + Grav
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL[3] <- -AL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  stmf <- c(DR, AL, -dRLA[3,1]/sqrt(1-rlm[3,1]^2), 
+\end_layout
+
+\begin_layout Plain Layout
+
+            1/(1+(rlm[3,2]/rlm[3,3])^2) * (rlm[3,2]/rlm[3,3]) * 
+\end_layout
+
+\begin_layout Plain Layout
+
+              (-dRLA[3,2]/rlm[3,2] + dRLA[3,3]/rlm[3,3]), 
+\end_layout
+
+\begin_layout Plain Layout
+
+            1/(1+(rlm[1,1]/rlm[1,2])^2) * (rlm[1,1]/rlm[1,2]) * 
+\end_layout
+
+\begin_layout Plain Layout
+
+              (dRLA[1,1]/rlm[1,1] - dRLA[1,2]/rlm[1,2]))
+\end_layout
+
+\begin_layout Plain Layout
+
+  return (as.vector (stmf, mode='numeric'))
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<utility-functions, echo=TRUE, include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+XfLAr <- function (data) {   ## XfLA but using input in radians and single
+ row
+\end_layout
+
+\begin_layout Plain Layout
+
+  # data must contain ROLL, PITCH, HEADING
+\end_layout
+
+\begin_layout Plain Layout
+
+  cosphi <- cos (data$ROLL)
+\end_layout
+
+\begin_layout Plain Layout
+
+  sinphi <- sin (data$ROLL)
+\end_layout
+
+\begin_layout Plain Layout
+
+  costheta <- cos (data$PITCH)
+\end_layout
+
+\begin_layout Plain Layout
+
+  sintheta <- sin (data$PITCH)
+\end_layout
+
+\begin_layout Plain Layout
+
+  cospsi <- cos (data$THDG)
+\end_layout
+
+\begin_layout Plain Layout
+
+  sinpsi <- sin (data$THDG)
+\end_layout
+
+\begin_layout Plain Layout
+
+  Rbl <- c(sinpsi*costheta, cospsi*cosphi+sinpsi*sintheta*sinphi, cospsi*sinphi-
+sinpsi*sintheta*cosphi,
+\end_layout
+
+\begin_layout Plain Layout
+
+           cospsi*costheta, -sinpsi*cosphi+cospsi*sintheta*sinphi, -sinpsi*sinph
+i-cospsi*sintheta*cosphi,
+\end_layout
+
+\begin_layout Plain Layout
+
+           -sintheta, costheta*sinphi, -costheta*cosphi)
+\end_layout
+
+\begin_layout Plain Layout
+
+  RblM <- aperm( array (Rbl, dim=c(3,3)))
+\end_layout
+
+\begin_layout Plain Layout
+
+  return (RblM)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<kf1, echo=TRUE, include=TRUE, fig.lp="fig:", fig.cap='Result of integration
+ using the state transformation vector given by the function STMF().'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## initialize state vector:
+\end_layout
+
+\begin_layout Plain Layout
+
+SV <- with(Data[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
+ THDG))
+\end_layout
+
+\begin_layout Plain Layout
+
+SV[c(1,2,7,8,9)] <- SV[c(1,2,7,8,9)] * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+names(SV) <- c('LAT', 'LON', 'ALT', 'VEW', 'VNS', 'VSPD', 'PITCH', 'ROLL',
+ 'THDG')
+\end_layout
+
+\begin_layout Plain Layout
+
+## initialize error state vector
+\end_layout
+
+\begin_layout Plain Layout
+
+SVE <- rep (0, 15)  ## respectively: (lat,lon,alt) (vew,vns,vspd),
+\end_layout
+
+\begin_layout Plain Layout
+
+                    ## (pitch,roll,thdg) (rot.
+ rates) (accel components)
+\end_layout
+
+\begin_layout Plain Layout
+
+SVE[1] <- (SV$LAT - Data$GGLAT[1])*Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+SVE[1] <- (SV$LON - Data$GGLON[1])*Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+SVE[3] <- SV$ALT - SP$GGALT[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+SVE[4] <- SV$VEW - SP$GGVEW[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+SVE[5] <- SV$VNS - SP$GGVNS[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+SVE[6] <- SV$VSPD - SP$GGVSPD[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## get measurement data.frame
+\end_layout
+
+\begin_layout Plain Layout
+
+MDF <- with(Data, data.frame (BLATA, BLONGA, BNORMA, BPITCHR, BROLLR, BYAWR))
+\end_layout
+
+\begin_layout Plain Layout
+
+## add adjustments (note adjustments to rotations were made previously,
+ now in SRRM)
+\end_layout
+
+\begin_layout Plain Layout
+
+MDF$BNORMA <- MDF$BNORMA*1.005 - 0.015
+\end_layout
+
+\begin_layout Plain Layout
+
+MDF$BPITCHR <- MDF$BPITCHR * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+MDF$BROLLR <- MDF$BROLLR * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+MDF$BYAWR <- MDF$BYAWR * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+tau = 60            ## corr time found from cursory study of measurements
+\end_layout
+
+\begin_layout Plain Layout
+
+## a function to provide the dynamic coefficient matrix:
+\end_layout
+
+\begin_layout Plain Layout
+
+DCM <- function (sv, sp, M) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## sv is the 15-component state vector,
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## sp is the original INS solution,
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## M is the IRU measurement vector
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm <- matrix (rep (0,225), ncol=15)
+\end_layout
+
+\begin_layout Plain Layout
+
+  rlm <- XfLAr(sv)
+\end_layout
+
+\begin_layout Plain Layout
+
+  AA <- as.vector (c(M$BLONGA, M$BLATA, M$BNORMA+sp$Grav), mode='numeric')
+ # aircraft-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- as.vector (rlm %*% as.matrix(AA), mode='numeric')   # l-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## now correct for angular effects
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## See Noureldin et al, 2013, Eq.
+ (5.55)
+\end_layout
+
+\begin_layout Plain Layout
+
+  VL <- c(sv$VEW, sv$VNS, sv$VSPD)
+\end_layout
+
+\begin_layout Plain Layout
+
+    C <- vector ('numeric', 3)
+\end_layout
+
+\begin_layout Plain Layout
+
+    lat <- sv$LAT
+\end_layout
+
+\begin_layout Plain Layout
+
+    sinLat <- sin(lat); cosLat <- cos(lat); tanLat <- tan(lat)
+\end_layout
+
+\begin_layout Plain Layout
+
+    M12 <- -2 * Oe * sinLat - VL[1] * tanLat / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M13 <- 2 * Oe * cosLat + VL[1] / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M21 <- 2 * Oe * sinLat + VL[1] * tanLat / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M23 <- VL[2] / Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+    M31 <- -2 * Oe * cosLat - VL[1] / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M32 <- -VL[2] / Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[1] <- M12 * VL[2] + M13 * VL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[2] <- M21 * VL[1] + M23 * VL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[3] <- M31 * VL[1] + M32 * VL[2]
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- as.vector (AL - C, mode='numeric')
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL[3] <- AL[3] + sp$Grav
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL[3] <- -AL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[1,5] <- 1/sp$Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[2,4] <- as.numeric (1 / (sp$Rn * cos(sv[1])))
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[3,6] <- 1
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[4,8] <- AL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[4,9] <- -AL[2]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[4,13:15] <- rlm[1,1:3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[5,7] <- -AL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[5,9] <- AL[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[5,13:15] <- rlm[2,1:3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[6,7] <- AL[2]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[6,8] <- -AL[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[6,13:15] <- rlm[3,1:3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[7,5] <- 1/sp$Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[7,10:12] <- rlm[1,1:3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[8,4] <- 1/sp$Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[8,10:12] <- rlm[2,1:3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[9,4] <- as.numeric (-tan(sv[1])/sp$Rn)
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[9,10:12] <- rlm[3,1:3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[10,10] <- 1/tau
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[11,11] <- 1/tau
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[12,12] <- 1/tau
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[13,13] <- -1/tau
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[14,14] <- -1/tau
+\end_layout
+
+\begin_layout Plain Layout
+
+  dcm[15,15] <- -1/tau
+\end_layout
+
+\begin_layout Plain Layout
+
+  return (dcm)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+dcm <- DCM (SV, SP[1, ], MDF[1, ])
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## noise distribution vector:
+\end_layout
+
+\begin_layout Plain Layout
+
+GCF <- function (sv, sp) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf <- vector('numeric', length=15)
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[1] <- 100 / sp$Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[2] <- 100 / (sp$Rn * cos (sv[1]))
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[3] <- 50 
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[4:6] <- 0.5
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[7:9] <- 0.05*Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[10:12] <- 0.05*Cradeg*sqrt(2/tau)
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[13:15] <- 0.002*sqrt(2/tau)
+\end_layout
+
+\begin_layout Plain Layout
+
+  return (gcf)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+gcf <- as.numeric (GCF (SV, SP[1, ]))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## random numbers for random errors:
+\end_layout
+
+\begin_layout Plain Layout
+
+wrand <- rnorm(15)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## given an error state matrix, a time step results from:
+\end_layout
+
+\begin_layout Plain Layout
+
+## SVE <- SVE + gcf %*% matrix(SVE, ncol=1) + gcf * wrand
+\end_layout
+
+\begin_layout Plain Layout
+
+## initialize covariance matrix
+\end_layout
+
+\begin_layout Plain Layout
+
+CV <- matrix (rep(0,81), ncol=9)
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[1,1] <- 2000^2 / SP$Rm[1]^2
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[2,2] <- 2000^2 / (SP$Rn[1]*cos(SV[1]))^2
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[3,3] <- 500^2
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[4,4] <- 4
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[5,5] <- 4
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[6,6] <- 4
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[7,7] <- (0.3*Cradeg)^2
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[8,8] <- CV[7,7]
+\end_layout
+
+\begin_layout Plain Layout
+
+CV[9,9] <- (1*Cradeg)^2
+\end_layout
+
+\begin_layout Plain Layout
+
+rlm <- XfLAr (SV)
+\end_layout
+
+\begin_layout Plain Layout
+
+# stm <- STM (SV, rlm, SRRM[,,1])
+\end_layout
+
+\begin_layout Plain Layout
+
+## IRU noise
+\end_layout
+
+\begin_layout Plain Layout
+
+QCV <- matrix (rep(0,36), ncol=6)
+\end_layout
+
+\begin_layout Plain Layout
+
+QCV[1,1] <- 0.1^2     ## accelerations
+\end_layout
+
+\begin_layout Plain Layout
+
+QCV[2,2] <- QCV[1,1]  
+\end_layout
+
+\begin_layout Plain Layout
+
+QCV[3,3] <- QCV[1,1]
+\end_layout
+
+\begin_layout Plain Layout
+
+QCV[4,4] <- 0.001^2   ## rotations
+\end_layout
+
+\begin_layout Plain Layout
+
+QCV[5,5] <- 0.001^2   
+\end_layout
+
+\begin_layout Plain Layout
+
+QCV[6,6] <- 0.001^2
+\end_layout
+
+\begin_layout Plain Layout
+
+## GPS measurement noise
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV <- matrix (rep(0,36), ncol=6)
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[1,1] <- (50/SP$Rm[1])^2  ## latitude
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[2,2] <- (50/(SP$Rn[1]*cos(SV[1])))^2
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[3,3] <- 10^2
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[4,4] <- 0.1^2            ## ve
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[5,5] <- 0.1^2
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[6,6] <- 0.1^2
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## The measurement model:
+\end_layout
+
+\begin_layout Plain Layout
+
+DZ <- with(Data, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS,
+ VSPD-GGVSPD))
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(DZ) <- c(DL, 6)
+\end_layout
+
+\begin_layout Plain Layout
+
+DZ[,1:2] <- DZ[, 1:2] * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## try an integration using this transition function:
+\end_layout
+
+\begin_layout Plain Layout
+
+ProcessingStart <- system('date', intern=TRUE)
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$LAT[1] <- SV$LAT
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$LON[1] <- SV$LON
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$ALT[1] <- SV$ALT
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$VEW[1] <- SV$VEW
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$VNS[1] <- SV$VNS
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$VSPD[1] <- SV$VSPD
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$PITCH[1] <- SV$PITCH
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$ROLL[1] <- SV$ROLL
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$THDG[1] <- SV$THDG
+\end_layout
+
+\begin_layout Plain Layout
+
+twoPi <- 2*pi
+\end_layout
+
+\begin_layout Plain Layout
+
+NS <- 4
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[1, ], SRRM[,,1], SP$Rn[1], SP$Rm[1], SP$Grav[1])
+\end_layout
+
+\begin_layout Plain Layout
+
+for (i in 2:DL) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (i %% NS == 0) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    stmf <- STMF (SV, MDF[i-1, ], SRRM[,,i-1], SP$Rn[i-1], SP$Rm[i-1], SP$Grav[i
+-1])
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+  SV <- SV + stmf * dt
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (SV$THDG < 0) {SV$THDG <- SV$THDG + twoPi}
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (SV$THDG > twoPi) {SV$THDG <- SV$THDG - twoPi}
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$LAT[i] <- SV$LAT 
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$LON[i] <- SV$LON 
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$ALT[i] <- SV$ALT
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VEW[i] <- SV$VEW
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VNS[i] <- SV$VNS
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$VSPD[i] <- SV$VSPD
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$PITCH[i] <- SV$PITCH 
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$ROLL[i] <- SV$ROLL 
+\end_layout
+
+\begin_layout Plain Layout
+
+  SP$THDG[i] <- SV$THDG
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$LAT <- SP$LAT / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$LON <- SP$LON / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$PITCH <- SP$PITCH / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$ROLL <- SP$ROLL / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$THDG <- SP$THDG / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+ProcessingEnd <- system('date', intern=TRUE)
+\end_layout
+
+\begin_layout Plain Layout
+
+print (c(ProcessingStart, ProcessingEnd))
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LATX <- SP$LAT
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$LONX <- SP$LON
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$ALTX <- SP$ALT
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'LAT', 'LATX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'LON', 'LONX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'ALT', 'ALTX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VEWX <- SP$VEW
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VNSX <- SP$VNS
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$VSPDX <- SP$VSPD
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VEW', 'VEWX')], legend.position='topright')
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VNS', 'VNSX')], legend.position='topright')
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'VSPD', 'VSPDX')])
+\end_layout
+
+\begin_layout Plain Layout
+
+## find attitude angles from RaLM:
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$PITCHX <- SP$PITCH
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$ROLLX <- SP$ROLL
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$THDGX <- SP$THDG
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DPITCH <- Data$PITCHX-Data$PITCH
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DROLL <- (Data$ROLLX-Data$ROLL)*10
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DTHDG <- 180+(Data$THDGX-Data$THDG)*10
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (Data[, c('Time', 'PITCH', 'PITCHX', 'DPITCH')])
+\end_layout
+
+\begin_layout Plain Layout
+
+lines (c(Data$Time[1], Data$Time[DL]), c(0,0), col='green')
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(Data[, c('Time', 'ROLL', 'ROLLX', 'DROLL')])
+\end_layout
+
+\begin_layout Plain Layout
+
+lines (c(Data$Time[1], Data$Time[DL]), c(0,0), col='green')
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(Data[, c('Time', 'THDG', 'THDGX', 'DTHDG')], ylim=c(0,360))
+\end_layout
+
+\begin_layout Plain Layout
+
+lines(c(Data$Time[1], Data$Time[DL]), c(180,180), col='green')
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+\end_layout
+
+\begin_layout Plain Layout
+
+SP <- SPR
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## numerically, find how covariances Q affect the measurements represented
+ in SV
+\end_layout
+
+\begin_layout Plain Layout
+
+GM <- matrix (rep(0,54), ncol=6)  ## 6 measurements, 9-component state vector
+\end_layout
+
+\begin_layout Plain Layout
+
+## GM[1,1] <- d(lat)/d(BLATA) etc
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<test-dcm, include=TRUE, echo=TRUE, fig.cap=' '>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## compare calculated dcm to the partial derivatives obtained from Derivs():
+\end_layout
+
+\begin_layout Plain Layout
+
+it <- getIndex (Data, 34200)
+\end_layout
+
+\begin_layout Plain Layout
+
+SV <- with(Data[it, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
+ THDG))
+\end_layout
+
+\begin_layout Plain Layout
+
+SV[c(1,2,7,8,9)] <- SV[c(1,2,7,8,9)] * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+## the derivative of SV is then returned as a 9-component vector from STMF(),
+\end_layout
+
+\begin_layout Plain Layout
+
+## so the Jacobian of STMF() gives the DCM:
+\end_layout
+
+\begin_layout Plain Layout
+
+## redefine STMF to accept vector argument:
+\end_layout
+
+\begin_layout Plain Layout
+
+SP <- SPR
+\end_layout
+
+\begin_layout Plain Layout
+
+## sv is the 9-component state vector
+\end_layout
+
+\begin_layout Plain Layout
+
+## M is the 6-component IRU measurement vector
+\end_layout
+
+\begin_layout Plain Layout
+
+## this depends on M, SRM, Rn, Rm, Grav being in the calling environment
+\end_layout
+
+\begin_layout Plain Layout
+
+## Also need revised XfLAr:
+\end_layout
+
+\begin_layout Plain Layout
+
+XfLArV <- function (data) {   ## XfLA but using input in radians and single
+ row
+\end_layout
+
+\begin_layout Plain Layout
+
+  # data must contain ROLL, PITCH, HEADING as components [7:9]
+\end_layout
+
+\begin_layout Plain Layout
+
+  cosphi <- cos (data[8])
+\end_layout
+
+\begin_layout Plain Layout
+
+  sinphi <- sin (data[8])
+\end_layout
+
+\begin_layout Plain Layout
+
+  costheta <- cos (data[7])
+\end_layout
+
+\begin_layout Plain Layout
+
+  sintheta <- sin (data[7])
+\end_layout
+
+\begin_layout Plain Layout
+
+  cospsi <- cos (data[9])
+\end_layout
+
+\begin_layout Plain Layout
+
+  sinpsi <- sin (data[9])
+\end_layout
+
+\begin_layout Plain Layout
+
+  Rbl <- c(sinpsi*costheta, cospsi*cosphi+sinpsi*sintheta*sinphi, cospsi*sinphi-
+sinpsi*sintheta*cosphi,
+\end_layout
+
+\begin_layout Plain Layout
+
+           cospsi*costheta, -sinpsi*cosphi+cospsi*sintheta*sinphi, -sinpsi*sinph
+i-cospsi*sintheta*cosphi,
+\end_layout
+
+\begin_layout Plain Layout
+
+           -sintheta, costheta*sinphi, -costheta*cosphi)
+\end_layout
+
+\begin_layout Plain Layout
+
+  RblM <- aperm( array (Rbl, dim=c(3,3)))
+\end_layout
+
+\begin_layout Plain Layout
+
+  return (RblM)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+STMFV <- function (sv) { ##, M, SRM, Rn, Rm, Grav) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  stmf <- vector('numeric', length=9)
+\end_layout
+
+\begin_layout Plain Layout
+
+  dt <- 1/25               ## working with 25-Hz file
+\end_layout
+
+\begin_layout Plain Layout
+
+  Oe <- StandardConstant ('Omega')
+\end_layout
+
+\begin_layout Plain Layout
+
+  rlm <- XfLArV(sv)    
+\end_layout
+
+\begin_layout Plain Layout
+
+  omega <- as.vector (c(-sv[5] / Rm, 
+\end_layout
+
+\begin_layout Plain Layout
+
+                    Oe*cos(sv[1])+sv[4]/(Rn),
+\end_layout
+
+\begin_layout Plain Layout
+
+                    Oe*sin(sv[1])+sv[4]*tan(sv[1])/Rn), mode='numeric')
+\end_layout
+
+\begin_layout Plain Layout
+
+  Oill <- matrix (c(0, -omega[3], omega[2], omega[3], 0, -omega[1], -omega[2],
+ omega[1], 0), ncol=3)
+\end_layout
+
+\begin_layout Plain Layout
+
+  Oilb <- Oill %*% rlm
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## find the derivative of the transformation matrix:
+\end_layout
+
+\begin_layout Plain Layout
+
+  dRLA <- rlm %*% SRM - Oilb
+\end_layout
+
+\begin_layout Plain Layout
+
+  DR <- c(sv[5] / Rm, sv[4] / (Rn * cos (sv[1])), sv[6])
+\end_layout
+
+\begin_layout Plain Layout
+
+  # G <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))    # * 0.9 improves pitch
+ and roll!
+\end_layout
+
+\begin_layout Plain Layout
+
+  AA <- as.vector (c(M$BLONGA, M$BLATA, M$BNORMA+Grav), mode='numeric') #
+ aircraft-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- as.vector (rlm %*% as.matrix(AA), mode='numeric')   # l-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## now correct for angular effects
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## See Noureldin et al, 2013, Eq.
+ (5.55)
+\end_layout
+
+\begin_layout Plain Layout
+
+  VL <- c(sv[4], sv[5], sv[6])
+\end_layout
+
+\begin_layout Plain Layout
+
+    C <- vector ('numeric', 3)
+\end_layout
+
+\begin_layout Plain Layout
+
+    lat <- sv[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+    sinLat <- sin(lat); cosLat <- cos(lat); tanLat <- tan(lat)
+\end_layout
+
+\begin_layout Plain Layout
+
+    M12 <- -2 * Oe * sinLat - VL[1] * tanLat / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M13 <- 2 * Oe * cosLat + VL[1] / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M21 <- 2 * Oe * sinLat + VL[1] * tanLat / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M23 <- VL[2] / Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+    M31 <- -2 * Oe * cosLat - VL[1] / Rn
+\end_layout
+
+\begin_layout Plain Layout
+
+    M32 <- -VL[2] / Rm
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[1] <- M12 * VL[2] + M13 * VL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[2] <- M21 * VL[1] + M23 * VL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+    C[3] <- M31 * VL[1] + M32 * VL[2]
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL <- as.vector (AL - C, mode='numeric')
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL[3] <- AL[3] + Grav
+\end_layout
+
+\begin_layout Plain Layout
+
+  AL[3] <- -AL[3]
+\end_layout
+
+\begin_layout Plain Layout
+
+  stmf <- c(DR, AL, -dRLA[3,1]/sqrt(1-rlm[3,1]^2), 
+\end_layout
+
+\begin_layout Plain Layout
+
+            1/(1+(rlm[3,2]/rlm[3,3])^2) * (rlm[3,2]/rlm[3,3]) * 
+\end_layout
+
+\begin_layout Plain Layout
+
+              (-dRLA[3,2]/rlm[3,2] + dRLA[3,3]/rlm[3,3]), 
+\end_layout
+
+\begin_layout Plain Layout
+
+            1/(1+(rlm[1,1]/rlm[1,2])^2) * (rlm[1,1]/rlm[1,2]) * 
+\end_layout
+
+\begin_layout Plain Layout
+
+              (dRLA[1,1]/rlm[1,1] - dRLA[1,2]/rlm[1,2]))
+\end_layout
+
+\begin_layout Plain Layout
+
+  return (as.vector (stmf, mode='numeric'))
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+rlm <- RaLM[,,it]
+\end_layout
+
+\begin_layout Plain Layout
+
+SPT <- SP[it, ]
+\end_layout
+
+\begin_layout Plain Layout
+
+M <- MDF[it, ]
+\end_layout
+
+\begin_layout Plain Layout
+
+SRM <- SRRM[,, it]
+\end_layout
+
+\begin_layout Plain Layout
+
+Rn <- SP$Rn[it]
+\end_layout
+
+\begin_layout Plain Layout
+
+Rm <- SP$Rm[it]
+\end_layout
+
+\begin_layout Plain Layout
+
+Grav <- SP$Grav[it]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+dcmNum <- jacobian (STMFV, SV) #, MDF[it, ], SRRM[,, it], SP$Rn[it], SP$Rm[it],
+ SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+dcm <- DCM (SV, SP[it, ], MDF[it, ])
+\end_layout
+
+\begin_layout Plain Layout
+
+dcmt <- dcm
+\end_layout
+
+\begin_layout Plain Layout
+
+## RaLM <- XfLA(Data)    ## these are reference values as provided by the
+ INS
+\end_layout
+
+\begin_layout Plain Layout
+
+rlm <- RaLM[,,it]
+\end_layout
+
+\begin_layout Plain Layout
+
+SPT <- SP[it, ]
+\end_layout
+
+\begin_layout Plain Layout
+
+SRM <- SRRM[,, it]
+\end_layout
+
+\begin_layout Plain Layout
+
+stmfZ <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+stmfZ <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment LAT, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <- 0.01
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$LAT <- SV$LAT + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$LAT <- SV$LAT - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf1 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment LON, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <- 0.01
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$LON <- SV$LON + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$LON <- SV$LON - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf2 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment ALR, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <-  10
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$ALT <- SV$ALT + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$ALT <- SV$ALT - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf3 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment VEW, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <- 0.01
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$VEW <- SV$VEW + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$VEW <- SV$VEW - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf4 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment VNS, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <- 0.01
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$VNS <- SV$VNS + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$VNS <- SV$VNS - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf5 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment VSPD, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <-  0.01
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$VSPD <- SV$VSPD + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$VSPD <- SV$VSPD - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf6 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment VEW, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <- 0.001
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$PITCH <- SV$PITCH + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$PITCH <- SV$PITCH - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf7 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment ROLL, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <- 0.001
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$ROLL <- SV$ROLL + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$ROLL <- SV$ROLL - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf8 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+## increment THDG, find changes:
+\end_layout
+
+\begin_layout Plain Layout
+
+D <-  0.001
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$THDG <- SV$THDG + D
+\end_layout
+
+\begin_layout Plain Layout
+
+stmf <- STMF (SV, MDF[it, ], SRRM[,,it], SP$Rn[it], SP$Rm[it], SP$Grav[it])
+\end_layout
+
+\begin_layout Plain Layout
+
+SV$THDG <- SV$THDG - D
+\end_layout
+
+\begin_layout Plain Layout
+
+dstmf9 <- (stmf-stmfZ)/D
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<error-integration, include=TRUE, echo=TRUE, fig.cap=' '>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## try an integration of the error state alone
+\end_layout
+
+\begin_layout Plain Layout
+
+SPE <- c(Data$LAT-Data$GGLAT, Data$LON-Data$GGLON, Data$ALT-Data$GGALT,
+\end_layout
+
+\begin_layout Plain Layout
+
+         Data$VEW-Data$GGVEW, Data$VNS-Data$GGVNS, Data$VSPD-Data$GGVSPD,
+\end_layout
+
+\begin_layout Plain Layout
+
+         rep(0,9*DL))
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(SPE) <- c(DL,15)
+\end_layout
+
+\begin_layout Plain Layout
+
+SPER <- SPE
+\end_layout
+
+\begin_layout Plain Layout
+
+SV <- with(Data[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
+ THDG))
+\end_layout
+
+\begin_layout Plain Layout
+
+SV[c(1,2,7,8,9)] <- SV[c(1,2,7,8,9)] * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+dcm <- DCM (SV, SP[1, ], MDF[1, ])
+\end_layout
+
+\begin_layout Plain Layout
+
+spe <- SPE[1, ]
+\end_layout
+
+\begin_layout Plain Layout
+
+spe[1] <- spe[1] * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+spe[2] <- spe[2] * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+SPE[1, ] <- spe
+\end_layout
+
+\begin_layout Plain Layout
+
+NMOD <- 25
+\end_layout
+
+\begin_layout Plain Layout
+
+for (i in 2:DL) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (i %% NMOD == 0) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH,
+ ROLL, THDG))
+\end_layout
+
+\begin_layout Plain Layout
+
+    SV[c(1,2,7,8,9)] <- SV[c(1,2,7,8,9)] * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+    dcm <- DCM (SV, SP[i, ], MDF[i, ])
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+  spe <- spe + dcm %*% (spe*dt) 
+\end_layout
+
+\begin_layout Plain Layout
+
+  SPE[i, ] <- spe
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+SPE[, 1] <- SPE[, 1] / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+SPE[, 2] <- SPE[, 2] / Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPE1 <- SPE[, 1]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPE2 <- SPE[, 2]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPE3 <- SPE[, 3]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPE4 <- SPE[, 4]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPE5 <- SPE[, 5]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPE6 <- SPE[, 6]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPER1 <- SPER[, 1]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPER2 <- SPER[, 2]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPER3 <- SPER[, 3]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPER4 <- SPER[, 4]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPER5 <- SPER[, 5]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$SPER6 <- SPER[, 6]
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DSPER1 <- Data$SPE1 - Data$SPER1
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DSPER2 <- Data$SPE2 - Data$SPER2
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DSPER3 <- Data$SPE3 - Data$SPER3
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DSPER4 <- Data$SPE4 - Data$SPER4
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DSPER5 <- Data$SPE5 - Data$SPER5
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$DSPER6 <- Data$SPE6 - Data$SPER6
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (subset (Data, , c(Time, SPE1, SPER1, DSPER1)))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (subset (Data, , c(Time, SPE2, SPER2, DSPER2)))
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (subset (Data, , c(Time, SPE3, SPER3, DSPER3)))
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (subset (Data, , c(Time, SPE4, SPER4, DSPER4)))
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (subset (Data, , c(Time, SPE5, SPER5, DSPER5)))
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC (subset (Data, , c(Time, SPE6, SPER6, DSPER6)))
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The mechanization as outlined here proceeds as follows:
+\end_layout
+
+\begin_layout Enumerate
+Define the reference state vector SP for the INS to have the standard uncorrecte
+d INS variables {LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL, THDG}.
+ Also include the accelerations {BLATA, BLONGB, BNORMA} and the rotation
+ ratess {BYAWR, BPITCHR, BROLLR} as well as the GPS measurements {GGLAT,
+ GGLON, GGALT, GGVEW, GGVNS, GGVSPD}.
+ Calculate the gravity using the GPS reference variables and save it for
+ use in calculating transformations, to save time and because the results
+ are rather insensitive to this except for VSPD/ALT which have already been
+ adjusted via the INS baro-loop but will be adjusted further to match the
+ GPS measurements.
+\end_layout
+
+\begin_layout Enumerate
+Initialize a state vector SV with these components: {LAT, LON, ALT, VEW,
+ VNS, VSPD, PITCH, ROLL, THDG} as measured by the INS at time t=1.
+ Convert where appropriate to units of radians.
+\end_layout
+
+\begin_layout Enumerate
+Define a function STMF such that the integration of SV proceeds via SV[i+1]
+ = SV[i] + STMF()*dt where arguments to STMF are {SV, MDF[i, ], SRRM[,,i],
+ SP$Rn[i], SP$Rm[i], SP$Grav[i]}.
+ MDF contains the measured accelerations, possibly re-calibrated; SRRM contains
+ the measured rotations, also possibly re-calibrated, and SP$Rn and SP$Rm
+ are the Earth-radius values with altitude added, calculated from the GPS
+ values, as is SP$Grav.
+\end_layout
+
+\begin_layout Enumerate
+During the processing, correct the heading for possible wrap-around effects
+ at 0 and 2
+\begin_inset Formula $\pi$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Result of such processing are shown in Figs.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:kf1-1}
+\end_layout
+
+\end_inset
+
+--
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:kf1-3}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Standard
 \begin_inset ERT
 status open
@@ -2457,7 +6384,7 @@ clearpage
 
 \end_inset
 
-
+ 
 \end_layout
 
 \begin_layout Standard

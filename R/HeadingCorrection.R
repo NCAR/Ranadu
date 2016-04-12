@@ -114,11 +114,11 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
   vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
   G <- Gravity (D1$LAT, D1$GGALT)
   AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame
-  VL <- matrix(c(D1$VNS, D1$VEW, D1$VSPD), ncol=3) 
+  VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
   AL <- XformLA (D1, AB)                                    #l-frame
   ## now corrected for angular effects
   ## See Noureldin et al, 2013, Eq. (5.55)
-  AL <- AL + RotationCorrection (D1, VL)
+  AL <- AL - RotationCorrection (D1, VL)
   
   ## the resulting l-frame accelerations
   D1$LACCX <- AL[, 1]
