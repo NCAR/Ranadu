@@ -224,7 +224,7 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
                            c(1/EH$hsdR^2, 1/EH$hsdL^2), na.rm=TRUE)
   whsd <- sqrt (1/sum(c(1/EH$hsdR^2, 1/EH$hsdL^2), na.rm=TRUE))
   if (GeneratePlot) {
-    p <- ggplot(EH, aes(x="tbar"), na.rm=TRUE)
+    p <- ggplot(EH, aes(x=tbar), na.rm=TRUE)
     p <- p + geom_errorbar(aes(ymin=hmeanR-hsdR, ymax=hmeanR+hsdR, colour="right"),
                            width=600, size=1.5, na.rm=TRUE) + ylim (-0.25,0.15)
     p <- p + geom_point (aes(y = hmeanR, colour="right"),size=3.5, na.rm=TRUE)
@@ -239,7 +239,7 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
   SS <- smooth.spline(EH$tbar, yss, w=ywts, df=length(yss)-1, spar=0.7)
   if (GeneratePlot) {
     D1$HC <- predict(SS, as.numeric(D1$Time))$y
-    p <- p + geom_line (data=D1, aes (x="Time", y=HC, colour="spline"), lwd=2, na.rm=TRUE)
+    p <- p + geom_line (data=D1, aes (x=Time, y=HC, colour="spline"), lwd=2, na.rm=TRUE)
     # SS2 <- smooth.spline(EH$tbar, yss, df=8, spar=0.4)
     # xss2 <- as.POSIXct (SS2$x, origin="1970-01-01", tz="GMT")
     # p <- p + geom_line(aes(x=xss2, y=SS2$y, colour="spline"), lwd=2, lty=2, na.rm=TRUE)
@@ -247,7 +247,7 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
     p <- p + scale_colour_manual("turn direction:", values=cols)
     p <- p + guides(color=guide_legend(override.aes=list(shape=c(16,16,NA), 
                                                          linetype=c(0,0,1))))
-    p <- p + ggtitle (sprintf ("%d turns, wtd mean and std %.2f %.2f", length (tbarL), whmean, whsd))
+    p <- p + ggtitle (sprintf ("%d turns, wtd mean and std %.2f %.3f", length (tbarL), whmean, whsd))
     p <- p + theme_WAC()
     suppressMessages(ggsave (.plotfile, p))
   }
