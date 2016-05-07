@@ -766,7 +766,7 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
     pitch <- signal::sgolayfilt (D1$PITCH, 3, .span)
     roll <- signal::sgolayfilt (D1$ROLL, 3, .span)
     thdg <- signal::sgolayfilt (D1$THDG, 3, .span)
-
+    ## these smoothed values are not being used.
     D1$VNSF <- vns
     D1$VEWF <- vew
     D1$VSPDF <- vspd
@@ -783,13 +783,13 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
 .roll <- D1$ROLL * Cradeg
 .thdg <- D1$THDG * Cradeg
 x <- XPitch (.pitch, .roll, .thdg)
-pitchL <- x[,1]
-rollL <- x[,2]
+# pitchL <- x[,1]
+# rollL <- x[,2]
   ## note: all in units of radians
   # pitchL <- cos (.thdg) * sin (D1$PITCH*Cradeg) * cos (D1$ROLL*Cradeg) - sin (.thdg) * sin (D1$ROLL*Cradeg)
   # rollL  <- sin (.thdg) * sin (D1$PITCH*Cradeg) * cos (D1$ROLL*Cradeg) + cos (.thdg) * sin (D1$ROLL*Cradeg)
-D1$PITCHL <- pitchL
-D1$ROLLL <-  rollL
+D1$PITCHL <- x[, 1] / Cradeg  #pitchL
+D1$ROLLL <-  x[, 2] / Cradeg  #rollL
 
 fm1 <- lm (vedot ~ D1$LACCX)
 fm2 <- lm (vndot ~ D1$LACCY)
@@ -832,13 +832,14 @@ measurement vector for Kalman filtering.
 tau <- 60
 GCF <- function (sv, sp) {
   gcf <- vector('numeric', length=15)
-  gcf[1] <- 100 / sp$Rm
-  gcf[2] <- 100 / (sp$Rn * cos (sv[1]))
-  gcf[3] <- 50
-  gcf[4:6] <- 0.5
-  gcf[7:9] <- 0.5*Cradeg  #0.05*Cradeg
-  gcf[10:12] <- 0.05*Cradeg*sqrt(2/tau)
-  gcf[13:15] <- 0.002*sqrt(2/tau)
+  gcf[1] <- 30 / sp$Rm
+  gcf[2] <- 30 / (sp$Rn * cos (sv[1]))
+  gcf[3] <- 150
+  gcf[4:5] <- 0.15
+  gcf[6] <- 1.5
+  gcf[7:9] <- 0.03*Cradeg  #0.05*Cradeg  ## large error gives better updating
+  gcf[10:12] <- 0.015*Cradeg*sqrt(2/tau)
+  gcf[13:15] <- 0.0005*sqrt(2/tau)
   return (gcf)
 }
 i <- 1
@@ -859,12 +860,12 @@ H <- diag(1, nrow=6, ncol=15)
 ## GPS measurement noise
 RN <- c(50/D1$Rm[1], 50/(D1$Rn[1]*cos(SV[1])), 10, 0.1, 0.1, 0.1)
 RCV <- matrix (rep(0,36), ncol=6)
-RCV[1,1] <- (50/D1$Rm[1])^2  ## latitude
-RCV[2,2] <- (50/(D1$Rn[1]*cos(SV[1])))^2
-RCV[3,3] <- 100^2
-RCV[4,4] <- 0.1^2            ## ve
-RCV[5,5] <- 0.1^2
-RCV[6,6] <- 0.1^2
+RCV[1,1] <- (1500/D1$Rm[1])^2  ## latitude
+RCV[2,2] <- (1500/(D1$Rn[1]*cos(SV[1])))^2
+RCV[3,3] <- 300^2
+RCV[4,4] <- 3^2            ## ve
+RCV[5,5] <- 3^2
+RCV[6,6] <- 0.3^2
 
 ## initialize covariance matrix
 CV <- matrix (rep(0,225), ncol=15)
@@ -895,7 +896,7 @@ s <- -120
 si <- 0
 SHIFT <- FALSE
 if (SHIFT) {
-  Data$GGVEW <- ShiftInTime (Data$GGVEW, Rate, s)    ## this is needed for pitch correction
+  Data$GGVEW <- ShiftInTime (Data$GGVEW, Rate, s)    ## this is needed for pitch and heading corrections
   Data$GGVNS <- ShiftInTime (Data$GGVNS, Rate, s)
   # Data$BLONGA <- ShiftInTime (Data$BLONGA, Rate, s-80)
   # Data$BLATA <- ShiftInTime (Data$BLATA, Rate, s-80)
@@ -926,8 +927,8 @@ SVE[7:9] <- 0  ## might initialize using pitch/roll/heading-correction functions
 ## start with zero for gyro and accelerometer errors
 SVEF[1, ] <- SVE
 CVEF[1, ] <- diag (CV)
-RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
-Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
+# RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
+# Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
 for (i in seq(2*NSTEP, DL, by=NSTEP)) {
   SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCHL, ROLLL, THDG,
                                    BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
@@ -985,16 +986,23 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
   Data$VEWKF <- Data$VEW - Cor[, 4]
   Data$VNSKF <- Data$VNS - Cor[, 5]
   Data$VSPDKF <- Data$VSPD - Cor[, 6]
-  Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
-  Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
-  Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
+  # Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
+  # Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
+  # Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
   Data$BPITCHRKF <- Data$BPITCHR - Cor[, 10]/Cradeg
   Data$BROLLRKF <- Data$BROLLR - Cor[, 11]/Cradeg
   Data$BYAWRKF <- Data$BYAWR - Cor[, 12]/Cradeg
   Data$BLATAKF <- Data$BLATA - Cor[, 13]
   Data$BLONGAKF <- Data$BLONGA - Cor[, 14]
   Data$BNORMAKF <- Data$BNORMA - Cor[, 15]
-
+## smooth the pitch, roll, and heading corrections:
+  for (k in 7:9) {
+    Cor[, k] <- SmoothInterp (Cor[, k], .Length=1801)
+  }
+  x <- XPitch(Data$PITCHL*Cradeg-Cor[,7], Data$ROLLL*Cradeg-Cor[,8], Data$THDG*Cradeg-Cor[,9], .inverse=TRUE)
+  Data$PITCHKF <- x[,1]/Cradeg
+  Data$ROLLKF <- x[,2]/Cradeg
+  Data$THDGKF <- Data$THDG-Cor[,9]/Cradeg
 Data$DLAT <- Data$LATKF-Data$GGLAT
 Data$CLAT <- -Cor[,1] / Cradeg
 Data$DLON <- Data$LONKF-Data$GGLON
@@ -1007,9 +1015,9 @@ Data$DVNS <- Data$VNSKF-Data$GGVNS
 Data$CVNS <- -Cor[,5]
 Data$DVSPD <- Data$VSPDKF-Data$GGVSPD
 Data$CVSPD <- -Cor[,6]
-Data$CPITCH <- Data$PITCHKF-Data$PITCH
-Data$CROLL <- Data$ROLLKF-Data$ROLL
-Data$CTHDG <- Data$THDGKF-Data$THDG
+# Data$CPITCH <- Data$PITCHKF-Data$PITCH
+# Data$CROLL <- Data$ROLLKF-Data$ROLL
+# Data$CTHDG <- Data$THDGKF-Data$THDG
 KalmanCaptions <- c("Comparison of the KF, GPS, and INS values of latitude, longitude, and altitude for DEEPWAVE flight 16. DLAT, DLON, and DALT (blue lines) are the differences between the Kalman-filter result and GPS measurement, while CLAT, CLON, and CALT (green lines) are the corrections applied to the original INS values by the Kalman filter.",
                     "Comparison of the KF, GPS, and INS values of aircraft-velocity components for DEEPWAVE flight 16. Blue lines show the differences between the Kalman-filter results and the corresponding GPS-provided values, while the green lines show the corrections applied to the original INS values by the Kalman filter.",
                       "Pitch Correction from the Kalman filter (CPITCH, blue line) and from Ranadu::CorrectPitch (PC, red line)",
@@ -1051,23 +1059,31 @@ Data$PC <- PC[, 1]
 Data$RC <- PC[, 2]
 ## translate pitch/roll corrections to the a-frame:
 .hdg <- Data$THDG * Cradeg
-CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
-CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
-Data$CPITCH <- CPITCH / Cradeg
-Data$CROLL <- CROLL / Cradeg
+# CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
+# CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
+# Data$CPITCH <- CPITCH / Cradeg
+# Data$CROLL <- CROLL / Cradeg
+Data$CPITCH <- Data$PITCHKF-Data$PITCH
+Data$CROLL <- Data$ROLLKF-Data$ROLL
+Data$CTHDG <- Data$THDGKF-Data$THDG
 Data$CPITCH <- SmoothInterp (Data$CPITCH, .Length=181)
 Data$CROLL <- SmoothInterp (Data$CROLL, .Length=181)
+Data$CTHDG <- SmoothInterp (Data$CTHDG, .Length=181)
 Data$HC <- CorrectHeading (Data, .plotfile='./HCPlot.pdf')
 r <- setRange (Data, 70000, 123000)
-plotWAC(subset(Data[r,],,c(Time, CPITCH, PC)), ylab=expression(paste('PITCH CORRECTION',' [',degree,']')), ylim=c(-0.05, 0.05), lwd=c(0.7,0.7), col=c('blue', 'red'))
 ival <- abs(Data$ROLL) > 4
-Data$CPITCH[ival] <- NA
 Data$PC[ival] <- NA
+plotWAC(subset(Data[r,],,c(Time, CPITCH, PC)), ylab=expression(paste('PITCH CORRECTION',' [',degree,']')), ylim=c(-0.05, 0.05), lwd=c(0.7,3), col=c('blue', 'red'))
+PE <- VCor[,7]
+PE[PE < 1.e-10] <- 1.e-10
+PE <- PE / 1015
+PE <- sqrt(PE)
+Data$CPITCH[ival] <- NA
 lineWAC(Data$Time[r], Data$CPITCH[r], lwd=3, col='blue')
-lineWAC(Data$Time[r], Data$PC[r], lwd=3, col='red')
+# lineWAC(Data$Time[r], Data$PC[r], lwd=3, col='red')
 abline(h=0, col='darkorange', lty=2)
 plotWAC(subset(Data[r,],,c(Time, CROLL, RC)), ylab=expression(paste('ROLL CORRECTION [',degree,']')), ylim=c(-0.05,0.05), lwd=c(0.7,0.7), col=c('blue', 'red'))
-Data$CROLL[ival] <- NA
+# Data$CROLL[ival] <- NA
 Data$RC[ival] <- NA
 lineWAC(Data$Time[r], Data$CROLL[r], lwd=3, col='blue')
 lineWAC(Data$Time[r], Data$RC[r], lwd=3, col='red')
@@ -1087,6 +1103,12 @@ SS <- smooth.spline(Data$Time[r], Data$CTHDG[r], w=1/HE[r]^2, spar=1)
 Data$HCS <- predict(SS, as.numeric(Data$Time))$y
 lineWAC(Data$Time[r], Data$HCS[r], col='red')
 # plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)))
+Data$pitch_L <- Cor[, 7]/Cradeg
+Data$roll_L <- Cor[, 8]/Cradeg
+plotWAC (subset(Data[r,],,c(Time, pitch_L, roll_L)), ylim=c(-0.05,0.05), ylab=expression (paste ('correction [',degree,']')), main="l-frame corrections")
+
+lineWAC(Data$Time[r], (Cor[r,7]+PE[r])/Cradeg, col='darkorange', lwd=1)
+lineWAC(Data$Time[r], (Cor[r,7]-PE[r])/Cradeg, col='darkorange', lwd=1)
 
 @
 

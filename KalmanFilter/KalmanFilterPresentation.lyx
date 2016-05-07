@@ -1,0 +1,4107 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\usetheme{WAC}
+%\setbeamertemplate{headline}{}
+\setbeamertemplate{footline}[default]{}
+\setbeamertemplate{navigation symbols}{}
+%\setbeamercovered{transparent}
+%\setbeamercovered{opaque}
+\setbeamertemplate{enumerate subitem}{(\alph{enumii})}
+\setbeamerfont{subsection in toc}{size=\small}
+\setbeamerfont{section in toc}{size=\small}
+% or ...
+
+\setbeamercovered{invisible}
+% or whatever (possibly just delete it)
+\end_preamble
+\use_default_options false
+\begin_modules
+sweave
+beamer-fragile
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman times
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 0
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 0
+\use_package mhchem 1
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+setbeamercolor{normal text}{bg=yellow!10}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Copyright 2004 by Till Tantau <tantau@users.sourceforge.net>.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+In principle, this file can be redistributed and/or modified under the terms
+ of the GNU Public License, version 2.
+ However, this file is supposed to be a template to be modified for your
+ own needs.
+ For this reason, if you use this file as a template and not specifically
+ distribute it as part of a another package/program, the author grants the
+ extra permission to freely copy and modify this file as you see fit and
+ even to delete this copyright notice.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+A Kalman Filter to Improve
+\begin_inset Newline newline
+\end_inset
+
+Measurements of Wind 
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Kalman Filter
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+optional, use only with long paper titles
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+F.
+\begin_inset space ~
+\end_inset
+
+Author
+\begin_inset Flex InstituteMark
+status open
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+and
+\end_layout
+
+\end_inset
+
+ S.
+\begin_inset space ~
+\end_inset
+
+Another
+\begin_inset Flex InstituteMark
+status collapsed
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+
+
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Itemize
+Give the names in the same order as the appear in the paper.
+ 
+\end_layout
+
+\begin_layout Itemize
+Use the 
+\begin_inset Quotes eld
+\end_inset
+
+Institute mark
+\begin_inset Quotes erd
+\end_inset
+
+ inset (
+\family sans
+Insert\SpecialChar \menuseparator
+Custom Insets\SpecialChar \menuseparator
+InstituteMark
+\family default
+) only if the authors have different affiliations.
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Author, Another
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+- optional, use only with lots of authors
+\end_layout
+
+\begin_layout Plain Layout
+- if there are really lots of authors, use 
+\begin_inset Quotes eld
+\end_inset
+
+Author et al.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+Al Cooper
+\end_layout
+
+\begin_layout Institute
+NCAR
+\end_layout
+
+\begin_layout Institute
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset Flex InstituteMark
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+Department of Computer Science
+\begin_inset Newline newline
+\end_inset
+
+University of Somewhere
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+and
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex InstituteMark
+status collapsed
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+
+Department of Theoretical Philosophy
+\begin_inset Newline newline
+\end_inset
+
+University of Elsewhere
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Itemize
+Use the 
+\begin_inset Quotes eld
+\end_inset
+
+Institute mark
+\begin_inset Quotes erd
+\end_inset
+
+ inset (
+\family sans
+Insert\SpecialChar \menuseparator
+Custom Insets\SpecialChar \menuseparator
+InstituteMark
+\family default
+) only if there are several affiliations.
+\end_layout
+
+\begin_layout Itemize
+Keep it simple, no one is interested in your street address.
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Universities of Somewhere and Elsewhere
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+optional, but mostly needed
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Date
+Presentation at RAF
+\begin_inset Newline newline
+\end_inset
+
+10 May 2016
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Itemize
+Either use conference name or its abbreviation.
+ 
+\end_layout
+
+\begin_layout Itemize
+Not really informative to the audience, more for people (including yourself)
+ who are reading the slides online
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+RAF 2016
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+optional, should be abbreviation of conference name
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+If you have a file called "institution-logo-filename.xxx", where xxx is a
+ graphic format that can be processed by latex or pdflatex, resp., then you
+ can add a logo by uncommenting the following:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\backslash
+pgfdeclareimage[height=0.5cm]{institution-logo}{institution-logo-filename}
+\end_layout
+
+\begin_layout Plain Layout
+
+%
+\backslash
+logo{
+\backslash
+pgfuseimage{institution-logo}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The following causes the table of contents to be shown at the beginning
+ of every subsection.
+ Delete this, if you do not want it.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+AtBeginSubsection[]{%
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+frame<beamer>{ 
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+frametitle{Outline}   
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\backslash
+tableofcontents[currentsection,currentsubsection] 
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+If you wish to uncover everything in a step-wise fashion, uncomment the
+ following command:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\backslash
+beamerdefaultoverlayspecification{<+->}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Outline
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Subsection
+Addressing Weaknesses in Measured Wind
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+PRIMARY UNCERTAINTIES IN MEASURED WIND
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout AlertBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+For vertical wind, 
+\emph on
+\bar under
+error in pitch
+\emph default
+\bar default
+ is the dominant remaining error.
+\end_layout
+
+\begin_layout Enumerate
+For horizontal wind, 
+\emph on
+\bar under
+error in heading
+\emph default
+\bar default
+ is the dominant remaining error.
+\end_layout
+
+\begin_layout Enumerate
+For both, pressure-line resonance limits high-frequency response and compromises
+ measurements of variance spectra.
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+My claim today:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+The first two can be addressed via software!
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+THE GOAL
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+The measurements used for the aircraft 
+\begin_inset Quotes eld
+\end_inset
+
+state vector
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+INS provides position, velocity, attitude angles
+\end_layout
+
+\begin_layout Enumerate
+GPS provides position and velocity with less uncertainty, esp.
+ long-term, but does not provide attitude angles.
+\end_layout
+
+\end_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Errors in attitude angles lead to measurable errors
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+A pitch error causes gravity to be resolved with the wrong coordinates,
+ resulting in a false acceleration that appears as a velocity error.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+A heading error causes accelerations measured by the IRU to be resolved
+ in the wrong directions, leading to velocity errors.
+\end_layout
+
+\end_deeper
+\begin_layout SummaryBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+3-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Feedback using measurable errors can improve the attitude angles
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Subsection
+Operation of the INS
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+INS OPERATION:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+IRU measurements in the aircraft reference frame:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+accelerometers
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+measure 3-axis accelerations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+gyros
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+measure rotation rates about the aircraft axes
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Block
+(BLATA, BLONGA, BNORMA, BPITCHR, BROLLR, BYAWR)
+\end_layout
+
+\begin_layout SummaryBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+The INS:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<2->
+\end_layout
+
+\end_inset
+
+Performs an initial alignment to determine an initial state.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<3->
+\end_layout
+
+\end_inset
+
+Integrates IRU-provided measurements to determine the aircraft state (position,
+ velocity, attitude).
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+This involves a reference-frame transformation.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<4->
+\end_layout
+
+\end_inset
+
+Incorporates feedback via a pressure reference to control instability in
+ the vertical integration.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<5->
+\end_layout
+
+\end_inset
+
+Does not use GPS information (GV Honeywell unit).
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Subsection
+Overview of the Kalman Filter
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+WHAT IS A KALMAN FILTER?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+in general:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+A means of combining redundant measurements, onsidering their relative uncertain
+ties, to obtain an optimal resulting measurement.
+\end_layout
+
+\end_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+in the present case:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+A method for using measurements from a GPS receiver to refine those produced
+ by the INS.
+\end_layout
+
+\end_deeper
+\begin_layout AlertBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+3-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+the primary value:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<3->
+\end_layout
+
+\end_inset
+
+
+\emph on
+\color black
+not 
+\emph default
+updating the redundant measurements: 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\color black
+GPS measurements are superior and mostly could be used alone for position
+ and velocity of the aircraft
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<4->
+\end_layout
+
+\end_inset
+
+
+\emph on
+\color black
+
+\begin_inset Flex Alert
+status open
+
+\begin_layout Plain Layout
+
+\color black
+updating the attitude angles,
+\end_layout
+
+\end_inset
+
+ 
+\emph default
+via error-feedback:
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+GENERIC FLOWCHART
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename KalmanFlowChart.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+ILLUSTRATION: 1D case
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Consider a single component of aircraft velocity
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+INS (e.g., VEW) and GPS (e.g., GGVEW)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+Step forward uses measured acceleration to find VEW
+\begin_inset Formula $^{*}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+
+\begin_inset Quotes eld
+\end_inset
+
+Best
+\begin_inset Quotes erd
+\end_inset
+
+ estimate is K
+\begin_inset space \thinspace{}
+\end_inset
+
+
+\begin_inset Formula $\times$
+\end_inset
+
+GGVEW+(1-K)
+\begin_inset Formula $\times$
+\end_inset
+
+VEW
+\begin_inset Formula $^{*}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+K depends on the relative magnitudes of the VEW
+\begin_inset Formula $^{*}$
+\end_inset
+
+variance and the variance applicable to GGVEW.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+The loop reduces the VEW
+\begin_inset Formula $^{*}$
+\end_inset
+
+ variance as the estimate is improved.
+\end_layout
+
+\end_deeper
+\begin_layout AlertBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+6-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Extension to the multi-dimensional case
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Coupling among error terms (e.g., an error in velocity results in an error
+ in position) leads to need for a covariance matrix.
+\end_layout
+
+\begin_layout Itemize
+Also must represent noise contributions and 
+\begin_inset Formula $\mathbf{K}$
+\end_inset
+
+ as matrices.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section
+Duplicating INS Processing
+\end_layout
+
+\begin_layout Subsection
+Mechanization Steps
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+MECHANIZATION [cf.
+\begin_inset space ~
+\end_inset
+
+gray boxes]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Must represent the processing in the INS
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Can't do this perfectly:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+INS has high-rate data internally and calibrations
+\end_layout
+
+\begin_layout Itemize
+baro-loop already applied to altitude and VSPD
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Approximate mechanization is OK (error state KF)
+\end_layout
+
+\end_deeper
+\begin_layout SummaryBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Find time-derivatives for the 9-component the state vector:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Accelerations and rotations are measured in the body frame, so must transform
+ to the 
+\emph on
+l-
+\emph default
+frame [local east, north, up components], with compensation for Earth and
+ 
+\emph on
+l-
+\emph default
+frame rotation.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+VALIDATION: COMPARE TO INS SOLUTION
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Attitude Angles [PITCHX etc are new-mechanization results]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename MechPlotAngles.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout AlertBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Good match => angle transformations and signs are correct.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+VALIDATION: COMPARE TO INS SOLUTION
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+GV Velocities [VEWX etc are new-mechanization results]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename MechPlotV.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout AlertBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+INS baro-loop uses pressure altitude and a faster update vs my slower update
+ to GPS altitude.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section
+The Error-State Kalman Filter
+\end_layout
+
+\begin_layout Subsection
+Advantages of the Error-State Filter
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+ADVANTAGES OF AN ERROR-STATE KALMAN FILTER
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout SummaryBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+State vector is the vector of error components in the INS solution
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Don't have to repeat the original integration; instead use the original
+ INS values as the reference solution and find errors.
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+(Still need the derivatives of the original state vector.)
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+The error-state is small so linear assumptions re propagation are likely
+ to be less compromising.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Key tasks:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Construct the rotation matrix transforming vectors from the 
+\emph on
+a-
+\emph default
+frame to the 
+\emph on
+l-
+\emph default
+frame.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Construct a function that gives the 9 derivatives of the error state, given
+ the state vector and INU measurements.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Validate that function by duplicating the INS-provided results.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Subsection
+Implementation Steps
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+IMPLEMENTATION
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout SummaryBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Key Components
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Now have a validated derivative function (STMFV).
+\end_layout
+
+\begin_layout Enumerate
+The error-state 
+\begin_inset Quotes eld
+\end_inset
+
+derivative coefficient matrix
+\begin_inset Quotes erd
+\end_inset
+
+ (DCM) can be calculated numerically from STMFV with the relatively fast
+ Jacobian function in R.
+\end_layout
+
+\begin_layout Enumerate
+The DCM also updates for the error-state covariance matrix.
+\end_layout
+
+\begin_layout Enumerate
+To initiate, estimate uncertainties in the initial error-state and the noise
+ components (INS and GPS).
+\end_layout
+
+\begin_layout Enumerate
+The uncertainties have been discussed in the Tech Note on uncertainty in
+ the wind measurements, except for the INS-provided accelerations and rotations
+ which are estimated based on spectral analysis of those signals.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout PlainFrame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+THE KALMAN-FILTER LOOP
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+The core R-code loop (6 lines, applied recursively)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Box ovalbox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "95col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Description
+sv[i]: the INS-provided state vector at time 
+\begin_inset Formula $i$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Description
+SVE: error-state vector, calculated sequentially
+\end_layout
+
+\begin_layout Description
+STMFV: derivative function for state vector
+\end_layout
+
+\begin_layout Description
+CV: the covariance matrix
+\end_layout
+
+\begin_layout Description
+Q
+\begin_inset space ~
+\end_inset
+
+and
+\begin_inset space ~
+\end_inset
+
+RCV: noise matrices, INS and GPS
+\end_layout
+
+\begin_layout Description
+H: correspondence, GPS and INS measurements
+\end_layout
+
+\begin_layout Description
+DZ[i,
+\begin_inset space ~
+\end_inset
+
+]: vector of GPS measurements at time 
+\emph on
+i
+\end_layout
+
+\begin_layout Description
+dt: time interval between steps
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+dcm <- jacobian (STMFV, sv[i]) * dt + diag(15)
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+\color red
+SVE
+\color inherit
+ <- dcm  %*% SVE
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+CV <- dcm %*% (CV %*% t(dcm)) + Q
+\end_layout
+
+\begin_layout LyX-Code
+
+\size footnotesize
+K <- CV %*% t(H) %*% solve (H %*% CV %*% t(H) + RCV)
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+\color red
+SVE
+\color inherit
+ <- SVE + K %*% (DZ[i, ] - H %*% SVE)
+\end_layout
+
+\begin_layout LyX-Code
+
+\size small
+CV <- CV - K %*% H %*% CV
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+THE RESULT OF THE KALMAN-FILTER LOOP
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout SummaryBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Error-State-Vector vs Time
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Quote
+The estimated errors at each time step, to be 
+\emph on
+\color black
+subtracted
+\emph default
+ from the INS-produced trajectory.
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Application to Recorded Variables
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+The error-state vector should vary slowly; 1-Hz file is OK.
+ 
+\end_layout
+
+\begin_layout Itemize
+For aircraft velocity and position, this solution should be a superior replaceme
+nt for the complementary filter now in use.
+\end_layout
+
+\begin_layout Itemize
+For higher-rate data, interpolation of the 1-Hz correction with appropriate
+ smoothing will be valid and will avoid the need for high-rate calculation
+ of the Kalman filter.
+\end_layout
+
+\begin_layout Itemize
+It may be beneficial to filter the errors to avoid introducing high-frequency
+ noise.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Subsection
+Some Special Considerations
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+SUBTLETIES REGARDING PITCH, ROLL, AND HEADING
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout AlertBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Use errors for pitch and roll in the l-frame
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Why? Errors vary more smoothly than in the 
+\emph on
+\color red
+a-
+\emph default
+\color inherit
+frame.
+\end_layout
+
+\begin_layout Description
+Explanation: The INS calculates orientation in an inertial frame; the l-frame
+ is a better match to an inertial frame.
+\end_layout
+
+\begin_layout Description
+Illustration: A pitch error when flying north becomes a roll error after
+ a turn to the west, producing an abrupt change in the 
+\emph on
+\color red
+a-
+\emph default
+frame but not in the 
+\emph on
+l-
+\emph default
+frame.
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+For acceleration and heading errors, differentiate GGVEW/GGVNS
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Why? Otherwise feedback to heading is slow and uncertain.
+\end_layout
+
+\begin_layout Description
+Explanation: There are many competing sources of error in velocity; this
+ helps isolate heading errors vs others.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Section
+Illustrative Results
+\end_layout
+
+\begin_layout Subsection
+Position and Aircraft Velocity
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+EXAMPLE: DEEPWAVE FLIGHT 16, INTENSE WAVES
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-4.3cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Graphics
+	filename DEEPWAVErf16Track.png
+	lyxscale 50
+	width 85text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout ExampleBlock
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-8cm
+\backslash
+hskip1cm
+\backslash
+fcolorbox{black}{yellow!40}{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status collapsed
+
+\begin_layout Plain Layout
+Turns about every 30 min:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+(important for the heading update)
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+RESULTS FOR POSITION
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-4cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename KFposition.pdf
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-6.5cm
+\backslash
+hskip1cm
+\backslash
+fcolorbox{black}{yellow!40}{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+Schuler oscillation evident in correction
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+(good agreement with GPS)
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+RESULTS FOR GV VELOCITY
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename KFvelocity.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Subsection
+Pitch and Roll
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+PITCH AND ROLL IN THE 
+\emph on
+l
+\emph default
+
+\begin_inset space \thinspace{}
+\end_inset
+
+-FRAME
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout SummaryBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Advantage: smooth variation
+\end_layout
+
+\begin_layout Itemize
+Note Schuler-period oscillation
+\end_layout
+
+\begin_layout Itemize
+Need both errors to transform to the body frame
+\end_layout
+
+\end_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename lframeCorrections.png
+	lyxscale 50
+	width 90text%
+	height 50theight%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout FragileFrame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+ALTERNATIVE FOR PITCH: 
+\begin_inset Quotes eld
+\end_inset
+
+CorrectPitch ()
+\begin_inset Quotes erd
+\end_inset
+
+ as in TN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Columns
+
+\end_layout
+
+\begin_deeper
+\begin_layout Column
+5cm
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Effect of a pitch error:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+False platform orientation produces a false horizontal component of sensed
+ gravity
+\end_layout
+
+\begin_layout Enumerate
+Result is a false accelera- tion, leading to growth of an error in the ground
+ speed:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{d(\delta v_{n})}{dt}=-g\delta\theta
+\]
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Column
+6 cm
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename plot-illustrating-pitch-coupling.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout SummaryBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout SummaryBlock
+find left side of equation by differentiating GPS-INS velocity components
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+RESULTS FOR PITCH [vs PC=CorrectPitch() result]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip0cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename KFPC.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset Flex Only
+status open
+
+\begin_layout Plain Layout
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+comments:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Thin lines are turns: possible timing differences? PC not plotted there.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout SummaryBlock
+\begin_inset Flex Only
+status open
+
+\begin_layout Plain Layout
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+comments:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Performance is much better with errors maintained in 
+\emph on
+l-
+\emph default
+frame.
+\end_layout
+
+\begin_layout Itemize
+Good agreement with PC supports both results.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+RESULTS FOR PITCH [vs PC=CorrectPitch() result]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename KFPC.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout AlertBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+advantage of the Kalman-filter result:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Quote
+CorrectPitch() assumes no error in measured accelera- tions; the Kalman
+ filter accounts for that error.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+AN INDICATION OF UNCERTAINTY IN THE PITCH CORRECTION
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Kalman-filter variance can be used to estimate uncertainty
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename PCsd.png
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout ExampleBlock
+(but it looks better than 0.017
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+; need to revise noise matrices?
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+Heading
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+THE HEADING CORRECTION
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Basis for the correction:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Accelerations in the 
+\emph on
+a
+\emph default
+-frame are transformed to the 
+\emph on
+l-
+\emph default
+frame using the measured heading.
+\end_layout
+
+\begin_layout Enumerate
+An incorrect heading results in velocity errors in the 
+\emph on
+l-
+\emph default
+frame.
+\end_layout
+
+\begin_layout Enumerate
+Comparison to GPS-provided velocity reveals these errors.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Flex Alert
+status open
+
+\begin_layout Plain Layout
+This relies on significant accelerations, best realized in turns.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout SummaryBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+A CorrectHeading() function:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Compare the direction of the velocity change to that predicted from the
+ l-frame accelerations.
+\end_layout
+
+\begin_layout Enumerate
+The difference is the heading error.
+\end_layout
+
+\begin_layout Enumerate
+Requires significant turns; discard other periods.
+\end_layout
+
+\begin_layout Enumerate
+Use a smoothing spline to extrapolate.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+RESULTS FROM CorrectHeading():
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-2.7cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\delta\psi=\arctan\left(\frac{a_{e}^{(l)}}{a_{n}^{(l)}}\right)-\arctan\left(\frac{\dot{v}_{e}}{\dot{v}_{n}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename HCPlotA.pdf
+	lyxscale 50
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-4.0cm
+\backslash
+hskip3cm
+\backslash
+fcolorbox{black}{yellow!40}{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "70col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+Original processing introduced a -0.08
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+ offset
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+ALTERNATIVE: SMOOTHED HEADING CORRECTION
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename HerrorSpline.png
+	lyxscale 50
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+SHIFTING IS A PROBLEM FOR THE KALMAN FILTER
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+The heading and the velocity components become inconsistent
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+The original INS calculations used the unshifted heading to calculate VNS/VEW
+ etc.
+\end_layout
+
+\begin_layout Itemize
+The Kalman filter attributes an error in VNS/VEW to various sources including
+ the measured accelerations and attitude angles.
+ It will make adjustments to minimize the errors, possibly further correcting
+ the heading because it doesn't know that it has been 'fudged'.
+\end_layout
+
+\begin_layout Itemize
+The heading correction is inherently constrained poorly, possibly leading
+ to significant errors.
+\end_layout
+
+\end_deeper
+\begin_layout SummaryBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+It is important to remove any cal-coefficient adjustments to INS variables
+ before using a Kalman filter.
+ (Affects wind also.)
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+ILLUSTRATION OF THE HEADING-CORRECTION PROBLEM
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename HCstandard.png
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Uncover
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Uncover
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.5cm
+\backslash
+hskip0cm
+\backslash
+fcolorbox{black}{yellow!40}{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+The Kalman filter fails to detect the error because VNS/VEW are consistent
+ with IRU attitude angles.
+ Must remove cal-coefficient adjustments before use.
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+THE HEADING CORRECTION W/O OFFSET
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename HCKF.png
+	width 90text%
+	height 4cm
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout SummaryBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Estimated uncertainty varies greatly
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Thick lines: 
+\begin_inset Formula $\sigma$
+\end_inset
+
+<0.05
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+ (only occurs in turns)
+\end_layout
+
+\begin_layout Enumerate
+Red line: 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Spline fit considering uncertainty, for smoothing.
+\end_layout
+
+\begin_layout Enumerate
+Standard deviation <0.01
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+.
+ (Wind error <0.04 m/s)
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.5cm
+\backslash
+hskip0cm
+\backslash
+fcolorbox{black}{yellow!40}{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "60col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+The red line is a weighted spline with weights determined by the running
+ variance in the KF correction term.
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusions and Next Steps
+\end_layout
+
+\begin_layout Subsection
+Summary of Status
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+TENTATIVE CONCLUSIONS
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout SummaryBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Attitude angles are improved significantly
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Uncertainty reduced to 
+\begin_inset Formula $\lesssim$
+\end_inset
+
+0.01
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+(for heading, only if there are regular turns)
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Results are consistent with previous estimates but require fewer assumptions.
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2-
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Aircraft-velocity components are also improved
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Horizontal: Better than complementary filter, but not significantly so.
+\end_layout
+
+\begin_layout Description
+Vertical: Provides an alternative to VSPD that is even better than GGVSPD
+\end_layout
+
+\end_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+3-
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Applicable to past projects as well as future ones.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Subsection
+Options for the Next Steps
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+PATH FORWARD (two options)?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+1.
+\begin_inset space ~
+\end_inset
+
+Incorporate the Kalman filter in processing
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\series bold
+Advantages:
+\end_layout
+
+\begin_layout Itemize
+Minimum uncertainty in results, with fewest assumptions
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Disadvantages / problems:
+\end_layout
+
+\begin_layout Itemize
+Substantial work to prepare for this:
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+develop a processing routine including revision of winds
+\end_layout
+
+\begin_layout Itemize
+document the procedure and program
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Must go back to original unprocessed data (need gyro rates)
+\end_layout
+
+\begin_layout Itemize
+Results are sensitive to time shifts, so will require checking
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-5cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+2.
+\begin_inset space ~
+\end_inset
+
+Use CorrectPitch(), CorrectHeading(), and existing CF
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+
+\series bold
+Advantages:
+\end_layout
+
+\begin_layout Itemize
+The least work to implement; mostly already documented
+\end_layout
+
+\begin_layout Itemize
+Results will be almost the same as for the KF
+\end_layout
+
+\begin_layout Itemize
+Often should be possible to process from old project archives
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Disadvantages:
+\end_layout
+
+\begin_layout Itemize
+Doesn't account for, e.g., IRU acceleration errors
+\end_layout
+
+\begin_layout Itemize
+Will be a step short of 
+\begin_inset Quotes eld
+\end_inset
+
+state of the art
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Subsection
+Requirements for Using the Kalman Filter
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+REQUIREMENTS FOR USING THE KALMAN FILTER:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.2cm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout AlertBlock
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Steps required for future processing or reprocessing:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+Must have IRU outputs (BLATA, BLONGA, BNORMA, BPITCHR, BROLLR, BYAWR) in
+ netCDF file.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Gyro measurements seldom were included in the netCDF files.
+ 
+\end_layout
+
+\begin_layout Enumerate
+1-Hz is adequate.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+Must determine time shifts accurately and shift appropriately.
+ THDG vs GPS is esp.
+\begin_inset space ~
+\end_inset
+
+important.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+Need a post-processing routine that adds variables with the Kalman-filter
+ corrections.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+Conduct further study of the specifications for uncertainty.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<+->
+\end_layout
+
+\end_inset
+
+Write documentation and archive that with the processing programs.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\end_body
+\end_document

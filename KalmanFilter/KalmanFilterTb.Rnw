@@ -93,7 +93,11 @@ thisFileName <- "KalmanFilter"
 require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
 require(numDeriv)    ## needed for the jacobian() function
 library(signal)
+library (TTR)
 setwd ('~/RStudio/Ranadu/KalmanFilter')
+## temporary until Ranadu updated:
+source ('~/RStudio/Ranadu/R/HeadingCorrection.R')
+source ('~/RStudio/Ranadu/R/PitchCorrection.R')
 Directory <- DataDirectory ()
 Flight <- "rf15HR" 				# XXX change this
 Project = "DWIRU"     			 # XXX change this
@@ -247,6 +251,31 @@ XfLArV <- function (data) {   ## XfLA but using input in radians and single row
   return (RblM)
 }
 
+XPitch <- function (pitch, roll, heading, .inverse=FALSE) {  # a-frame to l-frame
+  ## note: all in units of radians
+  if (!.inverse) {
+    pitchL <- -asin(-cos (heading) * sin (pitch) * cos (roll) - sin (heading) * sin (roll))
+    rollL  <-  asin(-sin (heading) * sin (pitch) * cos (roll) + cos (heading) * sin (roll))
+    A <- c(pitchL, rollL)
+    dim(A) <- c(length(pitch),2)
+    return (A)
+  } else {
+    lx <- sin (roll)
+    ly <- -sin (pitch)
+    lz <- -sqrt (1 - lx^2 - ly^2)
+    pitchA <- atan2 (lx * sin (heading) + ly * cos (heading), lz)
+    pitchA[pitchA < -pi/2] <- pitchA[pitchA < -pi/2] + pi
+    pitchA[pitchA >  pi/2] <- pitchA[pitchA >  pi/2] - pi
+    # rollA <- acos (lz / cos (pitchA))
+    rollA <- atan ((-cos(heading)*lx+sin(heading)*ly) /
+                    (sin(heading) * sin(pitchA)*lx+cos(heading)*sin(pitchA)*ly+cos(pitchA)*lz))
+    # rollA[rollA > pi/2] <- pi - rollA[rollA > pi/2] 
+    A <- c(pitchA, rollA)
+    dim(A) <- c(length(pitch), 2)
+    return (A)
+  }
+}
+
 # other-functions ---------------------------------------------------------
 
 Cradeg <- pi/180
@@ -296,15 +325,22 @@ Re <- StandardConstant ('Re')
 Data$Grav <- Data$Grav - StandardConstant('Omega')^2 * 
   (Re * sin (Data$LAT * Cradeg)^2 + Data$GGALT)
 
-STMFV <- function (sv, .aaframe='a') { 
+
+LFrame <- TRUE
+# LFrame <- FALSE
+STMFV <- function (sv, dbg=FALSE) { 
   stmf <- vector('numeric', length=15)
-  ## transform back to a-frame if necessary
-  if (.aaframe == 'l') {
-    svv1 <- cos (sv[9]) * sv[7] + sin (sv[9]) * sv[8]
-    sv[8] <- -sin(sv[9]) * sv[7] + cos(sv[9]) * sv[8]
-    sv[7] <- svv1
+  ## transform pitch and roll back to a-frame 
+  if (LFrame) {
+    x <- XPitch (sv[7], sv[8], sv[9], .inverse=TRUE)
+    sv[7] <- x[1]
+    sv[8] <- x[2]
   }
-  rlm <- XfLArV(sv)    
+  rlm <- XfLArV(sv)   
+  if (dbg) {
+    print (sprintf ('sv[7-9]=%f %f %f', sv[7],sv[8],sv[9]))
+    print (rlm)
+  }
   omega <- as.vector (c(-sv[5] / Rm, 
                         OmegaE*cos(sv[1])+sv[4]/(Rn),
                         OmegaE*sin(sv[1])+sv[4]*tan(sv[1])/Rn), mode='numeric')
@@ -318,7 +354,6 @@ STMFV <- function (sv, .aaframe='a') {
   SRM <- aperm( array (SRR, dim=c(3,3)))
   dRLA <- rlm %*% SRM - Oilb
   DR <- c(sv[5] / Rm, sv[4] / (Rn * cos (sv[1])), sv[6])
-  # G <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))    # * 0.9 improves pitch and roll!
   AA <- as.vector (c(sv[14], sv[13], sv[15]+Grav), mode='numeric') # aircraft-frame
   AL <- as.vector (rlm %*% as.matrix(AA), mode='numeric')   # l-frame
   ## now correct for angular effects
@@ -345,6 +380,20 @@ STMFV <- function (sv, .aaframe='a') {
             1/(1+(rlm[1,1]/rlm[1,2])^2) * (rlm[1,1]/rlm[1,2]) * 
               (dRLA[1,1]/rlm[1,1] - dRLA[1,2]/rlm[1,2]),
             0, 0, 0, 0, 0, 0)
+  ## transform angle derivatives back to l-frame
+  if (LFrame) {
+    x <- XPitch (sv[7]+stmf[7], sv[8]+stmf[8], sv[9]+stmf[9]) -
+         XPitch (sv[7], sv[8], sv[9])
+    stmf[7] <- x[1]
+    stmf[8] <- x[2]
+    # x <- rlm %*% as.matrix (c(stmf[8], -stmf[7], 0))
+    # stmf7 <- stmf[7]
+    # stmf8 <- stmf[8]
+    # stmf[7] <- cos(sv[9])*cos(sv[7])*cos(sv[8]) * stmf7 + 
+    #   (-cos(sv[9])*sin(sv[7])*sin(sv[8]) + cos(sv[9])*cos(sv[8])) *  stmf8
+    # stmf[8] <- (cos(sv[9])*cos(sv[7]) - sin(sv[9])*cos(sv[7])*cos(sv[8])) * stmf7 +
+    #   sin(sv[9])*sin(sv[7])*sin(sv[8]) * stmf8
+  }
   return (as.vector (stmf, mode='numeric'))
 }
 
@@ -353,10 +402,9 @@ STMFV <- function (sv, .aaframe='a') {
 <<INS-data, include=TRUE, echo=FALSE>>=
 
 SP <- with (Data, data.frame (LON, LAT, ALT, VNS, VEW, VSPD, 
-                              ROLL, PITCH, THDG, GGALT, GGVSPD, BLATA, BLONGA, BNORMA, 
+                              PITCH, ROLL, THDG, GGALT, GGVSPD, BLATA, BLONGA, BNORMA, 
                               BPITCHR, BROLLR, BYAWR,
                               GGVEW, GGVNS, Grav))
-
 ## adjustments:
 SP$BYAWR <- SP$BYAWR - 0.005
 SP$BROLLR <- SP$BROLLR + 0.0005
@@ -417,12 +465,18 @@ INS solution.
 SV <- with(Data[1, ], data.frame(LAT, LON, GGALT, VEW, VNS, VSPD, PITCH, ROLL, THDG,
                                  BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
 SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
-SP$LAT[1] <- SV$LAT
-SP$LON[1] <- SV$LON
+SP$LAT[1] <- SV$LAT/Cradeg
+SP$LON[1] <- SV$LON/Cradeg
 SP$ALT[1] <- SV$GGALT
 SP$VEW[1] <- SV$VEW
 SP$VNS[1] <- SV$VNS
 SP$VSPD[1] <- SV$VSPD
+## convert pitch/roll of SV to l-frame components:
+if (LFrame) {  ## initialize state vector in l-frame 
+  x <- XPitch (SV$PITCH, SV$ROLL, SV$THDG)
+  SV$PITCH <- x[1]
+  SV$ROLL  <- x[2]
+}
 SP$PITCH[1] <- SV$PITCH
 SP$ROLL[1] <- SV$ROLL
 SP$THDG[1] <- SV$THDG
@@ -432,13 +486,14 @@ sv <- as.vector (SV, mode='numeric')
 Rn <- SP$Rn[1]
 Rm <- SP$Rm[1]
 Grav <- SP$Grav[1]
-stmf <- STMFV (sv)
+stmf <- STMFV (sv)  # returns attitude-angle errors in l-frame if LFrame is TRUE
 ## feedback coefficients for baro loop:
 C0 <- 0.15; C1 <- 0.0075; C2 <- 0.000125
 wp3F <- 0;
 hxF <- hxxF <- 0
 hi3F <- SP$GGALT[1]
 RK <- TRUE    ## use Runge-Kutta integration if true
+# RK <- FALSE
 
 for (i in 2:DL) {
   Rn <- SP$Rn[i]
@@ -460,11 +515,17 @@ for (i in 2:DL) {
     stmf4 <- STMFV (sv3)
     stmf <- (stmf1 + stmf4 + 2*(stmf2+stmf3))/6
   } else {
-    stmf <- STMFV (sv)
+    if (i == 12001) {
+      dbg <- TRUE
+      print (sv)
+    } else {
+      dbg <- FALSE
+    }
+    stmf <- STMFV (sv, dbg)
   }
   sv <- sv + stmf * dt
   if (sv[9] < 0) {sv[9] <- sv[9] + twoPi}
-  if (sv[9] > twoPi) {sv[9]<- sv[9] - twoPi}
+  if (sv[9] > twoPi) {sv[9] <- sv[9] - twoPi}
   ## baro-loop
   wp3F <- wp3F + (stmf[6] - C1*hxF - C2 * hxxF) * dt
   hi3F <- hi3F + (wp3F - C0 * hxF) * dt
@@ -477,12 +538,18 @@ for (i in 2:DL) {
   SP$VEW[i] <- sv[4]
   SP$VNS[i] <- sv[5]
   SP$VSPD[i] <- sv[6]
-  SP$PITCH[i] <- sv[7] 
-  SP$ROLL[i] <- sv[8] 
+  SP$PITCH[i] <- sv[7]
+  SP$ROLL[i] <- sv[8]
   SP$THDG[i] <- sv[9]
 }
 SP$LAT <- SP$LAT / Cradeg
 SP$LON <- SP$LON / Cradeg
+## convert pitch/roll to a-frame components:
+if (LFrame) {
+  x <- XPitch (SP$PITCH, SP$ROLL, SP$THDG, .inverse=TRUE)
+  SP$PITCH <- x[,1]
+  SP$ROLL <- x[,2]
+}
 SP$PITCH <- SP$PITCH / Cradeg
 SP$ROLL <- SP$ROLL / Cradeg
 SP$THDG <- SP$THDG / Cradeg
@@ -554,48 +621,12 @@ is therefore a reasonable basis for the Kalman filter that follows.
 
 The preceding steps verify that at least an approximate calculation
 of the derivatives of the state variables is available. On that basis,
-an error-state Kalman filter can be developed. Before presenting that
-development, however, it is necessary to discuss two departures from
-normal practice in how this Kalman filter will be implemented:
-\begin{enumerate}
-\item Errors in the pitch and roll angles represent errors in the calculated
-level position of the IRU. For a fixed orientation error, when the
-aircraft turns, the errors in pitch and roll intermix, with for example
-a pitch error during northbound flight becoming a roll error during
-eastbound flight while the roll error becomes a pitch error. If a
-Kalman filter is implemented with error terms for pitch and roll in
-the a-frame, there will be large transient errors arising from course
-changes that must be corrected via the Kalman filter, whereas if the
-filter is implemented in the l-frame the respective north and east
-components of the attitude-angle errors remain approximately constant.
-For this reason, it is preferable to implement the filter using attitude-angle
-errors as they appear in the l-frame. The correction terms developed
-by the Kalman filter must then be transformed back to the a-frame
-before they are applied to the measurements of pitch and roll. 
-\item Conventional implementations of Kalman-filter updating use the measurements
-of position and velocity from the GPS receiver as the external measurements
-to which the INS measurements are compared. This works well for all
-but the heading measurement. A heading error results in erroneous
-resolution of measured accelerations into l-frame components and so
-to errors in velocity, but the feedback of these errors to heading
-is slow and noisy. Therefore, a more direct method of coupling GPS-derived
-measurements to heading errors will be used by differentiating the
-GPS-measured valocities to obtain independent measurements of acceleration
-and then using these measured l-frame accelerations as additional
-measurements to be compared to the INS solution. If there is an error
-in heading, these accelerations will lead to a difference between
-the GPS-derived direction of l-frame acceleration and the INS-derived
-direction, and this can be considered a direct measurement of heading
-error. Except in turns, the measured l-frame acceleration is too small
-and noisy for this to be effective, but turns produce strong signals
-and consequent constraints on the heading error.
-\end{enumerate}
-The Kalman filter is then implemented as follows:
+an error-state Kalman filter can be developed, as follows:
 \begin{enumerate}
 \item The first step is to initialize an error-state-vector $\delta\mathbf{x}$
 from initial measurements of the differences between the INS and GPS
-values of position, velocity, and acceleration. Other errors are unknown
-at the start of the integration and so will be initialized as zero.
+values of position and velocity. Other errors are unknown at the start
+of the integration and so will be initialized as zero.
 \item The covariance matrix characterizing the errors in the error-state-vector
 is also needed. This is here initialized to have rather large components
 because it is expected that the GPS measurements will have much lower
@@ -631,23 +662,15 @@ can be updated via\\
 \[
 \mathbf{K}=\mathbf{V\thinspace}\mathbf{H}^{T}\mathbf{\left\{ \mathbf{H}\thinspace\mathbf{V}\thinspace\mathbf{H}^{T}+\mathbf{R}\right\} ^{-1}}
 \]
-where $\mathbf{H}$ is a 15X9 matrix representing how the 9 measured
-differences (GPS-INS) correspond to the error-state vector. $\mathbf{R}$
-is the measurement-noise-covariance matrix representing the GPS noise,
-a with diagonal components that are the squares of these components::
-\{50/$R_{m}$, 50/($R_{n}\cos\Phi$, 100, 0.1, 0.1, 0.1, 0.001, 0.001,
-0.001\}. The effect of measured accelerations is more complex. The
-l-frame errors in acceleration, transformed to the a-frame, correspond
-directly to the measured accelerations from the INU (BLATA, BLONGA,
-BNORMA), so appropriate coupling is to include the appropriate direction-cosine
-transformation matrix as the coupling between the GPS measurements
-and the IRU-provided accelerations. This requires that $\mathbf{H}$
-contain components in the submatrix $\mathbf{H}_{7-9,\,13-15}$ that
-are $\mathbf{R}_{l}^{a}$ as defined previously.
-\item Define \textbf{$\delta\mathbf{z}$ }as the set of 9 measurements consisting
-of the differences between GPS and INS measurements of components
-of position, velocity and acceleration. The error-state vector is
-then further updated as follows:\\
+where $\mathbf{H}$ is a 15X6 diagonal matrix representing how the
+6 measured differences (GPS-INS) correspond to the error-state vector.
+$\mathbf{R}$ is the measurement-noise-covariance matrix representing
+the GPS noise, a 6x6 matrix having diagonal elements that are the
+squares of these components: \{50/$R_{m}$, 50/($R_{n}\cos\Phi$,
+100, 0.1, 0.1, 0.1\}.
+\item Define \textbf{$\delta\mathbf{z}$ }as the set of six measurements
+consisting of the differences between GPS and INS positions and velocities.
+The error-state vector is then further updated as follows:\\
 \[
 \delta\mathbf{x}_{k}\leftarrow\delta\mathbf{x}_{k}+\mathbf{K\{\delta}\mathbf{z}-\mathbf{H}\delta\mathbf{x}\}
 \]
@@ -671,30 +694,34 @@ of measured velocity components and attitude angles.
 
 <<new-data, include=TRUE, echo=FALSE>>=
 
-Flight <- "16" 				# XXX change this
-Project = "DW"     			 # XXX change this
+Flight <- "16" 			
+Project = "DW"     	
 ProjectDir <- "DEEPWAVE"
 fname = sprintf("%s%s/%s%s.nc", Directory, ProjectDir, Project, Flight)
-D1 <- getNetCDF (fname, VarList)
+D1 <- getNetCDF (fname, c(VarList, 'TASX'))
 DL <- nrow(D1)
-## adjustments:
-D1$BYAWR <- D1$BYAWR - 0.005
-D1$BROLLR <- D1$BROLLR + 0.0005
-D1$BPITCHR <- D1$BPITCHR + 0.0005
-# D1$BNORMA <- D1$BNORMA*1.005 - 0.015
-# D1$BLONGA <- D1$BLONGA * 0.96
-# D1$BLATA <- D1$BLATA * 1.1
 s <- -120
+si <- 0
+s <- 92
 si <- 0
 SHIFT <- FALSE
 SHIFT <- TRUE
+Rate <- 1
 if (SHIFT) {
-  D1$GGVEW <- ShiftInTime (D1$GGVEW, Rate, s)    
-  D1$GGVNS <- ShiftInTime (D1$GGVNS, Rate, s)
-  # Data$BLONGA <- ShiftInTime (Data$BLONGA, Rate, s-80)
-  # Data$BLATA <- ShiftInTime (Data$BLATA, Rate, s-80)
-  # Data$BNORMA <- ShiftInTime (Data$BNORMA, Rate, s-80)
+  # D1$GGVEW <- ShiftInTime (D1$GGVEW, Rate, s)    ## this is needed for pitch and heading corrections
+  # D1$GGVNS <- ShiftInTime (D1$GGVNS, Rate, s)
+  D1$THDG <- ShiftInTime (D1$THDG, Rate, s)
+  D1$PITCH <- ShiftInTime (D1$PITCH, Rate, s)
+  D1$ROLL <- ShiftInTime (D1$ROLL, Rate, s)
+  D1$VEW <- ShiftInTime (D1$VEW, Rate, s)
+  D1$VNS <- ShiftInTime (D1$VNS, Rate, s)
+  D1$VSPD <- ShiftInTime (D1$VSPD, Rate, s)
+  D1$BLONGA <- ShiftInTime (D1$BLONGA, Rate, si)
+  D1$BLATA <- ShiftInTime (D1$BLATA, Rate, si)
+  D1$BNORMA <- ShiftInTime (D1$BNORMA, Rate, si)
 }
+## remove the cal-coefficient offset: (+0.08)
+# D1$THDG <- D1$THDG + 0.08
 dt <- 1
 D1$Rn <- Ree / (1 - (Ecc*sin(D1$GGLAT*Cradeg))^2)^0.5 + D1$GGALT
 D1$Rm <- D1$Rn * (1-Ecc^2) / (1-(Ecc*sin(D1$GGLAT*Cradeg))^2) + D1$GGALT
@@ -725,9 +752,9 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
   ## The following are accelerations determined from derivatives of the GPS velocities.
   ## These should match the measured accelerations after transformation to the l-frame
   ## and application of the rotation correction:
-  D1$vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
-  D1$vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
-  D1$vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
+  vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
+  vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
+  vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
   ## transform to the a-frame for comparison to the IRU:
   G <- D1$Grav
   VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
@@ -755,7 +782,6 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
   D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
   .span <- 301
   SMOOTH <- FALSE
-  SMOOTH <- TRUE
   if (SMOOTH) {
     vns <- signal::sgolayfilt (vns, 3, .span)
     vew <- signal::sgolayfilt (vew, 3, .span)
@@ -766,7 +792,7 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
     pitch <- signal::sgolayfilt (D1$PITCH, 3, .span)
     roll <- signal::sgolayfilt (D1$ROLL, 3, .span)
     thdg <- signal::sgolayfilt (D1$THDG, 3, .span)
-
+    ## these smoothed values are not being used.
     D1$VNSF <- vns
     D1$VEWF <- vew
     D1$VSPDF <- vspd
@@ -779,13 +805,42 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
   }
 
 ## get the pitch and roll in the l-frame:
+.pitch <- D1$PITCH * Cradeg
+.roll <- D1$ROLL * Cradeg
 .thdg <- D1$THDG * Cradeg
-D1$PITCHL <- D1$PITCH * cos (.thdg) - D1$ROLL * sin (.thdg)
-D1$ROLLL <-  D1$PITCH * sin (.thdg) + D1$ROLL * cos (.thdg)
+x <- XPitch (.pitch, .roll, .thdg)
+# pitchL <- x[,1]
+# rollL <- x[,2]
+  ## note: all in units of radians
+  # pitchL <- cos (.thdg) * sin (D1$PITCH*Cradeg) * cos (D1$ROLL*Cradeg) - sin (.thdg) * sin (D1$ROLL*Cradeg)
+  # rollL  <- sin (.thdg) * sin (D1$PITCH*Cradeg) * cos (D1$ROLL*Cradeg) + cos (.thdg) * sin (D1$ROLL*Cradeg)
+D1$PITCHL <- x[, 1] / Cradeg  #pitchL
+D1$ROLLL <-  x[, 2] / Cradeg  #rollL
 
-fm1 <- lm (D1$vedot ~ D1$LACCX)
-fm2 <- lm (D1$vndot ~ D1$LACCY)
-fm3 <- lm (D1$vudot ~ D1$LACCZ)
+  A2 <- D1$LACCX^2 + D1$LACCY^2
+  A <- sqrt(A2)
+  D1$herr <- (-D1$LACCY*(vedot-D1$LACCX)+D1$LACCX*(vndot-D1$LACCY)) / (Cradeg*A2)
+  D1$herr <- (D1$LACCX*(vedot-D1$LACCX)-D1$LACCY * (vndot-D1$LACCY)) / (2*D1$LACCX*D1$LACCY)
+  D1$herr <- (atan2(D1$LACCX, D1$LACCY) - atan2 (vedot, vndot))/Cradeg
+  D1$herr[D1$herr > 180] <- D1$herr[D1$herr > 180] - 360
+  D1$herr[D1$herr < -180] <- D1$herr[D1$herr < -180] + 360
+  D1$varh <- runVar (D1$herr, n=30)
+  D1$varh[is.na(D1$varh)] <- 1000
+  
+  ## a test of the time shift:
+  D1$sdh <- sqrt(D1$varh)
+  D1$he <- D1$herr
+  D1$he[D1$sdh > 0.1] <- NA
+  DD1 <- D1[setRange(D1,61000,123000),]
+  plotWAC(DD1$ROLL, DD1$he, xlab='Roll', type='p', col='blue')
+  fff <- lm(DD1$he ~ I(tan(DD1$ROLL*Cradeg)))
+  b <- coef(fff)[2]*Cradeg
+  deltaT <- -b * mean (DD1$TASX, na.rm=TRUE) / 9.8
+  print (sprintf ('time shift is %f after shift of %f applied', deltaT, s/1000))
+
+fm1 <- lm (vedot ~ D1$LACCX)
+fm2 <- lm (vndot ~ D1$LACCY)
+fm3 <- lm (vudot ~ D1$LACCZ)
 
 @
 
@@ -824,13 +879,15 @@ measurement vector for Kalman filtering.
 tau <- 60
 GCF <- function (sv, sp) {
   gcf <- vector('numeric', length=15)
-  gcf[1] <- 100 / sp$Rm
-  gcf[2] <- 100 / (sp$Rn * cos (sv[1]))
-  gcf[3] <- 50
-  gcf[4:6] <- 0.5
-  gcf[7:9] <- 0.05*Cradeg
-  gcf[10:12] <- 0.05*Cradeg*sqrt(2/tau)
-  gcf[13:15] <- 0.002*sqrt(2/tau)
+  gcf[1] <- 30 / sp$Rm
+  gcf[2] <- 30 / (sp$Rn * cos (sv[1]))
+  gcf[3] <- 150
+  gcf[4:5] <- 0.15
+  gcf[6] <- 1.5
+  gcf[7:8] <- 0.03*Cradeg #0.03*Cradeg  #0.05*Cradeg  ## large error gives better updating
+  gcf[9] <- 0.01*Cradeg
+  gcf[10:12] <- 0.015*Cradeg*sqrt(2/tau)
+  gcf[13:15] <- 0.0005*sqrt(2/tau)
   return (gcf)
 }
 i <- 1
@@ -840,37 +897,33 @@ gcf <- as.numeric (GCF (SV, D1[i, ]))
 # SVEP <- SVE + dt * as.vector(dsve, mode='numeric')  ## take a time step
 
 ## The measurement model:
-GAEL <- c(D1$LACCX - vedot, D1$LACCY - vndot, D1$LACCZ - vudot)
-dim(GAEL) <- c(DL, 3)
-## transform to the a-frame
-GAE <- XformLA (D1, GAEL, .inverse=TRUE)
-DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS, VSPD-GGVSPD)
-DZ <- c(DZ, GAE[,1], GAE[,2], GAE[,3]))
-dim(DZ) <- c(DL, 9)
+DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS, VSPD-GGVSPD))
+DZ <- c(DZ, D1$LACCX-vedot, D1$LACCY-vndot, D1$LACCZ-vudot, D1$herr*Cradeg)
+dim(DZ) <- c(DL, 10)
 DZ[,1:2] <- DZ[, 1:2] * Cradeg
 
 ## the observation matrix: (the first six components of the state error vector are observable)
-## components 7-9 are connected to IRU-measured accelerations via the transformation matrix l->a,
-## so matrix H must vary with aircraft attitude angles
-H <- diag(1, nrow=9, ncol=15)
+H <- diag(1, nrow=10, ncol=15)
 for (k in 7:9) {
   H[k,k] <- 0
-  H[k,k+6] <- 1
+  # H[k,k+6] <- 1
 }
+H[10,10] <- 0
+# H[10,9] <- 1
 
 ## at any time step, assume the measurements are contaminated by noise:
-## GPS measurement noise
-RN <- c(50/D1$Rm[1], 50/(D1$Rn[1]*cos(SV[1])), 10, 0.1, 0.1, 0.1)
-RCV <- matrix (rep(0,81), ncol=9)
-RCV[1,1] <- (50/D1$Rm[1])^2  ## latitude
-RCV[2,2] <- (50/(D1$Rn[1]*cos(SV[1])))^2
-RCV[3,3] <- 100^2
-RCV[4,4] <- 0.1^2            ## ve
-RCV[5,5] <- 0.1^2
-RCV[6,6] <- 0.1^2
-RCV[7,7] <- 0.001^2
-RCV[8,8] <- 0.001^2
-RCV[9,9] <- 0.001^2
+RCV <- matrix (rep(0,100), ncol=10)
+RCV[1,1] <- (1500/D1$Rm[1])^2  ## latitude
+RCV[2,2] <- (1500/(D1$Rn[1]*cos(SV[1])))^2
+RCV[3,3] <- 300^2
+RCV[4,4] <- 3^2            ## ve
+RCV[5,5] <- 3^2
+RCV[6,6] <- 3^2
+RCV[7,7] <- 1^2
+RCV[8,8] <- 1^2
+RCV[9,9] <- 1^2
+RCV10 <- (0.5*Cradeg)^2  #0.1
+RCV[10,10] <- RCV10 / A[i]^4
 
 ## initialize covariance matrix
 CV <- matrix (rep(0,225), ncol=15)
@@ -897,6 +950,9 @@ Q <- diag(gcf^2, 15)
 
 Data <- D1
 DL <- nrow (Data)
+BACKWARD <- FALSE
+# BACKWARD <- TRUE  ## if true, calculate from end to start
+
   # find PITCHL, ROLLL in the l-frame
   # find PitchL, RollL, ThdgL in the l-frame: start with unit vector normal to AC
   # UV <- array (c(rep(0,DL), rep(0,DL), rep(-1,DL)), dim=c(DL,3))
@@ -908,7 +964,9 @@ DL <- nrow (Data)
   #   RollA <- (cos(.hdg)*RollL - sin(.hdg)*PitchL)/Cradeg
 
 ## note: using l-frame PITCH and ROLL; STMFV must account for this
-SV <- with(Data[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCHL, ROLLL, THDG,
+i <- 1
+if (BACKWARD) {i <- DL}
+SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCHL, ROLLL, THDG,
                                  BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
 SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
 NSTEP <- 5      ## update time
@@ -917,14 +975,30 @@ CVEF <- array(dim=c(DL/NSTEP, 15))
 ## initialize error state vector
 SVE <- rep (0, 15)  ## respectively: (lat,lon,alt) (vew,vns,vspd),
 ## (pitch,roll,thdg) (rot. rates) (accel components)
-SVE[1:6] <- DZ[1, 1:6]
-SVE[7:9] <- 0  ## might initialize using pitch/roll/heading-correction functions here
+SVE[1:6] <- DZ[i, 1:6]
+SVE[7:8] <- 0  ## might initialize using pitch/roll/heading-correction functions here
+SVE[9] <- -0.08 * Cradeg
 ## start with zero for gyro and accelerometer errors
-SVEF[1, ] <- SVE
-CVEF[1, ] <- diag (CV)
-RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
-Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
-for (i in seq(2*NSTEP, DL, by=NSTEP)) {
+SVEF[i, ] <- SVE
+CVEF[i, ] <- diag (CV)
+# RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
+# Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
+nStart <- 1+NSTEP
+nEnd <- DL
+NS <- NSTEP
+if (BACKWARD) {
+  nStart <- DL-NSTEP
+  nEnd <- 1
+  NS <- -NSTEP
+}
+pcntlast <- 0
+# for (i in seq(1+NSTEP, DL, by=NSTEP)) {
+for (i in seq(nStart, nEnd, by=NS)) {
+  pcnt <- as.integer ((i-nStart) / (nEnd-nStart) * 100)
+  if ((pcnt %% 10) == 0 && pcnt != pcntlast) {
+    print (sprintf ('percent done=%d', pcnt))
+    pcntlast <- pcnt
+  }
   SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCHL, ROLLL, THDG,
                                    BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
   SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
@@ -933,7 +1007,8 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
   Grav <- Data$Grav[i]
   sv <- as.vector (SV, mode='numeric')
   # stmf <- STMFV (sv)
-  dcm <- jacobian (STMFV, sv, .aaframe='l') * dt * NSTEP + diag(15)
+  dcm <- jacobian (STMFV, sv) * dt * NS + diag(15)
+  if (i == 1+NS*500) {dcmSave <- dcm}
   ## modify to include this?
 ## modify this to include decaying error terms for the measurements:
 # dcm[10,10] <- dcm[11,11] <- dcm[12,12] <- -1/tau
@@ -943,6 +1018,8 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
   ## update the covariance matrix:
   CV <- dcm %*% (CV %*% t(dcm)) + Q
   ## the Kalman gain:
+  # RCV[10,10] <- RCV10 / A[i]^2
+  RCV[10,10] <- Data$varh[i]
   Kb <- solve (H %*% CV %*% t(H) + RCV)
   K <- CV %*% t(H) %*% Kb
   DZZ <- DZ[i, ] - H %*% SVE
@@ -981,16 +1058,23 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
   Data$VEWKF <- Data$VEW - Cor[, 4]
   Data$VNSKF <- Data$VNS - Cor[, 5]
   Data$VSPDKF <- Data$VSPD - Cor[, 6]
-  Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
-  Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
-  Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
+  # Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
+  # Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
+  # Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
   Data$BPITCHRKF <- Data$BPITCHR - Cor[, 10]/Cradeg
   Data$BROLLRKF <- Data$BROLLR - Cor[, 11]/Cradeg
   Data$BYAWRKF <- Data$BYAWR - Cor[, 12]/Cradeg
   Data$BLATAKF <- Data$BLATA - Cor[, 13]
   Data$BLONGAKF <- Data$BLONGA - Cor[, 14]
   Data$BNORMAKF <- Data$BNORMA - Cor[, 15]
-
+## smooth the pitch, roll, and heading corrections:
+  for (k in 7:9) {
+    Cor[, k] <- SmoothInterp (Cor[, k], .Length=1801)
+  }
+  x <- XPitch(Data$PITCHL*Cradeg-Cor[,7], Data$ROLLL*Cradeg-Cor[,8], Data$THDG*Cradeg-Cor[,9], .inverse=TRUE)
+  Data$PITCHKF <- x[,1]/Cradeg
+  Data$ROLLKF <- x[,2]/Cradeg
+  Data$THDGKF <- Data$THDG-Cor[,9]/Cradeg
 Data$DLAT <- Data$LATKF-Data$GGLAT
 Data$CLAT <- -Cor[,1] / Cradeg
 Data$DLON <- Data$LONKF-Data$GGLON
@@ -1003,9 +1087,9 @@ Data$DVNS <- Data$VNSKF-Data$GGVNS
 Data$CVNS <- -Cor[,5]
 Data$DVSPD <- Data$VSPDKF-Data$GGVSPD
 Data$CVSPD <- -Cor[,6]
-Data$CPITCH <- Data$PITCHKF-Data$PITCH
-Data$CROLL <- Data$ROLLKF-Data$ROLL
-Data$CTHDG <- Data$THDGKF-Data$THDG
+# Data$CPITCH <- Data$PITCHKF-Data$PITCH
+# Data$CROLL <- Data$ROLLKF-Data$ROLL
+# Data$CTHDG <- Data$THDGKF-Data$THDG
 KalmanCaptions <- c("Comparison of the KF, GPS, and INS values of latitude, longitude, and altitude for DEEPWAVE flight 16. DLAT, DLON, and DALT (blue lines) are the differences between the Kalman-filter result and GPS measurement, while CLAT, CLON, and CALT (green lines) are the corrections applied to the original INS values by the Kalman filter.",
                     "Comparison of the KF, GPS, and INS values of aircraft-velocity components for DEEPWAVE flight 16. Blue lines show the differences between the Kalman-filter results and the corresponding GPS-provided values, while the green lines show the corrections applied to the original INS values by the Kalman filter.",
                       "Pitch Correction from the Kalman filter (CPITCH, blue line) and from Ranadu::CorrectPitch (PC, red line)",
@@ -1043,32 +1127,62 @@ op <- par (mar=c(5,4,1,1)+0.1)
 plotWAC (subset (Data[r, ],, c(Time, DVSPD, CVSPD)))
 op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
 PC <- CorrectPitch(Data, .span=601)
-Data$PC <- -PC[, 1]
-Data$RC <- -PC[, 2]
+Data$PC <- PC[, 1]
+Data$RC <- PC[, 2]
 ## translate pitch/roll corrections to the a-frame:
 .hdg <- Data$THDG * Cradeg
-CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
-CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
-Data$CPITCH <- CPITCH / Cradeg
-Data$CROLL <- CROLL / Cradeg
+# CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
+# CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
+# Data$CPITCH <- CPITCH / Cradeg
+# Data$CROLL <- CROLL / Cradeg
+Data$CPITCH <- Data$PITCHKF-Data$PITCH
+Data$CROLL <- Data$ROLLKF-Data$ROLL
+Data$CTHDG <- Data$THDGKF-Data$THDG
 Data$CPITCH <- SmoothInterp (Data$CPITCH, .Length=181)
 Data$CROLL <- SmoothInterp (Data$CROLL, .Length=181)
-Data$HC <- CorrectHeading (Data, .plotfile='./HCPlot.pdf')
+Data$CTHDG <- SmoothInterp (Data$CTHDG, .Length=181)
+## data processing introduced a shift of -0.08
+Data$HC <- -CorrectHeading (Data, .plotfile='./HCPlot.pdf')
 r <- setRange (Data, 70000, 123000)
-plotWAC(subset(Data[r,],,c(Time, CPITCH, PC)), ylab=expression(paste('PITCH CORRECTION',' [',degree,']')), ylim=c(-0.05, 0.05), lwd=c(0.7,0.7), col=c('blue', 'red'))
 ival <- abs(Data$ROLL) > 4
-Data$CPITCH[ival] <- NA
 Data$PC[ival] <- NA
+plotWAC(subset(Data[r,],,c(Time, CPITCH, PC)), ylab=expression(paste('pitch correction',' [',degree,']')), ylim=c(-0.05, 0.05), lwd=c(0.7,3), col=c('blue', 'red'))
+PE <- VCor[,7]
+PE[PE < 1.e-10] <- 1.e-10
+PE <- PE / 1015
+PE <- sqrt(PE)
+Data$CPITCH[ival] <- NA
 lineWAC(Data$Time[r], Data$CPITCH[r], lwd=3, col='blue')
-lineWAC(Data$Time[r], Data$PC[r], lwd=3, col='red')
+# lineWAC(Data$Time[r], Data$PC[r], lwd=3, col='red')
 abline(h=0, col='darkorange', lty=2)
-plotWAC(subset(Data[r,],,c(Time, CROLL, RC)), ylab=expression(paste('ROLL CORRECTION [',degree,']')), ylim=c(-0.05,0.05), lwd=c(0.7,0.7), col=c('blue', 'red'))
-Data$CROLL[ival] <- NA
+plotWAC(subset(Data[r,],,c(Time, CROLL, RC)), ylab=expression(paste('roll correction [',degree,']')), ylim=c(-0.05,0.05), lwd=c(0.7,0.7), col=c('blue', 'red'))
+# Data$CROLL[ival] <- NA
 Data$RC[ival] <- NA
 lineWAC(Data$Time[r], Data$CROLL[r], lwd=3, col='blue')
 lineWAC(Data$Time[r], Data$RC[r], lwd=3, col='red')
 abline(h=0, col='darkorange', lty=2)
-plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)))
+plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)), ylab=expression(paste('heading correction [',degree,']')), ylim=c(-0.15,0.15), lwd=0.7)
+abline(h=0, col='darkorange', lty=2)
+HE <- VCor[,9]
+HE[HE < 0.0025] <- 0.0025
+HE <- sqrt(HE)
+# lineWAC(Data$Time[r], Data$THDG[r]/1000, col='brown', lwd=0.7)
+# lineWAC(Data$Time, Data$CTHDG-HE, col='magenta', lwd=0.7)
+# lineWAC(Data$Time, Data$CTHDG+HE, col='magenta', lwd=0.7)
+iv <- HE > 0.051
+CCTHDG <- Data$CTHDG
+CCTHDG[iv] <- NA
+lineWAC(Data$Time[r], CCTHDG[r], lwd=3, col='blue')
+SS <- smooth.spline(Data$Time[r], Data$CTHDG[r], w=1/HE[r]^2, spar=1.25)
+Data$HCS <- predict(SS, as.numeric(Data$Time))$y
+lineWAC(Data$Time[r], Data$HCS[r], col='red')
+# plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)))
+Data$pitch_L <- Cor[, 7]/Cradeg
+Data$roll_L <- Cor[, 8]/Cradeg
+plotWAC (subset(Data[r,],,c(Time, pitch_L, roll_L)), ylim=c(-0.05,0.05), ylab=expression (paste ('correction [',degree,']')), main="l-frame pitch correction")
+
+lineWAC(Data$Time[r], (Cor[r,7]+PE[r])/Cradeg, col='darkorange', lwd=1)
+lineWAC(Data$Time[r], (Cor[r,7]-PE[r])/Cradeg, col='darkorange', lwd=1)
 
 @
 
