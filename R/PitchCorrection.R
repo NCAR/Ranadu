@@ -84,8 +84,8 @@ CorrectPitch <- function (D, .span=1013) {
   .hdg <- D$THDG*Cradeg
   # deltaPitch <- (sin(.hdg)*deltaRollL + cos(.hdg)*deltaPitchL)/Cradeg
   # deltaRoll <- (cos(.hdg)*deltaRollL - sin(.hdg)*deltaPitchL)/Cradeg
-  deltaPitch <- (sin(.hdg)*deltaRollL - cos(.hdg)*deltaPitchL)/Cradeg
-  deltaRoll <- (-cos(.hdg)*deltaRollL - sin(.hdg)*deltaPitchL)/Cradeg
+  deltaPitch <- (-sin(.hdg)*deltaRollL + cos(.hdg)*deltaPitchL)/Cradeg
+  deltaRoll <- (cos(.hdg)*deltaRollL + sin(.hdg)*deltaPitchL)/Cradeg
   if (data.rate > 1) {
 #     PC <- vector ("numeric", LD)
 #     RC <- vector ("numeric", LD)
