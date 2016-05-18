@@ -30,6 +30,6 @@ License: GPL
 Depends:
     R (>= 2.10),ncdf4,maps,ggplot2,ggthemes
 Imports:
-    tcltk,nleqslv,zoo,fields,stats,signal
+    tcltk,nleqslv,zoo,fields, stats, signal
 LazyData: true
 RoxygenNote: 5.0.1

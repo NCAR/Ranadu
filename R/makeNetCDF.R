@@ -40,11 +40,29 @@ makeNetCDF <- function (.d, newNetCDFname) {
   tref <- sub ("seconds since ", "", Dimensions[["Time"]]$units)
   tstart <- as.integer(difftime (.d$Time[1], tref, units='secs', tz='UTC'))
   tend   <- as.integer(difftime (.d$Time[nrow(.d)],tref, units='secs', tz='UTC'))
-  Dimensions[["Time"]]$vars <- tstart:tend
-  Dimensions[["Time"]]$len <- tend - tstart + 1
+  ## search for gaps in time:
+  # r <- NULL
+  # if (tend-tstart+1 > nrow (.d)) {
+  #   for (i in 2:nrow(.d)) {
+  #     if ((.d$Time[i] - .d$Time[i-1]) > 1) {
+  #       print (sprintf ('i=%d, Time=%s, next is %s', i, .d$Time[i-1], .d$Time[i]))
+  #       r1 <- as.integer (difftime (.d$Time[i-1], tref, units='secs', tz='UTC')) + 1
+  #       r2 <- as.integer (difftime (.d$Time[i], tref, units='secs', tz='UTC')) - 1
+  #       r <- c(r, r1:r2)
+  #     }
+  #   }
+  # }
+  # Dimensions[["Time"]]$vars <- tstart:tend
+  if (tend-tstart+1 > nrow(.d)) {
+    tt <- vector ('integer', nrow(.d))
+    for (i in 1:nrow(.d)) {
+      tt[i] <- as.integer (difftime (.d$Time[i], tref, units='secs', tz='UTC'))
+    }
+  } else {tt <- tstart:tend}
+  Dimensions[["Time"]]$len <- nrow(.d)
   ## must redefine Time to get it to be integer as is convention in RAF netCDF
   Dimensions[["Time"]] <- ncdim_def ("Time", Dimensions[["Time"]]$units,
-                                        vals=tstart:tend, create_dimvar=TRUE)
+                                        vals=tt, create_dimvar=TRUE)
   HR <- 0
   if ("sps25" %in% names (Dimensions)) {
     HR <- 25

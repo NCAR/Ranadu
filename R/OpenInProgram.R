@@ -58,7 +58,7 @@ OpenInProgram <- function(Data, Program="ncplot", dataDirectory=sprintf("%s/R", 
     if (grepl ("XANFILE", line)) {
       line <- gsub ("=.*", sprintf ("=%s", gsub ("\\.nc", '', netCDFfileName)), line)
     }
-    newlines[length (newlines) + 1] <- line
+    # newlines[length (newlines) + 1] <- line
     if (grepl ("XANDATA", line)) {
       line <- gsub ("=.*", sprintf ("=%s", dataDirectory), line)
     }
