@@ -1455,7 +1455,7 @@ status open
 status open
 
 \begin_layout Plain Layout
-Find time-derivatives for the 9-component the state vector:
+Find time-derivatives for the 9-component state vector:
 \end_layout
 
 \end_inset
@@ -1922,7 +1922,7 @@ and
 \begin_inset space ~
 \end_inset
 
-RCV: noise matrices, INS and GPS
+R: noise matrices, INS and GPS
 \end_layout
 
 \begin_layout Description
@@ -1972,7 +1972,7 @@ CV <- dcm %*% (CV %*% t(dcm)) + Q
 \begin_layout LyX-Code
 
 \size footnotesize
-K <- CV %*% t(H) %*% solve (H %*% CV %*% t(H) + RCV)
+K <- CV %*% t(H) %*% solve (H %*% CV %*% t(H) + R)
 \end_layout
 
 \begin_layout LyX-Code
@@ -2104,7 +2104,11 @@ SUBTLETIES REGARDING PITCH, ROLL, AND HEADING
 status open
 
 \begin_layout Plain Layout
-Use errors for pitch and roll in the l-frame
+Use errors for pitch and roll in the 
+\emph on
+l-
+\emph default
+frame
 \end_layout
 
 \end_inset
@@ -2124,8 +2128,11 @@ frame.
 \end_layout
 
 \begin_layout Description
-Explanation: The INS calculates orientation in an inertial frame; the l-frame
- is a better match to an inertial frame.
+Explanation: The INS calculates orientation in an inertial frame; the 
+\emph on
+l-
+\emph default
+frame is a better match to an inertial frame.
 \end_layout
 
 \begin_layout Description
@@ -2490,15 +2497,15 @@ Pitch and Roll
 status open
 
 \begin_layout Plain Layout
-PITCH AND ROLL IN THE 
-\emph on
-l
-\emph default
+PITCH AND ROLL IN THE
+\family roman
+ 
+\family default
 
-\begin_inset space \thinspace{}
+\begin_inset Formula $\mathcal{\mathscr{\ell-}}$
 \end_inset
 
--FRAME
+FRAME
 \end_layout
 
 \end_inset

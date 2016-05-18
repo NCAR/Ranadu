@@ -1360,7 +1360,7 @@ SP <- with (Data, data.frame (LON, LAT, ALT, VNS, VEW, VSPD,
 
 \begin_layout Plain Layout
 
-                              ROLL, PITCH, THDG, GGALT, GGVSPD, BLATA, BLONGA,
+                              PITCH, ROLL, THDG, GGALT, GGVSPD, BLATA, BLONGA,
  BNORMA, 
 \end_layout
 
@@ -1372,10 +1372,6 @@ SP <- with (Data, data.frame (LON, LAT, ALT, VNS, VEW, VSPD,
 \begin_layout Plain Layout
 
                               GGVEW, GGVNS, Grav))
-\end_layout
-
-\begin_layout Plain Layout
-
 \end_layout
 
 \begin_layout Plain Layout
