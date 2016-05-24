@@ -18,6 +18,7 @@ Version 2.4-16-03-01
       plotWAC.R             -- Added arguments pch and cex for use as scatterplots, 
                                and modified to function as a scatterplot call if a
                                names (other than 'Time') is provided for xlab.
+                            -- Also modified plot times to center points on time intervals.
       skewT.R               -- Modified to accept variable names 'PSXC', 'ATX', 'DPXC'
                                in place of 'Pressure', 'Temperature', 'DewPoint'. (This
                                provides the function SkewTSounding ().)

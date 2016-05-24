@@ -41,6 +41,7 @@
 plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]", 
                      ylab="", lwd=2, type="l", lty=1, logxy='', pch=20, cex=1, 
                      legend.position="bottomright", ...) {
+
   if (is.data.frame (x)) {
     if (!is.expression(ylab) && (ylab == "")) {
       ylab <- names(x)[2]
@@ -63,7 +64,14 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
         }
       }
     }
-
+    ## correct for offset if abscissa is Time, because value is centered in interval
+    if (grepl ('TIME', xlab) || grepl ('Time', xlab)) {
+      data.rate <- 1
+      itg <- x[!is.na(x), 1]  # protect against missing values at start
+      if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
+      if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
+      x[, 1] <- x[, 1] + 0.5 / data.rate
+    }
     if (!("ylim" %in% names(list(...))) && (yrange[1] != yrange[2])) {
       plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
             lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
@@ -134,6 +142,14 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     }
     axis(4,labels=NA,tck=0.02)
   } else {
+    ## correct for offset if abscissa is Time, because value is centered in interval
+    if (grepl ('TIME', xlab) || grepl ('Time', xlab)) {
+      data.rate <- 1
+      itg <- x[!is.na(x)]  # protect against missing values at start
+      if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
+      if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
+      x <- x + 0.5 / data.rate
+    }
     plot(x, y, xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, lwd=lwd, 
          type=type, col=col, xaxs="r", yaxs="r", log=logxy, ...)
     
@@ -184,6 +200,12 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
 #' \dontrun{lineWAC (Time, TASX, col='darkgreen')}
 #' \dontrun{lineWAC (Time, PSXC, lty=2)}
 lineWAC <- function (x, y, col="blue", lwd=2, type='l', ...) {
+  ## correct for offset if abscissa is Time, because value is centered in interval
+  data.rate <- 1
+  itg <- x[!is.na(x)]  # protect against missing values at start
+  if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
+  if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
+  x <- x + 0.5 / data.rate
   points(x, y, lwd=lwd, type=type, col=col, ...)
 }
 

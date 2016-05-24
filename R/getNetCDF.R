@@ -104,7 +104,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     T <- vector ("numeric", Rate*length(Time))
     for (i in 1:length(Time)) {
       for (j in 0:(Rate-1)) {
-        T[(i-1)*Rate+j+1] <- Time[i]+1/Rate*j
+        T[(i-1)*Rate+j+1] <- Time[i] + j/Rate
       }  
     }
     Time <- T
@@ -149,8 +149,11 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   IntFilter <- function (X, inRate, outRate) {
     if (inRate == outRate) {return (X)}
     ratio <- as.integer(outRate/inRate)    ## expected to be an integer
+    ## beware of missing values
+    z <- zoo::na.approx (as.vector(X), maxgap=1000, na.rm = FALSE)
+    z[is.na(z)] <- 0
     x <- 0:(length(X)-1)
-    A <- stats::approx (x, X, n=length(X)*ratio-ratio+1)
+    A <- stats::approx (x, z, n=length(X)*ratio-ratio+1)
     T <- A$y
     T <- signal::filter(signal::sgolay(4,75),T)
     ## now shift to match 25-Hz:

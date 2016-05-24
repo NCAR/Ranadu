@@ -51,7 +51,10 @@ ShiftInTime <- function (.X, .rate=1, .shift=0, .smooth=0) {
   n <- ifelse (.shift >= 0, as.integer (.shift*iRate/1000+0.5), 
                as.integer (.shift*iRate/1000-0.5))
   x <- 0:(NL-1)
-  At <- stats::approx (x, .X, n=ND-ratio+1)
+  ## beware of missing values
+  z <- zoo::na.approx (as.vector(.X), maxgap=1000, na.rm = FALSE)
+  z[is.na(z)] <- 0
+  At <- stats::approx (x, z, n=ND-ratio+1)
   ## now shift to match original
   j <- as.integer (ratio / 2)
   j2 <- ratio - j - 1
