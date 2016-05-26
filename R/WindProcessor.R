@@ -44,16 +44,18 @@ WindProcessor <- function (data) {
     }
     TASX <- data$TASX
   }
+
   if ("GGVSPDB" %in% Names) {
     GGVSPD <- data$GGVSPDB
+  } else if ('GGVSPD' %in% Names) {
+    GGVSPD <- data$GGVSPD
   } else if ("GGVSPD_NVTL" %in% Names) {
     GGVSPD <- data$GGVSPD_NVTL
+  } else if ('VSPD_A' %in% Names) {
+    GGVSPD <- data$VSPD_A
   } else {
-    if(!("GGVSPD" %in% Names)) {
-      print ("*** ERROR in Wind Processor: Variable GGVSPD is not present in data.frame.")
-      return (data)
-    }
-    GGVSPD <- data$GGVSPD
+    print ("*** ERROR in Wind Processor: Variable GGVSPD is not present in data.frame.")
+    return (data)
   }
   if (!("ATTACK" %in% Names)) {
     if ("AKRD" %in% Names) {
@@ -87,8 +89,16 @@ WindProcessor <- function (data) {
   d <- data.frame ("U" = TASX)
   SSLIP <- SSLIP * Cradeg; ATTACK <- ATTACK * Cradeg
   PITCH <- PITCH * Cradeg; ROLL <- ROLL * Cradeg; THDG <- THDG * Cradeg
-  d$V <- TASX * tan (SSLIP)
-  d$W <- TASX * tan (ATTACK)
+  Rate <- 1
+  tg <- data$Time[!is.na(data$Time)]  # protect against missing values at start
+  if ((tg[2]-tg[1]) <= 0.045) {Rate <- 25}
+  if ((tg[2]-tg[1]) <= 0.025) {Rate <- 50}
+  ## correct for aircraft rotation rate
+  LR <- 4.42; LG <- -4.30
+  Pdot <- c(0, diff (PITCH)) * Rate  # diff does step-wise differentiation
+  Hdot <- c(0, diff (THDG)) * Rate
+  d$V <- TASX * tan (SSLIP) - Hdot * LR
+  d$W <- TASX * tan (ATTACK) - Pdot * LR
   rw <- as.matrix(d)
   cosphi <- cos (ROLL)
   sinphi <- sin (ROLL)
@@ -112,6 +122,11 @@ WindProcessor <- function (data) {
   VEW <- zoo::na.approx (as.vector(VEW), maxgap=1000, na.rm = FALSE)
   GGVNS <- zoo::na.approx (as.vector(GGVNS), maxgap=1000, na.rm = FALSE)
   GGVEW <- zoo::na.approx (as.vector(GGVEW), maxgap=1000, na.rm = FALSE)
+  GGVSPD <- zoo::na.approx (as.vector(GGVSPD), maxgap=1000, na.rm = FALSE)
+  ## corrections for GPS-to-INS distance (GV)
+  GGVNS <- GGVNS + LG * Hdot * sinpsi
+  GGVEW <- GGVEW - LG * Hdot * cospsi
+  GGVSPD <- GGVSPD - LG * Pdot
   VNS[is.na(VNS)] <- 0
   VEW[is.na(VEW)] <- 0
   GGVNS[is.na(GGVNS)] <- 0
