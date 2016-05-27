@@ -96,7 +96,11 @@ WindProcessor <- function (data) {
   ## correct for aircraft rotation rate
   LR <- 4.42; LG <- -4.30
   Pdot <- c(0, diff (PITCH)) * Rate  # diff does step-wise differentiation
-  Hdot <- c(0, diff (THDG)) * Rate
+  Hdot <- c(0, diff (THDG))
+  Hdot[is.na(Hdot)] <- 0
+  Hdot[Hdot > pi] <- Hdot[Hdot > pi] - 2*pi
+  Hdot[Hdot < -pi] <- Hdot[Hdot < -pi] + 2*pi
+  Hdot <- Hdot * Rate
   d$V <- TASX * tan (SSLIP) - Hdot * LR
   d$W <- TASX * tan (ATTACK) - Pdot * LR
   rw <- as.matrix(d)
@@ -118,10 +122,14 @@ WindProcessor <- function (data) {
   WDN <- vector ("numeric", DL)
   WSN <- vector ("numeric", DL)
   WIN <- vector ("numeric", DL)
-  VNS <- zoo::na.approx (as.vector(VNS), maxgap=1000, na.rm = FALSE)
-  VEW <- zoo::na.approx (as.vector(VEW), maxgap=1000, na.rm = FALSE)
-  GGVNS <- zoo::na.approx (as.vector(GGVNS), maxgap=1000, na.rm = FALSE)
-  GGVEW <- zoo::na.approx (as.vector(GGVEW), maxgap=1000, na.rm = FALSE)
+  # VNS <- zoo::na.approx (as.vector(VNS), maxgap=1000, na.rm = FALSE)
+  # VEW <- zoo::na.approx (as.vector(VEW), maxgap=1000, na.rm = FALSE)
+  # GGVNS <- zoo::na.approx (as.vector(GGVNS), maxgap=1000, na.rm = FALSE)
+  # GGVEW <- zoo::na.approx (as.vector(GGVEW), maxgap=1000, na.rm = FALSE)
+  CVEW <- GGVEW - VEW
+  CVNS <- GGVNS - VNS
+  CVEW <- zoo::na.approx (as.vector(CVEW), maxgap=1000, na.rm = FALSE)
+  CVNS <- zoo::na.approx (as.vector(CVNS), maxgap=1000, na.rm = FALSE)
   GGVSPD <- zoo::na.approx (as.vector(GGVSPD), maxgap=1000, na.rm = FALSE)
   ## corrections for GPS-to-INS distance (GV)
   GGVNS <- GGVNS + LG * Hdot * sinpsi
@@ -131,9 +139,15 @@ WindProcessor <- function (data) {
   VEW[is.na(VEW)] <- 0
   GGVNS[is.na(GGVNS)] <- 0
   GGVEW[is.na(GGVEW)] <- 0
+  CVNS[is.na(CVNS)] <- 0
+  CVEW[is.na(CVEW)] <- 0
   
-  CVEW <- ComplementaryFilter (VEW, GGVEW, 150)
-  CVNS <- ComplementaryFilter (VNS, GGVNS, 150)
+  # CVEW <- ComplementaryFilter (VEW, GGVEW, 150)
+  # CVNS <- ComplementaryFilter (VNS, GGVNS, 150)
+  
+  tau <- 150
+  CVEW <- VEW + signal::filter (signal::butter(3, 2/tau), CVEW)
+  CVNS <- VNS + signal::filter (signal::butter(3, 2/tau), CVNS)
   Hlast <- 0.
  
   for (i in 1:DL) {
