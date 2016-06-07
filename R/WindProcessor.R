@@ -96,7 +96,7 @@ WindProcessor <- function (data) {
   ## correct for aircraft rotation rate
   LR <- 4.42; LG <- -4.30
   Pdot <- c(0, diff (PITCH)) * Rate  # diff does step-wise differentiation
-  Hdot <- c(0, diff (THDG))
+  Hdot <- c(0, diff (THDG))          # see Rate multiplication few lines down
   Hdot[is.na(Hdot)] <- 0
   Hdot[Hdot > pi] <- Hdot[Hdot > pi] - 2*pi
   Hdot[Hdot < -pi] <- Hdot[Hdot < -pi] + 2*pi
@@ -131,6 +131,8 @@ WindProcessor <- function (data) {
   CVEW <- zoo::na.approx (as.vector(CVEW), maxgap=1000, na.rm = FALSE)
   CVNS <- zoo::na.approx (as.vector(CVNS), maxgap=1000, na.rm = FALSE)
   GGVSPD <- zoo::na.approx (as.vector(GGVSPD), maxgap=1000, na.rm = FALSE)
+  VNS <- zoo::na.approx (as.vector(VNS), maxgap=1000, na.rm = FALSE)
+  VEW <- zoo::na.approx (as.vector(VEW), maxgap=1000, na.rm = FALSE)
   ## corrections for GPS-to-INS distance (GV)
   GGVNS <- GGVNS + LG * Hdot * sinpsi
   GGVEW <- GGVEW - LG * Hdot * cospsi

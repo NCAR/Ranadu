@@ -22,8 +22,8 @@ DataFileInfo <- function (fileLocation) {
     namesCDF <- names (netCDFfile$var)
     nms <- names(netCDFfile$dim)
     Time <- ncvar_get (netCDFfile, "Time")
-    LATC <- ncvar_get (netCDFfile, "LATC")
-    LONC <- ncvar_get (netCDFfile, "LONC")
+    if ('LATC' %in% namesCDF) {LATC <- ncvar_get (netCDFfile, "LATC")}
+    if ('LONC' %in% namesCDF) {LONC <- ncvar_get (netCDFfile, "LONC")}
     time_units <- ncatt_get (netCDFfile, "Time", "units")
     tref <- sub ('seconds since ', '', time_units$value)
     Time <- as.POSIXct(as.POSIXct(tref, tz='UTC')+Time, tz='UTC')
@@ -38,10 +38,20 @@ DataFileInfo <- function (fileLocation) {
     Flight$Start <- min (Time, na.rm=TRUE)
     Flight$End <- max (Time, na.rm=TRUE)
     Flight$Rate <- sampleRate
-    Flight$LatMin <- min (LATC, na.rm=TRUE)
-    Flight$LatMax <- max (LATC, na.rm=TRUE)
-    Flight$LonMin <- min (LONC, na.rm=TRUE)
-    Flight$LonMax <- max (LONC, na.rm=TRUE)
+    if (exists ('LATC')) {
+      Flight$LatMin <- min (LATC, na.rm=TRUE)
+      Flight$LatMax <- max (LATC, na.rm=TRUE)
+    } else {
+      Flight$LatMin <- NA
+      Flight$LatMax <- NA
+    }
+    if (exists ('LONC')) {
+      Flight$LonMin <- min (LONC, na.rm=TRUE)
+      Flight$LonMax <- max (LONC, na.rm=TRUE)
+    } else {
+      Flight$LonMin <- NA
+      Flight$LonMax <- NA
+    }
     Flight$Variables <- namesCDF
   } else {
     fileLoad <- load (fileLocation)
