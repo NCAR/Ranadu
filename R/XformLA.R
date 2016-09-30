@@ -1,5 +1,5 @@
 #' @title XformLA
-#' @description Transform a vector from b-frame to l-frame.
+#' @description Transform a vector from a-frame to l-frame.
 #' @details Apply rotations specified by ROLL, PITCH, THDG in the supplied
 #' data.frame to transform a vector (BX, BY, BZ) in the body frame of the
 #' aircraft (where x is forward, y starboard, z down) to the local or ENU 
@@ -18,7 +18,7 @@
 #' transforming and subtracted afterward. The matrix should have 3 columns
 #' representing the components and a number of rows corresponding to the
 #' number of observations.
-#' @param .inverse Logical, transform from l-frame to b-frame if TRUE
+#' @param .inverse Logical, transform from l-frame to a-frame if TRUE
 #' @import zoo
 #' @return The vector components transformed to l-frame or ENU coordinates, local
 #' Earth-relative with x east, y north, and z upward. Same structure as Avector.

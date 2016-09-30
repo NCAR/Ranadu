@@ -20,14 +20,14 @@ transforming and subtracted afterward. The matrix should have 3 columns
 representing the components and a number of rows corresponding to the
 number of observations.}
 
-\item{.inverse}{Logical, transform from l-frame to b-frame if TRUE}
+\item{.inverse}{Logical, transform from l-frame to a-frame if TRUE}
 }
 \value{
 The vector components transformed to l-frame or ENU coordinates, local
 Earth-relative with x east, y north, and z upward. Same structure as Avector.
 }
 \description{
-Transform a vector from b-frame to l-frame.
+Transform a vector from a-frame to l-frame.
 }
 \details{
 Apply rotations specified by ROLL, PITCH, THDG in the supplied

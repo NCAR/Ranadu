@@ -9,6 +9,7 @@ Version 2.4-16-06-26
       plotWAC.R             -- Modified plot times to center points on time intervals.
   Corrections:
       getNetCDF.R           -- corrected error in high-rate processing.
+                            -- added lines to ignore 'Time' if included in VarList.
       ShiftInTime.R         -- added protection against presence of missing values,
                                which produced an erroneous offset.
       PitchCorrection.R     -- significant correction of sign error.
