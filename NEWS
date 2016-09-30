@@ -1,3 +1,18 @@
+Version 2.4-16-06-26
+  Additions:
+      DataFileInfo.R        -- Protected against use on file without LATC/LONC
+      WindProcessor.R       -- Added interpolated values if VNS/VEW are missing-value,
+                               modified complementary-filter handling, and added
+                               corrections for rotation rates.
+      MakeNetCDF.R          -- Modified time-variable handling so resulting file
+                               works with ncplot.
+      plotWAC.R             -- Modified plot times to center points on time intervals.
+  Corrections:
+      getNetCDF.R           -- corrected error in high-rate processing.
+                            -- added lines to ignore 'Time' if included in VarList.
+      ShiftInTime.R         -- added protection against presence of missing values,
+                               which produced an erroneous offset.
+      PitchCorrection.R     -- significant correction of sign error.
 Version 2.4-16-03-01
   Additions:
       LCL.R                 -- Find the lifted condensation level corresponding to
@@ -17,8 +32,7 @@ Version 2.4-16-03-01
                                and return an interpolated array of values.
       plotWAC.R             -- Added arguments pch and cex for use as scatterplots, 
                                and modified to function as a scatterplot call if a
-                               names (other than 'Time') is provided for xlab.
-                            -- Also modified plot times to center points on time intervals.
+                               name (other than 'Time') is provided for xlab.
       skewT.R               -- Modified to accept variable names 'PSXC', 'ATX', 'DPXC'
                                in place of 'Pressure', 'Temperature', 'DewPoint'. (This
                                provides the function SkewTSounding ().)

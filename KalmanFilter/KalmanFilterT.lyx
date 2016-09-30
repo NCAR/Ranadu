@@ -1,7 +1,9 @@
-#LyX 2.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 474
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \input colordvi
@@ -50,16 +52,16 @@ knitr
 \language_package default
 \inputencoding default
 \fontencoding global
-\font_roman times
-\font_sans default
-\font_typewriter default
-\font_math auto
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -149,7 +151,7 @@ addressee={Wind Uncertainty TN file}
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="3" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0pt">
 <column alignment="left" valignment="top" width="0pt">
 <row>
@@ -1084,6 +1086,11 @@ STMFV <- function (sv, .aaframe='a') {
 
 \begin_layout Plain Layout
 
+  ## (AMTD-AAC says signs before sin (sv[9]) should be reversed)
+\end_layout
+
+\begin_layout Plain Layout
+
   if (.aaframe == 'l') {
 \end_layout
 
@@ -1475,6 +1482,10 @@ Initialize a state vector
 \end_inset
 
  having these components:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1502,6 +1513,10 @@ acceleration in the lateral, longitudinal, and normal direction relative
 \end_deeper
 \begin_layout Enumerate
 For each time increment:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2150,7 +2165,7 @@ The result of that integration is shown in Figs.
 \begin_inset space ~
 \end_inset
 
-1--3, with comparisons to the INS-produced solutions.
+1–3, with comparisons to the INS-produced solutions.
  There are some differences, but they are mostly understandable and could
  be corrected.
  For example, the attitude angles show differences in sine waves during
@@ -3204,7 +3219,7 @@ GCF <- function (sv, sp) {
 
 \begin_layout Plain Layout
 
-  gcf[7:9] <- 0.05*Cradeg
+  gcf[7:9] <- 0.05*Cradeg 
 \end_layout
 
 \begin_layout Plain Layout
@@ -4390,6 +4405,10 @@ clearpage
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4397,7 +4416,7 @@ clearpage
 
 \family sans
 \color blue
--- End of Memo --
+– End of Memo –
 \end_layout
 
 \begin_layout Standard
@@ -4420,7 +4439,7 @@ include enough info to re-run.
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0pt">
 <column alignment="left" valignment="top" width="0pt">
 <row>

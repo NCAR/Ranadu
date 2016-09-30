@@ -100,6 +100,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   nms <- names(netCDFfile$dim)
   if ("sps25" %in% nms) {Rate <- 25}
   if ("sps50" %in% nms) {Rate <- 50}
+  ## comment next line when LAMS 100-Hz vector present but no others
   if ("sps100" %in% nms) {Rate <- 100}
   # print (sprintf ("output rate for this data.frame is %d", Rate))
   # Expand Time to be high-rate if necessary

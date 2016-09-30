@@ -39,9 +39,9 @@ DataDirectory <- function() {
   if (file.exists (DataDir)){
     return (DataDir)
   }
-  DataDir <- "~/Data/"
+  DataDir <- "~/Data"
   if (file.exists (DataDir)){
-    return (DataDir)
+    return (sprintf('%s/', DataDir))
   }
   return(NA)
 } 
