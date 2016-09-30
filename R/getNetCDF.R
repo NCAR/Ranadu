@@ -82,6 +82,9 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   if ("ALL" %in% VarList) {
     VarList <- names (netCDFfile$var)
   }
+  if ('Time' %in% VarList) {
+    VarList <- VarList[-which(VarList == 'Time')]
+  }
   ## check that requested variables are present in netCDF file; fail otherwise
   namesCDF <- names (netCDFfile$var)
   for (V in VarList) {
