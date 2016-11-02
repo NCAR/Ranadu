@@ -126,6 +126,11 @@ WindProcessor <- function (data) {
   # VEW <- zoo::na.approx (as.vector(VEW), maxgap=1000, na.rm = FALSE)
   # GGVNS <- zoo::na.approx (as.vector(GGVNS), maxgap=1000, na.rm = FALSE)
   # GGVEW <- zoo::na.approx (as.vector(GGVEW), maxgap=1000, na.rm = FALSE)
+  
+  ## corrections for GPS-to-INS distance (GV)
+  GGVNS <- GGVNS + LG * Hdot * sinpsi
+  GGVEW <- GGVEW - LG * Hdot * cospsi
+  
   CVEW <- GGVEW - VEW
   CVNS <- GGVNS - VNS
   CVEW <- zoo::na.approx (as.vector(CVEW), maxgap=1000, na.rm = FALSE)
@@ -133,9 +138,6 @@ WindProcessor <- function (data) {
   GGVSPD <- zoo::na.approx (as.vector(GGVSPD), maxgap=1000, na.rm = FALSE)
   VNS <- zoo::na.approx (as.vector(VNS), maxgap=1000, na.rm = FALSE)
   VEW <- zoo::na.approx (as.vector(VEW), maxgap=1000, na.rm = FALSE)
-  ## corrections for GPS-to-INS distance (GV)
-  GGVNS <- GGVNS + LG * Hdot * sinpsi
-  GGVEW <- GGVEW - LG * Hdot * cospsi
   GGVSPD <- GGVSPD - LG * Pdot
   VNS[is.na(VNS)] <- 0
   VEW[is.na(VEW)] <- 0
