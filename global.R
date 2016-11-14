@@ -304,8 +304,13 @@ Project <- plotSpec$Project
 Flight <- plotSpec$Flight
 TypeFlight <- plotSpec$TypeFlight
 Production <- FALSE
-fn <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), Project, 
+if (TypeFlight == 'F') {
+  fn <- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), Project, 
+                 Project, Flight)
+} else {
+  fn <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), Project, 
                Project, TypeFlight, Flight)
+}
 if (!file.exists (fn)) {
   if (Trace) {print (sprintf ('%s not found', fn))}
   fn <- sub ('\\.nc', '.Rdata', fn)
@@ -589,14 +594,20 @@ makeVarList <- function () {
       VarList <- VarList [-vwh]
     }
   }
+  print (sprintf ('at end of VarList, VarList is:'))
+  print (VarList)
   return (VarList)
 }
 VarList <- makeVarList()
 VarListLast <- VarList
 
-
-fname.last <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project, 
+if (plotSpec$TypeFlight == 'F') {
+  fname.last <- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
+                         plotSpec$Project, plotSpec$Flight)
+} else {  
+  fname.last <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project, 
                        plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+}  
 Data <- getNetCDF (fname.last, VarList)
 
 # times <- c(Data$Time[1], Data$Time[nrow(Data)])
@@ -640,9 +651,15 @@ transferAttributes <- function (d, dsub) {
 
 saveRdata <- function (Data, inp) {
   print ('entered saveRdata')
-  netCDFfile <- nc_open (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (),
+  if (inp$typeFlight == 'F') {
+    netCDFfile <- nc_open (sprintf ('%s%s/%srf%02dF.nc', DataDirectory (),
+                                    inp$Project, inp$Project,
+                                    inp$Flight))
+  } else {
+    netCDFfile <- nc_open (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (),
                                   inp$Project, inp$Project, inp$typeFlight,
                                   inp$Flight))
+  }
   nms <- c('Time', 'TASX')
   Time <- ncvar_get (netCDFfile, "Time")
   TASX <- ncvar_get (netCDFfile, "TASX")
@@ -690,9 +707,15 @@ saveRdata <- function (Data, inp) {
     CellLimits <- CellSizes$value
     attr (C1DC, 'CellLimits') <- CellLimits
   }
-  fn <- sprintf ('%s%s/%s%s%02d.Rdata', DataDirectory (),
+  if (inp$typeFlight == 'F') {
+    fn <- sprintf ('%s%s/%srf%02dF.Rdata', DataDirectory (),
+                   inp$Project, inp$Project, 
+                   inp$Flight)
+  } else {
+    fn <- sprintf ('%s%s/%s%s%02d.Rdata', DataDirectory (),
                  inp$Project, inp$Project, inp$typeFlight,
                  inp$Flight)
+  }
   size.distributions <- mget (nms)
   save (Data, size.distributions, file=fn)
   print (sprintf ('saved data.frame and size distributions to %s', fn))
