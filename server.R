@@ -14,6 +14,35 @@ shinyServer(function(input, output, session) {
   observe ({
     
   }, priority=0)
+  observeEvent (input$plot_brush, {
+    xmin <- as.integer(input$plot_brush$xmin)
+    xmax <- as.integer(input$plot_brush$xmax)
+    T1 <- as.POSIXlt(xmin, origin='1970-01-01', tz='UTC')
+    T2 <- as.POSIXlt(xmax, origin='1970-01-01', tz='UTC')
+    TB1 <- T1$hour*10000 + T1$min*100 + T1$sec
+    TB2 <- T2$hour*10000 + T2$min*100 + T2$sec
+    print (sprintf ('brush times are %d %d', TB1, TB2))
+    plotSpec$Times[1] <<- T1
+    plotSpec$Times[2] <<- T2
+    updateSliderInput (session, 'times', value=plotSpec$Times)
+    updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+    updateTextInput (session, 'tend',   value=formatTime (plotSpec$Times[2]))
+    isolate (reac$newdisplay <- reac$newdisplay + 1)
+    isolate (reac$newhistogram <- reac$newhistogram + 1)
+    isolate (reac$newstats <- reac$newstats + 1)
+    isolate (reac$newscat <- reac$newscat + 1)
+    isolate (reac$newbin <- reac$newbin + 1)
+  } )
+  # exprBrush <- quote ({
+  #   xmin <- as.integer(input$plot_brush$xmin)
+  #   xmax <- as.integer(input$plot_brush$xmax)
+  #   T1 <- as.POSIXlt(xmin, origin='1970-01-01', tz='UTC')
+  #   T2 <- as.POSIXlt(xmax, origin='1970-01-01', tz='UTC')
+  #   TB1 <- T1$hour*10000 + T1$min*100 + T1$sec
+  #   TB2 <- T2$hour*10000 + T2$min*100 + T2$sec
+  #   print (sprintf ('brush times are %d %d', TB1, TB2))
+  # })
+  # obsBrush <- observe (exprBrush, quoted=TRUE)
   
   exprProject <- quote ({ 
     if (input$Project != plotSpec$Project) {
@@ -93,7 +122,9 @@ shinyServer(function(input, output, session) {
     isolate (pnl <- input$panel)
     isolate (lv <- input$lineV)
     
-    if (input$addVarP != plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]) {
+    print (sprintf ('lv, pnl, plt = %d %d %d adv %s', lv,pnl, plt, input$addVarP))
+    print (sprintf ('plotSpec is %s', plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]))
+    if ((lv <= length(plotSpec$Plot[[plt]]$panel[[pnl]]$var)) && input$addVarP != plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]) {
       isolate (reac$newdisplay <- reac$newdisplay + 1)
       if (Trace) {print ('PlotVar: reset newdisplay')}
       if (input$addVarP != 'omit') {
@@ -1305,22 +1336,32 @@ shinyServer(function(input, output, session) {
     m <- gregexpr('[[:alnum:]]+', TX)
     V <- regmatches(TX, m)[[1]]
     V <- V[grepl('[[:upper:]]', V)]
+    print (sprintf ('required variables are %s', V))
     ## if a requested variable is not present, get new data:
     nms <- names (data ())
+    needAddedVariables <- FALSE
     for (VV in V) {
       if (!(VV %in% nms)) {
         addedVariables <<- c(addedVariables, VV)
-        isolate (reac$newdata <- reac$newdata + 1)
+        print (sprintf (' need to add variable %s to data', VV))
+        print (sprintf (' list of added Variables is:'))
+        print (addedVariables)
+        # reac$newdata <- reac$newdata + 1
+        needAddedVariables <- TRUE
       }
     } 
+    if (needAddedVariables) {
+      reac$newdata <- reac$newdata + 1
+    }
     nv <- input$newvar
     assign (nv, with (data (), eval (parse (text=input$formla))))
-    print (summary (eval(parse(text=input$newvar))))
+    isolate (print (summary (eval(parse(text=input$newvar)))))
     if (!exists ('specialData')) {
       specialData <<- data.frame ('Time'=data()$Time)
     }
     specialData[, nv] <<- eval(parse(text=nv))
     FI$Variables <<- c(FI$Variables, nv)
+    print (sprintf (' adding %s to FI$Variables', nv))
     isolate (plt <- input$plot)
     isolate (pnl <- input$panel)
     isolate (hpnl <- input$hpanel)
@@ -1332,6 +1373,8 @@ shinyServer(function(input, output, session) {
     isolate (blv <- input$blineV)
     isolate (rlv <- input$rvNumber)
     choices <- c('select', 'omit',sort(FI$Variables))
+    print (sprintf (' setting variable choices to this list:'))
+    print (sort(FI$Variables))
     updateSelectInput (session, 'addVarP', choices=choices,
                        selected=plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv])
     updateSelectInput (session, 'haddVarP', choices=choices,
@@ -1448,11 +1491,21 @@ shinyServer(function(input, output, session) {
     ## VarList <- c(VarList, "RTH1", "RTH2", "RTF1")
     
     if (grepl ('HIPPO', plotSpec$Project)) {
-      fname <<- sprintf ('%sHIPPO/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
+      if (plotSpec$TypeFlight == 'F') {
+        fname <<- sprintf ('%sHIPPO/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
+                            plotSpec$Flight)
+      } else {
+        fname <<- sprintf ('%sHIPPO/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
                          plotSpec$TypeFlight, plotSpec$Flight)
+      }    
     } else {
-      fname <<- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
+      if (plotSpec$TypeFlight == 'F') {
+        fname <<- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
+                           plotSpec$Project, plotSpec$Flight)
+      } else {
+        fname <<- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
                          plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+      }
     }
     #     if (input$Production) {
     #       print (sprintf ('Production section, input$Production=%d', input$Production))
@@ -1473,6 +1526,9 @@ shinyServer(function(input, output, session) {
     # reac$newdisplay <- reac$newdisplay + 1
     if (file.exists(fname)) {
       FI <<- DataFileInfo (fname)
+      if (exists ('specialData')) {
+        FI$Variables <- c(FI$Variables, names (specialData)[-1])
+      }
       VarList <<- makeVarList ()  ## saved as global for possible inspection
       if ((fname != fname.last) || (any(!(VarList %in% VarListLast)))) {
         D <- getNetCDF (fname, VarList)
@@ -1589,6 +1645,7 @@ shinyServer(function(input, output, session) {
       }
       yl <- NULL
       if (spec$panel[[pnl]]$fixed) {yl <- spec$panel[[pnl]]$ylim}
+      par(cex=1.5)
       if (plotSpec$Plot[[input$plot]]$restrict) {
         if (is.null (yl)) {
           plotWAC (DataV[, c('Time', spec$panel[[pnl]]$var)], log=logY,
@@ -1624,6 +1681,7 @@ shinyServer(function(input, output, session) {
                    lwd=spec$panel[[pnl]]$lw,
                    lty=spec$panel[[pnl]]$lt) 
         }
+        par(cex=1)
       }
     }
   }
@@ -1636,7 +1694,7 @@ shinyServer(function(input, output, session) {
       # Sys.sleep(5)
     }
     if (Trace) {
-      print (sprintf ('display: newdisplay is', reac$newdisplay))
+      print (sprintf ('display: newdisplay is %d', reac$newdisplay))
       print (sprintf ('display: global plotSpec$Times are %s %s',
                       formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
@@ -1656,10 +1714,17 @@ shinyServer(function(input, output, session) {
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Plot[[input$plot]]$restrict)
     # i <- getIndex (DataR$Time, SE[1])
-    FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+    if (plotSpec$TypeFlight == 'F') {
+      FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
+                            plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
+                            strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
+                            strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
+    } else {
+      FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
                           plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
                           strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
                           strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
+    }
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
@@ -1675,7 +1740,7 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print ('display: finished plot generation')
     }
-  }, width=920, height=640)
+  }, width=1024, height=640)
   
   plotScat <- function (input) {  ## plotScat
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
@@ -1927,11 +1992,19 @@ shinyServer(function(input, output, session) {
     SE <- getStartEnd (DataR$Time)
     i <- getIndex (DataR$Time, SE[1])
     isolate (
-      FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+      if (plotSpec$TypeFlight == 'F') {
+        FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
+                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+                                       format="%H:%M:%S", tz='UTC'))
+      } else {
+        FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
                             plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
                             strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
                             strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
                                      format="%H:%M:%S", tz='UTC'))
+      }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
@@ -1978,11 +2051,19 @@ shinyServer(function(input, output, session) {
     SE <- getStartEnd (DataR$Time)
     i <- getIndex (DataR$Time, SE[1])
     isolate (
-      FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+      if (plotSpec$TypeFlight == 'F') {
+        FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
+                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+                                       format="%H:%M:%S", tz='UTC'))
+      } else {
+        FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
                             plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
                             strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
                             strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
                                      format="%H:%M:%S", tz='UTC'))
+      }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
@@ -2053,11 +2134,19 @@ shinyServer(function(input, output, session) {
     SE <- getStartEnd (DataR$Time)
     i <- getIndex (DataR$Time, SE[1])
     isolate (
-      FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+      if (plotSpec$TypeFlight == 'F') {
+        FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
+                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+                                       format="%H:%M:%S", tz='UTC'))        
+      } else {
+        FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
                             plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
                             strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
                             strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
                                      format="%H:%M:%S", tz='UTC'))
+      }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
@@ -2372,11 +2461,19 @@ shinyServer(function(input, output, session) {
     SE <- getStartEnd (DataR$Time)
     i <- getIndex (DataR$Time, SE[1])
     isolate (
-      FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+      if (plotSpec$TypeFlight == 'F') {
+        FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
+                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+                                       format="%H:%M:%S", tz='UTC'))        
+      } else {
+        FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
                             plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
                             strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
                             strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
                                      format="%H:%M:%S", tz='UTC'))
+      }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
@@ -2784,11 +2881,19 @@ shinyServer(function(input, output, session) {
     #       
     #       SE <- getStartEnd (Data$Time)
     i <- getIndex (DataR$Time, SE[1])
-    FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+    if (plotSpec$TypeFlight == 'F') {
+      FigFooter=sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
+                        plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+                        strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                        strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+                                 format="%H:%M:%S", tz='UTC'))
+    } else {
+      FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
                       plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
                       strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
                       strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
                                format="%H:%M:%S", tz='UTC'))
+    }
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       CallingFunction <- sub ("\\(.*\\)", "", deparse (sys.call (-1)))
@@ -2877,11 +2982,19 @@ shinyServer(function(input, output, session) {
       
       SE <- getStartEnd (Data$Time)
       i <- getIndex (Data$Time, SE[1])
-      FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, input$typeFlight,
+      if (input$typeFlight == 'F') {
+        FigFooter=sprintf("%s rf%02dF %s %s-%s UTC,", Project,
+                          input$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+                          strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
+                          strftime(Data$Time[getIndex(Data$Time,SE[2])],
+                                   format="%H:%M:%S", tz='UTC'))        
+      } else {
+        FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, input$typeFlight,
                         input$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
                         strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
                         strftime(Data$Time[getIndex(Data$Time,SE[2])],
                                  format="%H:%M:%S", tz='UTC'))
+      }
       FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
       AddFooter <<- function() {
         CallingFunction <- sub ("\\(.*\\)", "", deparse (sys.call (-1)))
@@ -2954,11 +3067,19 @@ shinyServer(function(input, output, session) {
       
       SE <- getStartEnd (Data$Time)
       i <- getIndex (Data$Time, SE[1])
-      FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+      if (plotSpec$TypeFlight == 'F') {
+        FigFooter=sprintf("%s rf%02dF %s %s-%s UTC,", Project,
+                          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+                          strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
+                          strftime(Data$Time[getIndex(Data$Time,SE[2])],
+                                   format="%H:%M:%S", tz='UTC'))        
+      } else {
+        FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
                         plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
                         strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
                         strftime(Data$Time[getIndex(Data$Time,SE[2])],
                                  format="%H:%M:%S", tz='UTC'))
+      }
       FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
       AddFooter <<- function() {
         CallingFunction <- sub ("\\(.*\\)", "", deparse (sys.call (-1)))
@@ -3527,11 +3648,19 @@ shinyServer(function(input, output, session) {
     SE <- getStartEnd (DataR$Time)
     i <- getIndex (DataR$Time, SE[1])
     isolate (
-      FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
+      if (plotSpec$TypeFlight == 'F') {
+        FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
+                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+                                       format="%H:%M:%S", tz='UTC'))        
+      } else {
+        FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
                             plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
                             strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
                             strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
                                      format="%H:%M:%S", tz='UTC'))
+      }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {

@@ -1,5 +1,5 @@
 #' @title WindProcessor
-#' @description Calculates new wind variables WDN, WSN, WIN
+#' @description Calculates new wind variables WDN, WSN, WIN (GV only)
 #' @details Constructs new wind variables using a data.frame that contains the required variables 
 #' (see 'param' below) as input and adds to that data.frame the new wind variables as 
 #' listed in the description above. If it is desirable to apply the Shuler-based correction
@@ -14,10 +14,14 @@
 #' @import zoo
 #' @param data A data.frame containing these variables (and possibly others): 
 #' TASX, ATTACK, SSLIP, GGVEW, GGVNS, GGVSPD, VEW, VNS, THDG, ROLL, and PITCH.
-#' Note that for some data archives GGVSPD may not be present, so it will be
-#' necessary to define a new data.frame variable (e.g., Data$GGVSPD <- Data$VSPD_A).
+#' Note that for some data archives GGVSPD may not be present, so it may be
+#' useful to define a new data.frame variable (e.g., Data$GGVSPD <- Data$VSPD_A).
 #' Also, (ATTACK and AKRD) and (SSLIP and SSRD) are usually the same, so similar 
-#' substitution may be needed in those cases.
+#' substitution may be needed in those cases. The routine searches for these
+#' candidates and selects the first found: {PITCHC, PITCH}, {TASN, TASX},
+#' {GGVSPD, GGVSPD_NVTL, VSPD_A}, {ATTACK, AKRD}, {SSLIP, SSRD}. If any
+#' required variables are not found, the function returns the original
+#' data.frame unchanged and prints an error message.
 #' @return The original data.frame is returned with variables WDN, WSN, WIN added. These
 #' variables are the new horizontal wind direction and speed and the vertical wind.
 #' @examples
@@ -126,6 +130,11 @@ WindProcessor <- function (data) {
   # VEW <- zoo::na.approx (as.vector(VEW), maxgap=1000, na.rm = FALSE)
   # GGVNS <- zoo::na.approx (as.vector(GGVNS), maxgap=1000, na.rm = FALSE)
   # GGVEW <- zoo::na.approx (as.vector(GGVEW), maxgap=1000, na.rm = FALSE)
+  
+  ## corrections for GPS-to-INS distance (GV)
+  GGVNS <- GGVNS + LG * Hdot * sinpsi
+  GGVEW <- GGVEW - LG * Hdot * cospsi
+  
   CVEW <- GGVEW - VEW
   CVNS <- GGVNS - VNS
   CVEW <- zoo::na.approx (as.vector(CVEW), maxgap=1000, na.rm = FALSE)
@@ -133,10 +142,7 @@ WindProcessor <- function (data) {
   GGVSPD <- zoo::na.approx (as.vector(GGVSPD), maxgap=1000, na.rm = FALSE)
   VNS <- zoo::na.approx (as.vector(VNS), maxgap=1000, na.rm = FALSE)
   VEW <- zoo::na.approx (as.vector(VEW), maxgap=1000, na.rm = FALSE)
-  ## corrections for GPS-to-INS distance (GV)
-  GGVNS <- GGVNS + LG * Hdot * sinpsi
-  GGVEW <- GGVEW - LG * Hdot * cospsi
-  GGVSPD <- GGVSPD - LG * Pdot
+  GGVSPD <- GGVSPD - LG * Pdot  ## positive contribution for Pdot positive
   VNS[is.na(VNS)] <- 0
   VEW[is.na(VEW)] <- 0
   GGVNS[is.na(GGVNS)] <- 0

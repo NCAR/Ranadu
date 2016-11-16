@@ -5,7 +5,7 @@
 
 step <- 60
 shinyUI(
-  fluidPage (    ##navbarPage('Explorer',  ##fluidPage(
+  fluidPage (theme='www/bootstrap.css',    ##navbarPage('Explorer',  ##fluidPage(
     # titlePanel("Explorer"),
     # tabPanel ('plot vs time',
     # tags$style (type='text/css', '.well {max-height:140px;}'),
@@ -27,11 +27,11 @@ shinyUI(
         fluidRow (
           column (8, numericInput (inputId='Flight', label='Flight', value=1,
                                    min=1, max=99, step=1, width='80px')),
-          column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff'),
+          column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff', 'F'),
                                    width='70px', inline=FALSE))))),
       column (1, 
               numericInput (inputId='plot', label='plot', value=1,
-                            min=1, max=49, step=1),
+                            min=1, max=5, step=1),
               actionButton ('check', 'quick')),
       column(5, wellPanel (
         fluidRow (
@@ -143,11 +143,13 @@ shinyUI(
                                                           width='90px')),
                                           width=3),
                              
-                             mainPanel( tabsetPanel (tabPanel ('plots', plotOutput (outputId='display')),
+                             mainPanel( tabsetPanel (tabPanel ('plots', plotOutput (outputId='display', brush=brushOpts(id='plot_brush', delayType='debounce', resetOnNew=TRUE))),
                                                      tabPanel ('stats', dataTableOutput ('stats')),
                                                      tabPanel ('histograms', plotOutput (outputId='hist')),
                                                      tabPanel ('soundings', plotOutput (outputId='barWvsZ')),
-                                                     tabPanel ('listing', dataTableOutput ('listing')), id='display')))
+                                                     tabPanel ('listing', dataTableOutput ('listing')), id='display')
+                                        
+                              ))
                            
                            # ),
                            # tabPanel ('track')
