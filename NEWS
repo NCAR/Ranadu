@@ -1,3 +1,8 @@
+  Updates:
+      shinyApp              -- Significant changes to improve and simplify use.
+  Corrections:
+      WindProcessor.R       -- Corrected handling of GPS-antenna lever arm.
+      getNetCDF.R           -- if 'Time' in variable list, skip it (vs fail)
 Version 2.4-16-06-26
   Additions:
       DataFileInfo.R        -- Protected against use on file without LATC/LONC

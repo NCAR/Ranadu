@@ -10,17 +10,21 @@ WindProcessor(data)
 \arguments{
 \item{data}{A data.frame containing these variables (and possibly others): 
 TASX, ATTACK, SSLIP, GGVEW, GGVNS, GGVSPD, VEW, VNS, THDG, ROLL, and PITCH.
-Note that for some data archives GGVSPD may not be present, so it will be
-necessary to define a new data.frame variable (e.g., Data$GGVSPD <- Data$VSPD_A).
+Note that for some data archives GGVSPD may not be present, so it may be
+useful to define a new data.frame variable (e.g., Data$GGVSPD <- Data$VSPD_A).
 Also, (ATTACK and AKRD) and (SSLIP and SSRD) are usually the same, so similar 
-substitution may be needed in those cases.}
+substitution may be needed in those cases. The routine searches for these
+candidates and selects the first found: {PITCHC, PITCH}, {TASN, TASX},
+{GGVSPD, GGVSPD_NVTL, VSPD_A}, {ATTACK, AKRD}, {SSLIP, SSRD}. If any
+required variables are not found, the function returns the original
+data.frame unchanged and prints an error message.}
 }
 \value{
 The original data.frame is returned with variables WDN, WSN, WIN added. These
 variables are the new horizontal wind direction and speed and the vertical wind.
 }
 \description{
-Calculates new wind variables WDN, WSN, WIN
+Calculates new wind variables WDN, WSN, WIN (GV only)
 }
 \details{
 Constructs new wind variables using a data.frame that contains the required variables 
