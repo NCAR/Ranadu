@@ -76,10 +76,11 @@ shinyUI(
                                    # tags$style(type="text/css", "input.shiny-bound-input {font-size:12px; height:15px;}"),
                                    textInput ('tend', label=NULL, value=formatTime(plotSpec$Times[2])), 
                                    tags$style(type='text/css', "#tend {width: 100px; height: 22px; }")),
-                           column (2, shinyBS::bsButton ('prevT', label=NULL, icon=icon('angle-left'), size='extra-small')),
+                           column (2, shinyBS::bsButton ('resetT', label='reset', size='extra-small')),
+                           column (1, shinyBS::bsButton ('prevT', label=NULL, icon=icon('angle-left'), size='extra-small')),
                            # tags$style(type='text/css', "#button { vertical-align: middle; height: 15px; width: 100%; font-size: 12px;}")
                            
-                           column (2, shinyBS::bsButton ('nextT', label=NULL, icon=icon('angle-right'), size='extra-small'))
+                           column (1, shinyBS::bsButton ('nextT', label=NULL, icon=icon('angle-right'), size='extra-small'))
                            # tags$style(type='text/css', "#button { vertical-align: middle; height: 15px; width: 100%; font-size: 12px;}")
                          )
                        )),

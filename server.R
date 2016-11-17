@@ -1296,11 +1296,36 @@ shinyServer(function(input, output, session) {
     isolate (reac$newstats <- reac$newstats + 1)
     isolate (reac$newscat <- reac$newscat + 1)
     isolate (reac$newbin <- reac$newbin + 1)
-  } )
+  } )  
   observeEvent (input$prevT, {
     dt <- difftime (plotSpec$Times[2], plotSpec$Times[1])
     plotSpec$Times[1] <<- plotSpec$Times[1] - dt
     plotSpec$Times[2] <<- plotSpec$Times[2] - dt
+    updateSliderInput (session, 'times', value=plotSpec$Times)
+    updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+    updateTextInput (session, 'tend',   value=formatTime (plotSpec$Times[2]))
+    isolate (reac$newdisplay <- reac$newdisplay + 1)
+    isolate (reac$newhistogram <- reac$newhistogram + 1)
+    isolate (reac$newstats <- reac$newstats + 1)
+    isolate (reac$newscat <- reac$newscat + 1)
+    isolate (reac$newbin <- reac$newbin + 1)
+  } )
+  observeEvent (input$resetT, {
+    print (sprintf ('reached resetT, plotSpec$Times=%s %s', plotSpec$Times[1], plotSpec$Times[2]))
+    print (sprintf ('Data times are %s %s', Data$Time[1], Data$Time[nrow(Data)]))
+    # global times?
+    plotSpec$Times[1] <<- Data$Time[1]
+    plotSpec$Times[2] <<- Data$Time[nrow(Data)]
+    step <- 60
+    minT <- Data$Time[1]
+    minT <- minT - as.integer (minT) %% step + step
+    maxT <- Data$Time[nrow(Data)]
+    maxT <- maxT - as.integer (maxT) %% step 
+    times <- c(minT, maxT)
+    if (plotSpec$Times[1] > times[1]) {times <- c(plotSpec$Times[1], maxT)}
+    if (plotSpec$Times[2] < times[2]) {times <- c(times[1], plotSpec$Times[2])}
+    plotSpec$Times <- times
+    print (sprintf ('resetting times to %s %s', plotSpec$Times[1], plotSpec$Times[2]))
     updateSliderInput (session, 'times', value=plotSpec$Times)
     updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
     updateTextInput (session, 'tend',   value=formatTime (plotSpec$Times[2]))
@@ -1492,7 +1517,7 @@ shinyServer(function(input, output, session) {
     
     if (grepl ('HIPPO', plotSpec$Project)) {
       if (plotSpec$TypeFlight == 'F') {
-        fname <<- sprintf ('%sHIPPO/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
+        fname <<- sprintf ('%sHIPPO/WAC/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
                             plotSpec$Flight)
       } else {
         fname <<- sprintf ('%sHIPPO/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
@@ -1500,7 +1525,7 @@ shinyServer(function(input, output, session) {
       }    
     } else {
       if (plotSpec$TypeFlight == 'F') {
-        fname <<- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
+        fname <<- sprintf ('%s%s/WAC/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
                            plotSpec$Project, plotSpec$Flight)
       } else {
         fname <<- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
