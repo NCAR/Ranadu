@@ -277,7 +277,7 @@ formatTime <- function (time) {
 }
 
 saveConfig <- function (inp) {
-  save (plotSpec, file=inp$save, ascii=TRUE)
+  save (plotSpec, file=inp$save)
 }
 loadConfig <- function (inp) {
   load (file=inp$restore)
