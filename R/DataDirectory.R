@@ -16,6 +16,7 @@ DataDirectory <- function() {
   #    laptop: /Data/
   #    LookoutHaven: /home/Data/
   #    RAF ground station: /home/data/
+  #    Other:  ~/Data
   # add others as needed
   
   DataDir <- Sys.getenv ("DATA_DIR")  ## EOL systems have this environment variable

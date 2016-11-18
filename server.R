@@ -1517,7 +1517,7 @@ shinyServer(function(input, output, session) {
     
     if (grepl ('HIPPO', plotSpec$Project)) {
       if (plotSpec$TypeFlight == 'F') {
-        fname <<- sprintf ('%sHIPPO/WAC/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
+        fname <<- sprintf ('%sHIPPO/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
                             plotSpec$Flight)
       } else {
         fname <<- sprintf ('%sHIPPO/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
@@ -1525,7 +1525,7 @@ shinyServer(function(input, output, session) {
       }    
     } else {
       if (plotSpec$TypeFlight == 'F') {
-        fname <<- sprintf ('%s%s/WAC/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
+        fname <<- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
                            plotSpec$Project, plotSpec$Flight)
       } else {
         fname <<- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
@@ -2822,10 +2822,10 @@ shinyServer(function(input, output, session) {
   
   output$savePNG <- downloadHandler(
     filename <- function() {
-      paste('Figures/Ranadu.', Sys.time(), '.png', sep='')
+      paste('Ranadu-', format(Sys.time(), '%y-%m-%d-%H-%M-%S'), '.png', sep='')
     },
     content <- function(file) {
-      png (file)
+      png (file, height=640, width=1024)
       if (grepl ('plot vs', input$whichTab)) {
         plotMain (input)
       }
@@ -2839,8 +2839,7 @@ shinyServer(function(input, output, session) {
         plotBin (input)
       }
       dev.off ()
-    },
-    contentType='image/png'
+    }
   )
   
   output$quickPlot <- renderPlot ({
