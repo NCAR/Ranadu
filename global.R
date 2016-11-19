@@ -609,6 +609,7 @@ if (plotSpec$TypeFlight == 'F') {
                        plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
 }  
 Data <- getNetCDF (fname.last, VarList)
+checkTime <- Data$Time[500]  ## starting value...
 
 # times <- c(Data$Time[1], Data$Time[nrow(Data)])
 step <- 60

@@ -144,12 +144,16 @@ shinyUI(
                                                           width='90px')),
                                           width=3),
                              
-                             mainPanel( tabsetPanel (tabPanel ('plots', plotOutput (outputId='display', brush=brushOpts(id='plot_brush', delayType='debounce', resetOnNew=TRUE))),
+                             mainPanel( tabsetPanel (tabPanel ('plots', plotOutput (outputId='display', click=clickOpts(id='plot_click'), 
+                                                                                    brush=brushOpts(id='plot_brush', delay=3000, delayType='debounce', resetOnNew=TRUE))),
                                                      tabPanel ('stats', dataTableOutput ('stats')),
                                                      tabPanel ('histograms', plotOutput (outputId='hist')),
                                                      tabPanel ('soundings', plotOutput (outputId='barWvsZ')),
-                                                     tabPanel ('listing', dataTableOutput ('listing')), id='display')
-                                        
+                                                     tabPanel ('listing', dataTableOutput ('listing')), 
+                                                     tabPanel ('checkV', h1('1-min averages centered on listed time'),
+                                                               textInput ('RefT', label=NULL, value=formatTime(checkTime)), 
+                                                               dataTableOutput ('checkV')), 
+                                                     id='display')
                               ))
                            
                            # ),

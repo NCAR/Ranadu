@@ -14,7 +14,20 @@ shinyServer(function(input, output, session) {
   observe ({
     
   }, priority=0)
-  observeEvent (input$plot_brush, {
+  
+  observeEvent (input$plot_click, {
+    print (input$plot_click)
+    xcursor <- as.integer(input$plot_click$x)
+    xcursor <- xcursor - xcursor %% 60  ## set even minute
+    ycursor <- input$plot_click$y
+    T1 <- as.POSIXlt(xcursor, origin='1970-01-01', tz='UTC')
+    TB1 <- T1$hour*10000 + T1$min*100 + T1$sec
+    checkTime <<- T1  ## selected to be even-minute value
+    updateTextInput (session, 'RefT', value=formatTime (checkTime))
+    print (sprintf ('click position is %d %f', TB1, ycursor))
+  } )
+  
+    observeEvent (input$plot_brush, {
     xmin <- as.integer(input$plot_brush$xmin)
     xmax <- as.integer(input$plot_brush$xmax)
     T1 <- as.POSIXlt(xmin, origin='1970-01-01', tz='UTC')
@@ -184,6 +197,20 @@ shinyServer(function(input, output, session) {
     }
   })
   obsTstart <- observe (exprTstart, quoted=TRUE)
+  
+  exprRefT <- quote ({
+    txt <- input$RefT
+    print (sprintf (' entered RefT, checkTime=%s, RefT=%s', checkTime, txt))
+    if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
+      hhmmss <- as.integer (gsub (':', '', txt))
+      i1 <- getIndex (Data, hhmmss)
+      if (i1 > 0) {
+        checkTime <<- Data$Time[i1]
+        updateTextInput (session, 'RefT', value=formatTime (checkTime))
+      }
+    }
+  })
+  obsRefT <- observe (exprRefT, quoted=TRUE)
   
   exprPaluchstart <- quote ({
     ## ignore it if before start or after finish
@@ -1510,6 +1537,7 @@ shinyServer(function(input, output, session) {
     }
     # Project <<- Project <- isolate(input$Project)
     reac$newdata
+    if (exists ('specialData')) {rm ('specialData')}  ## this doesn't work; fix someday
     # isolate (reac$newdisplay <- reac$newdisplay + 1)
     # isolate (reac$newskewT <- reac$newskewT + 1)
     ## these would be needed for translation to new cal coefficients
@@ -2799,10 +2827,10 @@ shinyServer(function(input, output, session) {
   
   output$savePDF <- downloadHandler(
     filename = function() {
-      paste('Figures/Ranadu.', Sys.time(), '.pdf', sep='')
+      paste('Ranadu-', Sys.time(), '.pdf', sep='')
     },
     content = function(file) {
-      pdf (file)
+      pdf (file, width=10, height=6)
       if (grepl ('plot vs', input$whichTab)) {
         plotMain (input)
       }
@@ -3732,6 +3760,27 @@ shinyServer(function(input, output, session) {
                xlab=nm, ylab='altitude [km]', names=NULL)
     }
   }, width=780, height=640)
+  
+  output$checkV <- renderDataTable ({
+    if (Trace) {print ('checkV: entered')}
+    input$times
+    input$plot_click
+    input$RefT
+    input$panels
+    Ds <- limitData (data(), input)
+    plotV <- vector ()
+    for (i in 1:plotSpec$Plot[[input$plot]]$panels) {
+      plotV <- c(plotV, plotSpec$Plot[[input$plot]]$panel[[i]]$var)
+    }
+    plotV <- unique (plotV)
+    Ds <- Ds[, c('Time', plotV)]
+    # Ds <- Ds[(Ds$Time >= (checkTime - 5)) & (Ds$Time <= checkTime + 5), ]
+    Ds <- Ds[(Ds$Time >= (checkTime-30)) & (Ds$Time <= (checkTime+30)), ]
+    Dr <- Ds[Ds$Time == checkTime, ]
+    for (nn in plotV) {Dr[1,nn] <- mean (Ds[, nn], na.rm=TRUE)}
+    Dr$Time <- formatTime(Dr$Time)
+    Dr
+  }, options=list(paging=FALSE, searching=FALSE))
   
   output$listing <- renderDataTable ({
     if (Trace) {print ('listing: entered')}
