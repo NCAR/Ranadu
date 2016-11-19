@@ -1,7 +1,7 @@
 graphSpecs <- function () {
   specs <- list()
   specs$type <- 'history'
-  specs$panels <- 6
+  specs$panels <- 2
   specs$columns <- 1
   specs$restrict <- FALSE
   .var <- c('GGALT', 'PALT')
@@ -11,29 +11,30 @@ graphSpecs <- function () {
   .lab <- .var
   .ylim <- c(NA,NA)
   .logY <- FALSE
-  .stamp <- FALSE
+  .smoothed <- c(FALSE,FALSE)
   .fixed <- FALSE
-  sf <- function (.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed) {
+  .SGlength <- c(61, 61)
+  sf <- function (.var, .col, .lw, .lt, .lab, .ylim, .logY, .smoothed, .fixed, .SGlength) {
     list(var=.var, col=.col, lw=.lw, lt=.lt,
                       lab=.lab, ylim=.ylim, logY=.logY, 
-                      stamp=.stamp, fixed=.fixed)
+                      smoothed=.smoothed, fixed=.fixed, SGlength=.SGlength)
   }
-  s1 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  s1 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .smoothed, .fixed, .SGlength)
   .var <- c('ATX', 'DPXC')
   .lab <- .var
-  s2 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  s2 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .smoothed, .fixed, .SGlength)
   .var <- c('PSXC', 'PS_A')
   .lab <- .var
-  s3 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  s3 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .smoothed, .fixed, .SGlength)
   .var <- c('QCXC', 'QC_A')
   .lab <- .var
-  s4 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  s4 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .smoothed, .fixed, .SGlength)
   .var <- c('WSC', 'WIC')
   .lab <- .var
-  s5 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  s5 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .smoothed, .fixed, .SGlength)
   .var <- c('WDC', 'THDG')
   .lab <- .var
-  s6 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
+  s6 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .smoothed, .fixed, .SGlength)
   specs$panel <- list(s1, s2, s3, s4, s5, s6)
   return (specs)
 }
@@ -41,8 +42,8 @@ specvarSpecs <- function () {
   specs <- list ()
   specs$type='variance'
   specs$restrict <- FALSE
-  .var <- 'TASX'
-  .cvar <- 'WIC'
+  .var <- 'WIC'
+  .cvar <- 'TASX'
   .lab <- .var
   .xlim <- c(NA,NA)
   .ylim <- c(NA,NA)
@@ -112,7 +113,7 @@ scatSpecs <- function () {
     .lab <- .vary
   s3 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
                         .logX, .logY, .fixed)
-  .vary <- c('QCXC', 'QC_A')
+  .vary <- c('QCXC', 'QCXC')
   .lab <- .vary
   s4 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
                         .logX, .logY, .fixed)
@@ -132,15 +133,23 @@ ps <- list ()
 ps$Project <- 'ORCAS'
 ps$Flight <- 1
 ps$TypeFlight <- 'rf'
+D <- Ranadu::getNetCDF ('/Data/ORCAS/ORCASrf01.nc')
+ps$Times <- c(D$Time[1], D$Time[nrow(D)])
 ps$Plot <- list (graphSpecs (), graphSpecs(), graphSpecs(), graphSpecs(), graphSpecs())
-ps$Hist <- list(graphSpecs (), graphSpecs())
+ps$Hist <- list(graphSpecs (), graphSpecs(), graphSpecs(), graphSpecs(), graphSpecs())
 ps$Hist[[1]]$type <- 'histogram'
 ps$Hist[[2]]$type <- 'histogram'
-ps$StatVar <- VarList
-ps$Variance <- list (specvarSpecs (), specvarSpecs (), specvarSpecs ())
+ps$Hist[[3]]$type <- 'histogram'
+ps$Hist[[4]]$type <- 'histogram'
+ps$Hist[[5]]$type <- 'histogram'
+ps$StatVar <- Ranadu::standardVariables()
+ps$Variance <- list (specvarSpecs (), specvarSpecs (), specvarSpecs (), specvarSpecs(), specvarSpecs())
 ps$Restrictions <- plotSpec$Restrictions
 # load(file='plotSpec.def')
-ps$Scat <- list (scatSpecs(), scatSpecs(), scatSpecs())
-ps$Bin <- list (scatSpecs(), scatSpecs(), scatSpecs())
+ps$Scat <- list (scatSpecs(), scatSpecs(), scatSpecs(), scatSpecs(), scatSpecs())
+ps$Bin <- list (scatSpecs(), scatSpecs(), scatSpecs(), scatSpecs(), scatSpecs())
+ps$paluchLWC <- "PLWCC"
+ps$PaluchTimes <- ps$Times
+ps$PaluchCTimes <- ps$Times
 plotSpec <- ps
-save (plotSpec, file='plotSpec.def', ascii=TRUE)
+save (plotSpec, file='plotSpec.def')

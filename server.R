@@ -371,6 +371,17 @@ shinyServer(function(input, output, session) {
   })
   obsFixed <- observe (exprFixed, quoted=TRUE)
   
+  exprSmooth <- quote ({
+    input$smooth
+    print (sprintf (' input$smooth:'))
+    print (input$smooth)
+    isolate (lv <- input$lineV)
+    plotSpec$Plot[[input$plot]]$panel[[input$panel]]$smooth[lv] <<- input$smooth
+    isolate (reac$newdisplay <- reac$newdisplay + 1)
+    if (Trace) {print ('Smooth: reset newdisplay')}
+  })
+  obsSmooth <- observe (exprSmooth, quoted=TRUE)
+  
   exprPanelMin <- quote ({
     plotSpec$Plot[[input$plot]]$panel[[input$panel]]$ylim[1] <<- input$panelMin
     isolate (reac$newdisplay <- reac$newdisplay + 1)
@@ -800,6 +811,8 @@ shinyServer(function(input, output, session) {
     updateNumericInput (session, 'panel', value=1)
     updateCheckboxInput (session, 'logY', value=plotSpec$Plot[[plt]]$panel[[1]]$logY)
     updateCheckboxInput (session, 'fixed', value=plotSpec$Plot[[plt]]$panel[[1]]$fixed)
+    updateCheckboxInput (session, 'smooth', value=plotSpec$Plot[[plt]]$panel[[1]]$smooth[1])
+    updateNumericInput (session, 'SGpoints', value=plotSpec$Plot[[plt]]$SGlength[1])
     updateCheckboxInput (session, 'restrict', value=plotSpec$Plot[[plt]]$restrict)
     updateNumericInput (session, 'lineV', value=1)
     updateSelectInput (session, 'addVarP', selected=plotSpec$Plot[[plt]]$panel[[1]]$var[1])
@@ -834,6 +847,8 @@ shinyServer(function(input, output, session) {
     pnl <- input$panel
     updateCheckboxInput (session, 'logY', value=plotSpec$Plot[[plt]]$panel[[pnl]]$logY)
     updateCheckboxInput (session, 'fixed', value=plotSpec$Plot[[plt]]$panel[[pnl]]$fixed)
+    updateCheckboxInput (session, 'smooth', value=plotSpec$Plot[[plt]]$panel[[pnl]]$smooth[1])
+    updateNumericInput (session, 'SGpoints', value=plotSpec$Plot[[plt]]$panel[[pnl]]$SGlength[1])
     updateNumericInput (session, 'lineV', value=1)
     updateSelectInput (session, 'addVarP', selected=plotSpec$Plot[[plt]]$panel[[pnl]]$var[1])
     updateSelectInput (session, 'varColor', selected=plotSpec$Plot[[plt]]$panel[[pnl]]$col[1])
@@ -855,6 +870,8 @@ shinyServer(function(input, output, session) {
       updateSelectInput (session, 'addVarP', selected=plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv])
       updateSelectInput (session, 'varColor', selected=plotSpec$Plot[[plt]]$panel[[pnl]]$col[lv])
       updateNumericInput (session, 'lineW', value=plotSpec$Plot[[plt]]$panel[[pnl]]$lw[lv])
+      updateNumericInput (session, 'SGpoints', value=plotSpec$Plot[[plt]]$panel[[pnl]]$SGlength[lv])
+      updateCheckboxInput (session, 'smooth', value=plotSpec$Plot[[plt]]$panel[[pnl]]$smooth[lv])
       updateRadioButtons (session, 'lineStyle', selected=ltyps[plotSpec$Plot[[plt]]$panel[[pnl]]$lt[lv]])
     } else {
       v <- plotSpec$Plot[[plt]]$panel[[pnl]]$var
@@ -873,10 +890,18 @@ shinyServer(function(input, output, session) {
       lt <- plotSpec$Plot[[plt]]$panel[[pnl]]$lt
       lt <- c(lt, lt[length(lt)])
       plotSpec$Plot[[plt]]$panel[[pnl]]$lt <<- lt
+      sm <- plotSpec$Plot[[plt]]$panel[[pnl]]$smooth
+      sm <- c(sm, FALSE)
+      plotSpec$Plot[[plt]]$panel[[pnl]]$smooth <<- sm
+      sgl <- plotSpec$Plot[[plt]]$panel[[pnl]]$SGlength
+      sgl <- c(sgl, 61)
+      plotSpec$Plot[[plt]]$panel[[pnl]]$SGlength <- sgl
       updateSelectInput (session, 'addVarP', selected=v[length(v)])
       updateSelectInput (session, 'varColor', selected=cl[length(cl)])
       updateNumericInput (session, 'lineW', value=lw[length(lw)])
       updateNumericInput (session, 'lineStyle', value=lt[length(lt)])
+      updateNumericInput (session, 'SGpoints', value=61)
+      updateCheckboxInput (session, 'smooth', value=FALSE)
     }
     isolate (reac$newdisplay <- reac$newdisplay + 1)
     isolate (reac$newhistogram <- reac$newhistogram + 1)
@@ -1076,6 +1101,16 @@ shinyServer(function(input, output, session) {
     pnl <- isolate (input$panel)
     lv <- isolate (input$lineV)
     plotSpec$Plot[[plt]]$panel[[pnl]]$lw[lv] <<- input$lineW
+    isolate (reac$newdisplay <- reac$newdisplay + 1)
+    if (Trace) {print ('LineWidth: reset newdisplay')}
+  })
+  obsLineWidth <- observe (exprLineWidth, quoted=TRUE)
+  
+  exprSGlength <- quote ({
+    plt <- isolate (input$plot)
+    pnl <- isolate (input$panel)
+    lv <- isolate (input$lineV)
+    plotSpec$Plot[[plt]]$panel[[pnl]]$SGlength[lv] <<- input$SGpoints
     isolate (reac$newdisplay <- reac$newdisplay + 1)
     if (Trace) {print ('LineWidth: reset newdisplay')}
   })
@@ -1281,6 +1316,8 @@ shinyServer(function(input, output, session) {
                   updateNumericInput (session, 'panel', value=1)
                   updateCheckboxInput (session, 'logY', value=plotSpec$Plot[[1]]$panel[[1]]$logY)
                   updateCheckboxInput (session, 'fixed', value=plotSpec$Plot[[1]]$panel[[1]]$fixed)
+                  updateCheckboxInput (session, 'smooth', value=plotSpec$Plot[[1]]$panel[[1]]$smooth[1])
+                  updateNumericInput (session, 'SGpoints', value=plotSpec$Plot[[1]]$panel[[1]]$SGlength[1])
                   updateNumericInput (session, 'panelMin', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[1])
                   updateNumericInput (session, 'panelMax', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[2])
                   updateNumericInput (session, 'lineV', value=1)
@@ -1699,6 +1736,16 @@ shinyServer(function(input, output, session) {
       yl <- NULL
       if (spec$panel[[pnl]]$fixed) {yl <- spec$panel[[pnl]]$ylim}
       par(cex=1.5)
+      v <- spec$panel[[pnl]]$var
+      print (sprintf('v: %s %s', v[1], v[2]))
+      print (sprintf ('smooth: %d %d', spec$panel[[pnl]]$smooth[1], spec$panel[[pnl]]$smooth[2]))
+      isolate (SGL <- spec$panel[[pnl]]$SGlength)
+      for (i in 1:length(v)) {
+        if (spec$panel[[pnl]]$smooth[i]) {
+          DataV[,v[i]] <- SmoothInterp (DataV[ ,v[i]], .Length=SGL[i])
+          DataR[,v[i]] <- SmoothInterp (DataR[ ,v[i]], .Length=SGL[i])
+        }
+      }
       if (plotSpec$Plot[[input$plot]]$restrict) {
         if (is.null (yl)) {
           plotWAC (DataV[, c('Time', spec$panel[[pnl]]$var)], log=logY,
@@ -2827,7 +2874,7 @@ shinyServer(function(input, output, session) {
   
   output$savePDF <- downloadHandler(
     filename = function() {
-      paste('Ranadu-', Sys.time(), '.pdf', sep='')
+      paste('Ranadu-', format(Sys.time(), '%y-%m-%d-%H-%M-%S'), '.pdf', sep='')
     },
     content = function(file) {
       pdf (file, width=10, height=6)

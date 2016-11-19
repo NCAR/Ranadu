@@ -139,9 +139,13 @@ shinyUI(
 #                                             fluidRow (
 #                                               column (6, 'width:'),
 #                                               column (6, numericInput ('lineW', NULL, 1, width='90px'))),
-                                            radioButtons ('lineStyle', label='line type', choices=ltyps, inline=TRUE, 
+                                            fluidRow (
+                                                column (6, radioButtons ('lineStyle', label='line type', choices=ltyps, inline=TRUE, 
                                                           selected=ltyps[plotSpec$Plot[[1]]$panel[[1]]$lt[1]],
                                                           width='90px')),
+                                                column (6, checkboxInput ('smooth','smooth?', plotSpec$Plot[[1]]$panel[[1]]$smooth[1]),
+                                                        numericInput ('SGpoints', 'SG pts', plotSpec$Plot[[1]]$panel[[1]]$SGlength[1])
+                                                        ))),
                                           width=3),
                              
                              mainPanel( tabsetPanel (tabPanel ('plots', plotOutput (outputId='display', click=clickOpts(id='plot_click'), 
@@ -150,7 +154,7 @@ shinyUI(
                                                      tabPanel ('histograms', plotOutput (outputId='hist')),
                                                      tabPanel ('soundings', plotOutput (outputId='barWvsZ')),
                                                      tabPanel ('listing', dataTableOutput ('listing')), 
-                                                     tabPanel ('checkV', h1('1-min averages centered on listed time'),
+                                                     tabPanel ('checkV', h2('1-min averages centered on listed time'),
                                                                textInput ('RefT', label=NULL, value=formatTime(checkTime)), 
                                                                dataTableOutput ('checkV')), 
                                                      id='display')
