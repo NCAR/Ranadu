@@ -403,6 +403,20 @@ shinyServer(function(input, output, session) {
   })
   obsRestrict <- observe (exprRestrict, quoted=TRUE)
   
+  exprMEMcolor <- quote ({
+    isolate (plt <- input$plot)
+    plotSpec$Variance[[plt]]$Definition$MEMcolor <<- input$MEMcolor
+    ## isolate (reac$newvarp <- reac$newvarp + 1)
+  })
+  obsMEMcolor <- observe (exprMEMcolor, quoted=TRUE)
+  
+  exprMEMadd <- quote ({
+    isolate (plt <- input$plot)
+    plotSpec$Variance[[plt]]$Definition$MEMadd <<- input$MEMadd
+    ## isolate (reac$newvarp <- reac$newvarp + 1)
+  })
+  obsMEMadd <- observe (exprMEMadd, quoted=TRUE)
+  
   exprhPanels <- quote ({
     plotSpec$Hist[[input$plot]]$panels <<- input$hpanels
     isolate (reac$newhistogram <- reac$newhistogram + 1)
@@ -2532,7 +2546,7 @@ shinyServer(function(input, output, session) {
     if (nrow (Data) <= 1) {
       plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
-      reac$newvarp <- reac$newvarp + 1 
+      # reac$newvarp <- reac$newvarp + 1 
       reac$newdata <- reac$newdata + 1
       if (Trace) {print ('varplot: exiting for new data')}
       return()
@@ -2749,9 +2763,10 @@ shinyServer(function(input, output, session) {
         }
       }
     } else {  ## end of acv section; others need Xanadu routine 'otto'
-      v <- plotSpec$Variance[[1]]$Definition$var
-      cv <- plotSpec$Variance[[1]]$Definition$cvar
-      setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype)
+      isolate (plt <- input$plot)
+      v <- plotSpec$Variance[[plt]]$Definition$var
+      cv <- plotSpec$Variance[[plt]]$Definition$cvar
+      setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype, isolate(input$MEMadd), isolate(input$MEMcolor))
       XanaduOut <<- system ("Xanadu otto", intern=TRUE)
       if (input$spectype == 'MEM') {
         while (!file.exists ("MEMPlot.png")) {Sys.sleep (1)}
@@ -2912,6 +2927,10 @@ shinyServer(function(input, output, session) {
       }
       if (grepl ('bin-average', input$whichTab)) {
         plotBin (input)
+      }
+      if (grepl ('variance', input$whichTab)) {
+        img <- png::readPNG("SpecialGraphics/PSDMEM.png")
+        grid.raster(img)
       }
       dev.off ()
     }

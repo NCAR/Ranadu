@@ -434,7 +434,9 @@ shinyUI(
                                                                                                                'cospectrum', 'quadrature', 'coherence', 'phase')),
                                                                  numericInput ('MEMpoles', 'poles', plotSpec$Variance[[1]]$Definition$MEMpoles),
                                                                  numericInput ('MEMres', 'resoln', plotSpec$Variance[[1]]$Definition$MEMres),
-                                                                 numericInput ('MEMavg', 'log avg intervals', plotSpec$Variance[[1]]$Definition$MEMavg)
+                                                                 selectInput ('MEMcolor', 'color', choices=c('blue', 'darkgreen', 'red', 'cyan', 'darkorange', 'brown', 'magenta', 'black')),
+                                                                 numericInput ('MEMavg', 'log avg intervals', plotSpec$Variance[[1]]$Definition$MEMavg),
+                                                                 checkboxInput ('MEMadd', 'add to prev. plot', value=FALSE)
                                                        ), id='spectype'),
                                           width=3),
                              

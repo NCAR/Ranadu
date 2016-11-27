@@ -397,7 +397,7 @@ readRecord <- function (cfile) {
 
 ## the following function writes some configuration for interaction with
 ## 'Xanadu' where the spectral analysis is performed.
-setXanadu <- function (fnew, start, end, var, cvar, wlow, whigh, type) {
+setXanadu <- function (fnew, start, end, var, cvar, wlow, whigh, type, addflag, lcolor) {
   ## edit the .def files for the Xanadu call
   if (end < start) {
     end <- end + 240000
@@ -523,8 +523,14 @@ setXanadu <- function (fnew, start, end, var, cvar, wlow, whigh, type) {
       if (substr (line, 1, 4) == 'RESN') {
         line <- sub (' .*', sprintf (' %f', plotSpec$Variance[[1]]$Definition$MEMres), line)
       }
+      if (substr (line, 1, 6) == 'ADDMEM') {
+        line <- sub (' .*', sprintf (' %d', addflag), line)
+      }
+      if (substr (line, 1, 6) == 'LCOLOR') {
+        vcolor <- c('black', 'blue', 'darkgreen', 'red', 'cyan', 'magenta', 'darkorange', 'brown')
+        line <- sub (' .*', sprintf (' %d', which (vcolor == lcolor)), line)
+      }
     }
-    
     newlines[length (newlines) + 1] <- line
   }
   writeLines (newlines, "otto.def")

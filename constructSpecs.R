@@ -61,22 +61,24 @@ specvarSpecs <- function () {
   .MEMpoles <- 50
   .MEMres <- 0.0001
   .MEMavg <- 50
+  .MEMadd <- FALSE
+  .MEMcolor <- 'blue'
   s <- function (.var, .cvar, .lab, .xlim, .ylim,
                  .fixed, .spectype, .fftpts, .fftwindow,
                  .fftavg, .ffttype, .acvtau, .acvwindow, .acvavg,
-                 .acvtype, .MEMtype, .MEMpoles, .MEMres, .MEMavg) {
+                 .acvtype, .MEMtype, .MEMpoles, .MEMres, .MEMavg, .MEMadd, .MEMcolor) {
     list (var=.var, cvar=.cvar, lab=.lab, xlim=.xlim,
           ylim=.ylim, fixed=.fixed, spectype=.spectype,
           fftpts=.fftpts, fftwindow=.fftwindow,
           fftavg=.fftavg, ffttype=.ffttype, acvtau=.acvtau,
           acvwindow=.acvwindow, acvavg=.acvavg, acvtype=.acvtype,
           MEMtype=.MEMtype,
-          MEMpoles=.MEMpoles, MEMres=.MEMres, MEMavg=.MEMavg)
+          MEMpoles=.MEMpoles, MEMres=.MEMres, MEMavg=.MEMavg, .MEMadd, .MEMcolor)
   }
   s1<- s(.var, .cvar, .lab, .xlim, .ylim,
           .fixed, .spectype, .fftpts, .fftwindow,
           .fftavg, .ffttype, .acvtau, .acvwindow, .acvavg, 
-          .acvtype, .MEMtype, .MEMpoles, .MEMres, .MEMavg)
+          .acvtype, .MEMtype, .MEMpoles, .MEMres, .MEMavg, .MEMadd, .MEMcolor)
   specs$Definition <- s1
   return (specs)
 }
