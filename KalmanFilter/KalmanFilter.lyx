@@ -2695,6 +2695,12 @@ D1$Grav <- Gravity (D1$LAT, D1$GGALT)
 
 \begin_layout Plain Layout
 
+## the following is commented because the centripetal effect is already
+ included in 'Gravity()'
+\end_layout
+
+\begin_layout Plain Layout
+
 # Re <- StandardConstant ('Re')
 \end_layout
 
@@ -2706,7 +2712,7 @@ D1$Grav <- Gravity (D1$LAT, D1$GGALT)
 
 \begin_layout Plain Layout
 
-  #interpolate if necessary:
+  #interpolate if necessary: otherwise later filters fail
 \end_layout
 
 \begin_layout Plain Layout
@@ -2807,7 +2813,7 @@ D1$Grav <- Gravity (D1$LAT, D1$GGALT)
 
 \begin_layout Plain Layout
 
-  ## smooth the measurements
+  ## smooth the measurements when determining derivatives
 \end_layout
 
 \begin_layout Plain Layout
@@ -3279,10 +3285,10 @@ The lateral accelerations were too noisy for a similar calibration because
 \end_layout
 
 \begin_layout Standard
-The differentiated measurements of velocity components from the GPS will
+The differentiated measurements of velocity components from the GPS can
  be considered as additional measurements corresponding to the measured
  accelerations.
- This is discussed further in the following section.
+ This is discussed further in the following sections.
 \end_layout
 
 \begin_layout Subsection*
@@ -3931,7 +3937,29 @@ status open
 
 \begin_layout Plain Layout
 
-## also need the noise vector:
+## initial values of the state vector and error-state vector:
+\end_layout
+
+\begin_layout Plain Layout
+
+SV <- with(D1[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
+ THDG,
+\end_layout
+
+\begin_layout Plain Layout
+
+                                 BPITCHR, BROLLR, BYAWR, BLATA, BLONGA,
+ BNORMA))
+\end_layout
+
+\begin_layout Plain Layout
+
+SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+## also need the corresponding noise vector:
 \end_layout
 
 \begin_layout Plain Layout
@@ -3941,7 +3969,8 @@ tau <- 60
 
 \begin_layout Plain Layout
 
-GCF <- function (sv, sp) {
+GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data
+ record
 \end_layout
 
 \begin_layout Plain Layout
@@ -4006,12 +4035,7 @@ GCF <- function (sv, sp) {
 
 \begin_layout Plain Layout
 
-i <- 1
-\end_layout
-
-\begin_layout Plain Layout
-
-gcf <- as.numeric (GCF (SV, D1[i, ]))
+gcf <- as.numeric (GCF (SV, D1[1, ]))
 \end_layout
 
 \begin_layout Plain Layout
@@ -4035,7 +4059,8 @@ gcf <- as.numeric (GCF (SV, D1[i, ]))
 
 \begin_layout Plain Layout
 
-## The measurement model:
+## The measurement model: calculate the measurements of acceleration from
+ the GPS to add to the measurement vector
 \end_layout
 
 \begin_layout Plain Layout
@@ -4066,7 +4091,7 @@ DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS,
 
 \begin_layout Plain Layout
 
-DZ <- c(DZ, GAE[,1], GAE[,2], GAE[,3])
+# DZ <- c(DZ, GAE[,1], GAE[,2], GAE[,3]) ## add this later
 \end_layout
 
 \begin_layout Plain Layout
@@ -4081,7 +4106,12 @@ DZ <- c(DZ, GAE[,1], GAE[,2], GAE[,3])
 
 \begin_layout Plain Layout
 
-dim(DZ) <- c(DL, 9)
+# dim(DZ) <- c(DL, 9)
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(DZ) <- c(DL, 6)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4113,12 +4143,12 @@ D1$sdPsi <- zoo::rollapply(D1$deltaPsi, 10, sd, fill=NA)  ## calculate the
 
 \begin_layout Plain Layout
 
-DZ <- c(as.vector(DZ), D1$deltaPsi)
+# DZ <- c(as.vector(DZ), D1$deltaPsi)
 \end_layout
 
 \begin_layout Plain Layout
 
-dim(DZ) <- c(DL, 10)
+# dim(DZ) <- c(DL, 10)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4151,32 +4181,37 @@ ation matrix l->a,
 
 \begin_layout Plain Layout
 
-H <- diag(1, nrow=10, ncol=15)
+# H <- diag(1, nrow=10, ncol=15)
 \end_layout
 
 \begin_layout Plain Layout
 
-for (k in 7:9) {
+# for (k in 7:9) {
 \end_layout
 
 \begin_layout Plain Layout
 
-  H[k,k] <- 0
+#   H[k,k] <- 0
 \end_layout
 
 \begin_layout Plain Layout
 
-  H[k,k+6] <- 1
+#   H[k,k+6] <- 1
 \end_layout
 
 \begin_layout Plain Layout
 
-}
+# }
 \end_layout
 
 \begin_layout Plain Layout
 
-H[10,9] <- 1
+# H[10,9] <- 1
+\end_layout
+
+\begin_layout Plain Layout
+
+H <- diag(1, nrow=6, ncol=15)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4200,6 +4235,11 @@ H[10,9] <- 1
 \begin_layout Plain Layout
 
 RCV <- matrix (rep(0,100), ncol=10)
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV <- matrix (rep(0,36), ncol=6)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4234,34 +4274,35 @@ RCV[6,6] <- 0.3^2
 
 \begin_layout Plain Layout
 
-RCV[7,7] <- 100.0  # A big value here limits updating of acceleration measurement.
+# RCV[7,7] <- 100.0  # A big value here limits updating of acceleration measureme
+nt.
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[8,8] <- 100.0  # The assumption is that there errors arise from an error
- in heading, not
+# RCV[8,8] <- 100.0  # The assumption is that there errors arise from an
+ error in heading, not
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[9,9] <- 100.0  # measured acceleration, so the GPS-measured acceleration
+# RCV[9,9] <- 100.0  # measured acceleration, so the GPS-measured acceleration
  is used for that.
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[10,10] <- D1$sdPsi[1]^2
+# RCV[10,10] <- D1$sdPsi[1]^2
 \end_layout
 
 \begin_layout Plain Layout
 
-if (is.na(D1$sdPsi[1])) {RCV[10,10] <- 225}  # typical sd is 15 deg.
+# if (is.na(D1$sdPsi[1])) {RCV[10,10] <- 225}  # typical sd is 15 deg.
 \end_layout
 
 \begin_layout Plain Layout
 
-# RCV[10, 10] <- 1000  ## suppress effect
+# # RCV[10, 10] <- 1000  ## suppress effect
 \end_layout
 
 \begin_layout Plain Layout
@@ -4450,19 +4491,6 @@ DL <- nrow (Data)
 
 \begin_layout Plain Layout
 
-SV <- with(Data[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
- THDG,
-\end_layout
-
-\begin_layout Plain Layout
-
-                                 BPITCHR, BROLLR, BYAWR, BLATA, BLONGA,
- BNORMA))
-\end_layout
-
-\begin_layout Plain Layout
-
-SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -4587,7 +4615,7 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  dcm <- jacobian (STMFV, sv, .aaframe='a') * dt * NSTEP + diag(15)
+  dcm <- jacobian (STMFV, sv) * dt * NSTEP + diag(15)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4679,7 +4707,7 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  SVE <- dcm %*% SVE
+  SVE <- dcm %*% SVE    ## take time step in error-state vector
 \end_layout
 
 \begin_layout Plain Layout
@@ -4703,27 +4731,27 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  if (is.na(Data$sdPsi[i])) {
+  # if (is.na(Data$sdPsi[i])) {
 \end_layout
 
 \begin_layout Plain Layout
 
-    RCV[10,10] <- 225
+  #   RCV[10,10] <- 225
 \end_layout
 
 \begin_layout Plain Layout
 
-  } else {
+  # } else {
 \end_layout
 
 \begin_layout Plain Layout
 
-    RCV[10,10] <- Data$sdPsi[i]^2
+  #   RCV[10,10] <- Data$sdPsi[i]^2
 \end_layout
 
 \begin_layout Plain Layout
 
-  }
+  # }
 \end_layout
 
 \begin_layout Plain Layout
@@ -4917,17 +4945,17 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  Data$PITCHKF <- Data$PITCH - Cor[, 7]
+  Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$ROLLKF <- Data$ROLL - Cor[, 8]
+  Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$THDGKF <- Data$THDG - Cor[, 9]
+  Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -5208,12 +5236,12 @@ PC <- CorrectPitch(Data, .span=601)
 
 \begin_layout Plain Layout
 
-Data$PC <- PC[, 1]
+Data$PC <- -PC[, 1]
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$RC <- PC[, 2]
+Data$RC <- -PC[, 2]
 \end_layout
 
 \begin_layout Plain Layout
@@ -5238,42 +5266,42 @@ C8 <- SmoothInterp (Cor[, 8], .Length=181)
 
 \begin_layout Plain Layout
 
-CPITCH <- cos(.hdg) * C7 + sin(.hdg) * C8
+# CPITCH <- cos(.hdg) * C7 + sin(.hdg) * C8
 \end_layout
 
 \begin_layout Plain Layout
 
-CROLL <- -sin(.hdg) * C7 + cos(.hdg) * C8
+# CROLL <- -sin(.hdg) * C7 + cos(.hdg) * C8
 \end_layout
 
 \begin_layout Plain Layout
 
-# CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
+# # CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
 \end_layout
 
 \begin_layout Plain Layout
 
-# CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
+# # CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$CPITCH <- CPITCH / Cradeg
+# Data$CPITCH <- CPITCH / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$CROLL <- CROLL / Cradeg
+# Data$CROLL <- CROLL / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-# Data$CPITCH <- SmoothInterp (Data$CPITCH, .Length=181)
+Data$CPITCH <- SmoothInterp (Data$CPITCH, .Length=181)
 \end_layout
 
 \begin_layout Plain Layout
 
-# Data$CROLL <- SmoothInterp (Data$CROLL, .Length=181)
+Data$CROLL <- SmoothInterp (Data$CROLL, .Length=181)
 \end_layout
 
 \begin_layout Plain Layout
@@ -5283,7 +5311,7 @@ Data$CTHDG <- SmoothInterp (Data$CTHDG, .Length=181)
 
 \begin_layout Plain Layout
 
-Data$HC <- CorrectHeading (Data, .plotfile='./HCPlot.pdf')
+Data$HC <- -CorrectHeading (Data, .plotfile='./HCPlot.pdf')
 \end_layout
 
 \begin_layout Plain Layout

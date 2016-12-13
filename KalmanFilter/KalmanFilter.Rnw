@@ -1,4 +1,4 @@
-%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% LyX 2.2.2 created this file.  For more info, see http://www.lyx.org/.
 %% Do not edit unless you really know what you are doing.
 \documentclass[12pt,english]{article}
 \usepackage{mathptmx}
@@ -88,11 +88,13 @@
 
 library(knitr)
 opts_chunk$set(echo=FALSE, include=FALSE, fig.lp="fig:")
-opts_chunk$set(fig.width=6, fig.height=5, fig.pos="center", digits=4)
+# note that fig.pos="center" gave errors, changed to fig.align
+opts_chunk$set(fig.width=6, fig.height=5, fig.align="center", digits=4)
 thisFileName <- "KalmanFilter"
 require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
 require(numDeriv)    ## needed for the jacobian() function
 library(signal)
+source ('~/RStudio/Ranadu/R/theme_WAC.R')
 setwd ('~/RStudio/Ranadu/KalmanFilter')
 Directory <- DataDirectory ()
 Flight <- "rf15HR" 				# XXX change this
@@ -114,7 +116,6 @@ if (ReloadData) {
 }
 
 @
-
 
 \section*{Introduction and scope}
 
@@ -170,7 +171,7 @@ names following the symbols are the R variable names used in the following
 code:
 \begin{lyxlist}{00.00.0000}
 \item [{$\delta\mathbf{x}_{k}$~{[}SVE{]}}] The error-state vector at
-time interval $k$. In the present case, this consists of the 15 components
+time index $k$. In the present case, this consists of these 15 components:
 estimated errors in position, aircraft velocity, aircraft attitude,
 IRU-measured rotation rate, and IRU-measured accelerations.
 \item [{$\mathbf{T}_{k|k-1}$~{[}dcm{]}}] The 15x15 state transformation
@@ -190,14 +191,17 @@ the state vector $\delta\mathbf{x}$, a 15x15 matrix
 \item [{$\mathbf{K}$~{[}K{]}}] The Kalman-gain matrix representing how
 the error-state vector is updated using the current error state and
 the new GPS measurements.
-\item [{$\delta\mathbf{z}$~{[}DZ{]}}] The 6-component measured differences
-between the INS and GPS measurements of position and velocity.
-\item [{$\mathbf{H}$~{[}H{]}}] The 15x6-component matrix representing
+\item [{$\delta\mathbf{z}$~{[}DZ{]}}] The 9-component measured differences
+between the INS and GPS measurements of position, velocity and acceleration.
+The latter three components are obtained by differentiating the GPS-provided
+velocity components. This differs from most conventional approaches
+but proves useful for contraining the measurement of heading.
+\item [{$\mathbf{H}$~{[}H{]}}] The 15x9-component matrix representing
 how the measured differences $\delta\mathbf{z}$ correspond to the
 state vector. 
-\item [{$\mathbf{Q},\,\mathbf{R}$~{[}Q,~R{]}}] Matrics representing
+\item [{$\mathbf{Q},\,\mathbf{R}$~{[}Q,~R{]}}] Matrices representing
 respectively the anticipated noise contributions affecting the error-state
-vector (15x15) and the measurements from the GPS (6x6).
+vector (15x15) and the measurements from the GPS (9x9).
 \end{lyxlist}
 The approach taken here will be to filter the error-state vector that
 represents the difference between the best-estimate measurements and
@@ -209,7 +213,6 @@ so the first step in this analysis is to obtain such a matrix and
 validate results using it against the available INS solution. The
 Jacobian of that state-transition function then provides the matrix
 $\mathbf{T}$ used in this filter.
-
 
 \section*{Some component functions}
 
@@ -293,16 +296,17 @@ Gravity <- function (latitude, altitude=0.) {
 
 Data$Grav <- Gravity (Data$LAT[1], Data$GGALT[1])
 Re <- StandardConstant ('Re')
-Data$Grav <- Data$Grav - StandardConstant('Omega')^2 * 
-  (Re * sin (Data$LAT * Cradeg)^2 + Data$GGALT)
-
+# The following is commented because it is already in the Somagliana equation
+# Data$Grav <- Data$Grav - StandardConstant('Omega')^2 * 
+#   (Re * sin (Data$LAT * Cradeg)^2 + Data$GGALT)
 STMFV <- function (sv, .aaframe='a') { 
   stmf <- vector('numeric', length=15)
   ## transform back to a-frame if necessary
   if (.aaframe == 'l') {
-    svv1 <- cos (sv[9]) * sv[7] + sin (sv[9]) * sv[8]
-    sv[8] <- -sin(sv[9]) * sv[7] + cos(sv[9]) * sv[8]
-    sv[7] <- svv1
+    svs7 <- sv[7]
+    svs8 <- sv[8]
+    sv[7] <- cos (sv[9]) * svs7 + sin (sv[9]) * svs8
+    sv[8] <- -sin (sv[9]) * svs7 + cos (sv[9]) * svs8
   }
   rlm <- XfLArV(sv)    
   omega <- as.vector (c(-sv[5] / Rm, 
@@ -318,7 +322,7 @@ STMFV <- function (sv, .aaframe='a') {
   SRM <- aperm( array (SRR, dim=c(3,3)))
   dRLA <- rlm %*% SRM - Oilb
   DR <- c(sv[5] / Rm, sv[4] / (Rn * cos (sv[1])), sv[6])
-  # G <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))    # * 0.9 improves pitch and roll!
+  Grav <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))    # * 0.9 improves pitch and roll!
   AA <- as.vector (c(sv[14], sv[13], sv[15]+Grav), mode='numeric') # aircraft-frame
   AL <- as.vector (rlm %*% as.matrix(AA), mode='numeric')   # l-frame
   ## now correct for angular effects
@@ -345,6 +349,11 @@ STMFV <- function (sv, .aaframe='a') {
             1/(1+(rlm[1,1]/rlm[1,2])^2) * (rlm[1,1]/rlm[1,2]) * 
               (dRLA[1,1]/rlm[1,1] - dRLA[1,2]/rlm[1,2]),
             0, 0, 0, 0, 0, 0)
+  ## return sv to original if necessary
+  if (.aaframe == 'l') {
+    sv[7] <- svs7
+    sv[8] <- svs8
+  }
   return (as.vector (stmf, mode='numeric'))
 }
 
@@ -373,7 +382,6 @@ SP$Rm <- SP$Rn * (1-Ecc^2) / (1-(Ecc*sin(Data$GGLAT*Cradeg))^2) + Data$GGALT
 SPR <- SP   ## save what INS produced, as reference
 
 @
-
 
 \section*{The integration steps}
 
@@ -412,7 +420,7 @@ These measurements should then be in reasonable agreement with the
 INS solution.
 \end{enumerate}
 \end{enumerate}
-<<mechanization, include=TRUE, echo=TRUE, fig.lp='fig:', fig.cap=' '>>=
+<<mechanization, include=TRUE, echo=FALSE, fig.lp='fig:', fig.cap=' ', cache=TRUE>>=
 
 SV <- with(Data[1, ], data.frame(LAT, LON, GGALT, VEW, VNS, VSPD, PITCH, ROLL, THDG,
                                  BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
@@ -531,10 +539,10 @@ SP <- SPR    ## restore to state before integration
 
 @
 
-The result of that integration is shown in Figs.~1--3, with comparisons
-to the INS-produced solutions. There are some differences, but they
-are mostly understandable and could be corrected. For example, the
-attitude angles show differences in sine waves during the circles
+The result of that integration is shown in Figs.~1\textendash 3,
+with comparisons to the INS-produced solutions. There are some differences,
+but they are mostly understandable and could be corrected. For example,
+the attitude angles show differences in sine waves during the circles
 flown during this time segment and suggest a timing error that causes
 one signal to be delayed relative to the comparable signal. The INS-produced
 solution for altitude has a baro-loop applied to keep the altitude
@@ -549,14 +557,14 @@ derivatives of components of the state vector are approximately correct
 and integrate to reasonable values. The function providing those derivatives
 is therefore a reasonable basis for the Kalman filter that follows.
 
-
 \section*{The Kalman filter}
 
 The preceding steps verify that at least an approximate calculation
 of the derivatives of the state variables is available. On that basis,
-an error-state Kalman filter can be developed. Before presenting that
-development, however, it is necessary to discuss two departures from
-normal practice in how this Kalman filter will be implemented:
+an error-state Kalman filter can be developed. an error-state Kalman
+filter can be developed. Before presenting that development, however,
+it is necessary to discuss two aspects of the Kalman filter developed
+here: 
 \begin{enumerate}
 \item Errors in the pitch and roll angles represent errors in the calculated
 level position of the IRU. For a fixed orientation error, when the
@@ -566,12 +574,13 @@ eastbound flight while the roll error becomes a pitch error. If a
 Kalman filter is implemented with error terms for pitch and roll in
 the a-frame, there will be large transient errors arising from course
 changes that must be corrected via the Kalman filter, whereas if the
-filter is implemented in the l-frame the respective north and east
-components of the attitude-angle errors remain approximately constant.
-For this reason, it is preferable to implement the filter using attitude-angle
-errors as they appear in the l-frame. The correction terms developed
-by the Kalman filter must then be transformed back to the a-frame
-before they are applied to the measurements of pitch and roll. 
+filter is implemented with errors in the l-frame the respective north
+and east components of the attitude-angle errors remain approximately
+constant. For this reason, it is preferable to implement the filter
+using attitude-angle errors as they appear in the l-frame. The correction
+terms developed by the Kalman filter must then be transformed back
+to the a-frame before they are applied to the measurements of pitch
+and roll. 
 \item Conventional implementations of Kalman-filter updating use the measurements
 of position and velocity from the GPS receiver as the external measurements
 to which the INS measurements are compared. This works well for all
@@ -590,11 +599,11 @@ error. Except in turns, the measured l-frame acceleration is too small
 and noisy for this to be effective, but turns produce strong signals
 and consequent constraints on the heading error.
 \end{enumerate}
-The Kalman filter is then implemented as follows:
+The Kalman filter is then constructed as follows:
 \begin{enumerate}
 \item The first step is to initialize an error-state-vector $\delta\mathbf{x}$
 from initial measurements of the differences between the INS and GPS
-values of position, velocity, and acceleration. Other errors are unknown
+values of position, velocity and acceleration. Other errors are unknown
 at the start of the integration and so will be initialized as zero.
 \item The covariance matrix characterizing the errors in the error-state-vector
 is also needed. This is here initialized to have rather large components
@@ -604,7 +613,7 @@ initialized as a 15x15 diagonal matrix where the diagonal elements
 are the squares of these values: \{2000/$R_{m}$, 2000/($R_{n}$cos$\Phi$),
 500, 2, 2, 2, 0.3$^{\circ}$, 0.3$^{\circ}$, 1$^{\circ}$, 0.005$^{\circ}s^{-1}$,
 0.005$^{\circ}s^{-1}$, 0.005$^{\circ}s^{-1}$, 0.0005, 0.0005, 0.0005\}.
-All entries are in SI units escelt those labeled as $^{\circ}$, in
+All entries are in SI units except those labeled as $^{\circ}$, in
 which case the values are converted to radians before use. The variables
 $R_{m}$ and $R_{n}$ are appropriate radii of the Earth. (See the
 code) 
@@ -617,7 +626,6 @@ by the time step) and the 15-element diagonal matrix:\\
 \begin{equation}
 \delta\mathbf{X}_{k}=\mathbf{T}\thinspace\delta\mathbf{x}_{k-1}=(\mathbf{J}(\mathbf{x})\thinspace\Delta t+\mathbf{I})\thinspace\delta\mathbf{x}_{k-1}\label{eq:error-state-transition}
 \end{equation}
-
 \item The noise-covariance matrix $\mathbf{Q}$ represents the noise in
 the solution. This is initialized as indicated in the code, via function
 GCF.
@@ -626,37 +634,35 @@ can be updated via\\
 \[
 \mathbf{V}=\mathbf{T}\thinspace\mathbf{V}\thinspace\mathbf{T}^{T}+\mathbf{Q}
 \]
-
 \item The Kalman gain is then given by\\
 \[
 \mathbf{K}=\mathbf{V\thinspace}\mathbf{H}^{T}\mathbf{\left\{ \mathbf{H}\thinspace\mathbf{V}\thinspace\mathbf{H}^{T}+\mathbf{R}\right\} ^{-1}}
 \]
-where $\mathbf{H}$ is a 15X9 matrix representing how the 9 measured
-differences (GPS-INS) correspond to the error-state vector. $\mathbf{R}$
-is the measurement-noise-covariance matrix representing the GPS noise,
-a with diagonal components that are the squares of these components::
-\{50/$R_{m}$, 50/($R_{n}\cos\Phi$, 100, 0.1, 0.1, 0.1, 0.001, 0.001,
-0.001\}. The effect of measured accelerations is more complex. The
-l-frame errors in acceleration, transformed to the a-frame, correspond
-directly to the measured accelerations from the INU (BLATA, BLONGA,
-BNORMA), so appropriate coupling is to include the appropriate direction-cosine
-transformation matrix as the coupling between the GPS measurements
-and the IRU-provided accelerations. This requires that $\mathbf{H}$
-contain components in the submatrix $\mathbf{H}_{7-9,\,13-15}$ that
-are $\mathbf{R}_{l}^{a}$ as defined previously.
-\item Define \textbf{$\delta\mathbf{z}$ }as the set of 9 measurements consisting
-of the differences between GPS and INS measurements of components
-of position, velocity and acceleration. The error-state vector is
-then further updated as follows:\\
+where $\mathbf{H}$ is a 15X9 diagonal matrix representing how the
+nine measured differences (GPS-INS) correspond to the error-state
+vector. $\mathbf{R}$ is the measurement-noise-covariance matrix representing
+the GPS noise, a 9x9 matrix having diagonal elements that are the
+squares of these components: \{50/$R_{m}$, 50/($R_{n}\cos\Phi$,
+100, 0.1, 0.1, 0.1, 0.001, 0.001, 0.001\}. The effect of measured
+accelerations is more complex. The l-frame errors in acceleration,
+transformed to the a-frame, correspond directly to the measured accelerations
+from the INU (BLATA, BLONGA, BNORMA), so appropriate coupling is to
+include the appropriate direction-cosine transformation matrix as
+the coupling between the GPS measurements and the IRU-provided accelerations.
+This requires that $\mathbf{H}$ contain components in the submatrix
+$\mathbf{H}_{7-9,13-15}$ that are $\mathbf{R}_{l}^{a}$ as defined
+previously. 
+\item Define \textbf{$\delta\mathbf{z}$ }as the set of nine measurements
+consisting of the differences between GPS and INS positions, velocities
+and accelerations. The error-state vector is then further updated
+as follows:\\
 \[
 \delta\mathbf{x}_{k}\leftarrow\delta\mathbf{x}_{k}+\mathbf{K\{\delta}\mathbf{z}-\mathbf{H}\delta\mathbf{x}\}
 \]
-
 \item Finally, the covariance matrix is updated further according to\\
 \[
 \mathbf{V}\leftarrow\mathbf{V}-\mathbf{K}\thinspace\mathbf{H}\thinspace\mathbf{V}
 \]
-
 \end{enumerate}
 To apply these equations, it is not necessary to use a high-rate file
 and update at high rate, because it is expected that the errors vary
@@ -669,46 +675,49 @@ the Kalman filter. DEEPWAVE flight 16 was selected, and the measurements
 were filtered with 11-s smoothing of accelerations and 301-s smoothing
 of measured velocity components and attitude angles.
 
-<<new-data, include=TRUE, echo=FALSE>>=
+<<new-data, include=TRUE, echo=FALSE, cache=TRUE>>=
 
-Flight <- "16" 				# XXX change this
-Project = "DW"     			 # XXX change this
+Flight <- "16" 			
+Project = "DW"     		
 ProjectDir <- "DEEPWAVE"
 fname = sprintf("%s%s/%s%s.nc", Directory, ProjectDir, Project, Flight)
 D1 <- getNetCDF (fname, VarList)
 DL <- nrow(D1)
 ## adjustments:
-D1$BYAWR <- D1$BYAWR - 0.005
-D1$BROLLR <- D1$BROLLR + 0.0005
-D1$BPITCHR <- D1$BPITCHR + 0.0005
+# D1$BYAWR <- D1$BYAWR - 0.005
+# D1$BROLLR <- D1$BROLLR + 0.0005
+# D1$BPITCHR <- D1$BPITCHR + 0.0005
 # D1$BNORMA <- D1$BNORMA*1.005 - 0.015
 # D1$BLONGA <- D1$BLONGA * 0.96
 # D1$BLATA <- D1$BLATA * 1.1
 s <- -120
 si <- 0
+Rate <- 1
 SHIFT <- FALSE
 SHIFT <- TRUE
 if (SHIFT) {
-  D1$GGVEW <- ShiftInTime (D1$GGVEW, Rate, s)    
+  D1$GGVEW <- ShiftInTime (D1$GGVEW, Rate, s)
   D1$GGVNS <- ShiftInTime (D1$GGVNS, Rate, s)
   # Data$BLONGA <- ShiftInTime (Data$BLONGA, Rate, s-80)
   # Data$BLATA <- ShiftInTime (Data$BLATA, Rate, s-80)
   # Data$BNORMA <- ShiftInTime (Data$BNORMA, Rate, s-80)
 }
+
 dt <- 1
 D1$Rn <- Ree / (1 - (Ecc*sin(D1$GGLAT*Cradeg))^2)^0.5 + D1$GGALT
 D1$Rm <- D1$Rn * (1-Ecc^2) / (1-(Ecc*sin(D1$GGLAT*Cradeg))^2) + D1$GGALT
 D1$Grav <- Gravity (D1$LAT, D1$GGALT)
-Re <- StandardConstant ('Re')
-D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2 + D1$GGALT)
-  #interpolate if necessary:
+## the following is commented because the centripetal effect is already included in 'Gravity()'
+# Re <- StandardConstant ('Re')
+# D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2 + D1$GGALT)
+  #interpolate if necessary: otherwise later filters fail
   MaxGap <- 1000
-  ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE)
-  ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE)
-  ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap, na.rm = FALSE)
-  vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm = FALSE)
-  vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm = FALSE)
-  vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm = FALSE)
+  D1$GGVNS <- ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE)
+  D1$GGVEW <- ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE)
+  D1$GGVSPD <- ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap, na.rm = FALSE)
+  D1$VNS <- vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm = FALSE)
+  D1$VEW <- vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm = FALSE)
+  D1$VSPD <- vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm = FALSE)
   D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE)
   D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE)
   D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE)
@@ -720,7 +729,7 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
   D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
   D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
   D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
-  ## smooth the measurements
+  ## smooth the measurements when determining derivatives
   .span <- 11    
   ## The following are accelerations determined from derivatives of the GPS velocities.
   ## These should match the measured accelerations after transformation to the l-frame
@@ -731,7 +740,7 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
   ## transform to the a-frame for comparison to the IRU:
   G <- D1$Grav
   VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
-  LA <- matrix (c(vedot, vndot, -vudot - G), ncol=3) + RotationCorrection (D1, VL)
+  LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrection (D1, VL)
   AA <- XformLA (D1, LA, .inverse=TRUE)
   AA[,3] <- AA[,3] - G
   fa1 <- lm(D1$BLONGA ~ AA[, 1])
@@ -741,7 +750,7 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
   AL <- XformLA (D1, AB)                                    #l-frame
   ## now corrected for angular effects
   ## See Noureldin et al, 2013, Eq. (5.55)
-  AL <- AL - RotationCorrection (D1, VL)
+  AL <- AL + RotationCorrection (D1, VL)  ##### check this sign and prev call above
   
   ## the resulting l-frame accelerations
   D1$LACCX <- AL[, 1]
@@ -755,7 +764,6 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
   D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
   .span <- 301
   SMOOTH <- FALSE
-  SMOOTH <- TRUE
   if (SMOOTH) {
     vns <- signal::sgolayfilt (vns, 3, .span)
     vew <- signal::sgolayfilt (vew, 3, .span)
@@ -809,68 +817,236 @@ during periods with significant slip, which were not present on this
 flight.}
 
 The differentiated measurements of velocity components from the GPS
-might be considered as additional measurements corresponding to the
-measured accelerations, but this will not be part of this initial
-study because the accelerometers appear to have low uncertainty and
-because the effect of errors in acceleration would also appear as
-errors in velocity and so should be detected by the conventional 6-component
-measurement vector for Kalman filtering.
+can be considered as additional measurements corresponding to the
+measured accelerations. This is discussed further in the following
+sections.
 
+\subsection*{Detecting the error in heading}
 
+Most of the components of the state vector have good feedback from
+GPS-derived measurements, but an exception is the measurement of heading.
+For position and velocity, there is direct correspondence between
+INS- and GPS-derived measurements. For pitch and roll, there is strong
+coupling to errors in the eastward and northward components of aircraft
+velocity. However, the coupling of INS-measured heading to GPS observations
+is not a case of strong coupling (to which the Schuler oscillation
+applies), and it is more difficult to update via measurements from
+the GPS receiver. As specified above, the differentiated GPS velocities
+provide an l-frame measurement of acceleration, and these can be transformed
+back to the a-frame to provide measurements that correspond to BLATA,
+BLONGA, and BNORMA. However, a difference in a-frame accelerations
+from the two sources can arise not only from errors in the measured
+accelerations but also (and more likely) from an error in heading,
+which would cause incorrect translation between l-frame and a-frame
+components. The source of coupling between GPS-derived measurements
+and heading is via the aircraft-velocity components, because an error
+in heading causes the IRU-measured accelerations to be resolved into
+the \emph{l-}frame incorrectly and so introduces errors in the aircraft-velocity
+components that can be detected via comparison to GPS-provided velocity
+components. Unfortunately, in most cases the measured accelerations
+are small, resulting in large uncertainties in any correction term
+except during turns. There are three possible approaches, all of which
+have been tried in this study:
+\begin{enumerate}
+\item The Kalman-filter structure as described above will use the errors
+in velocity to correct the state vector. Via the derivative coefficient
+matrix, the horizontal-velocity errors are dependent on errors in
+horizontal-acceleration as well as on attitude-angle errors, esp.~via
+strong coupling to the errors in roll and pitch. The coupling to heading
+is typically an order of magnitude weaker. Without special attention,
+the coupling to heading potentially can be obscured by the other sensitivities,
+through which the errors in velocity can be attributed to error-state
+components in horizontal acceleration and in roll and pitch. In turn,
+an error in heading is dependent mostly on errors in the gyro rotation
+rates. These sensitivities make it difficult to obtain a reliable
+adjustment of heading in the standard approach, although an estimate
+can be obtained.
+\item The \emph{l-}frame accelerations measured by differentiating the GPS-derived
+horizontal velocity components can be used as additional components
+of the observation vector, complementing the position and velocity
+measurements from GPS. These accelerations can then be used as independent
+measurements of acceleration. While this provides some additional
+adjustable parameters for the filter associated with the covariances
+of the GPS-derived accelerations, the errors in acceleration can still
+be attributed to errors in the measured accelerations. This seems
+to add little to the sensitivity, and indeed in tests this led to
+changes in pitch and roll corrections that appeared to produce degraded
+results.
+\item A more direct approach is to compare the measured horizontal-acceleration
+vector obtained by transforming the measured \emph{a-}frame accelerations
+to the \emph{l-}frame and comparing their horizontal direction to
+the direction of acceleration determined by differentiating the GPS-measured
+components of horizontal velocity. The difference is a measure of
+the heading error and can be used as a component of the observation
+vector $\mathbf{Z}$ with which to update the heading. That is, the
+error in heading is measured to be\\
+\begin{equation}
+\delta\psi=\arctan\left(\frac{a_{e}^{(l)}}{a_{n}^{(l)}}\right)-\arctan\left(\frac{\dot{v}_{e}}{\dot{v}_{n}}\right)\label{eq:Hcorr}
+\end{equation}
+where $a_{e}^{(l)}$ and $a_{n}^{(l)}$ are the \emph{l-}frame accelerations
+obtained by transforming the IRU-measured accelerations from the \emph{a-}frame
+to the \emph{l-}frame and $\dot{v}_{e}$ and $\dot{v}_{n}$ are the
+eastward and northward components of the acceleration obtained from
+the time-derivatives of the GPS-measured eastward and northward velocity
+components $v_{e}$ and $v_{n}$. The assumption made when using this
+formula is that the errors in the INS-produced accelerations in the
+\emph{l-}frame arise from the heading error with negligible contribution
+from the errors in the accelerometers. If this is the case, it would
+be possible to base the heading correction on this formula alone,
+but the more general case needs to consider how this might be influenced
+by errors in accelerations, so it is preferable to incorporate this
+into the Kalman filter and allow for the possibility that measured
+accelerations need to be adjusted.
+\end{enumerate}
+The third approach leads to noisy estimates of the correction $\delta\psi$
+except when accelerations are significant. Because significant accelerations
+occur mostly in turns when both angles in (\ref{eq:Hcorr}) are changing
+rapidly, it is very important to have correct relative timing between
+the INS measurement of heading and the GPS measurement of velocity.\footnote{As an illustration, a 50-ms delay in heading during a 3-min turn causes
+a shift in heading relative to the correct time of 0.1$^{\circ}$,
+so adjustment to at least this uncertainty is desirable. } The GPS measurements are assigned correct times by the GPS receiver
+and represent a standard clock against which to compare other measurements.\footnote{It appears that the relative timing between the IRU and the GPS can
+drift enough during some flights to introduce significant errors.} If the GPS-vs-INS time shift is not removed, a bias will be introduced
+into the heading correction that varies with turn direction. Therefore
+the following procedure is followed to remove this time shift:
+\begin{enumerate}
+\item Differentiate the GPS-provided measurements to obtain $\dot{v}_{e}$
+and $\dot{v}_{n}$.
+\item Transform the unshifted body accelerations to the \emph{l-}frame,
+with rotation corrections, to obtain the eastward and northward components
+of acceleration ($a_{e}^{(l)}$, $a_{n}^{(l)}$) in the local-level
+frame. 
+\item Find the heading correction for unshifted measurements by calculating
+$\delta\psi$ from (\ref{eq:Hcorr}).
+\item Calculate the running-standard-deviation of $\delta\psi$ spanning
+30 seconds. Select the subset of $\delta\psi$ for which that standard
+deviation is less than 0.2$^{\circ}$.
+\item Fit the subset to find the slope $b$ in the relationship $\delta\psi=a+b\thinspace\tan\phi$
+where $\phi$ is the roll angle. The rate of turn $R$ is related
+to the roll angle $\phi$ according to the relationship $R=g\thinspace\tan\phi/V$
+where $V$ is the airspeed, so $\tan\phi=RV/g$ and $\delta\psi=a+bRV/g$.
+A time delay of $\delta t$ produces a heading error of $-R\delta t$,
+so $-R\delta t=a+bRV/g$ and the time shift can be estimated from\\
+\begin{equation}
+\delta t=-b\frac{V}{g}\label{eq:deltaT}
+\end{equation}
+For example, for DEEPWAVE flight 16, $b=0.2146^{\circ}$s$^{-1}$
+= 0.003745\,rad\,s$^{-1}$ and $V\simeq240$\,m\,s$^{-1}$, so
+(with g=9.8\,m\,s$^{-2}$) $\delta t=$-0.092~s. The negative sign
+indicates that the INS-derived measurement of heading should be shifted
+forward in time by 92\,ms relative to the GPS-derived measurements
+of aircraft velocity. The standard error from the fit indicates that
+this shift was determined with an uncertainty of about 3\,ms, so
+this is a very sensitive method for determining the time shift.
+\item Apply this time shift to the measurements of heading. For a file containing
+measurements at 1~Hz, this requires creating an interpolated high-rate
+vector of measurements, shifting that vector, and then extracting
+a shifted 1-Hz vector from the shifted measurements. The Ranadu function
+ShiftInTime() accomplishes this by interpolating to a 125-Hz variable.
+The result can be checked by repeating step 5 using the shifted measurements;
+for this case, the deduced shift needed for the shifted time series
+was only 1~ms. 
+\end{enumerate}
+After an appropriate time shift is introduced, (\ref{eq:Hcorr}) is
+an appropriate measurement of heading to include in the matrix $\mathbf{H}$,
+where the appropriate components associated the heading error (component
+9 in the error-state vector) with components 7 and 8 in the measurement
+vector $\delta\mathbf{z}$. Specifically, column 9 in $\mathbf{H}$
+should have contributions from rows 7 and 8. Formulated in this way,
+the dependence is complex and non-linear, so it is simpler to add
+a 10th component to the measurement vector with value given by \ref{eq:Hcorr})
+and associate that directly (with coefficient 1 after appropriate
+conversion from radians to degrees) with column 9 of the information
+matrix $\mathbf{H}$, which then must have 10 rows and 15 columns.
 
-<<Kalman-setup, include=TRUE, echo=FALSE>>=
+Because typical horizontal accelerations in the l-frame are small,
+this estimate of the heading error is too noisy to be useful except
+in turns where the horizontal accelerations are significant, often
+about 3~m/s$^{2}$. In normal straight flight, the standard deviation
+in the estimate obtained from (\ref{eq:Hcorr}) is around 15$^{\circ}$,
+but in turns this standard deviation reduces to typically about 0.03$^{\circ}$.
+This has two important consequences. First, flights without turns
+or other sources of horizontal acceleration will lack the information
+for adjusting the heading. so in flights where this is important regular
+turns should be part of the flight plans. Second, when the GPS-based
+estimate of the heading error is used, an appropriate variance should
+be assigned to prevent excessive noise from affecting the result from
+the Kalman filter. 
 
-## also need the noise vector:
+<<Kalman-setup, include=TRUE, echo=FALSE, cache=TRUE>>=
+
+## initial values of the state vector and error-state vector:
+SV <- with(D1[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL, THDG,
+                                 BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
+SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
+## also need the corresponding noise vector:
 tau <- 60
-GCF <- function (sv, sp) {
+GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data record
   gcf <- vector('numeric', length=15)
-  gcf[1] <- 100 / sp$Rm
-  gcf[2] <- 100 / (sp$Rn * cos (sv[1]))
-  gcf[3] <- 50
+  gcf[1] <- 30 / sp$Rm
+  gcf[2] <- 30 / (sp$Rn * cos (sv[1]))
+  gcf[3] <- 150
   gcf[4:6] <- 0.5
-  gcf[7:9] <- 0.05*Cradeg
-  gcf[10:12] <- 0.05*Cradeg*sqrt(2/tau)
-  gcf[13:15] <- 0.002*sqrt(2/tau)
+  gcf[7:8] <- 0.005*Cradeg
+  gcf[9] <- 0.015*Cradeg
+  gcf[10:11] <- 0.015*Cradeg*sqrt(2/tau)
+  gcf[12] <- 0.015*Cradeg*sqrt(2/tau)
+  gcf[13:15] <- 0.001*sqrt(2/tau)
   return (gcf)
 }
-i <- 1
-gcf <- as.numeric (GCF (SV, D1[i, ]))
+gcf <- as.numeric (GCF (SV, D1[1, ]))
 # Gnoise <- gcf * rnorm(15)
 # dsve <- dcm %*% SVE   # + Gnoise
 # SVEP <- SVE + dt * as.vector(dsve, mode='numeric')  ## take a time step
 
-## The measurement model:
-GAEL <- c(D1$LACCX - vedot, D1$LACCY - vndot, D1$LACCZ - vudot)
+## The measurement model: calculate the measurements of acceleration from the GPS to add to the measurement vector
+GAEL <- c(D1$LACCX - D1$vedot, D1$LACCY - D1$vndot, D1$LACCZ - D1$vudot)
 dim(GAEL) <- c(DL, 3)
 ## transform to the a-frame
 GAE <- XformLA (D1, GAEL, .inverse=TRUE)
-DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS, VSPD-GGVSPD)
-DZ <- c(DZ, GAE[,1], GAE[,2], GAE[,3]))
-dim(DZ) <- c(DL, 9)
+DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS, VSPD-GGVSPD))
+# DZ <- c(DZ, GAE[,1], GAE[,2], GAE[,3]) ## add this later
+## The last three components provide direct feedback to measured acceleration
+## in the a-frame but also provide feedback to heading, as developed below
+# dim(DZ) <- c(DL, 9)
+dim(DZ) <- c(DL, 6)
 DZ[,1:2] <- DZ[, 1:2] * Cradeg
+## now add the pseudo-measurement of heading error found from the accelerations:
+D1$deltaPsi <- (atan2 (D1$LACCY, D1$LACCX) - atan2 (D1$vedot, D1$vndot)) / Cradeg
+D1$sdPsi <- zoo::rollapply(D1$deltaPsi, 10, sd, fill=NA)  ## calculate the std dev
+## add the heading correction to the measurement vector
+# DZ <- c(as.vector(DZ), D1$deltaPsi)
+# dim(DZ) <- c(DL, 10)
 
-## the observation matrix: (the first six components of the state error vector are observable)
-## components 7-9 are connected to IRU-measured accelerations via the transformation matrix l->a,
-## so matrix H must vary with aircraft attitude angles
-H <- diag(1, nrow=9, ncol=15)
-for (k in 7:9) {
-  H[k,k] <- 0
-  H[k,k+6] <- 1
-}
+## The observation matrix: (the first six and last three components of the state error 
+## vector are observable, the latter requiring transformation from l-frame to a-frame)
+## components 7-9 are connected to IRU-measured rotation rates via the transformation matrix l->a,
+## so matrix H must vary with aircraft attitude angles. This is addressed by the GAEL->GAE transform.
+# H <- diag(1, nrow=10, ncol=15)
+# for (k in 7:9) {
+#   H[k,k] <- 0
+#   H[k,k+6] <- 1
+# }
+# H[10,9] <- 1
+H <- diag(1, nrow=6, ncol=15)
+
 
 ## at any time step, assume the measurements are contaminated by noise:
 ## GPS measurement noise
-RN <- c(50/D1$Rm[1], 50/(D1$Rn[1]*cos(SV[1])), 10, 0.1, 0.1, 0.1)
-RCV <- matrix (rep(0,81), ncol=9)
-RCV[1,1] <- (50/D1$Rm[1])^2  ## latitude
-RCV[2,2] <- (50/(D1$Rn[1]*cos(SV[1])))^2
-RCV[3,3] <- 100^2
-RCV[4,4] <- 0.1^2            ## ve
-RCV[5,5] <- 0.1^2
-RCV[6,6] <- 0.1^2
-RCV[7,7] <- 0.001^2
-RCV[8,8] <- 0.001^2
-RCV[9,9] <- 0.001^2
+RCV <- matrix (rep(0,100), ncol=10)
+RCV <- matrix (rep(0,36), ncol=6)
+RCV[1,1] <- (30/D1$Rm[1])^2  ## latitude
+RCV[2,2] <- (30/(D1$Rn[1]*cos(SV[1])))^2
+RCV[3,3] <- 50^2
+RCV[4,4] <- 3^2            ## ve
+RCV[5,5] <- 3^2
+RCV[6,6] <- 0.3^2
+# RCV[7,7] <- 100.0  # A big value here limits updating of acceleration measurement.
+# RCV[8,8] <- 100.0  # The assumption is that there errors arise from an error in heading, not
+# RCV[9,9] <- 100.0  # measured acceleration, so the GPS-measured acceleration is used for that.
+# RCV[10,10] <- D1$sdPsi[1]^2
+# if (is.na(D1$sdPsi[1])) {RCV[10,10] <- 225}  # typical sd is 15 deg.
+# # RCV[10, 10] <- 1000  ## suppress effect
 
 ## initialize covariance matrix
 CV <- matrix (rep(0,225), ncol=15)
@@ -893,7 +1069,7 @@ Q <- diag(gcf^2, 15)
 
 @
 
-<<Kalman-loop, include=TRUE, echo=TRUE, eval=TRUE, fig.cap=' '>>=
+<<Kalman-loop, include=TRUE, echo=FALSE, eval=TRUE, fig.cap=' '>>=
 
 Data <- D1
 DL <- nrow (Data)
@@ -907,25 +1083,24 @@ DL <- nrow (Data)
   #   PitchA <- (sin(.hdg)*RollL + cos(.hdg)*PitchL)/Cradeg
   #   RollA <- (cos(.hdg)*RollL - sin(.hdg)*PitchL)/Cradeg
 
-## note: using l-frame PITCH and ROLL; STMFV must account for this
-SV <- with(Data[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCHL, ROLLL, THDG,
-                                 BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
-SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
+## note: if using l-frame PITCH and ROLL; STMFV must account for this
+
 NSTEP <- 5      ## update time
 SVEF <- array(dim=c(DL/NSTEP, 15))
 CVEF <- array(dim=c(DL/NSTEP, 15))
 ## initialize error state vector
 SVE <- rep (0, 15)  ## respectively: (lat,lon,alt) (vew,vns,vspd),
-## (pitch,roll,thdg) (rot. rates) (accel components)
+                    ## (pitch,roll,thdg) (rot. rates) (accel components)
 SVE[1:6] <- DZ[1, 1:6]
+## pitch and roll errors are going to be those in the l-frame; leave a-frame for now
 SVE[7:9] <- 0  ## might initialize using pitch/roll/heading-correction functions here
 ## start with zero for gyro and accelerometer errors
 SVEF[1, ] <- SVE
 CVEF[1, ] <- diag (CV)
-RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
-Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
+# RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
+# Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
 for (i in seq(2*NSTEP, DL, by=NSTEP)) {
-  SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCHL, ROLLL, THDG,
+  SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL, THDG,
                                    BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
   SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
   Rn <- Data$Rn[i]
@@ -933,16 +1108,34 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
   Grav <- Data$Grav[i]
   sv <- as.vector (SV, mode='numeric')
   # stmf <- STMFV (sv)
-  dcm <- jacobian (STMFV, sv, .aaframe='l') * dt * NSTEP + diag(15)
+  dcm <- jacobian (STMFV, sv) * dt * NSTEP + diag(15)
   ## modify to include this?
 ## modify this to include decaying error terms for the measurements:
 # dcm[10,10] <- dcm[11,11] <- dcm[12,12] <- -1/tau
 # dcm[13,13] <- dcm[14,14] <- dcm[15,15] <- -1/tau
-  ## predict the new state vector:
-  SVE <- dcm %*% SVE
+  ## predict the new error-state vector:
+  ## the pitch and roll error derivatives are now those in the a-frame, but
+  ##   the pitch/roll error state is in the l-frame. Save the l-frame error state:
+#   SVEL <- SVEA <- SVE
+#   ## Transform l-frame pitch/roll error state to a-frame
+#   SVEA[7] <- cos(sv[9]) * SVEL[7] + sin(sv[9]) * SVEL[8]
+#   SVEA[8] <- -sin(sv[9]) * SVEL[7] + cos(sv[9]) * SVEL[8]
+#   ## apply derivatives to get a-frame change
+#   SVEA <- dcm %*% SVEA
+#   ## transform back to l-frame
+#   SVEL[7] <- cos(sv[9]) * SVEA[7] - sin(sv[9]) * SVEA[8]
+#   SVEL[8] <- sin(sv[9]) * SVEA[7] + cos(sv[9]) * SVEA[8]
+  
+  SVE <- dcm %*% SVE    ## take time step in error-state vector
+
   ## update the covariance matrix:
   CV <- dcm %*% (CV %*% t(dcm)) + Q
   ## the Kalman gain:
+  # if (is.na(Data$sdPsi[i])) {
+  #   RCV[10,10] <- 225
+  # } else {
+  #   RCV[10,10] <- Data$sdPsi[i]^2
+  # }
   Kb <- solve (H %*% CV %*% t(H) + RCV)
   K <- CV %*% t(H) %*% Kb
   DZZ <- DZ[i, ] - H %*% SVE
@@ -1014,7 +1207,6 @@ KalmanCaptions <- c("Comparison of the KF, GPS, and INS values of latitude, long
 
 @
 
-
 \section*{Results}
 
 There are several tests that the corrected values should pass:
@@ -1028,7 +1220,7 @@ results in reasonable agreement with the KF values of pitch and roll.
 \item The heading-correction algorithm should also produce results consistent
 with the KF results.
 \end{enumerate}
-<<plot-Kalman, include=TRUE, echo=FALSE, fig.cap=KalmanCaptions>>=
+<<plot-Kalman, include=TRUE, echo=FALSE, fig.cap=c("Comparison of the KF, GPS, and INS values of latitude, longitude, and altitude for DEEPWAVE flight 16. DLAT, DLON, and DALT (blue lines) are the differences between the Kalman-filter result and GPS measurement, while CLAT, CLON, and CALT (green lines) are the corrections applied to the original INS values by the Kalman filter.", "Comparison of the KF, GPS, and INS values of aircraft-velocity components for DEEPWAVE flight 16. Blue lines show the differences between the Kalman-filter results and the corresponding GPS-provided values, while the green lines show the corrections applied to the original INS values by the Kalman filter.", "Pitch Correction from the Kalman filter (CPITCH, blue line) and from Ranadu::CorrectPitch (PC, red line)", "Roll Correction from the Kalman filter (CROLL) and from Ranadu::CorrectPitch (RC, red line)", "Heading Correction from the Kalman filter (CTHDG) and from Ranadu::CorrectHeading (HC, green line)")>>=
 
 op <- par (mar=c(2,4,1,1)+0.1)
 layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
@@ -1040,20 +1232,25 @@ op <- par (mar=c(2,4,1,1)+0.1)
 plotWAC (subset (Data[r, ],, c(Time, DVEW, CVEW)))
 plotWAC (subset (Data[r, ],, c(Time, DVNS, CVNS)))
 op <- par (mar=c(5,4,1,1)+0.1)
-plotWAC (subset (Data[r, ],, c(Time, DVSPD, CVSPD)))
+plotWAC (subset (Data[r, ],, c(Time, DVSPD, CVSPD)), ylim=c(-2,2))
 op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
 PC <- CorrectPitch(Data, .span=601)
 Data$PC <- -PC[, 1]
 Data$RC <- -PC[, 2]
 ## translate pitch/roll corrections to the a-frame:
 .hdg <- Data$THDG * Cradeg
-CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
-CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
-Data$CPITCH <- CPITCH / Cradeg
-Data$CROLL <- CROLL / Cradeg
+C7 <- SmoothInterp (Cor[, 7], .Length=181)
+C8 <- SmoothInterp (Cor[, 8], .Length=181)
+# CPITCH <- cos(.hdg) * C7 + sin(.hdg) * C8
+# CROLL <- -sin(.hdg) * C7 + cos(.hdg) * C8
+# # CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
+# # CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
+# Data$CPITCH <- CPITCH / Cradeg
+# Data$CROLL <- CROLL / Cradeg
 Data$CPITCH <- SmoothInterp (Data$CPITCH, .Length=181)
 Data$CROLL <- SmoothInterp (Data$CROLL, .Length=181)
-Data$HC <- CorrectHeading (Data, .plotfile='./HCPlot.pdf')
+Data$CTHDG <- SmoothInterp (Data$CTHDG, .Length=181)
+Data$HC <- -CorrectHeading (Data, .plotfile='./HCPlot.pdf')
 r <- setRange (Data, 70000, 123000)
 plotWAC(subset(Data[r,],,c(Time, CPITCH, PC)), ylab=expression(paste('PITCH CORRECTION',' [',degree,']')), ylim=c(-0.05, 0.05), lwd=c(0.7,0.7), col=c('blue', 'red'))
 ival <- abs(Data$ROLL) > 4
@@ -1068,14 +1265,28 @@ Data$RC[ival] <- NA
 lineWAC(Data$Time[r], Data$CROLL[r], lwd=3, col='blue')
 lineWAC(Data$Time[r], Data$RC[r], lwd=3, col='red')
 abline(h=0, col='darkorange', lty=2)
-plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)))
+plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)), ylim=c(-0.4,0.4), lwd=0.7)
+HE <- VCor[,9]
+HE[HE < 0.0025] <- 0.0025
+HE <- sqrt(HE)
+# lineWAC(Data$Time[r], Data$THDG[r]/1000, col='brown', lwd=0.7)
+# lineWAC(Data$Time, Data$CTHDG-HE, col='magenta', lwd=0.7)
+# lineWAC(Data$Time, Data$CTHDG+HE, col='magenta', lwd=0.7)
+iv <- HE > 0.051
+CCTHDG <- Data$CTHDG
+CCTHDG[iv] <- NA
+lineWAC(Data$Time[r], CCTHDG[r], lwd=3, col='blue')
+SS <- smooth.spline(Data$Time[r], Data$CTHDG[r], w=1/HE[r]^2, spar=1)
+Data$HCS <- predict(SS, as.numeric(Data$Time))$y
+lineWAC(Data$Time[r], Data$HCS[r], col='red')
+
 
 @
 
 \clearpage
 
 \begin{center}
-\textsf{\textcolor{blue}{-- End of Memo --}}
+\textsf{\textcolor{blue}{\textendash{} End of Memo \textendash{}}}
 \par\end{center}
 
 Reproducibility:
