@@ -12,28 +12,28 @@
 
 theme_WAC <- function () {
   themeWAC <- theme_gdocs() + theme(
-    plot.title = element_text(hjust=0.5),
-    axis.text = element_text(size = 16),
+    plot.title = element_text(hjust=0.5, vjust=1.3),
+    # axis.text = element_text(size = 16),
     panel.grid.major = element_line(color = "lightblue", linetype=5, size=0.5),
     panel.grid.minor = element_line(color = "gray90", linetype=5, size=0.5),
     panel.background = element_rect(fill = "gray95"),
-    axis.title=element_text(face="plain", size=18, colour="blue"),
+    # axis.title=element_text(face="plain", size=18, colour="blue"),
     line=element_line(size=1),
     axis.ticks = element_line(size=1),
     axis.ticks.length = unit(-0.35,"cm"),
-    axis.title.x = element_text (margin=margin(5,0,0,0)),
-    axis.text.x = element_text (margin=margin(15,0,0,0)),
-    axis.title.y = element_text (margin=margin(0,10,0,0)),
-    axis.text.y = element_text (margin=margin(0,20,0,0)),
+    axis.title.x = element_text (face='plain', size=16, color='blue', margin=margin(5,0,0,0)),
+    axis.text.x = element_text (size=16, margin=margin(15,0,0,0)),
+    axis.title.y = element_text (face='plain', size=18, color='blue', margin=margin(0,10,0,0), angle=90),
+    axis.text.y = element_text (size=16, margin=margin(0,20,0,0)),
     # axis.ticks.margin = unit (0.6,"cm"), # before ggplot2 v2.0
     legend.position=c(0.5,0.96),
     plot.margin=unit(c(1.5,1,1.0,0.5),"lines"),
-    plot.title=element_text(vjust=1.3),
     legend.background=element_rect(colour='black', size=0.3, fill="ivory"),
     legend.direction="horizontal",
     legend.title=element_text(size=12),
-    panel.border=element_rect(colour="black",size=0.7),
-    axis.title.y=element_text(angle=90))
+    panel.border=element_rect(colour="black",size=0.7)
+    # axis.title.y=element_text(angle=90))
+    )
   
   return (themeWAC)
 }

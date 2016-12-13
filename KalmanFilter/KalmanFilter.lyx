@@ -1,7 +1,9 @@
-#LyX 2.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 474
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \input colordvi
@@ -50,16 +52,16 @@ knitr
 \language_package default
 \inputencoding default
 \fontencoding global
-\font_roman times
-\font_sans default
-\font_typewriter default
-\font_math auto
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -149,7 +151,7 @@ addressee={Wind Uncertainty TN file}
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="3" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0pt">
 <column alignment="left" valignment="top" width="0pt">
 <row>
@@ -286,7 +288,12 @@ opts_chunk$set(echo=FALSE, include=FALSE, fig.lp="fig:")
 
 \begin_layout Plain Layout
 
-opts_chunk$set(fig.width=6, fig.height=5, fig.pos="center", digits=4)
+# note that fig.pos="center" gave errors, changed to fig.align
+\end_layout
+
+\begin_layout Plain Layout
+
+opts_chunk$set(fig.width=6, fig.height=5, fig.align="center", digits=4)
 \end_layout
 
 \begin_layout Plain Layout
@@ -307,6 +314,11 @@ require(numDeriv)    ## needed for the jacobian() function
 \begin_layout Plain Layout
 
 library(signal)
+\end_layout
+
+\begin_layout Plain Layout
+
+source ('~/RStudio/Ranadu/R/theme_WAC.R')
 \end_layout
 
 \begin_layout Plain Layout
@@ -509,12 +521,12 @@ The operation of the filter depends on sequential use of a set of matrices,
 \begin_inset space ~
 \end_inset
 
-[SVE] The error-state vector at time interval 
+[SVE] The error-state vector at time index 
 \begin_inset Formula $k$
 \end_inset
 
 .
- In the present case, this consists of the 15 components estimated errors
+ In the present case, this consists of these 15 components: estimated errors
  in position, aircraft velocity, aircraft attitude, IRU-measured rotation
  rate, and IRU-measured accelerations.
 \end_layout
@@ -599,8 +611,12 @@ The operation of the filter depends on sequential use of a set of matrices,
 \begin_inset space ~
 \end_inset
 
-[DZ] The 6-component measured differences between the INS and GPS measurements
- of position and velocity.
+[DZ] The 9-component measured differences between the INS and GPS measurements
+ of position, velocity and acceleration.
+ The latter three components are obtained by differentiating the GPS-provided
+ velocity components.
+ This differs from most conventional approaches but proves useful for contrainin
+g the measurement of heading.
 \end_layout
 
 \begin_layout Labeling
@@ -612,7 +628,7 @@ The operation of the filter depends on sequential use of a set of matrices,
 \begin_inset space ~
 \end_inset
 
-[H] The 15x6-component matrix representing how the measured differences
+[H] The 15x9-component matrix representing how the measured differences
  
 \begin_inset Formula $\delta\mathbf{z}$
 \end_inset
@@ -634,9 +650,9 @@ The operation of the filter depends on sequential use of a set of matrices,
 \begin_inset space ~
 \end_inset
 
-R] Matrics representing respectively the anticipated noise contributions
+R] Matrices representing respectively the anticipated noise contributions
  affecting the error-state vector (15x15) and the measurements from the
- GPS (6x6).
+ GPS (9x9).
 \end_layout
 
 \begin_layout Standard
@@ -1055,16 +1071,17 @@ Re <- StandardConstant ('Re')
 
 \begin_layout Plain Layout
 
-Data$Grav <- Data$Grav - StandardConstant('Omega')^2 * 
+# The following is commented because it is already in the Somagliana equation
 \end_layout
 
 \begin_layout Plain Layout
 
-  (Re * sin (Data$LAT * Cradeg)^2 + Data$GGALT)
+# Data$Grav <- Data$Grav - StandardConstant('Omega')^2 * 
 \end_layout
 
 \begin_layout Plain Layout
 
+#   (Re * sin (Data$LAT * Cradeg)^2 + Data$GGALT)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1089,17 +1106,22 @@ STMFV <- function (sv, .aaframe='a') {
 
 \begin_layout Plain Layout
 
-    svv1 <- cos (sv[9]) * sv[7] + sin (sv[9]) * sv[8]
+    svs7 <- sv[7]
 \end_layout
 
 \begin_layout Plain Layout
 
-    sv[8] <- -sin(sv[9]) * sv[7] + cos(sv[9]) * sv[8]
+    svs8 <- sv[8]
 \end_layout
 
 \begin_layout Plain Layout
 
-    sv[7] <- svv1
+    sv[7] <- cos (sv[9]) * svs7 + sin (sv[9]) * svs8
+\end_layout
+
+\begin_layout Plain Layout
+
+    sv[8] <- -sin (sv[9]) * svs7 + cos (sv[9]) * svs8
 \end_layout
 
 \begin_layout Plain Layout
@@ -1180,7 +1202,7 @@ STMFV <- function (sv, .aaframe='a') {
 
 \begin_layout Plain Layout
 
-  # G <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))    # * 0.9 improves pitch
+  Grav <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))    # * 0.9 improves pitch
  and roll!
 \end_layout
 
@@ -1314,6 +1336,31 @@ me
 \begin_layout Plain Layout
 
             0, 0, 0, 0, 0, 0)
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## return sv to original if necessary
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (.aaframe == 'l') {
+\end_layout
+
+\begin_layout Plain Layout
+
+    sv[7] <- svs7
+\end_layout
+
+\begin_layout Plain Layout
+
+    sv[8] <- svs8
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
 \end_layout
 
 \begin_layout Plain Layout
@@ -1479,6 +1526,10 @@ Initialize a state vector
 \end_inset
 
  having these components:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1506,6 +1557,10 @@ acceleration in the lateral, longitudinal, and normal direction relative
 \end_deeper
 \begin_layout Enumerate
 For each time increment:
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1553,7 +1608,8 @@ status open
 
 \begin_layout Plain Layout
 
-<<mechanization, include=TRUE, echo=TRUE, fig.lp='fig:', fig.cap=' '>>=
+<<mechanization, include=TRUE, echo=FALSE, fig.lp='fig:', fig.cap=' ', cache=TRUE>
+>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -2154,7 +2210,7 @@ The result of that integration is shown in Figs.
 \begin_inset space ~
 \end_inset
 
-1--3, with comparisons to the INS-produced solutions.
+1–3, with comparisons to the INS-produced solutions.
  There are some differences, but they are mostly understandable and could
  be corrected.
  For example, the attitude angles show differences in sine waves during
@@ -2182,7 +2238,55 @@ The Kalman filter
 \begin_layout Standard
 The preceding steps verify that at least an approximate calculation of the
  derivatives of the state variables is available.
- On that basis, an error-state Kalman filter can be developed, as follows:
+ On that basis, an error-state Kalman filter can be developed.
+ an error-state Kalman filter can be developed.
+ Before presenting that development, however, it is necessary to discuss
+ two aspects of the Kalman filter developed here: 
+\end_layout
+
+\begin_layout Enumerate
+Errors in the pitch and roll angles represent errors in the calculated level
+ position of the IRU.
+ For a fixed orientation error, when the aircraft turns, the errors in pitch
+ and roll intermix, with for example a pitch error during northbound flight
+ becoming a roll error during eastbound flight while the roll error becomes
+ a pitch error.
+ If a Kalman filter is implemented with error terms for pitch and roll in
+ the a-frame, there will be large transient errors arising from course changes
+ that must be corrected via the Kalman filter, whereas if the filter is
+ implemented with errors in the l-frame the respective north and east components
+ of the attitude-angle errors remain approximately constant.
+ For this reason, it is preferable to implement the filter using attitude-angle
+ errors as they appear in the l-frame.
+ The correction terms developed by the Kalman filter must then be transformed
+ back to the a-frame before they are applied to the measurements of pitch
+ and roll.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Conventional implementations of Kalman-filter updating use the measurements
+ of position and velocity from the GPS receiver as the external measurements
+ to which the INS measurements are compared.
+ This works well for all but the heading measurement.
+ A heading error results in erroneous resolution of measured accelerations
+ into l-frame components and so to errors in velocity, but the feedback
+ of these errors to heading is slow and noisy.
+ Therefore, a more direct method of coupling GPS-derived measurements to
+ heading errors will be used by differentiating the GPS-measured valocities
+ to obtain independent measurements of acceleration and then using these
+ measured l-frame accelerations as additional measurements to be compared
+ to the INS solution.
+ If there is an error in heading, these accelerations will lead to a difference
+ between the GPS-derived direction of l-frame acceleration and the INS-derived
+ direction, and this can be considered a direct measurement of heading error.
+ Except in turns, the measured l-frame acceleration is too small and noisy
+ for this to be effective, but turns produce strong signals and consequent
+ constraints on the heading error.
+\end_layout
+
+\begin_layout Standard
+The Kalman filter is then constructed as follows:
 \end_layout
 
 \begin_layout Enumerate
@@ -2191,7 +2295,7 @@ The first step is to initialize an error-state-vector
 \end_inset
 
  from initial measurements of the differences between the INS and GPS values
- of position and velocity.
+ of position, velocity and acceleration.
  Other errors are unknown at the start of the integration and so will be
  initialized as zero.
 \end_layout
@@ -2244,7 +2348,7 @@ cos
 \end_inset
 
 , 0.0005, 0.0005, 0.0005}.
- All entries are in SI units escelt those labeled as 
+ All entries are in SI units except those labeled as 
 \begin_inset Formula $^{\circ}$
 \end_inset
 
@@ -2332,14 +2436,14 @@ where
 \begin_inset Formula $\mathbf{H}$
 \end_inset
 
- is a 15X6 diagonal matrix representing how the 6 measured differences (GPS-INS)
- correspond to the error-state vector.
+ is a 15X9 diagonal matrix representing how the nine measured differences
+ (GPS-INS) correspond to the error-state vector.
  
 \begin_inset Formula $\mathbf{R}$
 \end_inset
 
  is the measurement-noise-covariance matrix representing the GPS noise,
- a 6x6 matrix having diagonal elements that are the squares of these components:
+ a 9x9 matrix having diagonal elements that are the squares of these components:
  {50/
 \begin_inset Formula $R_{m}$
 \end_inset
@@ -2348,7 +2452,27 @@ where
 \begin_inset Formula $R_{n}\cos\Phi$
 \end_inset
 
-, 100, 0.1, 0.1, 0.1}.
+, 100, 0.1, 0.1, 0.1, 0.001, 0.001, 0.001}.
+ The effect of measured accelerations is more complex.
+ The l-frame errors in acceleration, transformed to the a-frame, correspond
+ directly to the measured accelerations from the INU (BLATA, BLONGA, BNORMA),
+ so appropriate coupling is to include the appropriate direction-cosine
+ transformation matrix as the coupling between the GPS measurements and
+ the IRU-provided accelerations.
+ This requires that 
+\begin_inset Formula $\mathbf{H}$
+\end_inset
+
+ contain components in the submatrix 
+\begin_inset Formula $\mathbf{H}_{7-9,13-15}$
+\end_inset
+
+ that are 
+\begin_inset Formula $\mathbf{R}_{l}^{a}$
+\end_inset
+
+ as defined previously.
+ 
 \end_layout
 
 \begin_layout Enumerate
@@ -2360,8 +2484,8 @@ Define
 
  
 \series default
-as the set of six measurements consisting of the differences between GPS
- and INS positions and velocities.
+as the set of nine measurements consisting of the differences between GPS
+ and INS positions, velocities and accelerations.
  The error-state vector is then further updated as follows:
 \begin_inset Newline newline
 \end_inset
@@ -2413,7 +2537,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<new-data, include=TRUE, echo=FALSE>>=
+<<new-data, include=TRUE, echo=FALSE, cache=TRUE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -2422,12 +2546,12 @@ status open
 
 \begin_layout Plain Layout
 
-Flight <- "16" 				# XXX change this
+Flight <- "16" 			
 \end_layout
 
 \begin_layout Plain Layout
 
-Project = "DW"     			 # XXX change this
+Project = "DW"     		
 \end_layout
 
 \begin_layout Plain Layout
@@ -2452,6 +2576,105 @@ DL <- nrow(D1)
 
 \begin_layout Plain Layout
 
+## adjustments:
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$BYAWR <- D1$BYAWR - 0.005
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$BROLLR <- D1$BROLLR + 0.0005
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$BPITCHR <- D1$BPITCHR + 0.0005
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$BNORMA <- D1$BNORMA*1.005 - 0.015
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$BLONGA <- D1$BLONGA * 0.96
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$BLATA <- D1$BLATA * 1.1
+\end_layout
+
+\begin_layout Plain Layout
+
+s <- -120
+\end_layout
+
+\begin_layout Plain Layout
+
+si <- 0
+\end_layout
+
+\begin_layout Plain Layout
+
+Rate <- 1
+\end_layout
+
+\begin_layout Plain Layout
+
+SHIFT <- FALSE
+\end_layout
+
+\begin_layout Plain Layout
+
+SHIFT <- TRUE
+\end_layout
+
+\begin_layout Plain Layout
+
+if (SHIFT) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  D1$GGVEW <- ShiftInTime (D1$GGVEW, Rate, s)
+\end_layout
+
+\begin_layout Plain Layout
+
+  D1$GGVNS <- ShiftInTime (D1$GGVNS, Rate, s)
+\end_layout
+
+\begin_layout Plain Layout
+
+  # Data$BLONGA <- ShiftInTime (Data$BLONGA, Rate, s-80)
+\end_layout
+
+\begin_layout Plain Layout
+
+  # Data$BLATA <- ShiftInTime (Data$BLATA, Rate, s-80)
+\end_layout
+
+\begin_layout Plain Layout
+
+  # Data$BNORMA <- ShiftInTime (Data$BNORMA, Rate, s-80)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
 dt <- 1
 \end_layout
 
@@ -2472,13 +2695,13 @@ D1$Grav <- Gravity (D1$LAT, D1$GGALT)
 
 \begin_layout Plain Layout
 
-Re <- StandardConstant ('Re')
+# Re <- StandardConstant ('Re')
 \end_layout
 
 \begin_layout Plain Layout
 
-D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
- + D1$GGALT)
+# D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT *
+ Cradeg)^2 + D1$GGALT)
 \end_layout
 
 \begin_layout Plain Layout
@@ -2493,32 +2716,38 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
 
 \begin_layout Plain Layout
 
-  ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE)
+  D1$GGVNS <- ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap,
+ na.rm = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE)
+  D1$GGVEW <- ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap,
+ na.rm = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap, na.rm = FALSE)
+  D1$GGVSPD <- ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap,
+ na.rm = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm = FALSE)
+  D1$VNS <- vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm
+ = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm = FALSE)
+  D1$VEW <- vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm
+ = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm = FALSE)
+  D1$VSPD <- vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm
+ = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
@@ -2605,17 +2834,18 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
 
 \begin_layout Plain Layout
 
-  vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
+  D1$vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first
+ deriv.
 \end_layout
 
 \begin_layout Plain Layout
 
-  vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
+  D1$vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
 \end_layout
 
 \begin_layout Plain Layout
 
-  vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
+  D1$vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
 \end_layout
 
 \begin_layout Plain Layout
@@ -2635,8 +2865,8 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
 
 \begin_layout Plain Layout
 
-  LA <- matrix (c(vedot, vndot, -vudot - G), ncol=3) + RotationCorrection
- (D1, VL)
+  LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrecti
+on (D1, VL)
 \end_layout
 
 \begin_layout Plain Layout
@@ -2688,7 +2918,8 @@ D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2
 
 \begin_layout Plain Layout
 
-  AL <- AL - RotationCorrection (D1, VL)
+  AL <- AL + RotationCorrection (D1, VL)  ##### check this sign and prev
+ call above
 \end_layout
 
 \begin_layout Plain Layout
@@ -2890,17 +3121,17 @@ D1$ROLLL <-  D1$PITCH * sin (.thdg) + D1$ROLL * cos (.thdg)
 
 \begin_layout Plain Layout
 
-fm1 <- lm (vedot ~ D1$LACCX)
+fm1 <- lm (D1$vedot ~ D1$LACCX)
 \end_layout
 
 \begin_layout Plain Layout
 
-fm2 <- lm (vndot ~ D1$LACCY)
+fm2 <- lm (D1$vndot ~ D1$LACCY)
 \end_layout
 
 \begin_layout Plain Layout
 
-fm3 <- lm (vudot ~ D1$LACCZ)
+fm3 <- lm (D1$vudot ~ D1$LACCZ)
 \end_layout
 
 \begin_layout Plain Layout
@@ -3048,7 +3279,7 @@ The lateral accelerations were too noisy for a similar calibration because
 \end_layout
 
 \begin_layout Standard
-The differentiated measurements of velocity components from the GPS might
+The differentiated measurements of velocity components from the GPS will
  be considered as additional measurements corresponding to the measured
  accelerations.
  This is discussed further in the following section.
@@ -3068,6 +3299,13 @@ Most of the components of the state vector have good feedback from GPS-derived
  However, the coupling of INS-measured heading to GPS observations is not
  a case of strong coupling (to which the Schuler oscillation applies), and
  it is more difficult to update via measurements from the GPS receiver.
+ As specified above, the differentiated GPS velocities provide an l-frame
+ measurement of acceleration, and these can be transformed back to the a-frame
+ to provide measurements that correspond to BLATA, BLONGA, and BNORMA.
+ However, a difference in a-frame accelerations from the two sources can
+ arise not only from errors in the measured accelerations but also (and
+ more likely) from an error in heading, which would cause incorrect translation
+ between l-frame and a-frame components.
  The source of coupling between GPS-derived measurements and heading is
  via the aircraft-velocity components, because an error in heading causes
  the IRU-measured accelerations to be resolved into the 
@@ -3086,7 +3324,7 @@ frame incorrectly and so introduces errors in the aircraft-velocity components
 The Kalman-filter structure as described above will use the errors in velocity
  to correct the state vector.
  Via the derivative coefficient matrix, the horizontal-velocity errors are
- dependent on errors in horizontal-acceleration as well as to attitude-angle
+ dependent on errors in horizontal-acceleration as well as on attitude-angle
  errors, esp.
 \begin_inset space ~
 \end_inset
@@ -3100,7 +3338,7 @@ via strong coupling to the errors in roll and pitch.
  In turn, an error in heading is dependent mostly on errors in the gyro
  rotation rates.
  These sensitivities make it difficult to obtain a reliable adjustment of
- heading in the standard approach.
+ heading in the standard approach, although an estimate can be obtained.
 \end_layout
 
 \begin_layout Enumerate
@@ -3116,7 +3354,9 @@ n.
  While this provides some additional adjustable parameters for the filter
  associated with the covariances of the GPS-derived accelerations, the errors
  in acceleration can still be attributed to errors in the measured accelerations.
- This seems to add little to the sensitivity.
+ This seems to add little to the sensitivity, and indeed in tests this led
+ to changes in pitch and roll corrections that appeared to produce degraded
+ results.
 \end_layout
 
 \begin_layout Enumerate
@@ -3209,7 +3449,7 @@ The third approach leads to noisy estimates of the correction
 \begin_inset Formula $\delta\psi$
 \end_inset
 
-except when accelerations are significant.
+ except when accelerations are significant.
  Because significant accelerations occur mostly in turns when both angles
  in (
 \begin_inset CommandInset ref
@@ -3468,7 +3708,7 @@ Hz, this requires creating an interpolated high-rate vector of measurements,
 ms.
  
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 It may be useful to incorporate in addition a time dependence, either to
@@ -3484,8 +3724,89 @@ $Time[1]
 \end_layout
 
 \begin_layout Standard
+After an appropriate time shift is introduced, (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Hcorr"
+
+\end_inset
+
+) is an appropriate measurement of heading to include in the matrix 
+\begin_inset Formula $\mathbf{H}$
+\end_inset
+
+, where the appropriate components associated the heading error (component
+ 9 in the error-state vector) with components 7 and 8 in the measurement
+ vector 
+\begin_inset Formula $\delta\mathbf{z}$
+\end_inset
+
+.
+ Specifically, column 9 in 
+\begin_inset Formula $\mathbf{H}$
+\end_inset
+
+ should have contributions from rows 7 and 8.
+ Formulated in this way, the dependence is complex and non-linear, so it
+ is simpler to add a 10th component to the measurement vector with value
+ given by 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Hcorr"
+
+\end_inset
+
+) and associate that directly (with coefficient 1 after appropriate conversion
+ from radians to degrees) with column 9 of the information matrix 
+\begin_inset Formula $\mathbf{H}$
+\end_inset
+
+, which then must have 10 rows and 15 columns.
+\end_layout
+
+\begin_layout Standard
+Because typical horizontal accelerations in the l-frame are small, this
+ estimate of the heading error is too noisy to be useful except in turns
+ where the horizontal accelerations are significant, often about 3
+\begin_inset space ~
+\end_inset
+
+m/s
+\begin_inset Formula $^{2}$
+\end_inset
+
+.
+ In normal straight flight, the standard deviation in the estimate obtained
+ from (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Hcorr"
+
+\end_inset
+
+) is around 15
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+, but in turns this standard deviation reduces to typically about 0.03
+\begin_inset Formula $^{\circ}$
+\end_inset
+
+.
+ This has two important consequences.
+ First, flights without turns or other sources of horizontal acceleration
+ will lack the information for adjusting the heading.
+ so in flights where this is important regular turns should be part of the
+ flight plans.
+ Second, when the GPS-based estimate of the heading error is used, an appropriat
+e variance should be assigned to prevent excessive noise from affecting
+ the result from the Kalman filter.
+ 
+\end_layout
+
+\begin_layout Standard
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 , but this will not be part of this initial study because the accelerometers
@@ -3501,7 +3822,7 @@ status open
 
 \begin_layout Standard
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -3601,7 +3922,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<Kalman-setup, include=TRUE, echo=FALSE>>=
+<<Kalman-setup, include=TRUE, echo=FALSE, cache=TRUE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -3630,17 +3951,17 @@ GCF <- function (sv, sp) {
 
 \begin_layout Plain Layout
 
-  gcf[1] <- 100 / sp$Rm
+  gcf[1] <- 30 / sp$Rm
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[2] <- 100 / (sp$Rn * cos (sv[1]))
+  gcf[2] <- 30 / (sp$Rn * cos (sv[1]))
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[3] <- 50
+  gcf[3] <- 150
 \end_layout
 
 \begin_layout Plain Layout
@@ -3650,17 +3971,27 @@ GCF <- function (sv, sp) {
 
 \begin_layout Plain Layout
 
-  gcf[7:9] <- 0.05*Cradeg
+  gcf[7:8] <- 0.005*Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[10:12] <- 0.05*Cradeg*sqrt(2/tau)
+  gcf[9] <- 0.015*Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[13:15] <- 0.002*sqrt(2/tau)
+  gcf[10:11] <- 0.015*Cradeg*sqrt(2/tau)
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[12] <- 0.015*Cradeg*sqrt(2/tau)
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[13:15] <- 0.001*sqrt(2/tau)
 \end_layout
 
 \begin_layout Plain Layout
@@ -3709,13 +4040,48 @@ gcf <- as.numeric (GCF (SV, D1[i, ]))
 
 \begin_layout Plain Layout
 
+GAEL <- c(D1$LACCX - D1$vedot, D1$LACCY - D1$vndot, D1$LACCZ - D1$vudot)
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(GAEL) <- c(DL, 3)
+\end_layout
+
+\begin_layout Plain Layout
+
+## transform to the a-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+GAE <- XformLA (D1, GAEL, .inverse=TRUE)
+\end_layout
+
+\begin_layout Plain Layout
+
 DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS,
  VSPD-GGVSPD))
 \end_layout
 
 \begin_layout Plain Layout
 
-dim(DZ) <- c(DL, 6)
+DZ <- c(DZ, GAE[,1], GAE[,2], GAE[,3])
+\end_layout
+
+\begin_layout Plain Layout
+
+## The last three components provide direct feedback to measured acceleration
+\end_layout
+
+\begin_layout Plain Layout
+
+## in the a-frame but also provide feedback to heading, as developed below
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(DZ) <- c(DL, 9)
 \end_layout
 
 \begin_layout Plain Layout
@@ -3725,17 +4091,96 @@ DZ[,1:2] <- DZ[, 1:2] * Cradeg
 
 \begin_layout Plain Layout
 
+## now add the pseudo-measurement of heading error found from the accelerations:
 \end_layout
 
 \begin_layout Plain Layout
 
-## the observation matrix: (the first six components of the state error
- vector are observable)
+D1$deltaPsi <- (atan2 (D1$LACCY, D1$LACCX) - atan2 (D1$vedot, D1$vndot))
+ / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-H <- diag(1, nrow=6, ncol=15)
+D1$sdPsi <- zoo::rollapply(D1$deltaPsi, 10, sd, fill=NA)  ## calculate the
+ std dev
+\end_layout
+
+\begin_layout Plain Layout
+
+## add the heading correction to the measurement vector
+\end_layout
+
+\begin_layout Plain Layout
+
+DZ <- c(as.vector(DZ), D1$deltaPsi)
+\end_layout
+
+\begin_layout Plain Layout
+
+dim(DZ) <- c(DL, 10)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## The observation matrix: (the first six and last three components of the
+ state error 
+\end_layout
+
+\begin_layout Plain Layout
+
+## vector are observable, the latter requiring transformation from l-frame
+ to a-frame)
+\end_layout
+
+\begin_layout Plain Layout
+
+## components 7-9 are connected to IRU-measured rotation rates via the transform
+ation matrix l->a,
+\end_layout
+
+\begin_layout Plain Layout
+
+## so matrix H must vary with aircraft attitude angles.
+ This is addressed by the GAEL->GAE transform.
+\end_layout
+
+\begin_layout Plain Layout
+
+H <- diag(1, nrow=10, ncol=15)
+\end_layout
+
+\begin_layout Plain Layout
+
+for (k in 7:9) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  H[k,k] <- 0
+\end_layout
+
+\begin_layout Plain Layout
+
+  H[k,k+6] <- 1
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+H[10,9] <- 1
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -3754,42 +4199,69 @@ H <- diag(1, nrow=6, ncol=15)
 
 \begin_layout Plain Layout
 
-RN <- c(50/D1$Rm[1], 50/(D1$Rn[1]*cos(SV[1])), 10, 0.1, 0.1, 0.1)
+RCV <- matrix (rep(0,100), ncol=10)
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV <- matrix (rep(0,36), ncol=6)
+RCV[1,1] <- (30/D1$Rm[1])^2  ## latitude
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[1,1] <- (50/D1$Rm[1])^2  ## latitude
+RCV[2,2] <- (30/(D1$Rn[1]*cos(SV[1])))^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[2,2] <- (50/(D1$Rn[1]*cos(SV[1])))^2
+RCV[3,3] <- 50^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[3,3] <- 100^2
+RCV[4,4] <- 3^2            ## ve
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[4,4] <- 0.1^2            ## ve
+RCV[5,5] <- 3^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[5,5] <- 0.1^2
+RCV[6,6] <- 0.3^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[6,6] <- 0.1^2
+RCV[7,7] <- 100.0  # A big value here limits updating of acceleration measurement.
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[8,8] <- 100.0  # The assumption is that there errors arise from an error
+ in heading, not
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[9,9] <- 100.0  # measured acceleration, so the GPS-measured acceleration
+ is used for that.
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[10,10] <- D1$sdPsi[1]^2
+\end_layout
+
+\begin_layout Plain Layout
+
+if (is.na(D1$sdPsi[1])) {RCV[10,10] <- 225}  # typical sd is 15 deg.
+\end_layout
+
+\begin_layout Plain Layout
+
+# RCV[10, 10] <- 1000  ## suppress effect
 \end_layout
 
 \begin_layout Plain Layout
@@ -3904,7 +4376,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<Kalman-loop, include=TRUE, echo=TRUE, eval=TRUE, fig.cap=' '>>=
+<<Kalman-loop, include=TRUE, echo=FALSE, eval=TRUE, fig.cap=' '>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -3919,57 +4391,6 @@ Data <- D1
 \begin_layout Plain Layout
 
 DL <- nrow (Data)
-\end_layout
-
-\begin_layout Plain Layout
-
-s <- -120
-\end_layout
-
-\begin_layout Plain Layout
-
-si <- 0
-\end_layout
-
-\begin_layout Plain Layout
-
-SHIFT <- FALSE
-\end_layout
-
-\begin_layout Plain Layout
-
-if (SHIFT) {
-\end_layout
-
-\begin_layout Plain Layout
-
-  Data$GGVEW <- ShiftInTime (Data$GGVEW, Rate, s)    ## this is needed for
- pitch correction
-\end_layout
-
-\begin_layout Plain Layout
-
-  Data$GGVNS <- ShiftInTime (Data$GGVNS, Rate, s)
-\end_layout
-
-\begin_layout Plain Layout
-
-  # Data$BLONGA <- ShiftInTime (Data$BLONGA, Rate, s-80)
-\end_layout
-
-\begin_layout Plain Layout
-
-  # Data$BLATA <- ShiftInTime (Data$BLATA, Rate, s-80)
-\end_layout
-
-\begin_layout Plain Layout
-
-  # Data$BNORMA <- ShiftInTime (Data$BNORMA, Rate, s-80)
-\end_layout
-
-\begin_layout Plain Layout
-
-}
 \end_layout
 
 \begin_layout Plain Layout
@@ -4024,12 +4445,12 @@ if (SHIFT) {
 
 \begin_layout Plain Layout
 
-## note: using l-frame PITCH and ROLL; STMFV must account for this
+## note: if using l-frame PITCH and ROLL; STMFV must account for this
 \end_layout
 
 \begin_layout Plain Layout
 
-SV <- with(Data[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCHL, ROLLL,
+SV <- with(Data[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
  THDG,
 \end_layout
 
@@ -4071,13 +4492,19 @@ SVE <- rep (0, 15)  ## respectively: (lat,lon,alt) (vew,vns,vspd),
 
 \begin_layout Plain Layout
 
-## (pitch,roll,thdg) (rot.
+                    ## (pitch,roll,thdg) (rot.
  rates) (accel components)
 \end_layout
 
 \begin_layout Plain Layout
 
 SVE[1:6] <- DZ[1, 1:6]
+\end_layout
+
+\begin_layout Plain Layout
+
+## pitch and roll errors are going to be those in the l-frame; leave a-frame
+ for now
 \end_layout
 
 \begin_layout Plain Layout
@@ -4103,12 +4530,12 @@ CVEF[1, ] <- diag (CV)
 
 \begin_layout Plain Layout
 
-RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
+# RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
 \end_layout
 
 \begin_layout Plain Layout
 
-Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
+# Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
 \end_layout
 
 \begin_layout Plain Layout
@@ -4118,8 +4545,8 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCHL,
- ROLLL, THDG,
+  SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH,
+ ROLL, THDG,
 \end_layout
 
 \begin_layout Plain Layout
@@ -4160,7 +4587,7 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  dcm <- jacobian (STMFV, sv, .aaframe='l') * dt * NSTEP + diag(15)
+  dcm <- jacobian (STMFV, sv, .aaframe='a') * dt * NSTEP + diag(15)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4185,12 +4612,78 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  ## predict the new state vector:
+  ## predict the new error-state vector:
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## the pitch and roll error derivatives are now those in the a-frame,
+ but
+\end_layout
+
+\begin_layout Plain Layout
+
+  ##   the pitch/roll error state is in the l-frame.
+ Save the l-frame error state:
+\end_layout
+
+\begin_layout Plain Layout
+
+#   SVEL <- SVEA <- SVE
+\end_layout
+
+\begin_layout Plain Layout
+
+#   ## Transform l-frame pitch/roll error state to a-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+#   SVEA[7] <- cos(sv[9]) * SVEL[7] + sin(sv[9]) * SVEL[8]
+\end_layout
+
+\begin_layout Plain Layout
+
+#   SVEA[8] <- -sin(sv[9]) * SVEL[7] + cos(sv[9]) * SVEL[8]
+\end_layout
+
+\begin_layout Plain Layout
+
+#   ## apply derivatives to get a-frame change
+\end_layout
+
+\begin_layout Plain Layout
+
+#   SVEA <- dcm %*% SVEA
+\end_layout
+
+\begin_layout Plain Layout
+
+#   ## transform back to l-frame
+\end_layout
+
+\begin_layout Plain Layout
+
+#   SVEL[7] <- cos(sv[9]) * SVEA[7] - sin(sv[9]) * SVEA[8]
+\end_layout
+
+\begin_layout Plain Layout
+
+#   SVEL[8] <- sin(sv[9]) * SVEA[7] + cos(sv[9]) * SVEA[8]
+\end_layout
+
+\begin_layout Plain Layout
+
+  
 \end_layout
 
 \begin_layout Plain Layout
 
   SVE <- dcm %*% SVE
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -4206,6 +4699,31 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 \begin_layout Plain Layout
 
   ## the Kalman gain:
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (is.na(Data$sdPsi[i])) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    RCV[10,10] <- 225
+\end_layout
+
+\begin_layout Plain Layout
+
+  } else {
+\end_layout
+
+\begin_layout Plain Layout
+
+    RCV[10,10] <- Data$sdPsi[i]^2
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
 \end_layout
 
 \begin_layout Plain Layout
@@ -4399,17 +4917,17 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
+  Data$PITCHKF <- Data$PITCH - Cor[, 7]
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
+  Data$ROLLKF <- Data$ROLL - Cor[, 8]
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
+  Data$THDGKF <- Data$THDG - Cor[, 9]
 \end_layout
 
 \begin_layout Plain Layout
@@ -4602,7 +5120,21 @@ status open
 
 \begin_layout Plain Layout
 
-<<plot-Kalman, include=TRUE, echo=FALSE, fig.cap=KalmanCaptions>>=
+<<plot-Kalman, include=TRUE, echo=FALSE, fig.cap=c("Comparison of the KF,
+ GPS, and INS values of latitude, longitude, and altitude for DEEPWAVE flight
+ 16.
+ DLAT, DLON, and DALT (blue lines) are the differences between the Kalman-filter
+ result and GPS measurement, while CLAT, CLON, and CALT (green lines) are
+ the corrections applied to the original INS values by the Kalman filter.",
+ "Comparison of the KF, GPS, and INS values of aircraft-velocity components
+ for DEEPWAVE flight 16.
+ Blue lines show the differences between the Kalman-filter results and the
+ corresponding GPS-provided values, while the green lines show the corrections
+ applied to the original INS values by the Kalman filter.", "Pitch Correction
+ from the Kalman filter (CPITCH, blue line) and from Ranadu::CorrectPitch
+ (PC, red line)", "Roll Correction from the Kalman filter (CROLL) and from
+ Ranadu::CorrectPitch (RC, red line)", "Heading Correction from the Kalman
+ filter (CTHDG) and from Ranadu::CorrectHeading (HC, green line)")>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -4661,7 +5193,7 @@ op <- par (mar=c(5,4,1,1)+0.1)
 
 \begin_layout Plain Layout
 
-plotWAC (subset (Data[r, ],, c(Time, DVSPD, CVSPD)))
+plotWAC (subset (Data[r, ],, c(Time, DVSPD, CVSPD)), ylim=c(-2,2))
 \end_layout
 
 \begin_layout Plain Layout
@@ -4676,12 +5208,12 @@ PC <- CorrectPitch(Data, .span=601)
 
 \begin_layout Plain Layout
 
-Data$PC <- -PC[, 1]
+Data$PC <- PC[, 1]
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$RC <- -PC[, 2]
+Data$RC <- PC[, 2]
 \end_layout
 
 \begin_layout Plain Layout
@@ -4696,12 +5228,32 @@ Data$RC <- -PC[, 2]
 
 \begin_layout Plain Layout
 
-CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
+C7 <- SmoothInterp (Cor[, 7], .Length=181)
 \end_layout
 
 \begin_layout Plain Layout
 
-CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
+C8 <- SmoothInterp (Cor[, 8], .Length=181)
+\end_layout
+
+\begin_layout Plain Layout
+
+CPITCH <- cos(.hdg) * C7 + sin(.hdg) * C8
+\end_layout
+
+\begin_layout Plain Layout
+
+CROLL <- -sin(.hdg) * C7 + cos(.hdg) * C8
+\end_layout
+
+\begin_layout Plain Layout
+
+# CPITCH <- cos(.hdg) * Cor[, 7] + sin(.hdg) * Cor[, 8]
+\end_layout
+
+\begin_layout Plain Layout
+
+# CROLL <- -sin(.hdg) * Cor[, 7] + cos(.hdg) * Cor[, 8]
 \end_layout
 
 \begin_layout Plain Layout
@@ -4716,12 +5268,17 @@ Data$CROLL <- CROLL / Cradeg
 
 \begin_layout Plain Layout
 
-Data$CPITCH <- SmoothInterp (Data$CPITCH, .Length=181)
+# Data$CPITCH <- SmoothInterp (Data$CPITCH, .Length=181)
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$CROLL <- SmoothInterp (Data$CROLL, .Length=181)
+# Data$CROLL <- SmoothInterp (Data$CROLL, .Length=181)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$CTHDG <- SmoothInterp (Data$CTHDG, .Length=181)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4805,7 +5362,76 @@ abline(h=0, col='darkorange', lty=2)
 
 \begin_layout Plain Layout
 
-plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)))
+plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)), ylim=c(-0.4,0.4), lwd=0.7)
+\end_layout
+
+\begin_layout Plain Layout
+
+HE <- VCor[,9]
+\end_layout
+
+\begin_layout Plain Layout
+
+HE[HE < 0.0025] <- 0.0025
+\end_layout
+
+\begin_layout Plain Layout
+
+HE <- sqrt(HE)
+\end_layout
+
+\begin_layout Plain Layout
+
+# lineWAC(Data$Time[r], Data$THDG[r]/1000, col='brown', lwd=0.7)
+\end_layout
+
+\begin_layout Plain Layout
+
+# lineWAC(Data$Time, Data$CTHDG-HE, col='magenta', lwd=0.7)
+\end_layout
+
+\begin_layout Plain Layout
+
+# lineWAC(Data$Time, Data$CTHDG+HE, col='magenta', lwd=0.7)
+\end_layout
+
+\begin_layout Plain Layout
+
+iv <- HE > 0.051
+\end_layout
+
+\begin_layout Plain Layout
+
+CCTHDG <- Data$CTHDG
+\end_layout
+
+\begin_layout Plain Layout
+
+CCTHDG[iv] <- NA
+\end_layout
+
+\begin_layout Plain Layout
+
+lineWAC(Data$Time[r], CCTHDG[r], lwd=3, col='blue')
+\end_layout
+
+\begin_layout Plain Layout
+
+SS <- smooth.spline(Data$Time[r], Data$CTHDG[r], w=1/HE[r]^2, spar=1)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$HCS <- predict(SS, as.numeric(Data$Time))$y
+\end_layout
+
+\begin_layout Plain Layout
+
+lineWAC(Data$Time[r], Data$HCS[r], col='red')
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -4836,6 +5462,10 @@ clearpage
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -4843,7 +5473,7 @@ clearpage
 
 \family sans
 \color blue
--- End of Memo --
+– End of Memo –
 \end_layout
 
 \begin_layout Standard
@@ -4866,7 +5496,7 @@ include enough info to re-run.
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0pt">
 <column alignment="left" valignment="top" width="0pt">
 <row>
