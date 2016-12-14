@@ -682,6 +682,8 @@ Project = "DW"
 ProjectDir <- "DEEPWAVE"
 fname = sprintf("%s%s/%s%s.nc", Directory, ProjectDir, Project, Flight)
 D1 <- getNetCDF (fname, VarList)
+## remove heading adjustment as added during initial processing
+D1$THDG <- (D1$THDG + 0.08) %% 360
 DL <- nrow(D1)
 ## adjustments:
 # D1$BYAWR <- D1$BYAWR - 0.005
@@ -984,14 +986,15 @@ tau <- 60
 GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data record
   gcf <- vector('numeric', length=15)
   gcf[1] <- 30 / sp$Rm
-  gcf[2] <- 30 / (sp$Rn * cos (sv[1]))
+  gcf[2] <- 30 / (sp$Rn * cos (sv$LAT))
   gcf[3] <- 150
-  gcf[4:6] <- 0.5
-  gcf[7:8] <- 0.005*Cradeg
-  gcf[9] <- 0.015*Cradeg
-  gcf[10:11] <- 0.015*Cradeg*sqrt(2/tau)
-  gcf[12] <- 0.015*Cradeg*sqrt(2/tau)
-  gcf[13:15] <- 0.001*sqrt(2/tau)
+  gcf[4:6] <- 0.3    ## 0.3
+  gcf[7:8] <- 0.005*Cradeg  ## 0.005
+  gcf[9] <- 0.015*Cradeg    ## 0.015
+  gcf[10:11] <- 0.003*Cradeg    ## 0.015
+  gcf[12] <- 0.003*Cradeg       ## 0.015
+  gcf[13:15] <- 0.0002
+  # gcf <- as.vector(gcf) * sqrt(2/60)
   return (gcf)
 }
 gcf <- as.numeric (GCF (SV, D1[1, ]))
@@ -1009,14 +1012,17 @@ DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS, VSPD-GGV
 ## The last three components provide direct feedback to measured acceleration
 ## in the a-frame but also provide feedback to heading, as developed below
 # dim(DZ) <- c(DL, 9)
-dim(DZ) <- c(DL, 6)
-DZ[,1:2] <- DZ[, 1:2] * Cradeg
+# dim(DZ) <- c(DL, 6)
+# DZ[,1:2] <- DZ[, 1:2] * Cradeg
 ## now add the pseudo-measurement of heading error found from the accelerations:
-D1$deltaPsi <- (atan2 (D1$LACCY, D1$LACCX) - atan2 (D1$vedot, D1$vndot)) / Cradeg
+D1$deltaPsi <- (atan2 (D1$LACCX, D1$LACCY) - atan2 (D1$vedot, D1$vndot))
+D1$deltaPsi[D1$deltaPsi > pi] <- D1$deltaPsi[D1$deltaPsi > pi] - 2*pi
+D1$deltaPsi[D1$deltaPsi < -pi] <- D1$deltaPsi[D1$deltaPsi < -pi] + 2*pi
 D1$sdPsi <- zoo::rollapply(D1$deltaPsi, 10, sd, fill=NA)  ## calculate the std dev
 ## add the heading correction to the measurement vector
-# DZ <- c(as.vector(DZ), D1$deltaPsi)
-# dim(DZ) <- c(DL, 10)
+DZ <- c(as.vector(DZ), D1$deltaPsi)
+dim(DZ) <- c(DL, 7)
+DZ[ ,1:2] <- DZ[ ,1:2] * Cradeg
 
 ## The observation matrix: (the first six and last three components of the state error 
 ## vector are observable, the latter requiring transformation from l-frame to a-frame)
@@ -1028,18 +1034,20 @@ D1$sdPsi <- zoo::rollapply(D1$deltaPsi, 10, sd, fill=NA)  ## calculate the std d
 #   H[k,k+6] <- 1
 # }
 # H[10,9] <- 1
-H <- diag(1, nrow=6, ncol=15)
+H <- diag(1, nrow=7, ncol=15)
+H[7,7] <- 0
+H[7,9] <- 1
 
 
 ## at any time step, assume the measurements are contaminated by noise:
 ## GPS measurement noise
 RCV <- matrix (rep(0,100), ncol=10)
-RCV <- matrix (rep(0,36), ncol=6)
+RCV <- matrix (rep(0,49), ncol=7)
 RCV[1,1] <- (30/D1$Rm[1])^2  ## latitude
 RCV[2,2] <- (30/(D1$Rn[1]*cos(SV[1])))^2
 RCV[3,3] <- 50^2
-RCV[4,4] <- 3^2            ## ve
-RCV[5,5] <- 3^2
+RCV[4,4] <- 1^2            ## ve
+RCV[5,5] <- 1^2
 RCV[6,6] <- 0.3^2
 # RCV[7,7] <- 100.0  # A big value here limits updating of acceleration measurement.
 # RCV[8,8] <- 100.0  # The assumption is that there errors arise from an error in heading, not
@@ -1047,6 +1055,7 @@ RCV[6,6] <- 0.3^2
 # RCV[10,10] <- D1$sdPsi[1]^2
 # if (is.na(D1$sdPsi[1])) {RCV[10,10] <- 225}  # typical sd is 15 deg.
 # # RCV[10, 10] <- 1000  ## suppress effect
+RCV[7,7] <- 1000
 
 ## initialize covariance matrix
 CV <- matrix (rep(0,225), ncol=15)
@@ -1131,11 +1140,13 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
   ## update the covariance matrix:
   CV <- dcm %*% (CV %*% t(dcm)) + Q
   ## the Kalman gain:
-  # if (is.na(Data$sdPsi[i])) {
-  #   RCV[10,10] <- 225
-  # } else {
-  #   RCV[10,10] <- Data$sdPsi[i]^2
-  # }
+  if (is.na(Data$sdPsi[i]) || (sqrt(Data$LACCX[i]^2+Data$LACCY[i]^2) < 0.1)) {
+    H[7,9] <- 0
+    # DZ[i, 7] <- NA
+  } else {
+    H[7,9] <- 0.0
+    RCV[7, 7] <- Data$sdPsi[i]^2
+  }
   Kb <- solve (H %*% CV %*% t(H) + RCV)
   K <- CV %*% t(H) %*% Kb
   DZZ <- DZ[i, ] - H %*% SVE
@@ -1276,7 +1287,7 @@ iv <- HE > 0.051
 CCTHDG <- Data$CTHDG
 CCTHDG[iv] <- NA
 lineWAC(Data$Time[r], CCTHDG[r], lwd=3, col='blue')
-SS <- smooth.spline(Data$Time[r], Data$CTHDG[r], w=1/HE[r]^2, spar=1)
+SS <- smooth.spline(Data$Time[r], Data$CTHDG[r], w=1/HE[r]^2, spar=1.25)
 Data$HCS <- predict(SS, as.numeric(Data$Time))$y
 lineWAC(Data$Time[r], Data$HCS[r], col='red')
 

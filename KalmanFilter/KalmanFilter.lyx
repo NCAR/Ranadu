@@ -2571,6 +2571,16 @@ D1 <- getNetCDF (fname, VarList)
 
 \begin_layout Plain Layout
 
+## remove heading adjustment as added during initial processing
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$THDG <- (D1$THDG + 0.08) %% 360
+\end_layout
+
+\begin_layout Plain Layout
+
 DL <- nrow(D1)
 \end_layout
 
@@ -3985,7 +3995,7 @@ GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data
 
 \begin_layout Plain Layout
 
-  gcf[2] <- 30 / (sp$Rn * cos (sv[1]))
+  gcf[2] <- 30 / (sp$Rn * cos (sv$LAT))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3995,32 +4005,37 @@ GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data
 
 \begin_layout Plain Layout
 
-  gcf[4:6] <- 0.5
+  gcf[4:6] <- 0.3    ## 0.3
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[7:8] <- 0.005*Cradeg
+  gcf[7:8] <- 0.005*Cradeg  ## 0.005
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[9] <- 0.015*Cradeg
+  gcf[9] <- 0.015*Cradeg    ## 0.015
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[10:11] <- 0.015*Cradeg*sqrt(2/tau)
+  gcf[10:11] <- 0.003*Cradeg    ## 0.015
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[12] <- 0.015*Cradeg*sqrt(2/tau)
+  gcf[12] <- 0.003*Cradeg       ## 0.015
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[13:15] <- 0.001*sqrt(2/tau)
+  gcf[13:15] <- 0.0002
+\end_layout
+
+\begin_layout Plain Layout
+
+  # gcf <- as.vector(gcf) * sqrt(2/60)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4111,12 +4126,12 @@ DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS,
 
 \begin_layout Plain Layout
 
-dim(DZ) <- c(DL, 6)
+# dim(DZ) <- c(DL, 6)
 \end_layout
 
 \begin_layout Plain Layout
 
-DZ[,1:2] <- DZ[, 1:2] * Cradeg
+# DZ[,1:2] <- DZ[, 1:2] * Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -4126,8 +4141,17 @@ DZ[,1:2] <- DZ[, 1:2] * Cradeg
 
 \begin_layout Plain Layout
 
-D1$deltaPsi <- (atan2 (D1$LACCY, D1$LACCX) - atan2 (D1$vedot, D1$vndot))
- / Cradeg
+D1$deltaPsi <- (atan2 (D1$LACCX, D1$LACCY) - atan2 (D1$vedot, D1$vndot))
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$deltaPsi[D1$deltaPsi > pi] <- D1$deltaPsi[D1$deltaPsi > pi] - 2*pi
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$deltaPsi[D1$deltaPsi < -pi] <- D1$deltaPsi[D1$deltaPsi < -pi] + 2*pi
 \end_layout
 
 \begin_layout Plain Layout
@@ -4143,12 +4167,17 @@ D1$sdPsi <- zoo::rollapply(D1$deltaPsi, 10, sd, fill=NA)  ## calculate the
 
 \begin_layout Plain Layout
 
-# DZ <- c(as.vector(DZ), D1$deltaPsi)
+DZ <- c(as.vector(DZ), D1$deltaPsi)
 \end_layout
 
 \begin_layout Plain Layout
 
-# dim(DZ) <- c(DL, 10)
+dim(DZ) <- c(DL, 7)
+\end_layout
+
+\begin_layout Plain Layout
+
+DZ[ ,1:2] <- DZ[ ,1:2] * Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -4211,7 +4240,17 @@ ation matrix l->a,
 
 \begin_layout Plain Layout
 
-H <- diag(1, nrow=6, ncol=15)
+H <- diag(1, nrow=7, ncol=15)
+\end_layout
+
+\begin_layout Plain Layout
+
+H[7,7] <- 0
+\end_layout
+
+\begin_layout Plain Layout
+
+H[7,9] <- 1
 \end_layout
 
 \begin_layout Plain Layout
@@ -4239,7 +4278,7 @@ RCV <- matrix (rep(0,100), ncol=10)
 
 \begin_layout Plain Layout
 
-RCV <- matrix (rep(0,36), ncol=6)
+RCV <- matrix (rep(0,49), ncol=7)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4259,12 +4298,12 @@ RCV[3,3] <- 50^2
 
 \begin_layout Plain Layout
 
-RCV[4,4] <- 3^2            ## ve
+RCV[4,4] <- 1^2            ## ve
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[5,5] <- 3^2
+RCV[5,5] <- 1^2
 \end_layout
 
 \begin_layout Plain Layout
@@ -4303,6 +4342,11 @@ nt.
 \begin_layout Plain Layout
 
 # # RCV[10, 10] <- 1000  ## suppress effect
+\end_layout
+
+\begin_layout Plain Layout
+
+RCV[7,7] <- 1000
 \end_layout
 
 \begin_layout Plain Layout
@@ -4731,27 +4775,38 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  # if (is.na(Data$sdPsi[i])) {
+  if (is.na(Data$sdPsi[i]) || (sqrt(Data$LACCX[i]^2+Data$LACCY[i]^2) < 0.1))
+ {
 \end_layout
 
 \begin_layout Plain Layout
 
-  #   RCV[10,10] <- 225
+    H[7,9] <- 0
 \end_layout
 
 \begin_layout Plain Layout
 
-  # } else {
+    # DZ[i, 7] <- NA
 \end_layout
 
 \begin_layout Plain Layout
 
-  #   RCV[10,10] <- Data$sdPsi[i]^2
+  } else {
 \end_layout
 
 \begin_layout Plain Layout
 
-  # }
+    H[7,9] <- 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+    RCV[7, 7] <- Data$sdPsi[i]^2
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
 \end_layout
 
 \begin_layout Plain Layout
@@ -5445,7 +5500,7 @@ lineWAC(Data$Time[r], CCTHDG[r], lwd=3, col='blue')
 
 \begin_layout Plain Layout
 
-SS <- smooth.spline(Data$Time[r], Data$CTHDG[r], w=1/HE[r]^2, spar=1)
+SS <- smooth.spline(Data$Time[r], Data$CTHDG[r], w=1/HE[r]^2, spar=1.25)
 \end_layout
 
 \begin_layout Plain Layout
