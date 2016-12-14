@@ -2537,7 +2537,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<new-data, include=TRUE, echo=FALSE, cache=TRUE>>=
+<<new-data, include=TRUE, echo=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -2576,7 +2576,37 @@ D1 <- getNetCDF (fname, VarList)
 
 \begin_layout Plain Layout
 
-D1$THDG <- (D1$THDG + 0.08) %% 360
+Z <- data.frame(getAttributes(D1$THDG, .print=FALSE))
+\end_layout
+
+\begin_layout Plain Layout
+
+if ('CalibrationCoefficients' %in% names(Z)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  THDGoffset <- Z$CalibrationCoefficients[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+} else {
+\end_layout
+
+\begin_layout Plain Layout
+
+  THDGoffset <- 0
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$THDG <- (D1$THDG - THDGoffset) %% 360
 \end_layout
 
 \begin_layout Plain Layout
@@ -2685,7 +2715,7 @@ if (SHIFT) {
 
 \begin_layout Plain Layout
 
-dt <- 1
+dt <- 1    ## this is a 1-Hz file
 \end_layout
 
 \begin_layout Plain Layout
@@ -2722,220 +2752,219 @@ D1$Grav <- Gravity (D1$LAT, D1$GGALT)
 
 \begin_layout Plain Layout
 
-  #interpolate if necessary: otherwise later filters fail
+#interpolate if necessary: otherwise later filters fail
 \end_layout
 
 \begin_layout Plain Layout
 
-  MaxGap <- 1000
+MaxGap <- 1000
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$GGVNS <- ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap,
- na.rm = FALSE)
-\end_layout
-
-\begin_layout Plain Layout
-
-  D1$GGVEW <- ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap,
- na.rm = FALSE)
-\end_layout
-
-\begin_layout Plain Layout
-
-  D1$GGVSPD <- ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap,
- na.rm = FALSE)
-\end_layout
-
-\begin_layout Plain Layout
-
-  D1$VNS <- vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm
+D1$GGVNS <- ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm
  = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$VEW <- vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm
+D1$GGVEW <- ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm
  = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$VSPD <- vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm
+D1$GGVSPD <- ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap,
+ na.rm = FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$VNS <- vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm =
+ FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$VEW <- vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm =
+ FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$VSPD <- vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm
  = FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE)
+D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE)
+D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE)
+D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$BPITCHR <- zoo::na.approx (as.vector (D1$BPITCHR), maxgap=MaxGap, na.rm=FALSE)
+D1$BPITCHR <- zoo::na.approx (as.vector (D1$BPITCHR), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$BROLLR <- zoo::na.approx (as.vector (D1$BROLLR), maxgap=MaxGap, na.rm=FALSE)
+D1$BROLLR <- zoo::na.approx (as.vector (D1$BROLLR), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$BYAWR <- zoo::na.approx (as.vector (D1$BYAWR), maxgap=MaxGap, na.rm=FALSE)
+D1$BYAWR <- zoo::na.approx (as.vector (D1$BYAWR), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$GGALT <- zoo::na.approx (as.vector (D1$GGALT), maxgap=MaxGap, na.rm=FALSE)
+D1$GGALT <- zoo::na.approx (as.vector (D1$GGALT), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE)
+D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
+D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
+D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
+D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  ## smooth the measurements when determining derivatives
+## smooth the measurements when determining derivatives
 \end_layout
 
 \begin_layout Plain Layout
 
-  .span <- 11    
+.span <- 11    
 \end_layout
 
 \begin_layout Plain Layout
 
-  ## The following are accelerations determined from derivatives of the
- GPS velocities.
+## The following are accelerations determined from derivatives of the GPS
+ velocities.
 \end_layout
 
 \begin_layout Plain Layout
 
-  ## These should match the measured accelerations after transformation
- to the l-frame
+## These should match the measured accelerations after transformation to
+ the l-frame
 \end_layout
 
 \begin_layout Plain Layout
 
-  ## and application of the rotation correction:
+## and application of the rotation correction:
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first
- deriv.
+D1$vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
+D1$vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
+D1$vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
 \end_layout
 
 \begin_layout Plain Layout
 
-  ## transform to the a-frame for comparison to the IRU:
+## transform to the a-frame for comparison to the IRU:
 \end_layout
 
 \begin_layout Plain Layout
 
-  G <- D1$Grav
+G <- D1$Grav
 \end_layout
 
 \begin_layout Plain Layout
 
-  VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
+VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
 \end_layout
 
 \begin_layout Plain Layout
 
-  LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrecti
-on (D1, VL)
+LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrection
+ (D1, VL)
 \end_layout
 
 \begin_layout Plain Layout
 
-  AA <- XformLA (D1, LA, .inverse=TRUE)
+AA <- XformLA (D1, LA, .inverse=TRUE)
 \end_layout
 
 \begin_layout Plain Layout
 
-  AA[,3] <- AA[,3] - G
+AA[,3] <- AA[,3] - G
 \end_layout
 
 \begin_layout Plain Layout
 
-  fa1 <- lm(D1$BLONGA ~ AA[, 1])
+fa1 <- lm(D1$BLONGA ~ AA[, 1])
 \end_layout
 
 \begin_layout Plain Layout
 
-  fa2 <- lm(D1$BLATA ~ AA[, 2])
+fa2 <- lm(D1$BLATA ~ AA[, 2])
 \end_layout
 
 \begin_layout Plain Layout
 
-  fa3 <- lm(D1$BNORMA ~ AA[, 3])
+fa3 <- lm(D1$BNORMA ~ AA[, 3])
 \end_layout
 
 \begin_layout Plain Layout
 
-  AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame
+AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame
  
 \end_layout
 
 \begin_layout Plain Layout
 
-  AL <- XformLA (D1, AB)                                    #l-frame
+AL <- XformLA (D1, AB)                                    #l-frame
 \end_layout
 
 \begin_layout Plain Layout
 
-  ## now corrected for angular effects
+## now corrected for angular effects
 \end_layout
 
 \begin_layout Plain Layout
 
-  ## See Noureldin et al, 2013, Eq.
+## See Noureldin et al, 2013, Eq.
  (5.55)
 \end_layout
 
 \begin_layout Plain Layout
 
-  AL <- AL + RotationCorrection (D1, VL)  ##### check this sign and prev
- call above
+AL <- AL + RotationCorrection (D1, VL)  ##### check this sign and prev call
+ above
 \end_layout
 
 \begin_layout Plain Layout
@@ -2945,27 +2974,27 @@ on (D1, VL)
 
 \begin_layout Plain Layout
 
-  ## the resulting l-frame accelerations
+## the resulting l-frame accelerations
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$LACCX <- AL[, 1]
+D1$LACCX <- AL[, 1]
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$LACCY <- AL[, 2]
+D1$LACCY <- AL[, 2]
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$LACCZ <- AL[, 3] + G
+D1$LACCZ <- AL[, 3] + G
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$LACCZ <- -D1$LACCZ
+D1$LACCZ <- -D1$LACCZ
 \end_layout
 
 \begin_layout Plain Layout
@@ -2975,82 +3004,82 @@ on (D1, VL)
 
 \begin_layout Plain Layout
 
-  ## smooth to match GPS-velocity derivatives
+## smooth to match GPS-velocity derivatives
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$LACCX <- signal::sgolayfilt (D1$LACCX, 3, .span, m=0)
+D1$LACCX <- signal::sgolayfilt (D1$LACCX, 3, .span, m=0)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$LACCY <- signal::sgolayfilt (D1$LACCY, 3, .span, m=0)
+D1$LACCY <- signal::sgolayfilt (D1$LACCY, 3, .span, m=0)
 \end_layout
 
 \begin_layout Plain Layout
 
-  D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
+D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
 \end_layout
 
 \begin_layout Plain Layout
 
-  .span <- 301
+.span <- 301
 \end_layout
 
 \begin_layout Plain Layout
 
-  SMOOTH <- FALSE
+SMOOTH <- FALSE
 \end_layout
 
 \begin_layout Plain Layout
 
-  if (SMOOTH) {
+if (SMOOTH) {
 \end_layout
 
 \begin_layout Plain Layout
 
-    vns <- signal::sgolayfilt (vns, 3, .span)
+  vns <- signal::sgolayfilt (vns, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
 
-    vew <- signal::sgolayfilt (vew, 3, .span)
+  vew <- signal::sgolayfilt (vew, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
 
-    vspd <- signal::sgolayfilt (vspd, 3, .span)
+  vspd <- signal::sgolayfilt (vspd, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
 
-    ggvns <- signal::sgolayfilt (ggvns, 3, .span)
+  ggvns <- signal::sgolayfilt (ggvns, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
 
-    ggvew <- signal::sgolayfilt (ggvew, 3, .span)
+  ggvew <- signal::sgolayfilt (ggvew, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
 
-    ggvspd <- signal::sgolayfilt (ggvspd, 3, .span)
+  ggvspd <- signal::sgolayfilt (ggvspd, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
 
-    pitch <- signal::sgolayfilt (D1$PITCH, 3, .span)
+  pitch <- signal::sgolayfilt (D1$PITCH, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
 
-    roll <- signal::sgolayfilt (D1$ROLL, 3, .span)
+  roll <- signal::sgolayfilt (D1$ROLL, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
 
-    thdg <- signal::sgolayfilt (D1$THDG, 3, .span)
+  thdg <- signal::sgolayfilt (D1$THDG, 3, .span)
 \end_layout
 
 \begin_layout Plain Layout
@@ -3059,52 +3088,52 @@ on (D1, VL)
 
 \begin_layout Plain Layout
 
-    D1$VNSF <- vns
+  D1$VNSF <- vns
 \end_layout
 
 \begin_layout Plain Layout
 
-    D1$VEWF <- vew
+  D1$VEWF <- vew
 \end_layout
 
 \begin_layout Plain Layout
 
-    D1$VSPDF <- vspd
+  D1$VSPDF <- vspd
 \end_layout
 
 \begin_layout Plain Layout
 
-    D1$GGVNSF <- ggvns
+  D1$GGVNSF <- ggvns
 \end_layout
 
 \begin_layout Plain Layout
 
-    D1$GGVEWF <- ggvew
+  D1$GGVEWF <- ggvew
 \end_layout
 
 \begin_layout Plain Layout
 
-    D1$GGVSPDF <- ggvspd
+  D1$GGVSPDF <- ggvspd
 \end_layout
 
 \begin_layout Plain Layout
 
-    D1$PITCHF <- pitch
+  D1$PITCHF <- pitch
 \end_layout
 
 \begin_layout Plain Layout
 
-    D1$ROLLF <- roll
+  D1$ROLLF <- roll
 \end_layout
 
 \begin_layout Plain Layout
 
-    D1$THDGF <- thdg
+  D1$THDGF <- thdg
 \end_layout
 
 \begin_layout Plain Layout
 
-  }
+}
 \end_layout
 
 \begin_layout Plain Layout
@@ -3938,7 +3967,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<Kalman-setup, include=TRUE, echo=FALSE, cache=TRUE>>=
+<<Kalman-setup, include=TRUE, echo=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -4030,12 +4059,12 @@ GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data
 
 \begin_layout Plain Layout
 
-  gcf[13:15] <- 0.0002
+  gcf[13:15] <- 0.00002
 \end_layout
 
 \begin_layout Plain Layout
 
-  # gcf <- as.vector(gcf) * sqrt(2/60)
+  # gcf <- as.vector(gcf) * sqrt(2/tau)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4051,21 +4080,6 @@ GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data
 \begin_layout Plain Layout
 
 gcf <- as.numeric (GCF (SV, D1[1, ]))
-\end_layout
-
-\begin_layout Plain Layout
-
-# Gnoise <- gcf * rnorm(15)
-\end_layout
-
-\begin_layout Plain Layout
-
-# dsve <- dcm %*% SVE   # + Gnoise
-\end_layout
-
-\begin_layout Plain Layout
-
-# SVEP <- SVE + dt * as.vector(dsve, mode='numeric')  ## take a time step
 \end_layout
 
 \begin_layout Plain Layout
@@ -4250,7 +4264,8 @@ H[7,7] <- 0
 
 \begin_layout Plain Layout
 
-H[7,9] <- 1
+H[7,9] <- 1  ## measurement 7 applies to the heading error, SVE component
+ 9
 \end_layout
 
 \begin_layout Plain Layout
@@ -4268,11 +4283,6 @@ H[7,9] <- 1
 
 \begin_layout Plain Layout
 
-## GPS measurement noise
-\end_layout
-
-\begin_layout Plain Layout
-
 RCV <- matrix (rep(0,100), ncol=10)
 \end_layout
 
@@ -4283,27 +4293,27 @@ RCV <- matrix (rep(0,49), ncol=7)
 
 \begin_layout Plain Layout
 
-RCV[1,1] <- (30/D1$Rm[1])^2  ## latitude
+RCV[1,1] <- (10/D1$Rm[1])^2  ## latitude
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[2,2] <- (30/(D1$Rn[1]*cos(SV[1])))^2
+RCV[2,2] <- (10/(D1$Rn[1]*cos(SV$LAT)))^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[3,3] <- 50^2
+RCV[3,3] <- 100^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[4,4] <- 1^2            ## ve
+RCV[4,4] <- 0.3^2            ## ve
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[5,5] <- 1^2
+RCV[5,5] <- 0.3^2
 \end_layout
 
 \begin_layout Plain Layout
@@ -4346,7 +4356,7 @@ nt.
 
 \begin_layout Plain Layout
 
-RCV[7,7] <- 1000
+RCV[7,7] <- 1000  ## but update this each time step
 \end_layout
 
 \begin_layout Plain Layout
@@ -4355,7 +4365,7 @@ RCV[7,7] <- 1000
 
 \begin_layout Plain Layout
 
-## initialize covariance matrix
+## initialize covariance matrix with generous variances
 \end_layout
 
 \begin_layout Plain Layout
@@ -4612,7 +4622,23 @@ CVEF[1, ] <- diag (CV)
 
 \begin_layout Plain Layout
 
+pctL <- 0
+\end_layout
+
+\begin_layout Plain Layout
+
 for (i in seq(2*NSTEP, DL, by=NSTEP)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  pct <- as.integer(100*i/DL)
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (pct %% 10 == 0 && pct != pctL) {print (sprintf ('pct done is %d',
+ pct));pctL <- pct}
 \end_layout
 
 \begin_layout Plain Layout
@@ -4860,187 +4886,187 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  IntFilter <- function (X, inRate, outRate) {
+IntFilter <- function (X, inRate, outRate) {
 \end_layout
 
 \begin_layout Plain Layout
 
-    if (inRate == outRate) {return (X)}
+  if (inRate == outRate) {return (X)}
 \end_layout
 
 \begin_layout Plain Layout
 
-    ratio <- as.integer(outRate/inRate)    ## expected to be an integer
+  ratio <- as.integer(outRate/inRate)    ## expected to be an integer
 \end_layout
 
 \begin_layout Plain Layout
 
-    x <- 0:(length(X)-1)
+  x <- 0:(length(X)-1)
 \end_layout
 
 \begin_layout Plain Layout
 
-    A <- stats::approx (x, X, n=length(X)*ratio-ratio+1)
+  A <- stats::approx (x, X, n=length(X)*ratio-ratio+1)
 \end_layout
 
 \begin_layout Plain Layout
 
-    T <- A$y
+  T <- A$y
 \end_layout
 
 \begin_layout Plain Layout
 
-    T <- signal::filter(signal::sgolay(4,75),T)
+  T <- signal::filter(signal::sgolay(4,75),T)
 \end_layout
 
 \begin_layout Plain Layout
 
-    ## now shift to match 25-Hz:
+  ## now shift to match 25-Hz:
 \end_layout
 
 \begin_layout Plain Layout
 
-    n <- as.integer (ratio / 2)
+  n <- as.integer (ratio / 2)
 \end_layout
 
 \begin_layout Plain Layout
 
-    NL = length(T)
+  NL = length(T)
 \end_layout
 
 \begin_layout Plain Layout
 
-    T <- c(rep(T[1],n), T, rep(T[NL],ratio-n-1))  ## OK, even or odd ratio
+  T <- c(rep(T[1],n), T, rep(T[NL],ratio-n-1))  ## OK, even or odd ratio
 \end_layout
 
 \begin_layout Plain Layout
 
-    return (T)
+  return (T)
 \end_layout
 
 \begin_layout Plain Layout
 
-  }
+}
 \end_layout
 
 \begin_layout Plain Layout
 
-  Cor <- vector('numeric', DL*15)
+Cor <- vector('numeric', DL*15)
 \end_layout
 
 \begin_layout Plain Layout
 
-  dim (Cor) <- c(DL, 15)
+dim (Cor) <- c(DL, 15)
 \end_layout
 
 \begin_layout Plain Layout
 
-  VCor <- vector ('numeric', DL*15)
+VCor <- vector ('numeric', DL*15)
 \end_layout
 
 \begin_layout Plain Layout
 
-  dim (VCor) <- c(DL, 15)
+dim (VCor) <- c(DL, 15)
 \end_layout
 
 \begin_layout Plain Layout
 
-  X <- SVEF[, 1]
+X <- SVEF[, 1]
 \end_layout
 
 \begin_layout Plain Layout
 
-  for (j in 1:15) {
+for (j in 1:15) {
 \end_layout
 
 \begin_layout Plain Layout
 
-    Cor[, j] <- IntFilter (SVEF[, j], 1, NSTEP)
+  Cor[, j] <- IntFilter (SVEF[, j], 1, NSTEP)
 \end_layout
 
 \begin_layout Plain Layout
 
-    VCor[, j] <- IntFilter (CVEF[, j], 1, NSTEP)
+  VCor[, j] <- IntFilter (CVEF[, j], 1, NSTEP)
 \end_layout
 
 \begin_layout Plain Layout
 
-  }
+}
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$LATKF <- Data$LAT - Cor[, 1]/Cradeg
+Data$LATKF <- Data$LAT - Cor[, 1]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$LONKF <- Data$LON - Cor[, 2]/Cradeg
+Data$LONKF <- Data$LON - Cor[, 2]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$ALTKF <- Data$ALT - Cor[, 3]
+Data$ALTKF <- Data$ALT - Cor[, 3]
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$VEWKF <- Data$VEW - Cor[, 4]
+Data$VEWKF <- Data$VEW - Cor[, 4]
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$VNSKF <- Data$VNS - Cor[, 5]
+Data$VNSKF <- Data$VNS - Cor[, 5]
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$VSPDKF <- Data$VSPD - Cor[, 6]
+Data$VSPDKF <- Data$VSPD - Cor[, 6]
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
+Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
+Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
+Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$BPITCHRKF <- Data$BPITCHR - Cor[, 10]/Cradeg
+Data$BPITCHRKF <- Data$BPITCHR - Cor[, 10]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$BROLLRKF <- Data$BROLLR - Cor[, 11]/Cradeg
+Data$BROLLRKF <- Data$BROLLR - Cor[, 11]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$BYAWRKF <- Data$BYAWR - Cor[, 12]/Cradeg
+Data$BYAWRKF <- Data$BYAWR - Cor[, 12]/Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$BLATAKF <- Data$BLATA - Cor[, 13]
+Data$BLATAKF <- Data$BLATA - Cor[, 13]
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$BLONGAKF <- Data$BLONGA - Cor[, 14]
+Data$BLONGAKF <- Data$BLONGA - Cor[, 14]
 \end_layout
 
 \begin_layout Plain Layout
 
-  Data$BNORMAKF <- Data$BNORMA - Cor[, 15]
+Data$BNORMAKF <- Data$BNORMA - Cor[, 15]
 \end_layout
 
 \begin_layout Plain Layout
@@ -5054,7 +5080,7 @@ Data$DLAT <- Data$LATKF-Data$GGLAT
 
 \begin_layout Plain Layout
 
-Data$CLAT <- -Cor[,1] / Cradeg
+Data$CLAT <- -Cor[, 1] / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -5064,7 +5090,7 @@ Data$DLON <- Data$LONKF-Data$GGLON
 
 \begin_layout Plain Layout
 
-Data$CLON <- -Cor[,2] / Cradeg
+Data$CLON <- -Cor[, 2] / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -5074,7 +5100,7 @@ Data$DALT <- Data$ALTKF-Data$GGALT
 
 \begin_layout Plain Layout
 
-Data$CALT <- -Cor[,3]
+Data$CALT <- -Cor[, 3]
 \end_layout
 
 \begin_layout Plain Layout
@@ -5084,7 +5110,7 @@ Data$DVEW <- Data$VEWKF-Data$GGVEW
 
 \begin_layout Plain Layout
 
-Data$CVEW <- -Cor[,4]
+Data$CVEW <- -Cor[, 4]
 \end_layout
 
 \begin_layout Plain Layout
@@ -5094,7 +5120,7 @@ Data$DVNS <- Data$VNSKF-Data$GGVNS
 
 \begin_layout Plain Layout
 
-Data$CVNS <- -Cor[,5]
+Data$CVNS <- -Cor[, 5]
 \end_layout
 
 \begin_layout Plain Layout
@@ -5104,22 +5130,22 @@ Data$DVSPD <- Data$VSPDKF-Data$GGVSPD
 
 \begin_layout Plain Layout
 
-Data$CVSPD <- -Cor[,6]
+Data$CVSPD <- -Cor[, 6]
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$CPITCH <- Data$PITCHKF-Data$PITCH
+Data$CPITCH <- -Cor[, 7] / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$CROLL <- Data$ROLLKF-Data$ROLL
+Data$CROLL <- -Cor[, 8] / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$CTHDG <- Data$THDGKF-Data$THDG
+Data$CTHDG <- -Cor[, 9] / Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -5377,8 +5403,13 @@ r <- setRange (Data, 70000, 123000)
 \begin_layout Plain Layout
 
 plotWAC(subset(Data[r,],,c(Time, CPITCH, PC)), ylab=expression(paste('PITCH
- CORRECTION',' [',degree,']')), ylim=c(-0.05, 0.05), lwd=c(0.7,0.7), col=c('blue',
- 'red'))
+ CORRECTION',' [',degree,']')), 
+\end_layout
+
+\begin_layout Plain Layout
+
+        ylim=c(-0.05, 0.05), lwd=c(0.7,0.7), col=c('blue', 'red'), legend.position='t
+opright')
 \end_layout
 
 \begin_layout Plain Layout
@@ -5413,9 +5444,18 @@ abline(h=0, col='darkorange', lty=2)
 
 \begin_layout Plain Layout
 
-plotWAC(subset(Data[r,],,c(Time, CROLL, RC)), ylab=expression(paste('ROLL
- CORRECTION [',degree,']')), ylim=c(-0.05,0.05), lwd=c(0.7,0.7), col=c('blue',
- 'red'))
+plotWAC(subset(Data[r,],,c(Time, CROLL, RC)), 
+\end_layout
+
+\begin_layout Plain Layout
+
+      ylab=expression(paste('ROLL CORRECTION [',degree,']')), 
+\end_layout
+
+\begin_layout Plain Layout
+
+      ylim=c(-0.05,0.05), lwd=c(0.7,0.7), col=c('blue', 'red'), legend.position='topr
+ight')
 \end_layout
 
 \begin_layout Plain Layout
@@ -5445,7 +5485,8 @@ abline(h=0, col='darkorange', lty=2)
 
 \begin_layout Plain Layout
 
-plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)), ylim=c(-0.4,0.4), lwd=0.7)
+plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)), ylim=c(-0.4,0.4), lwd=0.7,
+ legend.position='topright')
 \end_layout
 
 \begin_layout Plain Layout

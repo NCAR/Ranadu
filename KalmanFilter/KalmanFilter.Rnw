@@ -675,7 +675,7 @@ the Kalman filter. DEEPWAVE flight 16 was selected, and the measurements
 were filtered with 11-s smoothing of accelerations and 301-s smoothing
 of measured velocity components and attitude angles.
 
-<<new-data, include=TRUE, echo=FALSE, cache=TRUE>>=
+<<new-data, include=TRUE, echo=FALSE>>=
 
 Flight <- "16" 			
 Project = "DW"     		
@@ -683,7 +683,13 @@ ProjectDir <- "DEEPWAVE"
 fname = sprintf("%s%s/%s%s.nc", Directory, ProjectDir, Project, Flight)
 D1 <- getNetCDF (fname, VarList)
 ## remove heading adjustment as added during initial processing
-D1$THDG <- (D1$THDG + 0.08) %% 360
+Z <- data.frame(getAttributes(D1$THDG, .print=FALSE))
+if ('CalibrationCoefficients' %in% names(Z)) {
+  THDGoffset <- Z$CalibrationCoefficients[1]
+} else {
+  THDGoffset <- 0
+}
+D1$THDG <- (D1$THDG - THDGoffset) %% 360
 DL <- nrow(D1)
 ## adjustments:
 # D1$BYAWR <- D1$BYAWR - 0.005
@@ -705,88 +711,88 @@ if (SHIFT) {
   # Data$BNORMA <- ShiftInTime (Data$BNORMA, Rate, s-80)
 }
 
-dt <- 1
+dt <- 1    ## this is a 1-Hz file
 D1$Rn <- Ree / (1 - (Ecc*sin(D1$GGLAT*Cradeg))^2)^0.5 + D1$GGALT
 D1$Rm <- D1$Rn * (1-Ecc^2) / (1-(Ecc*sin(D1$GGLAT*Cradeg))^2) + D1$GGALT
 D1$Grav <- Gravity (D1$LAT, D1$GGALT)
 ## the following is commented because the centripetal effect is already included in 'Gravity()'
 # Re <- StandardConstant ('Re')
 # D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2 + D1$GGALT)
-  #interpolate if necessary: otherwise later filters fail
-  MaxGap <- 1000
-  D1$GGVNS <- ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE)
-  D1$GGVEW <- ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE)
-  D1$GGVSPD <- ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap, na.rm = FALSE)
-  D1$VNS <- vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm = FALSE)
-  D1$VEW <- vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm = FALSE)
-  D1$VSPD <- vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm = FALSE)
-  D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE)
-  D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE)
-  D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE)
-  D1$BPITCHR <- zoo::na.approx (as.vector (D1$BPITCHR), maxgap=MaxGap, na.rm=FALSE)
-  D1$BROLLR <- zoo::na.approx (as.vector (D1$BROLLR), maxgap=MaxGap, na.rm=FALSE)
-  D1$BYAWR <- zoo::na.approx (as.vector (D1$BYAWR), maxgap=MaxGap, na.rm=FALSE)
-  D1$GGALT <- zoo::na.approx (as.vector (D1$GGALT), maxgap=MaxGap, na.rm=FALSE)
-  D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE)
-  D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
-  D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
-  D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
-  ## smooth the measurements when determining derivatives
-  .span <- 11    
-  ## The following are accelerations determined from derivatives of the GPS velocities.
-  ## These should match the measured accelerations after transformation to the l-frame
-  ## and application of the rotation correction:
-  D1$vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
-  D1$vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
-  D1$vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
-  ## transform to the a-frame for comparison to the IRU:
-  G <- D1$Grav
-  VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
-  LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrection (D1, VL)
-  AA <- XformLA (D1, LA, .inverse=TRUE)
-  AA[,3] <- AA[,3] - G
-  fa1 <- lm(D1$BLONGA ~ AA[, 1])
-  fa2 <- lm(D1$BLATA ~ AA[, 2])
-  fa3 <- lm(D1$BNORMA ~ AA[, 3])
-  AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame 
-  AL <- XformLA (D1, AB)                                    #l-frame
-  ## now corrected for angular effects
-  ## See Noureldin et al, 2013, Eq. (5.55)
-  AL <- AL + RotationCorrection (D1, VL)  ##### check this sign and prev call above
+#interpolate if necessary: otherwise later filters fail
+MaxGap <- 1000
+D1$GGVNS <- ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE)
+D1$GGVEW <- ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE)
+D1$GGVSPD <- ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap, na.rm = FALSE)
+D1$VNS <- vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm = FALSE)
+D1$VEW <- vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm = FALSE)
+D1$VSPD <- vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm = FALSE)
+D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE)
+D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE)
+D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE)
+D1$BPITCHR <- zoo::na.approx (as.vector (D1$BPITCHR), maxgap=MaxGap, na.rm=FALSE)
+D1$BROLLR <- zoo::na.approx (as.vector (D1$BROLLR), maxgap=MaxGap, na.rm=FALSE)
+D1$BYAWR <- zoo::na.approx (as.vector (D1$BYAWR), maxgap=MaxGap, na.rm=FALSE)
+D1$GGALT <- zoo::na.approx (as.vector (D1$GGALT), maxgap=MaxGap, na.rm=FALSE)
+D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE)
+D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
+D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
+D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
+## smooth the measurements when determining derivatives
+.span <- 11    
+## The following are accelerations determined from derivatives of the GPS velocities.
+## These should match the measured accelerations after transformation to the l-frame
+## and application of the rotation correction:
+D1$vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
+D1$vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
+D1$vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
+## transform to the a-frame for comparison to the IRU:
+G <- D1$Grav
+VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
+LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrection (D1, VL)
+AA <- XformLA (D1, LA, .inverse=TRUE)
+AA[,3] <- AA[,3] - G
+fa1 <- lm(D1$BLONGA ~ AA[, 1])
+fa2 <- lm(D1$BLATA ~ AA[, 2])
+fa3 <- lm(D1$BNORMA ~ AA[, 3])
+AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame 
+AL <- XformLA (D1, AB)                                    #l-frame
+## now corrected for angular effects
+## See Noureldin et al, 2013, Eq. (5.55)
+AL <- AL + RotationCorrection (D1, VL)  ##### check this sign and prev call above
   
-  ## the resulting l-frame accelerations
-  D1$LACCX <- AL[, 1]
-  D1$LACCY <- AL[, 2]
-  D1$LACCZ <- AL[, 3] + G
-  D1$LACCZ <- -D1$LACCZ
+## the resulting l-frame accelerations
+D1$LACCX <- AL[, 1]
+D1$LACCY <- AL[, 2]
+D1$LACCZ <- AL[, 3] + G
+D1$LACCZ <- -D1$LACCZ
   
-  ## smooth to match GPS-velocity derivatives
-  D1$LACCX <- signal::sgolayfilt (D1$LACCX, 3, .span, m=0)
-  D1$LACCY <- signal::sgolayfilt (D1$LACCY, 3, .span, m=0)
-  D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
-  .span <- 301
-  SMOOTH <- FALSE
-  if (SMOOTH) {
-    vns <- signal::sgolayfilt (vns, 3, .span)
-    vew <- signal::sgolayfilt (vew, 3, .span)
-    vspd <- signal::sgolayfilt (vspd, 3, .span)
-    ggvns <- signal::sgolayfilt (ggvns, 3, .span)
-    ggvew <- signal::sgolayfilt (ggvew, 3, .span)
-    ggvspd <- signal::sgolayfilt (ggvspd, 3, .span)
-    pitch <- signal::sgolayfilt (D1$PITCH, 3, .span)
-    roll <- signal::sgolayfilt (D1$ROLL, 3, .span)
-    thdg <- signal::sgolayfilt (D1$THDG, 3, .span)
+## smooth to match GPS-velocity derivatives
+D1$LACCX <- signal::sgolayfilt (D1$LACCX, 3, .span, m=0)
+D1$LACCY <- signal::sgolayfilt (D1$LACCY, 3, .span, m=0)
+D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
+.span <- 301
+SMOOTH <- FALSE
+if (SMOOTH) {
+  vns <- signal::sgolayfilt (vns, 3, .span)
+  vew <- signal::sgolayfilt (vew, 3, .span)
+  vspd <- signal::sgolayfilt (vspd, 3, .span)
+  ggvns <- signal::sgolayfilt (ggvns, 3, .span)
+  ggvew <- signal::sgolayfilt (ggvew, 3, .span)
+  ggvspd <- signal::sgolayfilt (ggvspd, 3, .span)
+  pitch <- signal::sgolayfilt (D1$PITCH, 3, .span)
+  roll <- signal::sgolayfilt (D1$ROLL, 3, .span)
+  thdg <- signal::sgolayfilt (D1$THDG, 3, .span)
 
-    D1$VNSF <- vns
-    D1$VEWF <- vew
-    D1$VSPDF <- vspd
-    D1$GGVNSF <- ggvns
-    D1$GGVEWF <- ggvew
-    D1$GGVSPDF <- ggvspd
-    D1$PITCHF <- pitch
-    D1$ROLLF <- roll
-    D1$THDGF <- thdg
-  }
+  D1$VNSF <- vns
+  D1$VEWF <- vew
+  D1$VSPDF <- vspd
+  D1$GGVNSF <- ggvns
+  D1$GGVEWF <- ggvew
+  D1$GGVSPDF <- ggvspd
+  D1$PITCHF <- pitch
+  D1$ROLLF <- roll
+  D1$THDGF <- thdg
+}
 
 ## get the pitch and roll in the l-frame:
 .thdg <- D1$THDG * Cradeg
@@ -975,7 +981,7 @@ estimate of the heading error is used, an appropriate variance should
 be assigned to prevent excessive noise from affecting the result from
 the Kalman filter. 
 
-<<Kalman-setup, include=TRUE, echo=FALSE, cache=TRUE>>=
+<<Kalman-setup, include=TRUE, echo=FALSE>>=
 
 ## initial values of the state vector and error-state vector:
 SV <- with(D1[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL, THDG,
@@ -993,14 +999,11 @@ GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data record
   gcf[9] <- 0.015*Cradeg    ## 0.015
   gcf[10:11] <- 0.003*Cradeg    ## 0.015
   gcf[12] <- 0.003*Cradeg       ## 0.015
-  gcf[13:15] <- 0.0002
-  # gcf <- as.vector(gcf) * sqrt(2/60)
+  gcf[13:15] <- 0.00002
+  # gcf <- as.vector(gcf) * sqrt(2/tau)
   return (gcf)
 }
 gcf <- as.numeric (GCF (SV, D1[1, ]))
-# Gnoise <- gcf * rnorm(15)
-# dsve <- dcm %*% SVE   # + Gnoise
-# SVEP <- SVE + dt * as.vector(dsve, mode='numeric')  ## take a time step
 
 ## The measurement model: calculate the measurements of acceleration from the GPS to add to the measurement vector
 GAEL <- c(D1$LACCX - D1$vedot, D1$LACCY - D1$vndot, D1$LACCZ - D1$vudot)
@@ -1036,18 +1039,17 @@ DZ[ ,1:2] <- DZ[ ,1:2] * Cradeg
 # H[10,9] <- 1
 H <- diag(1, nrow=7, ncol=15)
 H[7,7] <- 0
-H[7,9] <- 1
+H[7,9] <- 1  ## measurement 7 applies to the heading error, SVE component 9
 
 
 ## at any time step, assume the measurements are contaminated by noise:
-## GPS measurement noise
 RCV <- matrix (rep(0,100), ncol=10)
 RCV <- matrix (rep(0,49), ncol=7)
-RCV[1,1] <- (30/D1$Rm[1])^2  ## latitude
-RCV[2,2] <- (30/(D1$Rn[1]*cos(SV[1])))^2
-RCV[3,3] <- 50^2
-RCV[4,4] <- 1^2            ## ve
-RCV[5,5] <- 1^2
+RCV[1,1] <- (10/D1$Rm[1])^2  ## latitude
+RCV[2,2] <- (10/(D1$Rn[1]*cos(SV$LAT)))^2
+RCV[3,3] <- 100^2
+RCV[4,4] <- 0.3^2            ## ve
+RCV[5,5] <- 0.3^2
 RCV[6,6] <- 0.3^2
 # RCV[7,7] <- 100.0  # A big value here limits updating of acceleration measurement.
 # RCV[8,8] <- 100.0  # The assumption is that there errors arise from an error in heading, not
@@ -1055,9 +1057,9 @@ RCV[6,6] <- 0.3^2
 # RCV[10,10] <- D1$sdPsi[1]^2
 # if (is.na(D1$sdPsi[1])) {RCV[10,10] <- 225}  # typical sd is 15 deg.
 # # RCV[10, 10] <- 1000  ## suppress effect
-RCV[7,7] <- 1000
+RCV[7,7] <- 1000  ## but update this each time step
 
-## initialize covariance matrix
+## initialize covariance matrix with generous variances
 CV <- matrix (rep(0,225), ncol=15)
 CV[1,1] <- 2000^2 / D1$Rm[1]^2
 CV[2,2] <- 2000^2 / (D1$Rn[1]*cos(SV[1]))^2
@@ -1108,7 +1110,10 @@ SVEF[1, ] <- SVE
 CVEF[1, ] <- diag (CV)
 # RCV <- RCV * 1000; RCV[3,3] <- RCV[3,3]/100; RCV[6,6] <- RCV[6,6]/100
 # Q <- Q * 0.1; Q[3,3] <- Q[3,3] * 100; Q[6,6] <- Q[6,6] * 100
+pctL <- 0
 for (i in seq(2*NSTEP, DL, by=NSTEP)) {
+  pct <- as.integer(100*i/DL)
+  if (pct %% 10 == 0 && pct != pctL) {print (sprintf ('pct done is %d', pct));pctL <- pct}
   SV <- with(Data[i, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL, THDG,
                                    BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
   SV[c(1,2,7:12)] <- SV[c(1,2,7:12)] * Cradeg
@@ -1157,59 +1162,59 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 }
 
 ## interpolate the results over the full data.frame:
-  IntFilter <- function (X, inRate, outRate) {
-    if (inRate == outRate) {return (X)}
-    ratio <- as.integer(outRate/inRate)    ## expected to be an integer
-    x <- 0:(length(X)-1)
-    A <- stats::approx (x, X, n=length(X)*ratio-ratio+1)
-    T <- A$y
-    T <- signal::filter(signal::sgolay(4,75),T)
-    ## now shift to match 25-Hz:
-    n <- as.integer (ratio / 2)
-    NL = length(T)
-    T <- c(rep(T[1],n), T, rep(T[NL],ratio-n-1))  ## OK, even or odd ratio
-    return (T)
-  }
-  Cor <- vector('numeric', DL*15)
-  dim (Cor) <- c(DL, 15)
-  VCor <- vector ('numeric', DL*15)
-  dim (VCor) <- c(DL, 15)
-  X <- SVEF[, 1]
-  for (j in 1:15) {
-    Cor[, j] <- IntFilter (SVEF[, j], 1, NSTEP)
-    VCor[, j] <- IntFilter (CVEF[, j], 1, NSTEP)
-  }
-  Data$LATKF <- Data$LAT - Cor[, 1]/Cradeg
-  Data$LONKF <- Data$LON - Cor[, 2]/Cradeg
-  Data$ALTKF <- Data$ALT - Cor[, 3]
-  Data$VEWKF <- Data$VEW - Cor[, 4]
-  Data$VNSKF <- Data$VNS - Cor[, 5]
-  Data$VSPDKF <- Data$VSPD - Cor[, 6]
-  Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
-  Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
-  Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
-  Data$BPITCHRKF <- Data$BPITCHR - Cor[, 10]/Cradeg
-  Data$BROLLRKF <- Data$BROLLR - Cor[, 11]/Cradeg
-  Data$BYAWRKF <- Data$BYAWR - Cor[, 12]/Cradeg
-  Data$BLATAKF <- Data$BLATA - Cor[, 13]
-  Data$BLONGAKF <- Data$BLONGA - Cor[, 14]
-  Data$BNORMAKF <- Data$BNORMA - Cor[, 15]
+IntFilter <- function (X, inRate, outRate) {
+  if (inRate == outRate) {return (X)}
+  ratio <- as.integer(outRate/inRate)    ## expected to be an integer
+  x <- 0:(length(X)-1)
+  A <- stats::approx (x, X, n=length(X)*ratio-ratio+1)
+  T <- A$y
+  T <- signal::filter(signal::sgolay(4,75),T)
+  ## now shift to match 25-Hz:
+  n <- as.integer (ratio / 2)
+  NL = length(T)
+  T <- c(rep(T[1],n), T, rep(T[NL],ratio-n-1))  ## OK, even or odd ratio
+  return (T)
+}
+Cor <- vector('numeric', DL*15)
+dim (Cor) <- c(DL, 15)
+VCor <- vector ('numeric', DL*15)
+dim (VCor) <- c(DL, 15)
+X <- SVEF[, 1]
+for (j in 1:15) {
+  Cor[, j] <- IntFilter (SVEF[, j], 1, NSTEP)
+  VCor[, j] <- IntFilter (CVEF[, j], 1, NSTEP)
+}
+Data$LATKF <- Data$LAT - Cor[, 1]/Cradeg
+Data$LONKF <- Data$LON - Cor[, 2]/Cradeg
+Data$ALTKF <- Data$ALT - Cor[, 3]
+Data$VEWKF <- Data$VEW - Cor[, 4]
+Data$VNSKF <- Data$VNS - Cor[, 5]
+Data$VSPDKF <- Data$VSPD - Cor[, 6]
+Data$PITCHKF <- Data$PITCH - Cor[, 7]/Cradeg
+Data$ROLLKF <- Data$ROLL - Cor[, 8]/Cradeg
+Data$THDGKF <- Data$THDG - Cor[, 9]/Cradeg
+Data$BPITCHRKF <- Data$BPITCHR - Cor[, 10]/Cradeg
+Data$BROLLRKF <- Data$BROLLR - Cor[, 11]/Cradeg
+Data$BYAWRKF <- Data$BYAWR - Cor[, 12]/Cradeg
+Data$BLATAKF <- Data$BLATA - Cor[, 13]
+Data$BLONGAKF <- Data$BLONGA - Cor[, 14]
+Data$BNORMAKF <- Data$BNORMA - Cor[, 15]
 
 Data$DLAT <- Data$LATKF-Data$GGLAT
-Data$CLAT <- -Cor[,1] / Cradeg
+Data$CLAT <- -Cor[, 1] / Cradeg
 Data$DLON <- Data$LONKF-Data$GGLON
-Data$CLON <- -Cor[,2] / Cradeg
+Data$CLON <- -Cor[, 2] / Cradeg
 Data$DALT <- Data$ALTKF-Data$GGALT
-Data$CALT <- -Cor[,3]
+Data$CALT <- -Cor[, 3]
 Data$DVEW <- Data$VEWKF-Data$GGVEW
-Data$CVEW <- -Cor[,4]
+Data$CVEW <- -Cor[, 4]
 Data$DVNS <- Data$VNSKF-Data$GGVNS
-Data$CVNS <- -Cor[,5]
+Data$CVNS <- -Cor[, 5]
 Data$DVSPD <- Data$VSPDKF-Data$GGVSPD
-Data$CVSPD <- -Cor[,6]
-Data$CPITCH <- Data$PITCHKF-Data$PITCH
-Data$CROLL <- Data$ROLLKF-Data$ROLL
-Data$CTHDG <- Data$THDGKF-Data$THDG
+Data$CVSPD <- -Cor[, 6]
+Data$CPITCH <- -Cor[, 7] / Cradeg
+Data$CROLL <- -Cor[, 8] / Cradeg
+Data$CTHDG <- -Cor[, 9] / Cradeg
 KalmanCaptions <- c("Comparison of the KF, GPS, and INS values of latitude, longitude, and altitude for DEEPWAVE flight 16. DLAT, DLON, and DALT (blue lines) are the differences between the Kalman-filter result and GPS measurement, while CLAT, CLON, and CALT (green lines) are the corrections applied to the original INS values by the Kalman filter.",
                     "Comparison of the KF, GPS, and INS values of aircraft-velocity components for DEEPWAVE flight 16. Blue lines show the differences between the Kalman-filter results and the corresponding GPS-provided values, while the green lines show the corrections applied to the original INS values by the Kalman filter.",
                       "Pitch Correction from the Kalman filter (CPITCH, blue line) and from Ranadu::CorrectPitch (PC, red line)",
@@ -1263,20 +1268,23 @@ Data$CROLL <- SmoothInterp (Data$CROLL, .Length=181)
 Data$CTHDG <- SmoothInterp (Data$CTHDG, .Length=181)
 Data$HC <- -CorrectHeading (Data, .plotfile='./HCPlot.pdf')
 r <- setRange (Data, 70000, 123000)
-plotWAC(subset(Data[r,],,c(Time, CPITCH, PC)), ylab=expression(paste('PITCH CORRECTION',' [',degree,']')), ylim=c(-0.05, 0.05), lwd=c(0.7,0.7), col=c('blue', 'red'))
+plotWAC(subset(Data[r,],,c(Time, CPITCH, PC)), ylab=expression(paste('PITCH CORRECTION',' [',degree,']')), 
+        ylim=c(-0.05, 0.05), lwd=c(0.7,0.7), col=c('blue', 'red'), legend.position='topright')
 ival <- abs(Data$ROLL) > 4
 Data$CPITCH[ival] <- NA
 Data$PC[ival] <- NA
 lineWAC(Data$Time[r], Data$CPITCH[r], lwd=3, col='blue')
 lineWAC(Data$Time[r], Data$PC[r], lwd=3, col='red')
 abline(h=0, col='darkorange', lty=2)
-plotWAC(subset(Data[r,],,c(Time, CROLL, RC)), ylab=expression(paste('ROLL CORRECTION [',degree,']')), ylim=c(-0.05,0.05), lwd=c(0.7,0.7), col=c('blue', 'red'))
+plotWAC(subset(Data[r,],,c(Time, CROLL, RC)), 
+      ylab=expression(paste('ROLL CORRECTION [',degree,']')), 
+      ylim=c(-0.05,0.05), lwd=c(0.7,0.7), col=c('blue', 'red'), legend.position='topright')
 Data$CROLL[ival] <- NA
 Data$RC[ival] <- NA
 lineWAC(Data$Time[r], Data$CROLL[r], lwd=3, col='blue')
 lineWAC(Data$Time[r], Data$RC[r], lwd=3, col='red')
 abline(h=0, col='darkorange', lty=2)
-plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)), ylim=c(-0.4,0.4), lwd=0.7)
+plotWAC(subset(Data[r, ],, c(Time, CTHDG, HC)), ylim=c(-0.4,0.4), lwd=0.7, legend.position='topright')
 HE <- VCor[,9]
 HE[HE < 0.0025] <- 0.0025
 HE <- sqrt(HE)
