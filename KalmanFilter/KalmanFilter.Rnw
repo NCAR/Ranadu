@@ -681,9 +681,9 @@ components and attitude angles.
 <<new-data, include=TRUE, echo=FALSE, cache=TRUE>>=
 
 Flight <- "16" 			
-Project = "DW"     		
+Project = "DEEPWAVE"     		
 ProjectDir <- "DEEPWAVE"
-fname = sprintf("%s%s/%s%s.nc", Directory, ProjectDir, Project, Flight)
+fname = sprintf("%s%s/%srf%s.nc", Directory, ProjectDir, Project, Flight)
 D1 <- getNetCDF (fname, c(VarList, 'PSXC', 'ATX', 'ACINS'))
 ## remove heading adjustments as added during initial processing
 Z <- data.frame(getAttributes(D1$THDG, .print=FALSE))
@@ -1660,6 +1660,142 @@ Data$THDGKF <- Data$THDG - Data$HCS    ## save the corrected heading
 
 \clearpage
 
+
+\section{New netCDF variables}
+
+The result of the Kalman filter is that new corrected variables \{LATKF,
+LONKF, ALTKF, VEWKF, VNSKF, ROCKF, PITCHKF, ROLLKF, and THDGKF\} are
+available. The code in this section adds those variables to an existing
+newCDF file, renaming the result with names like xxxrf01KF.nc if the
+original file was xxxrf01.nc. 
+
+<<create-new-netcdf>>=
+
+fnew <- sub ('.nc', 'KF.nc', fname)
+## beware: overwrites without warning!!
+Z <- file.copy (fname, fnew, overwrite=TRUE)  ## BEWARE: overwrites without warning!!
+
+# function to copy attributes from old variable (e.g., PITCH) to new one (e.g., PITCHKF)
+copy_attributes <- function (atv, v, nfile) {
+  for (i in 1:length(atv)) {
+    aname <- names(atv[i])
+    if (grepl ('name', aname)) {next}  # skips long and standard names
+    if (grepl ('units', aname)) {next}
+    if (grepl ('Dependencies', aname)) {next}
+    if (grepl ('actual_range', aname)) {next}
+    if (is.numeric (atv[[i]])) {
+      ncatt_put (nfile, v, attname=aname, attval=as.numeric(atv[[i]]))
+    } else {
+      ncatt_put (nfile, v, attname=aname, attval=as.character (atv[[i]]))
+    }
+  }
+}
+
+@
+
+<<modify-new-netcdf, include=TRUE>>=
+
+## variables needed for attributes and new wind calculation:
+VarList <- c('TASX', 'ATTACK', 'SSLIP', 'GGVEW', 'GGVNS', 'GGVSPD', 'VEW', 'VNS', 'THDG', 'ROLL', 'PITCH',
+             'LAT', 'LON', 'VSPD')
+VarListRef <- VarList
+FI <- DataFileInfo (fname)
+VarList <- VarListRef
+if ('GGVSPD' %in% FI$Variables) {
+} else if ('GGVSPDB' %in% FI$Variables) {
+  VarList [which (VarList == 'GGVSPD')] <- 'GGVSPDB'
+} else if ('VSPD_A' %in% FI$Variables) {
+  VarList [which (VarList == 'GGVSPD')] <- 'VSPD_A'
+} else if ('VSPD_G' %in% FI$Variables) {
+  VarList [which (VarList == 'GGVSPD')] <- 'VSPD_G'
+} else {
+  print ('ERROR: no VSPD variable found')
+  exit()
+}
+for (Var in VarList) {
+  if (!(Var %in% FI$Variables)) {
+    print (sprintf (' required variable %s not found in file %s; skipping...', Var, fname))
+    exit()
+  }
+}
+D <- getNetCDF (fname, VarList)
+netCDFfile <- nc_open (fnew, write=TRUE) 
+Rate <- 1
+Dimensions <- attr (D, "Dimensions")
+Dim <- Dimensions[["Time"]]
+if ("sps25" %in% names (Dimensions)) {
+  Rate <- 25
+  Dim <- list(Dimensions[["sps25"]], Dimensions[["Time"]])
+}
+if ("sps50" %in% names (Dimensions)) {
+  Rate <- 50
+  Dim <- list(Dimensions[["sps50"]], Dimensions[["Time"]])
+}
+DATT <- D  ## save to ensure that attributes are preserved
+
+## variables to add to the netCDF file:
+VarNew <- c('LATKF', 'LONKF', 'ALTKF', 'VEWKF', 'VNSKF', 'ROCKF', 'PITCHKF', 'ROLLKF', 'THDGKF',
+            'WDKF', 'WSKF', 'WIKF')
+VarOld <- c('LAT', 'LON', 'ALT', 'VEW', 'VNS', 'VSPD', 'PITCH', 'ROLL', 'THDG', 'WD', 'WS', 'WI')
+VarUnits <- c('degrees', 'degrees', 'm', 'm/s', 'm/s', 'm/s', 'degrees', 'degrees', 'degrees',
+              'degrees', 'm/s', 'm/s')
+VarLongName <- c('latitude, KF', 'longitude, KF', 'altitude MSL, KF',
+                 'eastward groundspeed, KF', 'northward groundspeed, KF', 'rate of climb, KF',
+                 'pitch, KF', 'roll, KF', 'heading, KF',
+                 'wind direction, KF', 'wind speed, KF', 'vertical wind, KF')
+VarStdName <- c('INS latitude, Kalman-filter-corrected',
+                'INS longitude, Kalman-filter-corrected',
+				'INS altitude, Kalman-filter-corrected',
+				'INS eastward ground speed, Kalman-filter-corrected',
+				'INS northward ground speed, Kalman-filter-corrected',
+				'INS rate of climb, Kalman-filter-corrected',
+				'INS aircraft pitch angle, Kalman-filter-corrected',
+				'INS aircraft roll angle, Kalman-filter-corrected',
+				'INS aircraft true heading angle, Kalman-filter-corrected',
+				'horizontal wind direction, Kalman-filter-corrected',
+				'horizontal wind speed, Kalman-filter-corrected',
+				'vertical wind speed, Kalman-filter-corrected')
+
+## get the wind variables:
+DataW <- D
+DataW$PITCH <- Data$PITCHKF
+DataW$ROLL <- Data$ROLLKF
+DataW$THDG <- Data$THDGKF
+DataW$VEW <- Data$VEWKF
+DataW$VNS <- Data$VNSKF
+DataW$GGVSPD <- Data$ROCKF
+DataW <- WindProcessor(DataW)
+Data$WDKF <- DataW$WDN
+Data$WSKF <- DataW$WSN
+Data$WIKF <- DataW$WIN
+
+## create the new variables
+nv <- length (VarNew)
+varCDF <- list ()
+for (i in 1:nv) {
+  varCDF[[i]] <- ncvar_def (VarNew[i],  
+                    units=VarUnits[i], 
+                    dim=Dim, 
+                    missval=as.single(-32767.), prec='float', 
+                    longname=VarLongName[i])
+  if (i == 1) {
+    newfile <- ncvar_add (netCDFfile, varCDF[[i]])
+  } else {
+    newfile <- ncvar_add (newfile, varCDF[[i]])
+  }
+  ATV <- ncatt_get (netCDFfile, VarOld[i])
+  copy_attributes (ATV, VarNew[i], newfile)
+  ncatt_put (newfile, VarNew[i], attname="standard_name", 
+             attval=VarStdName[i])
+  if (Rate == 1) {
+    ncvar_put (newfile, varCDF[[i]], Data[, VarNew[i]])
+  } else if (Rate == 25) {
+    ncvar_put (newfile, varCDF[[i]], Data[, VarNew[i]], count=c(25, nrow(Data)/25))
+  }
+}
+nc_close (newfile)
+
+@
 \begin{center}
 \textsf{\textcolor{blue}{\textendash{} End of Memo \textendash{}}}
 \par\end{center}
@@ -1675,6 +1811,4 @@ Reproducibility:
 \textsf{\textsc{\textcolor{blue}{Workflow:}}} & Workflow\Sexpr{thisFileName}.pdf\tabularnewline
 \textsf{\textsc{\textcolor{blue}{Git:}}} & https://github.com/WilliamCooper/\Sexpr{thisFileName}.git\tabularnewline
 \end{tabular}
-
-
 \end{document}

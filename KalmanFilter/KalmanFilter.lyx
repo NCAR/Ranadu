@@ -2698,7 +2698,7 @@ Flight <- "16"
 
 \begin_layout Plain Layout
 
-Project = "DW"     		
+Project = "DEEPWAVE"     		
 \end_layout
 
 \begin_layout Plain Layout
@@ -2708,7 +2708,7 @@ ProjectDir <- "DEEPWAVE"
 
 \begin_layout Plain Layout
 
-fname = sprintf("%s%s/%s%s.nc", Directory, ProjectDir, Project, Flight)
+fname = sprintf("%s%s/%srf%s.nc", Directory, ProjectDir, Project, Flight)
 \end_layout
 
 \begin_layout Plain Layout
@@ -7373,6 +7373,669 @@ clearpage
 
 \end_layout
 
+\begin_layout Section
+New netCDF variables
+\end_layout
+
+\begin_layout Standard
+The result of the Kalman filter is that new corrected variables {LATKF,
+ LONKF, ALTKF, VEWKF, VNSKF, ROCKF, PITCHKF, ROLLKF, and THDGKF} are available.
+ The code in this section adds those variables to an existing newCDF file,
+ renaming the result with names like xxxrf01KF.nc if the original file was
+ xxxrf01.nc.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<create-new-netcdf>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fnew <- sub ('.nc', 'KF.nc', fname)
+\end_layout
+
+\begin_layout Plain Layout
+
+## beware: overwrites without warning!!
+\end_layout
+
+\begin_layout Plain Layout
+
+Z <- file.copy (fname, fnew, overwrite=TRUE)  ## BEWARE: overwrites without
+ warning!!
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# function to copy attributes from old variable (e.g., PITCH) to new one (e.g.,
+ PITCHKF)
+\end_layout
+
+\begin_layout Plain Layout
+
+copy_attributes <- function (atv, v, nfile) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  for (i in 1:length(atv)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    aname <- names(atv[i])
+\end_layout
+
+\begin_layout Plain Layout
+
+    if (grepl ('name', aname)) {next}  # skips long and standard names
+\end_layout
+
+\begin_layout Plain Layout
+
+    if (grepl ('units', aname)) {next}
+\end_layout
+
+\begin_layout Plain Layout
+
+    if (grepl ('Dependencies', aname)) {next}
+\end_layout
+
+\begin_layout Plain Layout
+
+    if (grepl ('actual_range', aname)) {next}
+\end_layout
+
+\begin_layout Plain Layout
+
+    if (is.numeric (atv[[i]])) {
+\end_layout
+
+\begin_layout Plain Layout
+
+      ncatt_put (nfile, v, attname=aname, attval=as.numeric(atv[[i]]))
+\end_layout
+
+\begin_layout Plain Layout
+
+    } else {
+\end_layout
+
+\begin_layout Plain Layout
+
+      ncatt_put (nfile, v, attname=aname, attval=as.character (atv[[i]]))
+\end_layout
+
+\begin_layout Plain Layout
+
+    }
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<modify-new-netcdf, include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## variables needed for attributes and new wind calculation:
+\end_layout
+
+\begin_layout Plain Layout
+
+VarList <- c('TASX', 'ATTACK', 'SSLIP', 'GGVEW', 'GGVNS', 'GGVSPD', 'VEW',
+ 'VNS', 'THDG', 'ROLL', 'PITCH',
+\end_layout
+
+\begin_layout Plain Layout
+
+             'LAT', 'LON', 'VSPD')
+\end_layout
+
+\begin_layout Plain Layout
+
+VarListRef <- VarList
+\end_layout
+
+\begin_layout Plain Layout
+
+FI <- DataFileInfo (fname)
+\end_layout
+
+\begin_layout Plain Layout
+
+VarList <- VarListRef
+\end_layout
+
+\begin_layout Plain Layout
+
+if ('GGVSPD' %in% FI$Variables) {
+\end_layout
+
+\begin_layout Plain Layout
+
+} else if ('GGVSPDB' %in% FI$Variables) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  VarList [which (VarList == 'GGVSPD')] <- 'GGVSPDB'
+\end_layout
+
+\begin_layout Plain Layout
+
+} else if ('VSPD_A' %in% FI$Variables) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  VarList [which (VarList == 'GGVSPD')] <- 'VSPD_A'
+\end_layout
+
+\begin_layout Plain Layout
+
+} else if ('VSPD_G' %in% FI$Variables) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  VarList [which (VarList == 'GGVSPD')] <- 'VSPD_G'
+\end_layout
+
+\begin_layout Plain Layout
+
+} else {
+\end_layout
+
+\begin_layout Plain Layout
+
+  print ('ERROR: no VSPD variable found')
+\end_layout
+
+\begin_layout Plain Layout
+
+  exit()
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+for (Var in VarList) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (!(Var %in% FI$Variables)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    print (sprintf (' required variable %s not found in file %s; skipping...',
+ Var, fname))
+\end_layout
+
+\begin_layout Plain Layout
+
+    exit()
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+D <- getNetCDF (fname, VarList)
+\end_layout
+
+\begin_layout Plain Layout
+
+netCDFfile <- nc_open (fnew, write=TRUE) 
+\end_layout
+
+\begin_layout Plain Layout
+
+Rate <- 1
+\end_layout
+
+\begin_layout Plain Layout
+
+Dimensions <- attr (D, "Dimensions")
+\end_layout
+
+\begin_layout Plain Layout
+
+Dim <- Dimensions[["Time"]]
+\end_layout
+
+\begin_layout Plain Layout
+
+if ("sps25" %in% names (Dimensions)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  Rate <- 25
+\end_layout
+
+\begin_layout Plain Layout
+
+  Dim <- list(Dimensions[["sps25"]], Dimensions[["Time"]])
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+if ("sps50" %in% names (Dimensions)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  Rate <- 50
+\end_layout
+
+\begin_layout Plain Layout
+
+  Dim <- list(Dimensions[["sps50"]], Dimensions[["Time"]])
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+DATT <- D  ## save to ensure that attributes are preserved
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## variables to add to the netCDF file:
+\end_layout
+
+\begin_layout Plain Layout
+
+VarNew <- c('LATKF', 'LONKF', 'ALTKF', 'VEWKF', 'VNSKF', 'ROCKF', 'PITCHKF',
+ 'ROLLKF', 'THDGKF',
+\end_layout
+
+\begin_layout Plain Layout
+
+            'WDKF', 'WSKF', 'WIKF')
+\end_layout
+
+\begin_layout Plain Layout
+
+VarOld <- c('LAT', 'LON', 'ALT', 'VEW', 'VNS', 'VSPD', 'PITCH', 'ROLL',
+ 'THDG', 'WD', 'WS', 'WI')
+\end_layout
+
+\begin_layout Plain Layout
+
+VarUnits <- c('degrees', 'degrees', 'm', 'm/s', 'm/s', 'm/s', 'degrees',
+ 'degrees', 'degrees',
+\end_layout
+
+\begin_layout Plain Layout
+
+              'degrees', 'm/s', 'm/s')
+\end_layout
+
+\begin_layout Plain Layout
+
+VarLongName <- c('latitude, KF', 'longitude, KF', 'altitude MSL, KF',
+\end_layout
+
+\begin_layout Plain Layout
+
+                 'eastward groundspeed, KF', 'northward groundspeed, KF',
+ 'rate of climb, KF',
+\end_layout
+
+\begin_layout Plain Layout
+
+                 'pitch, KF', 'roll, KF', 'heading, KF',
+\end_layout
+
+\begin_layout Plain Layout
+
+                 'wind direction, KF', 'wind speed, KF', 'vertical wind,
+ KF')
+\end_layout
+
+\begin_layout Plain Layout
+
+VarStdName <- c('INS latitude, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+                'INS longitude, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'INS altitude, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'INS eastward ground speed, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'INS northward ground speed, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'INS rate of climb, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'INS aircraft pitch angle, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'INS aircraft roll angle, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'INS aircraft true heading angle, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'horizontal wind direction, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'horizontal wind speed, Kalman-filter-corrected',
+\end_layout
+
+\begin_layout Plain Layout
+
+				'vertical wind speed, Kalman-filter-corrected')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## get the wind variables:
+\end_layout
+
+\begin_layout Plain Layout
+
+DataW <- D
+\end_layout
+
+\begin_layout Plain Layout
+
+DataW$PITCH <- Data$PITCHKF
+\end_layout
+
+\begin_layout Plain Layout
+
+DataW$ROLL <- Data$ROLLKF
+\end_layout
+
+\begin_layout Plain Layout
+
+DataW$THDG <- Data$THDGKF
+\end_layout
+
+\begin_layout Plain Layout
+
+DataW$VEW <- Data$VEWKF
+\end_layout
+
+\begin_layout Plain Layout
+
+DataW$VNS <- Data$VNSKF
+\end_layout
+
+\begin_layout Plain Layout
+
+DataW$GGVSPD <- Data$ROCKF
+\end_layout
+
+\begin_layout Plain Layout
+
+DataW <- WindProcessor(DataW)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$WDKF <- DataW$WDN
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$WSKF <- DataW$WSN
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$WIKF <- DataW$WIN
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## create the new variables
+\end_layout
+
+\begin_layout Plain Layout
+
+nv <- length (VarNew)
+\end_layout
+
+\begin_layout Plain Layout
+
+varCDF <- list ()
+\end_layout
+
+\begin_layout Plain Layout
+
+for (i in 1:nv) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  varCDF[[i]] <- ncvar_def (VarNew[i],  
+\end_layout
+
+\begin_layout Plain Layout
+
+                    units=VarUnits[i], 
+\end_layout
+
+\begin_layout Plain Layout
+
+                    dim=Dim, 
+\end_layout
+
+\begin_layout Plain Layout
+
+                    missval=as.single(-32767.), prec='float', 
+\end_layout
+
+\begin_layout Plain Layout
+
+                    longname=VarLongName[i])
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (i == 1) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    newfile <- ncvar_add (netCDFfile, varCDF[[i]])
+\end_layout
+
+\begin_layout Plain Layout
+
+  } else {
+\end_layout
+
+\begin_layout Plain Layout
+
+    newfile <- ncvar_add (newfile, varCDF[[i]])
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+  ATV <- ncatt_get (netCDFfile, VarOld[i])
+\end_layout
+
+\begin_layout Plain Layout
+
+  copy_attributes (ATV, VarNew[i], newfile)
+\end_layout
+
+\begin_layout Plain Layout
+
+  ncatt_put (newfile, VarNew[i], attname="standard_name", 
+\end_layout
+
+\begin_layout Plain Layout
+
+             attval=VarStdName[i])
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (Rate == 1) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    ncvar_put (newfile, varCDF[[i]], Data[, VarNew[i]])
+\end_layout
+
+\begin_layout Plain Layout
+
+  } else if (Rate == 25) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    ncvar_put (newfile, varCDF[[i]], Data[, VarNew[i]], count=c(25, nrow(Data)/2
+5))
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+nc_close (newfile)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 \align center
 
@@ -7653,10 +8316,6 @@ Sexpr{thisFileName}.git
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
 
 \end_layout
 
