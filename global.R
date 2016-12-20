@@ -662,6 +662,9 @@ saveRdata <- function (Data, inp) {
     netCDFfile <- nc_open (sprintf ('%s%s/%srf%02dF.nc', DataDirectory (),
                                     inp$Project, inp$Project,
                                     inp$Flight))
+  } else if (inp$typeFlight == 'KF') {
+    netCDFfile <- nc_open (sprintf ('%s%s/%srf%02dKF.nc', DataDirectory (),
+                                    inp$Project, inp$Project, inp$Flight))
   } else {
     netCDFfile <- nc_open (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (),
                                   inp$Project, inp$Project, inp$typeFlight,
@@ -718,6 +721,10 @@ saveRdata <- function (Data, inp) {
     fn <- sprintf ('%s%s/%srf%02dF.Rdata', DataDirectory (),
                    inp$Project, inp$Project, 
                    inp$Flight)
+  } else if (inp$typeFlight == 'KF') {
+    fn <- sprintf ('%s%s/%srf%02dKF.Rdata', DataDirectory (),
+                     inp$Project, inp$Project, 
+                     inp$Flight)
   } else {
     fn <- sprintf ('%s%s/%s%s%02d.Rdata', DataDirectory (),
                  inp$Project, inp$Project, inp$typeFlight,

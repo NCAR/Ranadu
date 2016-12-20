@@ -27,7 +27,7 @@ shinyUI(
         fluidRow (
           column (8, numericInput (inputId='Flight', label='Flight', value=1,
                                    min=1, max=99, step=1, width='80px')),
-          column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff', 'F'),
+          column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff', 'F', 'KF'),
                                    width='70px', inline=FALSE))))),
       column (1, 
               numericInput (inputId='plot', label='plot', value=1,
