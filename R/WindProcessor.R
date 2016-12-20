@@ -27,7 +27,7 @@
 #' @examples
 #' newData <- WindProcessor (RAFdata)
 
-WindProcessor <- function (data) {
+WindProcessor <- function (data, LR=4.42, LG=-4.30, CompF=TRUE) {
   Cradeg <- pi/180
   Names <- names (data)
   if ("PITCHC" %in% Names) {
@@ -154,8 +154,13 @@ WindProcessor <- function (data) {
   # CVNS <- ComplementaryFilter (VNS, GGVNS, 150)
   
   tau <- 150
-  CVEW <- VEW + signal::filter (signal::butter(3, 2/tau), CVEW)
-  CVNS <- VNS + signal::filter (signal::butter(3, 2/tau), CVNS)
+  if (CompF) {
+    CVEW <- VEW + signal::filter (signal::butter(3, 2/tau), CVEW)
+    CVNS <- VNS + signal::filter (signal::butter(3, 2/tau), CVNS)
+  } else {
+    CVEW <- VEW
+    CVNS <- VNS
+  }  
   Hlast <- 0.
  
   for (i in 1:DL) {
