@@ -1,0 +1,649 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass report
+\begin_preamble
+\input colordvi
+\usepackage{color}
+\fancyhead{}
+\fancyfoot[CE,CO]{}
+\newtoks{\addressee} \global\addressee={}
+\newdimen\longindent \longindent=3.5truein
+\fancyhead[L]{Memo to: \the\addressee \\ \datetoday \\ Page \thepage \hfill}
+\renewcommand{\headrulewidth}{0.0pt}
+\newenvironment{lyxlist}[1]
+{\begin{list}{}
+{\settowidth{\labelwidth}{#1}
+\setlength{\leftmargin}{\labelwidth}
+\addtolength{\leftmargin}{\labelsep}
+\renewcommand{\makelabel}[1]{##1\hfil}}}
+{\end{list}}
+\newcommand{\datetoday}{\number\day\space
+     \ifcase\month\or January\or February\or March\or April\or May\or
+     June\or July\or August\or September\or October\or November\or
+     December\fi
+     \space\number\year}
+\newcommand{\EOLmemo}{\null \vskip-1.5truein
+{\raggedright \textsf{\textsc{\large \textcolor{blue}{Earth Observing Laboratory}}}}\par
+{\raggedright \textsf{\textsl{\textcolor{blue}{Memorandum:}}}} \par \vskip6pt
+{\color{blue}{\hrule}}\par
+\vskip0.3truein \leftline{\hskip \longindent \datetoday} \vskip0.2truein
+\thispagestyle{empty}}
+\newcommand{\attachm}[1]{\begin{lyxlist}{Attachments:00}
+\item [Attachments:] {#1}
+\end{lyxlist}}
+\newcommand{\cc}[1]{\begin{lyxlist}{Attachments:00}
+\item [cc:] {#1}
+\end{lyxlist}}
+\newcommand{\attach}[1]{\begin{lyxlist}{Attachments:00}
+\item [Attachment:] {#1}
+\end{lyxlist}}
+%usage: \encl{A\\B\\C} or \cc{ma,e1\\name2\\name3}
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding default
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref false
+\papersize letterpaper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 0
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.54cm
+\topmargin 3.54cm
+\rightmargin 2.54cm
+\bottommargin 2.54cm
+\headheight 1cm
+\headsep 2cm
+\footskip 0.5cm
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+EOLmemo 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+global
+\backslash
+addressee={Jorgen Jensen and Jeff Stith}% change "File" to the "To:" name
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="0pt">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+To:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+the
+\backslash
+addressee
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family sans
+\shape smallcaps
+\color blue
+From:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Al Cooper
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 
+\family sans
+\shape smallcaps
+\color blue
+Subject:
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+proposal re Kalman filtering
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+bigskip
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Summary
+\end_layout
+
+\begin_layout Standard
+I propose to complete the Kalman-filter project to a point where routine
+ second-pass processing will be available that, for the GV, decreases uncertaint
+y in horizontal and vertical wind measurements to about 20% of present values.
+ In addition to a convenient processing program, the proposed project will
+ develop extensive documentation including a new NCAR Technical Note.
+ The cost is about three weeks (FTE) of my time, to be spread over not more
+ than three months.
+ A journal article (short note) will follow this project to document the
+ key corrections to pitch and heading and to call attention to the additional
+ detail contained in this technical note and the previous one on uncertainty
+ in wind measurements.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Present status
+\end_layout
+
+\begin_layout Standard
+Early last year, I developed a proof-of-concept demonstration that a Kalman
+ filter can improve the wind measurements from the GV, primarily by improving
+ the measurements of attitude angles.
+ I presented a talk at the RAF in May that described these results; see
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "this link"
+target "https://drive.google.com/open?id=0B1kIUH45ca5Acl9SZkdfcmkzTDQ"
+
+\end_inset
+
+.
+ That talk showed a set of preliminary results that I think demonstrated
+ the potential usefulness of the Kalman filter, but the development was
+ not carried to a point where it could be used to create a new netCDF file
+ containing wind measurements based on the Kalman-filter results.
+ This memo proposes that I finish this task, either individually or in collabora
+tion with someone, so that Kalman-filter processing would be available.
+ The process will work equally well for past and future projects, and I
+ have found a way to reprocess even those projects where INS body accelerations
+ and rotation rates were not preserved in the archive files.
+\end_layout
+
+\begin_layout Subsection*
+The expected results
+\end_layout
+
+\begin_layout Standard
+I propose to produce these products:
+\end_layout
+
+\begin_layout Enumerate
+An R routine that can add corrected measurements of position, aircraft velocity,
+ attitude angles, and horizontal and vertical wind to an existing netCDF
+ file.
+ For this purpose, the preliminary work I did will need these additional
+ steps:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+\begin_inset Quotes eld
+\end_inset
+
+Tuning
+\begin_inset Quotes erd
+\end_inset
+
+ of the Kalman filter by adjusting the assumed uncertainties associated
+ with propagation of the solution and use of the error measurements.
+ References say this tuning is an art, and I'm not experienced with this,
+ so this will take some exploration.
+ The solution I obtained earlier was good, so this tuning will result in
+ something at least that good, but this is a step that should be taken if
+ this is to be used to produce new data files.
+\end_layout
+
+\begin_layout Enumerate
+Two additions to the routine, both straightforward and minor tasks:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+to calculate wind based on the corrected results from the Kalman filter;
+ and 
+\end_layout
+
+\begin_layout Enumerate
+to add the variables to a netCDF file.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Provision for interaction with a user so the routine can be used without
+ the need to change specifications like which files to use via code changes.
+ This is also straightforward and a minor task.
+\end_layout
+
+\begin_layout Enumerate
+Addition of appropriate smoothing of the correction terms.
+ Without smoothing, the Kalman filter will introduce undesirable high-frequency
+ noise to the solution and that noise will affect variance spectra and turbulenc
+e-scale results.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Addition of a recalculation the body accelerations and body rotation rates
+ from the archived data, when needed, so the processing will be possible
+ with netCDF archives that do not include those accelerations and rotation
+ rates.
+ This is necessary because the needed accelerations and rotation rates were
+ not even recorded in the raw tapes for many projects, so nimbus reprocessing
+ to recover them is not an option.
+ I have already verified that this recalculation will be possible.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+An NCAR Technical Note describing the technique, showing results and especially
+ showing the effect on calculated wind and on variance spectra for the wind
+ components.
+ This will be one component of extensive documentation to be provided for
+ the processing algorithms, and it would be accompanied by a workflow descriptio
+n that would assist someone wanting to perform the processing with the routine
+ provided or make changes to that routine.
+ My expectation is that this technical note could be approved much faster
+ than the previous technical note on uncertainty in wind measurements because
+ it could probably be reviewed by NCAR scientists instead of having to seek
+ outside approval.
+ We ended up needing outside reviewers for the previous note because everyone
+ internal to NCAR who was suitable to review was a co-author.
+ That will not be the case for the new Technical Note.
+ Other notes, many already written, will document special steps like determining
+ needed time shifts and justification for a revision to VSPD as used in
+ the Kalman filter, and these will be referenced in the technical note.
+\end_layout
+
+\begin_layout Enumerate
+The basis for a journal article, probably a short note, to be written after
+ the project is completed (independent of the support requested here) that
+ describes the simplified correction algorithms for pitch and heading that
+ I have developed.
+ The Kalman filter technical note would be reference material that I could
+ use for comparison to the results from the simpler algorithms.
+ I think the simpler algorithms are worth documenting because they provide
+ a means of obtaining much of the benefit of the Kalman filter without the
+ complexity of that filter.
+\end_layout
+
+\begin_layout Subsection*
+Resources needed
+\end_layout
+
+\begin_layout Standard
+Previous work on the Kalman filter was all done on my own time, last spring,
+ and has not been charged to RAF.
+ I estimate that the remaining work will require three weeks of full-time
+ work, which I would prefer to do at no more than 25% FTE pace, so the project
+ will take about three months.
+ Because of the advanced status of preliminary work, I am confident that
+ in that time I can produce a working version that improves the wind measurement
+s significantly.
+ That will provide a basis for claiming that the wind measurements are state-of-
+the-art, which I think we cannot claim without a Kalman filter.
+ A co-author's time at about 10% FTE for three months would also be helpful
+ to develop knowledge of this tool for future use, but that is not necessary
+ to complete the project.
+\end_layout
+
+\begin_layout Subsection*
+Benefits to EOL/RAF
+\end_layout
+
+\begin_layout Enumerate
+
+\emph on
+A method of reducing the uncertainties in pitch and heading
+\emph default
+ to about 20% or present uncertainties.
+ As documented in the NCAR Technical Note on uncertainty in wind measurements,
+ uncertainty in pitch and heading are the primary limitations to uncertainty
+ in the measurements of vertical and horizontal wind, so this is a significant
+ improvement.
+ In the case of vertical wind, and with the elsewhere-proposed change in
+ representation of angle-of-attack, I think it will be possible to claim
+ vertical-wind uncertainty as low as 0.05
+\begin_inset space ~
+\end_inset
+
+m/s.
+\end_layout
+
+\begin_layout Enumerate
+
+\emph on
+Improvement in angle-of-attack calibration,
+\emph default
+ because our calibration methods depend on accurate measurements of pitch
+ and so will improve if based on the Kalman-filter results for improved
+ measurements of pitch.
+\end_layout
+
+\begin_layout Enumerate
+
+\emph on
+Availability of a method for providing the highest-quality wind measurements,
+\emph default
+ which can be claimed to be state-of-the-art, for projects that need them.
+ This will apply to past as well as to future projects.
+\end_layout
+
+\begin_layout Enumerate
+
+\emph on
+A training opportunity for someone who could carry this work forward
+\emph default
+ in the future and could learn more about wind measurements by participating
+ in the project.
+\end_layout
+
+\begin_layout Enumerate
+
+\emph on
+An addition of another NCAR Technical Note
+\emph default
+ to the documentation available to users of EOL/RAF-provided measurements.
+\end_layout
+
+\begin_layout Enumerate
+
+\emph on
+A basis for a follow-up journal article, 
+\emph default
+which could also call attention to the documentation of uncertainty in the
+ previous and new technical notes.
+\end_layout
+
+\begin_layout Enumerate
+
+\emph on
+Benefits to HCR,
+\emph default
+ which needs highest-quality measurements of aircraft velocity and pointing
+ angles and for which this approach could be tailored to meet their needs.
+\end_layout
+
+\begin_layout Subsection*
+Alternatives
+\end_layout
+
+\begin_layout Standard
+It is worth considering alternative approaches:
+\end_layout
+
+\begin_layout Enumerate
+Purchase a new inertial system with built-in Kalman filtering, or add Kalman
+ filtering to the present systems.
+ In addition to being more expensive, this result will prevent tuning to
+ meet our specific needs and will leave the results as 
+\begin_inset Quotes eld
+\end_inset
+
+black-box
+\begin_inset Quotes erd
+\end_inset
+
+ results for which we have limited documentation and little control.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Use the Applanix, which we own and which has an internal Kalman filter.
+ Efforts to use this unit have met with some problems, and preliminary results
+ are not improvements over our present measurements, so this would likely
+ be as large an effort as implementation of the Kalman filter.
+\end_layout
+
+\begin_layout Enumerate
+Purchase an outside-vendor Kalman filter for our unit.
+ It is my understanding that there are groups who can provide this capability
+ for post-processing, but I don't know details or costs.
+\end_layout
+
+\begin_layout Enumerate
+Rely on the pitch-correction and heading-correction algorithms already developed
+, which produce results that look good in comparison to the Kalman-filter
+ results.
+ The disadvantage is that this approach is special and poorly documented
+ and that it makes assumptions (like negligible error from the accelerometers)
+ that are limitations not present with the Kalman filter.
+ Develolping the Kalman-filter documentation would provide support for future
+ documentation of these simplified algorithms, but convincing users of their
+ validity will be more difficult without the backup support of the Kalman
+ filter.
+\end_layout
+
+\begin_layout Enumerate
+Do nothing because the wind measurements already look quite good and the
+ corrections from the Kalman filter are mostly small.
+ The weakness with this approach is that good agreement in a test case is
+ no guarantee against system changes or new conditions where the measurements
+ might be worse.
+ It is hard to argue for uncertainty limits smaller than those provided
+ by the manufacturer of the INS unless continuing checks are available that
+ document those lower limits, and this or another Kalman filter is the only
+ proven method for determining the errors.
+\end_layout
+
+\begin_layout Standard
+Alternatives 1 and 2 would not be useful for archived projects.
+ Even if other alternatives are pursued, it seems that the scale of this
+ project is relatively modest and would add an important capability to the
+ tool kit available to EOL/RAF.
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\family sans
+\color blue
+– End of Memo –
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%
+\backslash
+attach{attachment}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+%
+\backslash
+attachm{first
+\backslash
+
+\backslash
+second}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%
+\backslash
+cc{first attachment
+\backslash
+
+\backslash
+second
+\backslash
+
+\backslash
+3rd att}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
