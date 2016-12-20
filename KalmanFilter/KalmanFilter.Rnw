@@ -29,6 +29,16 @@
  \addtolength{\leftmargin}{\labelsep}
  \renewcommand{\makelabel}[1]{##1\hfil}}}
 {\end{list}}
+\newenvironment{lyxcode}
+{\par\begin{list}{}{
+\setlength{\rightmargin}{\leftmargin}
+\setlength{\listparindent}{0pt}% needed for AMS classes
+\raggedright
+\setlength{\itemsep}{0pt}
+\setlength{\parsep}{0pt}
+\normalfont\ttfamily}%
+ \item[]}
+{\end{list}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
 \input colordvi
@@ -575,6 +585,231 @@ components of the state vector are approximately correct and integrate
 to reasonable values. The function providing those derivatives is
 therefore a reasonable basis for the Kalman filter that follows.
 
+\section{A new rate-of-climb variable}
+
+The preceding highlights the weakness of using VSPD from the INS as
+a measurement of rate of climb of the aircraft, primarily because
+it is updated to pressure altitude instead of geometric altitude.
+The GPS-provided variable GGVSPD can be used instead, but it is likely
+that the INS can produce a better representation of the high-frequency
+component, so it is useful to consider another variable based on the
+INS measurements that can then be updated to GGVSPD via the Kalman
+filter. The hydrostatic equation provides a basis for updating that
+is independent of the GPS: 
+
+\begin{equation}
+\frac{dz}{dp}=-\frac{R_{a}T}{pg}\label{eq:hydrostatic-equation}
+\end{equation}
+where $z$ is the geometric altitude, $p$ the pressure, $R_{a}$
+the gas constant for air, $T$ the absolute temperature, and $g$
+the acceleration of gravity. Then 
+
+\begin{equation}
+w_{p}=\frac{dz}{dt}=-\frac{R_{d}T}{pg}\frac{dp}{dt}\label{eq:w-hydro}
+\end{equation}
+is the rate of climb in terms of geometric altitude. The resolution
+in the pressure measurements makes this estimate too noisy to use
+directly, but it can be used to update the integrated vertical acceleration
+from the INS. Define these variables: $w_{p}^{\prime}$ as provided
+by (\ref{eq:w-hydro}) and $w_{p}^{*}=\int_{0}^{t}a(t)dt$ where $a$
+is the vertical acceleration (ACINS) as provided by the INS. Define
+$\Delta w_{p}=w_{p}^{\prime}-w_{p}^{*}$ and $\overline{\Delta w_{p}}$
+as a low-pass-filtered version of $\Delta w_{p}$. Then estimate the
+rate of climb of the aircraft from $w_{p}=w_{p}^{*}+\overline{\Delta w_{p}}$.
+The specific implementation of this uses a Butterworth filter to find
+$\overline{\Delta w_{p}}$, as follows:
+\begin{lyxcode}
+DIF~<-~WPPRIME~-~WPSTAR~~\#\#~WPPRIME~from~hydrostatic~equation,~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~\#\#~WPSTAR~from~integrating~ACINS
+
+DIF~<-~zoo::na.approx~(as.vector(DIF),~maxgap=1000,~na.rm~=~FALSE)
+
+DIFW~<-~signal::filtfilt~(signal::butter(3,~2/tau),~DIF)
+
+ROC~<-~WPSTAR~+~DIFW
+\end{lyxcode}
+where the second statement removes missing values by interpolation
+and is needed to avoid an error return in the third statement. The
+period of the filter cut-off is tau, here selected after some exploration
+to be 300~s. The ``filtfilt()'' function filters by averaging two
+passes, forward and backward in time, to minimize phase-shift distortion
+of the filtered signal.
+
+<<new-data, include=TRUE, echo=FALSE, cache=TRUE>>=
+
+Flight <- "16" 			
+Project = "DEEPWAVE"     		
+ProjectDir <- "DEEPWAVE"
+fname = sprintf("%s%s/%srf%s.nc", Directory, ProjectDir, Project, Flight)
+D1 <- getNetCDF (fname, c(VarList, 'PSXC', 'ATX', 'ACINS'))
+## remove heading adjustments as added during initial processing
+Z <- data.frame(getAttributes(D1$THDG, .print=FALSE))
+if ('CalibrationCoefficients' %in% names(Z)) {
+  THDGoffset <- Z$CalibrationCoefficients[1]
+} else {
+  THDGoffset <- 0
+}
+if ('TimeLag' %in% names(Z)) {
+  D1$THDG <- ShiftInTime(D1$THDG, -Z$TimeLag[1])
+}
+D1$THDG <- (D1$THDG - THDGoffset) %% 360
+DL <- nrow(D1)
+## adjustments:
+# D1$BYAWR <- D1$BYAWR - 0.005
+# D1$BROLLR <- D1$BROLLR + 0.0005
+# D1$BPITCHR <- D1$BPITCHR + 0.0005
+# D1$BNORMA <- D1$BNORMA*1.005 - 0.015
+# D1$BLONGA <- D1$BLONGA * 0.96
+# D1$BLATA <- D1$BLATA * 1.1
+s <- -120
+# s <- -92
+si <- 0
+Rate <- 1
+SHIFT <- FALSE
+SHIFT <- TRUE
+if (SHIFT) {
+  D1$GGVEW <- ShiftInTime (D1$GGVEW, Rate, s)
+  D1$GGVNS <- ShiftInTime (D1$GGVNS, Rate, s)
+  D1$GGVSPD <- ShiftInTime (D1$GGVSPD, Rate, s)
+  # D1$BLONGA <- ShiftInTime (D1$BLONGA, Rate, s-80)
+  # D1$BLATA <- ShiftInTime (D1$BLATA, Rate, s-80)
+  # D1$BNORMA <- ShiftInTime (D1$BNORMA, Rate, s-80)
+}
+
+D1$DPDT <- c(0, diff(D1$PSXC))
+Rd <- StandardConstant('Rd')
+TK <- 273.15 + D1$ATX
+g <- Gravity(D1$GGLAT, D1$GGALT)
+g[is.na(g)] <- 9.80
+D1$WPPRIME <- -Rd * TK / (D1$PSXC * g) * D1$DPDT
+D1$WPSTAR <- cumsum(D1$ACINS)
+D1$DIF <- D1$WPPRIME - D1$WPSTAR
+D1$DIF <- zoo::na.approx (as.vector(D1$DIF), maxgap=1000, na.rm=FALSE)
+tau <- 300
+D1$DIFW <- signal::filtfilt (signal::butter (3, 2/tau), D1$DIF)
+D1$ROC <- D1$WPSTAR + D1$DIFW
+
+dt <- 1    ## this is a 1-Hz file
+D1$Rn <- Ree / (1 - (Ecc*sin(D1$GGLAT*Cradeg))^2)^0.5 + D1$GGALT
+D1$Rm <- D1$Rn * (1-Ecc^2) / (1-(Ecc*sin(D1$GGLAT*Cradeg))^2) + D1$GGALT
+D1$Grav <- Gravity (D1$LAT, D1$GGALT)
+## the following is commented because the centripetal effect is already included in 'Gravity()'
+# Re <- StandardConstant ('Re')
+# D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2 + D1$GGALT)
+#interpolate if necessary: otherwise later filters fail
+MaxGap <- 1000
+D1$GGVNS <- ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE)
+D1$GGVEW <- ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE)
+D1$GGVSPD <- ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap, na.rm = FALSE)
+D1$VNS <- vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm = FALSE)
+D1$VEW <- vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm = FALSE)
+D1$VSPD <- vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm = FALSE)
+D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE)
+D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE)
+D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE)
+D1$BPITCHR <- zoo::na.approx (as.vector (D1$BPITCHR), maxgap=MaxGap, na.rm=FALSE)
+D1$BROLLR <- zoo::na.approx (as.vector (D1$BROLLR), maxgap=MaxGap, na.rm=FALSE)
+D1$BYAWR <- zoo::na.approx (as.vector (D1$BYAWR), maxgap=MaxGap, na.rm=FALSE)
+D1$GGALT <- zoo::na.approx (as.vector (D1$GGALT), maxgap=MaxGap, na.rm=FALSE)
+D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE)
+D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
+D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
+D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
+## smooth the measurements when determining derivatives
+.span <- 11    
+## The following are accelerations determined from derivatives of the GPS velocities.
+## These should match the measured accelerations after transformation to the l-frame
+## and application of the rotation correction:
+D1$vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
+D1$vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
+D1$vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
+## transform to the a-frame for comparison to the IRU:
+G <- D1$Grav
+VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
+LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrection (D1, VL)
+AA <- XformLA (D1, LA, .inverse=TRUE)
+AA[,3] <- AA[,3] - G
+fa1 <- lm(D1$BLONGA ~ AA[, 1])
+fa2 <- lm(D1$BLATA ~ AA[, 2])
+fa3 <- lm(D1$BNORMA ~ AA[, 3])
+AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame 
+AL <- XformLA (D1, AB)                                    #l-frame
+## now corrected for angular effects
+## See Noureldin et al, 2013, Eq. (5.55)
+AL <- AL + RotationCorrection (D1, VL)  ##### check this sign and prev call above
+  
+## the resulting l-frame accelerations
+D1$LACCX <- AL[, 1]
+D1$LACCY <- AL[, 2]
+D1$LACCZ <- AL[, 3] + G
+D1$LACCZ <- -D1$LACCZ
+  
+## smooth to match GPS-velocity derivatives
+D1$LACCX <- signal::sgolayfilt (D1$LACCX, 3, .span, m=0)
+D1$LACCY <- signal::sgolayfilt (D1$LACCY, 3, .span, m=0)
+D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
+.span <- 301
+SMOOTH <- FALSE
+if (SMOOTH) {
+  vns <- signal::sgolayfilt (vns, 3, .span)
+  vew <- signal::sgolayfilt (vew, 3, .span)
+  vspd <- signal::sgolayfilt (vspd, 3, .span)
+  ggvns <- signal::sgolayfilt (ggvns, 3, .span)
+  ggvew <- signal::sgolayfilt (ggvew, 3, .span)
+  ggvspd <- signal::sgolayfilt (ggvspd, 3, .span)
+  pitch <- signal::sgolayfilt (D1$PITCH, 3, .span)
+  roll <- signal::sgolayfilt (D1$ROLL, 3, .span)
+  thdg <- signal::sgolayfilt (D1$THDG, 3, .span)
+
+  D1$VNSF <- vns
+  D1$VEWF <- vew
+  D1$VSPDF <- vspd
+  D1$GGVNSF <- ggvns
+  D1$GGVEWF <- ggvew
+  D1$GGVSPDF <- ggvspd
+  D1$PITCHF <- pitch
+  D1$ROLLF <- roll
+  D1$THDGF <- thdg
+}
+
+## get the pitch and roll in the l-frame:
+.thdg <- D1$THDG * Cradeg
+D1$PITCHL <- D1$PITCH * cos (.thdg) + D1$ROLL * sin (.thdg)
+D1$ROLLL <-  -D1$PITCH * sin (.thdg) + D1$ROLL * cos (.thdg)
+
+fm1 <- lm (D1$vedot ~ D1$LACCX)
+fm2 <- lm (D1$vndot ~ D1$LACCY)
+fm3 <- lm (D1$vudot ~ D1$LACCZ)
+
+@
+
+<<ROC-plot, include=TRUE, fig.cap='Comparison of new variable representing rate of climb (ROC) to the GPS-provided measurement (GGVSPD) and the measurement provided by the INS (VSPD).'>>=
+
+layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6)) 
+op <- par (mar=c(2,4,1,1)+0.1)
+with(D1[setRange(D1, 70000, 122000), ], plotWAC (data.frame (Time, ROC, GGVSPD), 
+                                                 col=c('blue', 'red'), lwd=c(3,1), lty=c(1,2)))
+with(D1[setRange(D1, 70000, 122000), ], plotWAC (data.frame (Time, ROC-GGVSPD)))
+op <- par (mar=c(5,4,1,1)+0.1)
+with(D1[setRange(D1, 75500, 75900), ], plotWAC (data.frame (Time, ROC, GGVSPD, VSPD), ylim=c(-2,2))) 
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+meanROC <- with(D1[setRange(D1, 70000, 122000), ], mean (ROC-GGVSPD, na.rm=TRUE))
+sdROC <- with(D1[setRange(D1, 70000, 122000), ], sd (ROC-GGVSPD, na.rm=TRUE))
+
+@
+
+The resulting variable ``ROC'' is plotted in Fig.~\ref{fig:ROC-plot}
+for comparison to the GPS-provided variable GGVSPD. The bottom panel
+also shows the variable ``VSPD'' that is provided directly by the
+INS. The latter departs significantly from the other two measurements,
+so using ROC as input to the Kalman filter appears preferable to using
+VSPD. Indeed, The mean difference ROC$-$GGVSPD is \Sexpr{round(meanROC, 2)}$\pm$\Sexpr{round(sdROC, 2)}.
+ROC appears to vary more smoothly than GGVSPD, so Kalman-filter-updating
+of ROC to GGVSPD may provide a better representation of aircraft rate-of-climb
+than GGVSPD. This will be considered further in Sect.~XXX, where
+the wind measurements produced by the Kalman filter are discussed.
+
 \section{The Kalman filter}
 
 The preceding steps verify that at least an approximate calculation
@@ -677,152 +912,6 @@ needed and then smoothed before applying the Kalman filter. DEEPWAVE
 flight 16 was selected, and the measurements were filtered with 11-s
 smoothing of accelerations and 301-s smoothing of measured velocity
 components and attitude angles.
-
-<<new-data, include=TRUE, echo=FALSE, cache=TRUE>>=
-
-Flight <- "16" 			
-Project = "DEEPWAVE"     		
-ProjectDir <- "DEEPWAVE"
-fname = sprintf("%s%s/%srf%s.nc", Directory, ProjectDir, Project, Flight)
-D1 <- getNetCDF (fname, c(VarList, 'PSXC', 'ATX', 'ACINS'))
-## remove heading adjustments as added during initial processing
-Z <- data.frame(getAttributes(D1$THDG, .print=FALSE))
-if ('CalibrationCoefficients' %in% names(Z)) {
-  THDGoffset <- Z$CalibrationCoefficients[1]
-} else {
-  THDGoffset <- 0
-}
-if ('TimeLag' %in% names(Z)) {
-  D1$THDG <- ShiftInTime(D1$THDG, -Z$TimeLag[1])
-}
-D1$THDG <- (D1$THDG - THDGoffset) %% 360
-DL <- nrow(D1)
-## adjustments:
-# D1$BYAWR <- D1$BYAWR - 0.005
-# D1$BROLLR <- D1$BROLLR + 0.0005
-# D1$BPITCHR <- D1$BPITCHR + 0.0005
-# D1$BNORMA <- D1$BNORMA*1.005 - 0.015
-# D1$BLONGA <- D1$BLONGA * 0.96
-# D1$BLATA <- D1$BLATA * 1.1
-s <- -120
-# s <- -92
-si <- 0
-Rate <- 1
-SHIFT <- FALSE
-SHIFT <- TRUE
-if (SHIFT) {
-  D1$GGVEW <- ShiftInTime (D1$GGVEW, Rate, s)
-  D1$GGVNS <- ShiftInTime (D1$GGVNS, Rate, s)
-  # D1$BLONGA <- ShiftInTime (D1$BLONGA, Rate, s-80)
-  # D1$BLATA <- ShiftInTime (D1$BLATA, Rate, s-80)
-  # D1$BNORMA <- ShiftInTime (D1$BNORMA, Rate, s-80)
-}
-
-D1$DPDT <- c(0, diff(D1$PSXC))
-Rd <- StandardConstant('Rd')
-TK <- 273.15 + D1$ATX
-g <- 9.80
-D1$WPPRIME <- -Rd * TK / (D1$PSXC * g) * D1$DPDT
-D1$WPSTAR <- cumsum(D1$ACINS)
-D1$DIF <- D1$WPPRIME - D1$WPSTAR
-D1$DIF <- zoo::na.approx (as.vector(D1$DIF), maxgap=1000, na.rm=FALSE)
-tau <- 300
-D1$DIFW <- signal::filter (signal::butter (3, 2/tau), D1$DIF)
-D1$ROC <- D1$WPSTAR + D1$DIFW
-
-dt <- 1    ## this is a 1-Hz file
-D1$Rn <- Ree / (1 - (Ecc*sin(D1$GGLAT*Cradeg))^2)^0.5 + D1$GGALT
-D1$Rm <- D1$Rn * (1-Ecc^2) / (1-(Ecc*sin(D1$GGLAT*Cradeg))^2) + D1$GGALT
-D1$Grav <- Gravity (D1$LAT, D1$GGALT)
-## the following is commented because the centripetal effect is already included in 'Gravity()'
-# Re <- StandardConstant ('Re')
-# D1$Grav <- D1$Grav - StandardConstant('Omega')^2 * (Re * sin (D1$LAT * Cradeg)^2 + D1$GGALT)
-#interpolate if necessary: otherwise later filters fail
-MaxGap <- 1000
-D1$GGVNS <- ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE)
-D1$GGVEW <- ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE)
-D1$GGVSPD <- ggvspd <- zoo::na.approx (as.vector(D1$GGVSPD), maxgap=MaxGap, na.rm = FALSE)
-D1$VNS <- vns <- zoo::na.approx (as.vector(D1$VNS), maxgap=MaxGap, na.rm = FALSE)
-D1$VEW <- vew <- zoo::na.approx (as.vector(D1$VEW), maxgap=MaxGap, na.rm = FALSE)
-D1$VSPD <- vspd <- zoo::na.approx (as.vector(D1$VSPD), maxgap=MaxGap, na.rm = FALSE)
-D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE)
-D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE)
-D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE)
-D1$BPITCHR <- zoo::na.approx (as.vector (D1$BPITCHR), maxgap=MaxGap, na.rm=FALSE)
-D1$BROLLR <- zoo::na.approx (as.vector (D1$BROLLR), maxgap=MaxGap, na.rm=FALSE)
-D1$BYAWR <- zoo::na.approx (as.vector (D1$BYAWR), maxgap=MaxGap, na.rm=FALSE)
-D1$GGALT <- zoo::na.approx (as.vector (D1$GGALT), maxgap=MaxGap, na.rm=FALSE)
-D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE)
-D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
-D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
-D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
-## smooth the measurements when determining derivatives
-.span <- 11    
-## The following are accelerations determined from derivatives of the GPS velocities.
-## These should match the measured accelerations after transformation to the l-frame
-## and application of the rotation correction:
-D1$vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
-D1$vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
-D1$vudot <- signal::sgolayfilt (ggvspd, 3, .span, m=1)
-## transform to the a-frame for comparison to the IRU:
-G <- D1$Grav
-VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
-LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrection (D1, VL)
-AA <- XformLA (D1, LA, .inverse=TRUE)
-AA[,3] <- AA[,3] - G
-fa1 <- lm(D1$BLONGA ~ AA[, 1])
-fa2 <- lm(D1$BLATA ~ AA[, 2])
-fa3 <- lm(D1$BNORMA ~ AA[, 3])
-AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame 
-AL <- XformLA (D1, AB)                                    #l-frame
-## now corrected for angular effects
-## See Noureldin et al, 2013, Eq. (5.55)
-AL <- AL + RotationCorrection (D1, VL)  ##### check this sign and prev call above
-  
-## the resulting l-frame accelerations
-D1$LACCX <- AL[, 1]
-D1$LACCY <- AL[, 2]
-D1$LACCZ <- AL[, 3] + G
-D1$LACCZ <- -D1$LACCZ
-  
-## smooth to match GPS-velocity derivatives
-D1$LACCX <- signal::sgolayfilt (D1$LACCX, 3, .span, m=0)
-D1$LACCY <- signal::sgolayfilt (D1$LACCY, 3, .span, m=0)
-D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
-.span <- 301
-SMOOTH <- FALSE
-if (SMOOTH) {
-  vns <- signal::sgolayfilt (vns, 3, .span)
-  vew <- signal::sgolayfilt (vew, 3, .span)
-  vspd <- signal::sgolayfilt (vspd, 3, .span)
-  ggvns <- signal::sgolayfilt (ggvns, 3, .span)
-  ggvew <- signal::sgolayfilt (ggvew, 3, .span)
-  ggvspd <- signal::sgolayfilt (ggvspd, 3, .span)
-  pitch <- signal::sgolayfilt (D1$PITCH, 3, .span)
-  roll <- signal::sgolayfilt (D1$ROLL, 3, .span)
-  thdg <- signal::sgolayfilt (D1$THDG, 3, .span)
-
-  D1$VNSF <- vns
-  D1$VEWF <- vew
-  D1$VSPDF <- vspd
-  D1$GGVNSF <- ggvns
-  D1$GGVEWF <- ggvew
-  D1$GGVSPDF <- ggvspd
-  D1$PITCHF <- pitch
-  D1$ROLLF <- roll
-  D1$THDGF <- thdg
-}
-
-## get the pitch and roll in the l-frame:
-.thdg <- D1$THDG * Cradeg
-D1$PITCHL <- D1$PITCH * cos (.thdg) + D1$ROLL * sin (.thdg)
-D1$ROLLL <-  -D1$PITCH * sin (.thdg) + D1$ROLL * cos (.thdg)
-
-fm1 <- lm (D1$vedot ~ D1$LACCX)
-fm2 <- lm (D1$vndot ~ D1$LACCY)
-fm3 <- lm (D1$vudot ~ D1$LACCZ)
-
-@
 
 As a check on the uncertainty associated with the accelerometers,
 the GPS measurements of velocity components were differentiated and
@@ -1661,13 +1750,14 @@ Data$THDGKF <- Data$THDG - Data$HCS    ## save the corrected heading
 \clearpage
 
 
-\section{New netCDF variables}
+\section{New variables for wind}
+
+\subsection{Calculating the wind}
 
 The result of the Kalman filter is that new corrected variables \{LATKF,
 LONKF, ALTKF, VEWKF, VNSKF, ROCKF, PITCHKF, ROLLKF, and THDGKF\} are
-available. The code in this section adds those variables to an existing
-newCDF file, renaming the result with names like xxxrf01KF.nc if the
-original file was xxxrf01.nc. 
+available. These and the variables \{TASX, ATTACK, SSLIP\} can be
+used in a new calculation of the vector wind. 
 
 <<create-new-netcdf>>=
 
@@ -1690,6 +1780,64 @@ copy_attributes <- function (atv, v, nfile) {
     }
   }
 }
+
+@
+
+\subsection{Adding the new variables to the netCDF file}
+
+The code in this section adds those variables to an existing newCDF
+file, renaming the result with names like PROJECTrf01KF.nc if the
+original file was PROJECTrf01.nc. For reference, the following is
+a generic description of how variables are added. The listed code
+is not executed; see the ``.Rnw'' file for the actual code, which
+has more steps to protect against missing variables or substitute
+variables when some are missing and to handle high-rate data files.
+This example is included to serve as a template for other routines
+that might want to add variables to a netCDF file.
+
+<<example, eval=FALSE, echo=TRUE, include=TRUE>>=
+
+## get the old netCDF variables:
+D <- getNetCDF (fname, VarList)    
+## open the copy of the old file for writing:
+netCDFfile <- nc_open (fnew, write=TRUE) 
+Rate <- 1  ## the data rate of this file
+## retrieve dimension info from the old file
+Dimensions <- attr (D, "Dimensions")
+Dim <- Dimensions[["Time"]]
+
+## variables to add to the netCDF file:
+VarNew <- c('LATKF')    ## add to these vectors for more variables
+VarOld <- c('LAT')
+VarUnits <- c('degrees')
+VarLongName <- c('latitude, KF')
+VarStdName <- c('INS latitude, Kalman-filter-corrected')
+
+## create the new variables
+nv <- length (VarNew)
+varCDF <- list ()
+for (i in 1:nv) {  ## there is only one in this example
+  ## create the new variable and add it to the netCDF file
+  varCDF[[i]] <- ncvar_def (VarNew[i],  
+                    units=VarUnits[i], 
+                    dim=Dim, 
+                    missval=as.single(-32767.), prec='float', 
+                    longname=VarLongName[i])
+  if (i == 1) {
+    newfile <- ncvar_add (netCDFfile, varCDF[[i]])
+  } else {
+    newfile <- ncvar_add (newfile, varCDF[[i]])
+  }
+  ## transfer attributes from the old variable
+  ATV <- ncatt_get (netCDFfile, VarOld[i])
+  copy_attributes (ATV, VarNew[i], newfile)
+  ncatt_put (newfile, VarNew[i], attname="standard_name", 
+             attval=VarStdName[i])
+  ## add the measurements for the new variable
+  ncvar_put (newfile, varCDF[[i]], Data[, VarNew[i]])
+}
+## then close to write the new file
+nc_close (newfile)
 
 @
 
