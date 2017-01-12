@@ -1,5 +1,11 @@
   Updates:
       shinyApp              -- Significant changes to improve and simplify use.
+      ggplotWAC             -- Added multiplot function via 'position', and
+                               added new arguments to support faceting.
+      ShiftInTime           -- Added a .mod argument for variables like
+                               heading, because otherwise smoothing gives jumps.
+      XformLA               -- If the supplied vector for transformation is NA,
+                               the routine returns the transformation matrix.
   Corrections:
       WindProcessor.R       -- Corrected handling of GPS-antenna lever arm.
       getNetCDF.R           -- if 'Time' in variable list, skip it (vs fail)

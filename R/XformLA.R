@@ -17,7 +17,8 @@
 #' the acceleration of gravity G subtracted, so G should be added before
 #' transforming and subtracted afterward. The matrix should have 3 columns
 #' representing the components and a number of rows corresponding to the
-#' number of observations.
+#' number of observations. Special case: If Avector is NA, the routine
+#' instead returns the 3x3 transformation matrix that would multiply Avector.
 #' @param .inverse Logical, transform from l-frame to a-frame if TRUE
 #' @import zoo
 #' @return The vector components transformed to l-frame or ENU coordinates, local
@@ -26,7 +27,7 @@
 #' newDataFrame <- XformLA (data.frame("ROLL"=1:50, "PITCH"=(3+(1:50)/50), "THDG"=91:140),
 #'                                    Avector=matrix(c(21:70, 31:80, 41:90), ncol=3))
 
-XformLA <- function (data, Avector, .inverse=FALSE) { 
+XformLA <- function (data, Avector=NA, .inverse=FALSE) { 
   # data must contain ROLL, PITCH or PITCHC, HEADING
   Cradeg <- pi/180
   if ("PITCHC" %in% names(data)) {
@@ -81,6 +82,14 @@ XformLA <- function (data, Avector, .inverse=FALSE) {
            cospsi*costheta, -sinpsi*cosphi+cospsi*sintheta*sinphi, -sinpsi*sinphi-cospsi*sintheta*cosphi,
            -sintheta, costheta*sinphi, -costheta*cosphi)
   RblM <- aperm( array (Rbl, dim=c(DL,3,3)))
+  if (is.na (Avector[1])) {
+    if (DL == 1) {dim(RblM) <- c(3,3)}
+    if (.inverse) {
+      return (t(RblM))
+    } else {
+      return (RblM)
+    }
+  }
   AA <- matrix(nrow=DL, ncol=3)
   if (.inverse) {
     for (i in 1:DL) {
@@ -91,7 +100,7 @@ XformLA <- function (data, Avector, .inverse=FALSE) {
       AA[i,] <- RblM[,,i] %*% Avector[i,]
     }
   }
-  ## much slower:
+  ## much slower attempt to avoid for loop:
 #   AA <- aperm(mapply(FUN='%*%',
 #                     lapply(X=apply(RblM, 3, data.frame), FUN=as.matrix, nrow=3, ncol=3),
 #                     as.data.frame (aperm(A))))

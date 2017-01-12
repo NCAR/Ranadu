@@ -21,7 +21,8 @@
 #' @param .X A numeric vector, usually representing a measurement history.
 #' @param .rate The assumed sampling rate in Hz (default 1 Hz). 
 #' @param .shift The shift to be applied, in milliseconds. Can be positive 
-#' or negative.
+#' or negative. A negative value moves the time series earlier in time, 
+#' as would be needed to correct for a delay in recording.
 #' @param .smooth The smoothing interval in milliseconds.
 #' Controls smoothing of the time series after interpolation
 #' to high rate but before discrete points are selected from that series to
@@ -31,6 +32,12 @@
 #' 40 ms (or five samples at 125-Hz). If .smooth is larger than 40, 
 #' smoothing is performed using 3rd-order Savitzky-Golay polynomials 
 #' spanning that interval.
+#' @param .mod For variables that wrap around to zero at some modulus,
+#' like an angle variable such as heading at modulus 360, this specifies
+#' that modulus. It is used to avoid interpolation to intermediate values
+#' between 0 and .mod in such cases. The default is NA, so omitting 
+#' this parameter will inhibit the special action needed for variables
+#' with a modulus.
 #' @return The same series after shifting in time, possibly by fractions
 #' of the sampling period.
 #' @examples 
@@ -38,8 +45,8 @@
 #' newVariable <- ShiftInTime (1:50, .rate=1, .shift=-500)
   
 
-ShiftInTime <- function (.X, .rate=1, .shift=0, .smooth=0) {
-  ## negative .shift moves the series forward in time and so
+ShiftInTime <- function (.X, .rate=1, .shift=0, .smooth=0, .mod=NA) {
+  ## negative .shift moves the series earlier in time and so
   ## compensates for an assumed delay in recorded values.
   ## .shift has units of ms.
   iRate <- 125
@@ -54,7 +61,21 @@ ShiftInTime <- function (.X, .rate=1, .shift=0, .smooth=0) {
   ## beware of missing values
   z <- zoo::na.approx (as.vector(.X), maxgap=1000, na.rm = FALSE)
   z[is.na(z)] <- 0
-  At <- stats::approx (x, z, n=ND-ratio+1)
+  ## the following treats values like heading with a specified modulus
+  if (!is.na(.mod)) {
+    dh <- c(0, diff(z))
+    iz <- !is.na(dh) & (dh < -.mod/2)
+    iz <- which(iz == TRUE)
+    for (j in iz) {
+      z[j:length(z)] <- z[j:length(z)] + .mod
+    }
+    iz <- !is.na(dh) & (dh > .mod/2)
+    iz <- which(iz == TRUE)
+    for (j in iz) {
+      z[j:length(z)] <- z[j:length(z)] - .mod
+    }
+  }
+  At <- stats::approx (x, z, n=ND-ratio+1) 
   ## now shift to match original
   j <- as.integer (ratio / 2)
   j2 <- ratio - j - 1
@@ -68,6 +89,12 @@ ShiftInTime <- function (.X, .rate=1, .shift=0, .smooth=0) {
     rtio <- as.integer (.smooth * iRate / 1000 )
     rtio <- ifelse (rtio %% 2, rtio, rtio+1)  ## ensure value is odd
     T <- signal::filter (signal::sgolay (3, rtio), T)
+  }
+  if (!is.na(.mod)) {
+    while (min(T, na.rm=TRUE) < 0) {
+      T <- T + .mod
+    }
+    T <- T %% .mod
   }
   ## now pick off discrete values representing average at original rate
   tstart <- as.integer ((ratio + 1) / 2)
