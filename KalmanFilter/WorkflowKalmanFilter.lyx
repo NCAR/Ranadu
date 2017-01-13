@@ -2020,7 +2020,7 @@ with
 \begin_layout Enumerate
 The combination of the above two effects gives the derivative of the transformat
 ion matrix, 
-\begin_inset Formula $\dot{\boldsymbol{R}_{a}^{l}}$
+\begin_inset Formula $\dot{\boldsymbol{R}_{a}^{l}}=\mathbf{R}_{a}^{l}\mathbf{\Omega}_{ia}^{a}+\mathbf{\Omega}_{il}^{l}\mathbf{R}_{a}^{l}$
 \end_inset
 
 .
@@ -2058,9 +2058,53 @@ The derivatives of the attitude angles are then given by the derivatives
 \frac{d(\arctan(x))}{dx} & = & \frac{1}{1+x^{2}}\\
 \dot{\theta} & = & \frac{-1}{\sqrt{1-R_{l}^{a}[3,1]^{2}}}\dot{R}_{l}^{a}[3,1]\\
 \dot{\phi} & = & \frac{1}{1+\left(R_{l}^{a}[3,2]/R_{l}^{a}[3.3]\right)^{2}}\frac{R_{l}^{a}[3,2]}{R_{l}^{a}[3,3]}\left(\frac{\dot{R}_{l}^{a}[3,3]}{R_{l}^{a}[3,3]}-\frac{\dot{R}_{l}^{a}[3,2]}{R_{l}^{a}[3,2]}\right)\\
-\dot{\psi} & = & \frac{1}{1+\left(R_{l}^{a}[1,1]/R_{l}^{a}[1,2]\right)^{2}}\frac{R_{l}^{a}[1,1]}{R_{l}^{a}[1,2]}\left(\frac{\dot{R}_{l}^{a}[1,1]}{R_{l}^{a}[1,1]}-\frac{\dot{R}_{l}^{a}[1,2]}{R_{l}^{a}[1,2]}\right)
+\dot{\psi} & = & \frac{1}{1+\left(R_{l}^{a}[1,1]/R_{l}^{a}[1,2]\right)^{2}}\frac{R_{l}^{a}[1,1]}{R_{l}^{a}[1,2]}\left(\frac{\dot{R}_{l}^{a}[1,1]}{R_{l}^{a}[1,1]}-\frac{\dot{R}_{l}^{a}[1,2]}{R_{l}^{a}[1,2]}\right)\\
+ & = & \frac{1}{1+\left(R_{l}^{a}[1,1]/R_{l}^{a}[1,2]\right)^{2}}\left(\frac{\dot{R}_{l}^{a}[1,1]}{R_{l}^{a}[1,2]}-\frac{\dot{R}_{l}^{a}[1,2]R_{l}^{a}[1,1]}{R_{l}^{a}[1,2]^{2}}\right)
 \end{eqnarray*}
 
+\end_inset
+
+Because 
+\begin_inset Formula $R_{l}^{1}[1,2]$
+\end_inset
+
+ (equal to 
+\begin_inset Formula $\cos\psi\cos\theta$
+\end_inset
+
+) can pass through zero for heading of 90 or 270
+\begin_inset Formula $^{\circ},$
+\end_inset
+
+ some numerical problems arise when the last equation is used.
+ (Avoiding similar problems at the zero for 
+\begin_inset Formula $R_{l}^{a}[1,1]$
+\end_inset
+
+ is the justification for using the second form of the last equation.) For
+ small 
+\begin_inset Formula $R_{l}^{a}[1,2]$
+\end_inset
+
+, the last equation becomes
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\dot{\psi}=\left(\frac{R_{l}^{a}[1,2]\dot{R}_{l}^{a}[1,1]}{R_{l}^{a}[1,1]^{2}}-\frac{\dot{R}_{l}^{a}[1,2]}{R_{l}^{a}[1,1]}\right)
+\]
+
+\end_inset
+
+which avoids the singularity, so this form will be used when the absolute
+ value of 
+\begin_inset Formula $R_{l}^{a}[1,2]$
+\end_inset
+
+ is smaller than 0.001.
+\begin_inset Newline newline
 \end_inset
 
 
@@ -2478,12 +2522,12 @@ Results
 \end_layout
 
 \begin_layout Standard
-The plots of results shown in the subsection of the KalmanFilter.pdf report
- named 
+The plots of results shown in the subsection of the KalmanFilterTechNote.pdf
+ report named 
 \begin_inset Quotes eld
 \end_inset
 
-Tests of the mechanization
+Mechanization using the derivatives
 \begin_inset Quotes erd
 \end_inset
 
@@ -2491,20 +2535,233 @@ Tests of the mechanization
 \begin_inset Quotes eld
 \end_inset
 
-Ranadu::plotWAC()
+Ranadu::ggplotWAC()
 \begin_inset Quotes erd
 \end_inset
 
- convenience function, which calls the normal R plot routine plot() with
+ convenience function, which calls functions that are part of ggplot2 with
  some assigned settings.
  During the mechanization, the aircraft-state vector was saved in variables
  in an R data.frame called SP, and at the end these variables were added
  back to the original data.frame (called Data) as new variables with names
  like LATX, LONX, ALTX, ...
- instead of the original INS-produced variables LAT, LON, ALT.
+ that correspond to the original INS-produced variables LAT, LON, ALT.
  These variables were then used in plot commands to generate the figures
  in the subsections that compare the results for attitude angles, velocity
  components, and position.
+\end_layout
+
+\begin_layout Standard
+Many of the plots were generated in multiple-panel displays.
+ This was straightforward in standard R graphics, using the 
+\begin_inset Quotes eld
+\end_inset
+
+layout()
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+par()
+\begin_inset Quotes erd
+\end_inset
+
+ functions, and was used in first drafts.
+ However, plotting with ggplot2 produced plots with better appearance.
+ This was tried in two ways, first using viewports and then using facets.
+ With viewports, it was difficult to get the panels to align vertically
+ without much tailoring of margins, but facets handled this automatically
+ so that was the method in the final version.
+ The procedure is worth documenting here because it took some exploration.
+ This was built into a revision of the function 
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu::ggplotWAC(),
+\begin_inset Quotes erd
+\end_inset
+
+ which is used as follows:
+\end_layout
+
+\begin_layout Enumerate
+Construct a new data.frame that contains only the variables that will appear
+ on the plot, along with the 
+\begin_inset Quotes eld
+\end_inset
+
+Time
+\begin_inset Quotes erd
+\end_inset
+
+ variable (which should be first).
+ Variables should be in lines/panel format, i.e., all variables for the top
+ panel, all for the next-to-top, etc.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Call ggplotWAC() with these new arguments: 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+panels: the number of panels or facets, aligned vertically
+\end_layout
+
+\begin_layout Enumerate
+lines_per_panel: the number of variables per panel.
+ 
+\end_layout
+
+\begin_layout Enumerate
+labelL: the names to appear in the legend for the lines.
+ Only one legend appears for all panels.
+\end_layout
+
+\begin_layout Enumerate
+labelP: the names to appear in side strips for each panel.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+The procedure that ggplotWAC() uses is as follows:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Define two groups, VarGroup and PanelGroup, to describe the structure specified
+ by the new arguments.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Quotes eld
+\end_inset
+
+melt
+\begin_inset Quotes erd
+\end_inset
+
+ the data.frame to a long-format data.frame, with 
+\begin_inset Quotes eld
+\end_inset
+
+Time
+\begin_inset Quotes erd
+\end_inset
+
+ as the id.var, and include the two new groups in the data.frame definition.
+\end_layout
+
+\begin_layout Enumerate
+Use the ggplotWAC() arguments for cols, lwd, and lty in groups for each
+ panel, with replication as needed.
+ Each panel must be the same.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Construct the initial plot definition using ggplot, using x=Time, y=value,
+ colour=VarGroup, linetype=VarGroup in the aesthetic specification.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Add 
+\begin_inset Quotes eld
+\end_inset
+
+geom_line(aes(size=VarGroup))
+\begin_inset Quotes erd
+\end_inset
+
+ to this definition.
+\end_layout
+
+\begin_layout Enumerate
+Use appropriate manual scale definitions to set the desired colors, line
+ types, and line widths in order to get consistent plot lines and legend.
+\end_layout
+
+\begin_layout Enumerate
+Add 
+\begin_inset Quotes eld
+\end_inset
+
+facet_grid()
+\begin_inset Quotes erd
+\end_inset
+
+ with first argument 
+\begin_inset Quotes eld
+\end_inset
+
+PanelGroup
+\begin_inset Quotes erd
+\end_inset
+
+ as included in the data.frame definition.
+\end_layout
+
+\begin_layout Enumerate
+Tailor desired aspects of the plotting theme.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+The routine then returns a plot definition, and that definition can be tailored
+ further using 
+\begin_inset Quotes eld
+\end_inset
+
+theme()
+\begin_inset Quotes erd
+\end_inset
+
+ elements if desired or printed without further modification.
+\end_layout
+
+\begin_layout Standard
+Here is the code for the plot of attitude angles:
+\end_layout
+
+\begin_layout LyX-Code
+d <- with(Data[setRange(Data, 32000, 35500), ], 
+\end_layout
+
+\begin_layout LyX-Code
+          data.frame(Time, PITCH, PITCHX, DPITCH, ROLL, ROLLX, DROLL,
+\end_layout
+
+\begin_layout LyX-Code
+                     THDG, THDGX, DTHDG))
+\end_layout
+
+\begin_layout LyX-Code
+ggplotWAC (d, col=c('blue', 'red', 'forestgreen'), 
+\end_layout
+
+\begin_layout LyX-Code
+          ylab=expression (paste ('attitude angles [', degree, ']')),
+\end_layout
+
+\begin_layout LyX-Code
+          lwd=c(1.4, 0.8, 1), lty=c(1, 42, 1), panels=3, lines_per_panel=3,
+\end_layout
+
+\begin_layout LyX-Code
+          labelL=c('original', 'new', 'diff'),
+\end_layout
+
+\begin_layout LyX-Code
+          labelP=c('pitch', 'roll', 'heading'),
+\end_layout
+
+\begin_layout LyX-Code
+          legend.position=c(0.8, 0.97))
 \end_layout
 
 \begin_layout Standard
@@ -2635,7 +2892,502 @@ y small and the calibration did not appear sufficiently reliable to trust,
 \end_layout
 
 \begin_layout Section
-Discussion of Section 3 regarding the Kalman filter
+Retrieving the IRU measurements
+\end_layout
+
+\begin_layout Standard
+The rotation rates and accelerations measured by the IRU {BPITCHR, BROLLR,
+ BYAWR, BLATA, BLONGA, BNORMA} are the rotation rates and accelerations
+ of the a-frame relative to an inertial frame.
+ For early projects these measurements were not recorded, and for most projects
+ they have not been retained in the archived files.
+ This appendix describes how they can be retrieved from the measurements
+ of attitude angles and the aircraft velocity vector.
+ Without Coriolis corrections, the answers would be straightforward: Differentia
+te the measured angles and components of the aircraft velocity and transform
+ the results to the a-frame.
+ However, the inertial contributions from motion and rotation of the a-frame,
+ while minor, are not negligible.
+ The needed corrections are developed in this section, to complement the
+ outlined solutions presented in the technical note.
+\end_layout
+
+\begin_layout Subsection
+Accelerations
+\end_layout
+
+\begin_layout Standard
+The accelerations in the a-frame are reconstructed as follows:
+\end_layout
+
+\begin_layout Enumerate
+Construct a vector representing the aircraft motion from the variables {VEW,
+ VNS, VSPD} as produced by the INS.
+\end_layout
+
+\begin_layout Enumerate
+Introduce interpolation at missing values to avoid failure of the code in
+ the next step.
+ The routine used was that provided by the 
+\begin_inset Quotes eld
+\end_inset
+
+na.approx
+\begin_inset space ~
+\end_inset
+
+()
+\begin_inset Quotes erd
+\end_inset
+
+ function in the 
+\begin_inset Quotes eld
+\end_inset
+
+zoo
+\begin_inset Quotes erd
+\end_inset
+
+ package for R.
+\end_layout
+
+\begin_layout Enumerate
+Differentiate the time series, either using the R function 
+\begin_inset Quotes eld
+\end_inset
+
+diff
+\begin_inset space ~
+\end_inset
+
+()
+\begin_inset Quotes erd
+\end_inset
+
+ or, to introduce some smoothing, Savitzgy-Golay polynomials.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+sgolayfilt
+\begin_inset space ~
+\end_inset
+
+()
+\begin_inset Quotes erd
+\end_inset
+
+ function in the 
+\begin_inset Quotes eld
+\end_inset
+
+signal
+\begin_inset Quotes erd
+\end_inset
+
+ package for R was used, and the derivative was determined over 11 1-Hz
+ samples.
+ With an appropriate argument, this function returns the derivative when
+ called with the time series as an argument.
+\end_layout
+
+\begin_layout Enumerate
+For the third (vertical) component, change the sign and subtract the acceleratio
+n of gravity.
+\end_layout
+
+\begin_layout Enumerate
+Add the rotation correction (usually subtracted during translation from
+ the a-frame to the l-frame) as calculated by the function 
+\begin_inset Quotes eld
+\end_inset
+
+RotationCorrection
+\begin_inset space ~
+\end_inset
+
+()
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The correction can be explained by discussing the following code for that
+ function.
+ Argument 
+\begin_inset Quotes eld
+\end_inset
+
+.data.
+\begin_inset Quotes erd
+\end_inset
+
+ is an R data.frame containing the latitude and altitude in variables .data$LAT
+ and .data$GGALT.
+ The vector 
+\begin_inset Quotes eld
+\end_inset
+
+.V
+\begin_inset Quotes erd
+\end_inset
+
+ is the l-frame vector representing aircraft velocity.
+ The function treats the input arguments as arrays, so it will provide correctio
+ns for the entire flight on one call.
+ When used to correct just one vector, the dimensions of 
+\begin_inset Quotes eld
+\end_inset
+
+.V
+\begin_inset Quotes erd
+\end_inset
+
+ must be changed to 1x3 for consistency with the vectorized structure of
+ the function.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout LyX-Code
+RotationCorrection <- function (.data, .V) {
+\end_layout
+
+\begin_layout LyX-Code
+  omegaE <- StandardConstant ('Omega') ## Earth's angular velocity
+\end_layout
+
+\begin_layout LyX-Code
+  C <- vector ('numeric', 3*(DL <- nrow(.data))); dim(C) <- c(DL,3)
+\end_layout
+
+\begin_layout LyX-Code
+  if (DL == 1) {dim (.V) <- c(1,3)}    ## for consistency, vectorization
+\end_layout
+
+\begin_layout LyX-Code
+  lat <- .data$LAT * pi / 180          ## convert to radians
+\end_layout
+
+\begin_layout LyX-Code
+  sinLat <- sin(lat); cosLat <- cos(lat); tanLat <- tan(lat)
+\end_layout
+
+\begin_layout LyX-Code
+  Ree <- 6378137; Ecc <- 0.08181919    ## constants for Earth radii
+\end_layout
+
+\begin_layout LyX-Code
+  Rn <- Ree / (1 - (Ecc * sinLat)^2)^0.5 
+\end_layout
+
+\begin_layout LyX-Code
+  Rm <- Rn * (1 - Ecc^2) / (1 - (Ecc * sinLat)^2) + .data$GGALT
+\end_layout
+
+\begin_layout LyX-Code
+  Rn <- Rn + .data$GGALT
+\end_layout
+
+\begin_layout LyX-Code
+  omega <- as.vector (-.V[,2] / Rm, 2 * omegaE * cosLat + .V[,1] / Rn,
+\end_layout
+
+\begin_layout LyX-Code
+                      2 * omegaE * sinLat + .V[,1] * tanLat / Rn)
+\end_layout
+
+\begin_layout LyX-Code
+  dim(omega) <- c(DL, 3)
+\end_layout
+
+\begin_layout LyX-Code
+  zro <- rep(0, DL)
+\end_layout
+
+\begin_layout LyX-Code
+  M <- array (c(zro, -omega[3], omega[2], omega[3], zro, -omega[1],
+\end_layout
+
+\begin_layout LyX-Code
+                 -omega[2], omega[1], zro), dim=c(DL, 3, 3))    ## skew-symmetri
+c 
+\end_layout
+
+\begin_layout LyX-Code
+  MP <- aperm(M)
+\end_layout
+
+\begin_layout LyX-Code
+  ## R uses column-major representation of matrices.
+ Matrix multiplication, each row:
+\end_layout
+
+\begin_layout LyX-Code
+  for (i in 1:DL) {C[i,] <- MP[,,i] %*% .V[i,]}   
+\end_layout
+
+\begin_layout LyX-Code
+  return (C)
+\end_layout
+
+\begin_layout LyX-Code
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Apply the transformation matrix that transforms from the l-frame to the
+ a-frame.
+ This is the transpose of (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:XformLA"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Enumerate
+Subtract the acceleration of gravity from the third component.
+\end_layout
+
+\begin_layout Subsection
+Rotation rates
+\end_layout
+
+\begin_layout Standard
+The equations used for mechanization were developed in this report and in
+ the workflow description that accompanies it.
+ In the case of the attitude angles, the derivatives of the attitude angles
+ were obtained by expressing those angles in terms of appropriate components
+ of the rotation matrix, for example by finding the time derivative of pitch
+ from 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\dot{\theta}=d(\frac{\mathrm{d(}\arcsin(-R_{a}^{l}[3,1])\mathrm{)}}{\mathrm{d}t}=\frac{-1}{\sqrt{1-R_{a}^{l}[3,1]^{2}}}\dot{R}_{a}^{l}[3,1]
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\boldsymbol{R}_{a}^{l}$
+\end_inset
+
+ is the transformation matrix from the a-frame to the l-frame, which has
+ component [3,1] equal to 
+\begin_inset Formula $-\sin\theta$
+\end_inset
+
+.
+ The derivative of the transformation matrix 
+\begin_inset Formula $\boldsymbol{\dot{R}_{a}^{l}}$
+\end_inset
+
+ is found by transforming the measured body rotation rates to the l-frame
+ and then adding the inertial correction term 
+\begin_inset Formula $-\Omega_{il}^{a}\boldsymbol{R}_{a}^{l}$
+\end_inset
+
+ where, if 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is defined as
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\omega=\left[\begin{array}{c}
+-v_{e}/(R_{M}+z)\\
+\Omega_{E}\cos\lambda+(v_{n}/(R_{n}+z))\\
+\Omega_{E}\sin\lambda+(v_{n}\tan\lambda/(R_{N}+z))
+\end{array}\right]
+\]
+
+\end_inset
+
+with 
+\begin_inset Formula $\Omega_{E}$
+\end_inset
+
+ the angular rotation rate of the Earth, the skew-symmetric representation
+ of 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is 
+\begin_inset Formula $\Omega_{il}^{l}$
+\end_inset
+
+: 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\Omega_{il}^{l}=\left[\begin{array}{ccc}
+0 & -\omega_{3} & \omega_{2}\\
+\omega_{3} & 0 & -\omega_{1}\\
+-\omega_{2} & \omega_{1} & 0
+\end{array}\right]
+\]
+
+\end_inset
+
+To reverse this procedure, start with the representation of the derivative
+ of the transformation matrix, now expressed in terms of the l-frame angular
+ rates represented by {
+\begin_inset Formula $\dot{\theta}$
+\end_inset
+
+, 
+\begin_inset Formula $\dot{\phi}$
+\end_inset
+
+, 
+\begin_inset Formula $\dot{\psi}$
+\end_inset
+
+}, which can be determined by differentiating the measurements of pitch,
+ roll, and heading.
+ This is 
+\begin_inset Formula $\dot{\boldsymbol{R}}_{a}^{l}$
+\end_inset
+
+, and its components in terms of the derivatives of the measured angles
+ are as follows:
+\end_layout
+
+\begin_layout Quotation
+[1,1]: dR[1,1]dt = d(
+\begin_inset Formula $\sin\psi\cos\theta$
+\end_inset
+
+)/dt = 
+\begin_inset Formula $\dot{\psi}\cos\psi\cos\theta-\dot{\theta}\sin\psi\sin\theta$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+[1,2]: 
+\begin_inset Formula $\sin\psi\sin\theta\sin\phi+\cos\psi\cos\phi\rightarrow\dot{\psi}(\cos\psi\sin\theta\sin\phi-\sin\psi\cos\phi)+\dot{\theta}\sin\psi\cos\theta\sin\phi+\dot{\phi}(\sin\psi\sin\theta\cos\phi-\cos\psi\sin\phi)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+[1,3]: 
+\begin_inset Formula $\cos\psi\sin\phi-\sin\psi\sin\theta\cos\phi\rightarrow\dot{\psi}(-\sin\psi\sin\phi-\cos\psi\sin\theta\cos\phi)+\dot{\theta(-}\sin\psi\cos\theta\cos\phi)+\dot{\phi}(\cos\psi\cos\phi+\sin\psi\sin\theta\sin\phi)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+[2,1]: 
+\begin_inset Formula $\cos\psi\cos\theta\rightarrow\dot{\psi}(-\sin\psi\cos\theta)+\dot{\theta}(-\cos\psi\sin\theta)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+[2.2]: 
+\begin_inset Formula $\cos\psi\sin\theta\sin\phi-\sin\psi\cos\phi\rightarrow\dot{\psi}(-\sin\psi\sin\theta\sin\phi-\cos\psi\cos\phi)+\dot{\theta}\cos\psi\cos\theta\sin\phi+\dot{\phi}(\cos\psi\sin\theta\cos\phi+\sin\psi\sin\phi)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+[2.3]: 
+\begin_inset Formula $-\cos\psi\sin\theta\cos\phi-\sin\psi\sin\phi\rightarrow\dot{\psi}(\sin\psi\sin\theta\cos\phi-\cos\psi\sin\phi)+\dot{\theta}(-\cos\psi\cos\theta\cos\phi)+\dot{\phi}(\cos\psi\sin\theta\sin\phi-\sin\psi\cos\phi)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+[3,1]: 
+\begin_inset Formula $-\sin\theta\rightarrow\dot{\theta}(-\cos\theta)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+[3,2]: 
+\begin_inset Formula $\cos\theta\sin\phi\rightarrow\dot{\theta}(-\sin\theta\sin\phi)+\dot{\phi}\cos\theta\cos\phi$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Quotation
+[3,3]: 
+\begin_inset Formula $-\cos\theta\cos\phi\rightarrow\dot{\theta}\sin\theta\cos\phi+\dot{\phi}\cos\theta\sin\phi$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Add to this the correction for inertial effects (i.e., 
+\begin_inset Formula $+\boldsymbol{\Omega}_{il}^{a}\boldsymbol{R}_{a}^{l}$
+\end_inset
+
+), then transform back to the a-frame using 
+\begin_inset Formula $\boldsymbol{R}_{l}^{a}$
+\end_inset
+
+ (i.e., the inverse of 
+\begin_inset Formula $\boldsymbol{R}_{a}^{l}$
+\end_inset
+
+) to get the skew-symmetric representation of the rotation rates as measured
+ in the a-frame.
+ Then, for example, the [3,1] component of the result is 
+\begin_inset Formula $-$
+\end_inset
+
+BPITCHR.
+\end_layout
+
+\begin_layout Section
+Discussion of Section 4 regarding the Kalman filter
 \end_layout
 
 \begin_layout Subsection
