@@ -1,3 +1,4 @@
+Version 2.4-17-01-16  
   Updates:
       shinyApp              -- Significant changes to improve and simplify use.
       ggplotWAC             -- Added multiplot function via 'position', and

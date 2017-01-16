@@ -4,7 +4,7 @@
 \alias{XformLA}
 \title{XformLA}
 \usage{
-XformLA(data, Avector, .inverse = FALSE)
+XformLA(data, Avector = NA, .inverse = FALSE)
 }
 \arguments{
 \item{data}{A data.frame containing at least ROLL, PITCH, THDG (true
@@ -18,7 +18,8 @@ is normally measured in the -z direction in the aircraft frame and has
 the acceleration of gravity G subtracted, so G should be added before
 transforming and subtracted afterward. The matrix should have 3 columns
 representing the components and a number of rows corresponding to the
-number of observations.}
+number of observations. Special case: If Avector is NA, the routine
+instead returns the 3x3 transformation matrix that would multiply Avector.}
 
 \item{.inverse}{Logical, transform from l-frame to a-frame if TRUE}
 }

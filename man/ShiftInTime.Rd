@@ -4,7 +4,7 @@
 \alias{ShiftInTime}
 \title{ShiftInTime}
 \usage{
-ShiftInTime(.X, .rate = 1, .shift = 0, .smooth = 0)
+ShiftInTime(.X, .rate = 1, .shift = 0, .smooth = 0, .mod = NA)
 }
 \arguments{
 \item{.X}{A numeric vector, usually representing a measurement history.}
@@ -12,7 +12,8 @@ ShiftInTime(.X, .rate = 1, .shift = 0, .smooth = 0)
 \item{.rate}{The assumed sampling rate in Hz (default 1 Hz).}
 
 \item{.shift}{The shift to be applied, in milliseconds. Can be positive 
-or negative.}
+or negative. A negative value moves the time series earlier in time, 
+as would be needed to correct for a delay in recording.}
 
 \item{.smooth}{The smoothing interval in milliseconds.
 Controls smoothing of the time series after interpolation
@@ -23,6 +24,13 @@ is performed. This is also the case for smoothing intervals less than
 40 ms (or five samples at 125-Hz). If .smooth is larger than 40, 
 smoothing is performed using 3rd-order Savitzky-Golay polynomials 
 spanning that interval.}
+
+\item{.mod}{For variables that wrap around to zero at some modulus,
+like an angle variable such as heading at modulus 360, this specifies
+that modulus. It is used to avoid interpolation to intermediate values
+between 0 and .mod in such cases. The default is NA, so omitting 
+this parameter will inhibit the special action needed for variables
+with a modulus.}
 }
 \value{
 The same series after shifting in time, possibly by fractions
