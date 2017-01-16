@@ -246,6 +246,32 @@ proposal re Kalman filtering
 
 \begin_layout Standard
 \begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vskip-0.63in
+\backslash
+hskip2.8in
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename ../../../.lyx/templates/al.png
+	lyxscale 10
+	width 1.5cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
 status collapsed
 
 \begin_layout Plain Layout
@@ -267,16 +293,18 @@ Summary
 \begin_layout Standard
 I propose to complete the Kalman-filter project to a point where routine
  second-pass processing will be available that, for the GV, decreases uncertaint
-y in horizontal and vertical wind measurements to about 20% of present values.
+y in horizontal and vertical wind measurements significantly by decreasing
+ the uncertainty in pitch and heading to about 20% of present values.
  In addition to a convenient processing program, the proposed project will
  develop extensive documentation including a new NCAR Technical Note.
  The cost is about three weeks (FTE) of my time, to be spread over not more
  than three months.
- A journal article (short note) will follow this project to document the
- key corrections to pitch and heading and to call attention to the additional
- detail contained in this technical note and the previous one on uncertainty
- in wind measurements.
- 
+ After this project is finished, my goal is to submit a journal article
+ (short note) to document the key corrections to pitch and heading and to
+ call attention to the additional detail contained in this technical note
+ and the previous one on uncertainty in wind measurements.
+ While the focus of this is the GV, I expect that once available it will
+ be straightforward to adapt it to the C-130 as well.
 \end_layout
 
 \begin_layout Subsection*
@@ -297,19 +325,42 @@ target "https://drive.google.com/open?id=0B1kIUH45ca5Acl9SZkdfcmkzTDQ"
 \end_inset
 
 .
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+The link is live in the PDF file of this memo, but if that does not work
+ here is the URL: 
+\begin_inset Newline newline
+\end_inset
+
+https://drive.google.com/open?id=0B1kIUH45ca5Acl9SZkdfcmkzTDQ
+\end_layout
+
+\end_inset
+
  That talk showed a set of preliminary results that I think demonstrated
  the potential usefulness of the Kalman filter, but the development was
  not carried to a point where it could be used to create a new netCDF file
  containing wind measurements based on the Kalman-filter results.
  This memo proposes that I finish this task, either individually or in collabora
-tion with someone, so that Kalman-filter processing would be available.
+tion with someone, so that Kalman-filter processing will be available.
  The process will work equally well for past and future projects, and I
  have found a way to reprocess even those projects where INS body accelerations
- and rotation rates were not preserved in the archive files.
+ and rotation rates were not preserved in the archive files or original
+ 
+\begin_inset Quotes eld
+\end_inset
+
+raw
+\begin_inset Quotes erd
+\end_inset
+
+ files.
 \end_layout
 
 \begin_layout Subsection*
-The expected results
+The expected results of the proposed project
 \end_layout
 
 \begin_layout Standard
@@ -320,8 +371,7 @@ I propose to produce these products:
 An R routine that can add corrected measurements of position, aircraft velocity,
  attitude angles, and horizontal and vertical wind to an existing netCDF
  file.
- For this purpose, the preliminary work I did will need these additional
- steps:
+ These additional steps, beyond what I did before, will be needed:
 \end_layout
 
 \begin_deeper
@@ -336,24 +386,40 @@ Tuning
  of the Kalman filter by adjusting the assumed uncertainties associated
  with propagation of the solution and use of the error measurements.
  References say this tuning is an art, and I'm not experienced with this,
- so this will take some exploration.
+ so I have planned on a significant part of the work to be dedicated to
+ this task.
+ .
  The solution I obtained earlier was good, so this tuning will result in
- something at least that good, but this is a step that should be taken if
- this is to be used to produce new data files.
+ something at least that good, but this is a step that should be taken carefully
+ if this is to be used to produce new data files.
 \end_layout
 
 \begin_layout Enumerate
-Two additions to the routine, both straightforward and minor tasks:
+Four additions to the routine, both straightforward and minor tasks that
+ I have done before in other projects:
 \end_layout
 
 \begin_deeper
+\begin_layout Enumerate
+to add a new rate-of-climb variable that merges GPS and INS measurements
+ in a way that produces a better vertical-motion variable than either the
+ GPS or INS alone;
+\end_layout
+
+\begin_layout Enumerate
+to incorporate the new complementary-filter treatment of AKRD so that the
+ new values will be produced in the same processing pass that runs the Kalman
+ filter;
+\end_layout
+
 \begin_layout Enumerate
 to calculate wind based on the corrected results from the Kalman filter;
  and 
 \end_layout
 
 \begin_layout Enumerate
-to add the variables to a netCDF file.
+to add the new variables from the Kalman filter, including three-component
+ wind, to a netCDF file.
  
 \end_layout
 
@@ -402,13 +468,17 @@ n that would assist someone wanting to perform the processing with the routine
  Other notes, many already written, will document special steps like determining
  needed time shifts and justification for a revision to VSPD as used in
  the Kalman filter, and these will be referenced in the technical note.
+ An outline of the proposed technical note is attached to this proposal.
 \end_layout
 
 \begin_layout Enumerate
 The basis for a journal article, probably a short note, to be written after
- the project is completed (independent of the support requested here) that
- describes the simplified correction algorithms for pitch and heading that
- I have developed.
+ theKalman-filter project is completed (independent of the support requested
+ here) that will describe the simplified correction algorithms for pitch
+ and heading that I have developed.
+ I started this earlier, but it seemed to need the justification and support
+ of rhte Kalman-filter so it seems that this is a better sequence for these
+ documents.
  The Kalman filter technical note would be reference material that I could
  use for comparison to the results from the simpler algorithms.
  I think the simpler algorithms are worth documenting because they provide
@@ -423,17 +493,30 @@ Resources needed
 \begin_layout Standard
 Previous work on the Kalman filter was all done on my own time, last spring,
  and has not been charged to RAF.
+ There is already a several-month investment of my time in this, much of
+ which was devoted to learning about the mathematics of the Kalman filter
+ as applied to aircraft motion and how to represent this in R code.
  I estimate that the remaining work will require three weeks of full-time
  work, which I would prefer to do at no more than 25% FTE pace, so the project
  will take about three months.
  Because of the advanced status of preliminary work, I am confident that
  in that time I can produce a working version that improves the wind measurement
-s significantly.
- That will provide a basis for claiming that the wind measurements are state-of-
-the-art, which I think we cannot claim without a Kalman filter.
- A co-author's time at about 10% FTE for three months would also be helpful
- to develop knowledge of this tool for future use, but that is not necessary
- to complete the project.
+s significantly and produce the Technical Note.
+ Those two steps will provide a basis for claiming that the wind measurements
+ are state-of-the-art, which I think we cannot claim without a Kalman filter.
+ 
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+A co-author's time at about 10% FTE for three months would also be helpful
+ to develop that person's knowledge of this tool for future use, but that
+ is not necessary to complete the project.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection*
@@ -514,7 +597,123 @@ Benefits to HCR,
 \end_layout
 
 \begin_layout Subsection*
-Alternatives
+Milestones to be met
+\end_layout
+
+\begin_layout Standard
+As the project proceeds, I would provide updates on progress each two weeks,
+ when I submit my time card.
+ If the project starts soon (by mid-January), the following milestones can
+ serve to track progress:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Feb.
+\begin_inset space ~
+\end_inset
+
+1 Outline of the Tech Note, expanding on the outline appended to this memo,
+ and improved coding of the derivative function used for the Kalman filter.
+ This code was developed earlier in preliminary form but needs structure
+ and appropriate commenting to assist others who might look at it and use
+ it in the future.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Feb
+\begin_inset space ~
+\end_inset
+
+15: Operational code for the needed ancillary routines representing AKRD,
+ rate-of-climb, recovery of IRU measurements of body acceleration and body
+ rotation from archived files, and the simplified routines for correcting
+ pitch and heading that will be used to test the Kalman-filter results.
+ The latter are existing routines in the 
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu
+\begin_inset Quotes erd
+\end_inset
+
+ R package but need documentation.
+ 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Mar.
+\begin_inset space ~
+\end_inset
+
+1 A first-draft Technical Note, for preliminary discussion and internal
+ review.
+ This version will include illustrative Kalman-filter results and documentation
+ of the 
+\begin_inset Quotes eld
+\end_inset
+
+tuning
+\begin_inset Quotes erd
+\end_inset
+
+ used to specify error characteristics of the imeasurements that are input
+ to the Kalman filter.
+ The illustrative results will also include examples of the resulting uncertaint
+ies in the results.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Mar.
+\begin_inset space ~
+\end_inset
+
+15: NCAR Tech Note ready for review, submitted to EOL and the library for
+ procedural handling.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Apr.
+\begin_inset space ~
+\end_inset
+
+1: An R script that can be used for production processing to implement the
+ Kalman filter, produce revised wind measurements and attitude angles, include
+ the new rate-of-climb and AKRD variables, and where desirable revised sideslip
+ calibrations as well.
+ This will include appropriate user interaction so that it can be used without
+ needing to change anything in the script, for example by specifying the
+ project and data file to use, the options for including revised AKRD and
+ sideslip coefficients, and options including use of the simplified routines
+ for correcting pitch and heading, etc.
+ The script will also be designed so that batch processing is possible,
+ for example covering all flights from a specific project.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Apr.
+\begin_inset space ~
+\end_inset
+
+15: Project completion, to include a detailed workflow document that explains
+ the R script and how to use it as well as appropriate archives to ensure
+ reproducibility of the project.
+ 
+\end_layout
+
+\begin_layout Standard
+It may be desirable to extend these results to the C-130.
+ I haven't looked at what would be involved to do that, but I expect it
+ would be a relatively simple task once the GV version is developed.
+\end_layout
+
+\begin_layout Subsection*
+Alternate ways to make similar improvements
 \end_layout
 
 \begin_layout Standard
@@ -563,18 +762,6 @@ Rely on the pitch-correction and heading-correction algorithms already developed
  filter.
 \end_layout
 
-\begin_layout Enumerate
-Do nothing because the wind measurements already look quite good and the
- corrections from the Kalman filter are mostly small.
- The weakness with this approach is that good agreement in a test case is
- no guarantee against system changes or new conditions where the measurements
- might be worse.
- It is hard to argue for uncertainty limits smaller than those provided
- by the manufacturer of the INS unless continuing checks are available that
- document those lower limits, and this or another Kalman filter is the only
- proven method for determining the errors.
-\end_layout
-
 \begin_layout Standard
 Alternatives 1 and 2 would not be useful for archived projects.
  Even if other alternatives are pursued, it seems that the scale of this
@@ -592,13 +779,13 @@ Alternatives 1 and 2 would not be useful for archived projects.
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
-%
+
 \backslash
-attach{attachment}
+attach{Outline of the proposed technical note}
 \end_layout
 
 \begin_layout Plain Layout
@@ -643,6 +830,176 @@ second
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vfill
+\backslash
+eject
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Outline of the proposed technical note
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Enumerate
+Introduction
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Overview
+\end_layout
+
+\begin_layout Enumerate
+Brief summary of the Kalman filter
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+The derivative of the state vector
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The procedure to be used
+\end_layout
+
+\begin_layout Enumerate
+The components of the derivative array
+\end_layout
+
+\begin_layout Enumerate
+Tests of the derivatives
+\end_layout
+
+\begin_layout Enumerate
+Mechanization using the derivatives
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Ancillary topics needed for the Kalman filter
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+A new variable for rate of climb
+\end_layout
+
+\begin_layout Enumerate
+Retrieving IRU measurements by differentiation
+\end_layout
+
+\begin_layout Enumerate
+Calculating angle of attack via complementry filtering
+\end_layout
+
+\begin_layout Enumerate
+Documentation for the simplified algorithms to correct pitch and heading
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+The Kalman filter
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The basic structure
+\end_layout
+
+\begin_layout Enumerate
+Detecting the error in heading
+\end_layout
+
+\begin_layout Enumerate
+Smoothing the errors in pitch and roll
+\end_layout
+
+\begin_layout Enumerate
+Results (position, velocity, attitude angles)
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Calculating new values for the wind
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Comparison to uncorrected values
+\end_layout
+
+\begin_layout Enumerate
+Spectral characteristics
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Adding variables to an existing netCDF file
+\end_layout
+
+\begin_layout Enumerate
+Conclusions
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Target size: about 50 pages.
+\end_layout
+
+\begin_layout Standard
+Accompanying document: Workflow, probably of similar size.
+\end_layout
+
+\begin_layout Standard
+Structure: the generating program will use 
+\begin_inset Quotes eld
+\end_inset
+
+chunks
+\begin_inset Quotes erd
+\end_inset
+
+ of R code that can also be used by a processing script that implements
+ the Kalman filter, so consistency between the technical note and the processing
+ script will be forced and easily maintained.
 \end_layout
 
 \end_body

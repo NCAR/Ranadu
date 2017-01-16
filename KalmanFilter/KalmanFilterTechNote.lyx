@@ -3168,14 +3168,10 @@ status open
 <<plot-acc, include=TRUE, fig.height=7,fig.cap='Comparison of measured acceleratio
 ns {BLONGA, BLATA, BNORMA, blue lines} to the accelerations determined by
  differentiating the velocity components measured by the GPS receiver and
- then translating these to the a-frame ({AA1, AA2, AA3}, thicker red lines),
- from a period during DEEPWAVE flight 15 when there were modest pilot-induced
- fluctuations in pitch.
- Units are m
-\backslash
-
-\backslash
-,s$^{-2}$.', cache=TRUE>>=
+ then translating these to the a-frame ({AA1, AA2, AA3}, dashed red lines),
+ from a period during DEEPWAVE flight 15 that includes pitch maneuvers,
+ a speed run, and yaw maneuvers (in sequence in this time segment).', cache=TRUE>
+>=
 \end_layout
 
 \begin_layout Plain Layout

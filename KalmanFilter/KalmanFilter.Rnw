@@ -12,6 +12,8 @@
 \setlength{\parskip}{\medskipamount}
 \setlength{\parindent}{0pt}
 \usepackage{color}
+\usepackage{amsbsy}
+\usepackage{graphicx}
 \PassOptionsToPackage{normalem}{ulem}
 \usepackage{ulem}
 
@@ -107,8 +109,8 @@ library(signal)
 source ('~/RStudio/Ranadu/R/theme_WAC.R')
 setwd ('~/RStudio/Ranadu/KalmanFilter')
 Directory <- DataDirectory ()
-Flight <- "rf15HR" 				# XXX change this
-Project = "DWIRU"     			 # XXX change this
+Flight <- "rf15HR" 			
+Project = "DWIRU"     		
 ProjectDir <- "DEEPWAVE"
 fname = sprintf("%s%s/%s%s.nc", Directory, ProjectDir, Project, Flight)
 VarList <- c('BLATA', 'BLONGA', 'BNORMA', 'BPITCHR', 'BROLLR', 'BYAWR')
@@ -124,6 +126,22 @@ if (ReloadData) {
 } else {
   load (file=SaveRData)
 }
+Cradeg <- pi/180
+# remove 'cal coef' in data archive
+Data$THDG <- (Data$THDG + 0.08) %% 360
+.shift = 60  # previously shifted backward 60 ms in processing
+Data$THDG <- ShiftInTime (Data$THDG, 25, .shift)
+Data$PITCH <- ShiftInTime (Data$PITCH, 25, .shift)
+Data$ROLL <- ShiftInTime (Data$ROLL, 25, .shift)
+.shift <- 0
+for (V in c('BPITCHR', 'BROLLR', 'BYAWR')) {
+  Data[, V] <- ShiftInTime (Data[, V], 25, .shift)
+}
+Data$pdot <- c(0, diff(Data$PITCH)) * 25
+Data$rdot <- c(0, diff(Data$ROLL)) * 25
+Data$hdot <- c(0, diff(Data$THDG))
+Data$hdot <- (Data$hdot + 540) %% 360 - 180
+Data$hdot <- Data$hdot * 25
 
 @
 
@@ -261,10 +279,10 @@ XfLArV <- function (data) {   ## XfLA but using input in radians and single row
 
 # other-functions ---------------------------------------------------------
 
-Cradeg <- pi/180
 dt <- 1/25               ## working with 25-Hz file
 DL <- nrow(Data)
-OmegaE <- StandardConstant ('Omega')
+omegaE <- StandardConstant ('Omega') #* 0.95  ### NOTE!!!
+# omegaE <- 2*pi/86400
 Ree <- 6378137
 Ecc <- 0.08181919
 ## The next correction calculates the correction needed to account for the rotation
@@ -319,11 +337,13 @@ STMFV <- function (sv, .aaframe='a') {
     sv[7] <- cos (sv[9]) * svs7 - sin (sv[9]) * svs8
     sv[8] <- sin (sv[9]) * svs7 + cos (sv[9]) * svs8
   }
-  rlm <- XfLArV(sv)    
+  rlm <- XfLArV(sv)   
   omega <- as.vector (c(-sv[5] / Rm, 
-                        OmegaE*cos(sv[1])+sv[4]/(Rn),
-                        OmegaE*sin(sv[1])+sv[4]*tan(sv[1])/Rn), mode='numeric')
-  Oill <- matrix (c(0, -omega[3], omega[2], omega[3], 0, -omega[1], -omega[2], omega[1], 0), ncol=3)
+                        omegaE*cos(sv[1])+sv[4]/(Rn),
+                        omegaE*sin(sv[1])+sv[4]*tan(sv[1])/(Rn)), mode='numeric')
+  ## signs account for b-frame to a-frame: reverse sign of 3, swap 1 and 2
+  Oill <- matrix (c(0, omega[3], omega[2], -omega[3], 0, -omega[1], 
+                    -omega[2], omega[1], 0), ncol=3)
   Oilb <- Oill %*% rlm
   ## find the derivative of the transformation matrix:
   ## (must recalculate SRM from measured rotation rates)
@@ -331,9 +351,12 @@ STMFV <- function (sv, .aaframe='a') {
            sv[12], 0, sv[11],
            sv[10], -sv[11], 0)
   SRM <- aperm( array (SRR, dim=c(3,3)))
-  dRLA <- rlm %*% SRM - Oilb
+  dRLA <- rlm %*% SRM - (Oilb)
+  # A <- 0.11
+  # dRKA[1,1] <- (1-A*(1-2*sin(sv[9])^2)) * dRLA[1,1]
+  # dRKA[1,2] <- (1-A*(1-2*sin(sv[9])^2)) * dRLA[1,2]
   DR <- c(sv[5] / Rm, sv[4] / (Rn * cos (sv[1])), sv[6])
-  Grav <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))    # * 0.9 improves pitch and roll!
+  Grav <- as.numeric (Gravity (sv[1]/Cradeg, sv[3]))
   AA <- as.vector (c(sv[14], sv[13], sv[15]+Grav), mode='numeric') # aircraft-frame
   AL <- as.vector (rlm %*% as.matrix(AA), mode='numeric')   # l-frame
   ## now correct for angular effects
@@ -342,11 +365,11 @@ STMFV <- function (sv, .aaframe='a') {
   C <- vector ('numeric', 3)
   lat <- sv[1]
   sinLat <- sin(lat); cosLat <- cos(lat); tanLat <- tan(lat)
-  M12 <- -2 * OmegaE * sinLat - VL[1] * tanLat / Rn
-  M13 <- 2 * OmegaE * cosLat + VL[1] / Rn
-  M21 <- 2 * OmegaE * sinLat + VL[1] * tanLat / Rn
+  M12 <- -2 * omegaE * sinLat - VL[1] * tanLat / Rn
+  M13 <- 2 * omegaE * cosLat + VL[1] / Rn
+  M21 <- 2 * omegaE * sinLat + VL[1] * tanLat / Rn
   M23 <- VL[2] / Rm
-  M31 <- -2 * OmegaE * cosLat - VL[1] / Rn
+  M31 <- -2 * omegaE * cosLat - VL[1] / Rn
   M32 <- -VL[2] / Rm
   C[1] <- M12 * VL[2] + M13 * VL[3]
   C[2] <- M21 * VL[1] + M23 * VL[3]
@@ -354,11 +377,39 @@ STMFV <- function (sv, .aaframe='a') {
   AL <- as.vector (AL - C, mode='numeric')
   AL[3] <- AL[3] + Grav
   AL[3] <- -AL[3]
-  stmf <- c(DR, AL, -dRLA[3,1]/sqrt(1-rlm[3,1]^2), 
+  if (abs(rlm[1,2]) < 0.001) {
+    RRT <- c(-dRLA[3,1]/sqrt(1-rlm[3,1]^2), 
             1/(1+(rlm[3,2]/rlm[3,3])^2) * (rlm[3,2]/rlm[3,3]) * 
               (-dRLA[3,2]/rlm[3,2] + dRLA[3,3]/rlm[3,3]), 
-            1/(1+(rlm[1,1]/rlm[1,2])^2) * (rlm[1,1]/rlm[1,2]) * 
-              (dRLA[1,1]/rlm[1,1] - dRLA[1,2]/rlm[1,2]),
+              (rlm[1,2]*dRLA[1,1]/rlm[1,1]^2 - dRLA[1,2]/rlm[1,1]))
+  } else {
+    RRT <- c(-dRLA[3,1]/sqrt(1-rlm[3,1]^2), 
+            1/(1+(rlm[3,2]/rlm[3,3])^2) * (rlm[3,2]/rlm[3,3]) * 
+              (-dRLA[3,2]/rlm[3,2] + dRLA[3,3]/rlm[3,3]), 
+            1/(1+(rlm[1,1]/rlm[1,2])^2) * 
+              (dRLA[1,1]/rlm[1,2] - dRLA[1,2]*rlm[1,1]/rlm[1,2]^2))
+  }
+  sx <- sv
+  sx[4] <- RRT[1]
+  sx[5] <- RRT[2]
+  sx[6] <- RRT[3]
+  sx[7] <- 0*Cradeg
+  sx[8] <- 0*Cradeg
+  sx[9] <- 0*Cradeg
+  VROTA <- XfLArV(sx) %*% RRT
+  RRT[1] <- VROTA[2]
+  RRT[2] <- VROTA[1]
+  RRT[3] <- -VROTA[3]
+  A <- 0.10
+  A <- 0
+  YC <- 1-A*(1-2*sin(sv[9]-5*Cradeg)^2)
+  RRT[3] <- YC * RRT[3]
+  stmf <- c(DR, AL, RRT,
+           # -dRLA[3,1]/sqrt(1-rlm[3,1]^2), 
+           # 1/(1+(rlm[3,2]/rlm[3,3])^2) * (rlm[3,2]/rlm[3,3]) * 
+           #   (-dRLA[3,2]/rlm[3,2] + dRLA[3,3]/rlm[3,3]), 
+           # 1/(1+(rlm[1,1]/rlm[1,2])^2) * (rlm[1,1]/rlm[1,2]) * 
+           #   (dRLA[1,1]/rlm[1,1] - dRLA[1,2]/rlm[1,2]) * YC,
             0, 0, 0, 0, 0, 0)
   ## return sv to original if necessary
   if (.aaframe == 'l') {
@@ -381,12 +432,19 @@ SP <- with (Data, data.frame (LON, LAT, ALT, VNS, VEW, VSPD,
                               GGVEW, GGVNS, Grav))
 
 ## adjustments:
-SP$BYAWR <- SP$BYAWR - 0.005
+SP$BYAWR <- (SP$BYAWR+0.0003) * 1.008
 SP$BROLLR <- SP$BROLLR + 0.0005
-SP$BPITCHR <- SP$BPITCHR + 0.0005
-# SP$BNORMA <- SP$BNORMA*1.005 - 0.015
+SP$BPITCHR <- SP$BPITCHR + 0.0003
+SP$BNORMA <- SP$BNORMA*1.005 - 0.025
 # SP$BLONGA <- SP$BLONGA * 0.96
 # SP$BLATA <- SP$BLATA * 1.1
+## consider the possible effects of misalignment of INS wrt AC axes
+VROT <- array(c(SP$BPITCHR, SP$BROLLR, SP$BYAWR), dim=c(nrow(SP), 3))
+SX <- data.frame(ROLL=rep(0.05,nrow(SP)), PITCH=rep(0.15,nrow(SP)), THDG=rep(0,nrow(SP)))
+VROTA <- XformLA(SX, VROT)
+# SP$BPITCHR <- VROTA[,2]
+# SP$BROLLR <- VROTA[,1]
+# SP$BYAWR <- -VROTA[,3]
 SP$BPITCHR <- SP$BPITCHR * Cradeg
 SP$BROLLR <- SP$BROLLR * Cradeg
 SP$BYAWR <- SP$BYAWR * Cradeg
@@ -555,7 +613,7 @@ Data$DROLL <- (Data$ROLLX-Data$ROLL)*10
 Data$DTHDG <- 180+(Data$THDGX-Data$THDG)*10
 op <- par (mar=c(2,4,1,1)+0.1)
 layout(matrix(1:3, ncol = 1), widths = 1,  heights = c(5,5,6))
-plotWAC (Data[r, c('Time', 'PITCH', 'PITCHX', 'DPITCH')])
+plotWAC (Data[r, c('Time', 'PITCH', 'PITCHX', 'DPITCH')], legend.position='right')
 lines (c(Data$Time[1], Data$Time[DL]), c(0,0), col='green')
 plotWAC(Data[r, c('Time', 'ROLL', 'ROLLX', 'DROLL')])
 lines (c(Data$Time[1], Data$Time[DL]), c(0,0), col='green')
@@ -563,7 +621,7 @@ op <- par (mar=c(5,4,1,1)+0.1)
 plotWAC(Data[r, c('Time', 'THDG', 'THDGX', 'DTHDG')], ylim=c(0,360))
 lines(c(Data$Time[1], Data$Time[DL]), c(180,180), col='green')
 op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
-SP <- SPR    ## restore to state before integration
+# SP <- SPR    ## restore to state before integration
 
 @
 
@@ -1152,7 +1210,18 @@ GAEL <- c(D1$LACCX - D1$vedot, D1$LACCY - D1$vndot, D1$LACCZ - D1$vudot)
 dim(GAEL) <- c(DL, 3)
 ## transform to the a-frame
 GAE <- XformLA (D1, GAEL, .inverse=TRUE)
-DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW, VNS-GGVNS, ROC-GGVSPD))
+## get rotation-rate corrections to apply to GPS measurements
+  LR <- 4.42; LG <- -4.30
+  Pdot <- c(0, diff (D1$PITCH*Cradeg)) * Rate  # diff does step-wise differentiation
+  Hdot <- c(0, diff (D1$THDG*Cradeg))          # see Rate multiplication few lines down
+  Hdot[is.na(Hdot)] <- 0
+  Hdot[Hdot > pi] <- Hdot[Hdot > pi] - 2*pi
+  Hdot[Hdot < -pi] <- Hdot[Hdot < -pi] + 2*pi
+  Hdot <- Hdot * Rate
+  cospsi <- cos (D1$THDG*Cradeg)
+  sinpsi <- sin (D1$THDG*Cradeg)
+DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW + LG*Hdot*cospsi, 
+                 VNS-GGVNS - LG*Hdot*sinpsi, ROC-GGVSPD + LG*Pdot))
 # DZ <- c(DZ, GAE[,1], GAE[,2], GAE[,3]) ## add this later
 ## The last three components provide direct feedback to measured acceleration
 ## in the a-frame but also provide feedback to heading, as developed below
@@ -1759,6 +1828,8 @@ Data$THDGKF <- Data$THDG - Data$HCS    ## save the corrected heading
 
 \subsection{Calculating the wind}
 
+\subsubsection{The vertical wind}
+
 The result of the Kalman filter is that new corrected variables \{LATKF,
 LONKF, ALTKF, VEWKF, VNSKF, ROCKF, PITCHKF, ROLLKF, and THDGKF\} are
 available. These and the variables \{TASX, ATTACK, SSLIP\} can be
@@ -1767,18 +1838,22 @@ the new variable PITCHKF should be superior to the original variable
 PITCH and should lead to some improvement. The other cricital measurement
 used to calculate vertical wind is the rate-of-climb of the aircraft,
 for which there are two options: ROCKF and GGVSPD. The former uses
-the accelerations from the INS and so might have the best high-frequency
-performance, but GPS receivers provide such good measurements now
-that it may be preferable to use GGVSPD directly. The other difference
-between these two choices is that if GGVSPD is used then a correction
-is needed for the about-6~m displacement of the GPS antenna from
-the INS. This needs a lever-arm correction, while ROCKF is based on
-measurements from the INS and so does not need such a correction.
+the accelerations from the INS and so could have the best high-frequency
+performance, although GPS receivers provide very good measurements
+now even at high frequency. The other difference between these two
+choices is that if GGVSPD is used then a correction is needed for
+the about-4~m displacement of the GPS antenna from the INS. ROCKF
+is based on measurements from the INS, with slow updating to the GPS
+value, so it does not need such a correction.
 
 <<wind-calculation, include=TRUE>>=
 
 ## get the wind variables:
 DataW <- D1
+DataN <- WindProcessor (DataW)
+Data$WICC <- DataN$WIN
+Data$WDCC <- DataN$WDN
+Data$WSCC <- DataN$WSN
 DataW$PITCH <- Data$PITCHKF
 DataW$ROLL <- Data$ROLLKF
 DataW$THDG <- Data$THDGKF
@@ -1789,11 +1864,173 @@ DataN <- WindProcessor(DataW, LG=0, CompF=FALSE)    ## suppress comp filter and 
 Data$WDKF <- DataN$WDN
 Data$WSKF <- DataN$WSN
 Data$WIKF <- DataN$WIN
+## add longitudinal and lateral components analogous to UXC and VYC:
+.hdg <- Data$THDGKF * Cradeg
+.wd <- Data$WDKF * Cradeg + pi
+Data$UXKF <- Data$WSKF * (sin(.hdg)*sin(.wd) + cos(.hdg)*cos(.wd))
+.hdg <- .hdg - pi/2
+Data$VYKF <- Data$WSKF * (sin(.hdg)*sin(.wd) + cos(.hdg)*cos(.wd))
 DataW$GGVSPD <- Data$GGVSPD
 DataN <- WindProcessor(DataW, CompF=FALSE)    ## suppress comp filter and GPS lever arm)
 Data$WIKFG <- DataN$WIN
+sdWIdif <- sd(Data$WIKF-Data$WICC, na.rm=TRUE)
 
 @
+
+The following figure (Fig.~\ref{fig:Variance-spectra-ROC}) shows
+a comparison of the variance spectra from the GPS-receiver value (GGVSPD)
+and the Kalman-filter value (ROCKF). The spectra are nearly identical,
+but GGVSPD appears to have some high-frequency noise not present in
+ROCKF. At these high frequencies, both have contributions to the wind
+that are insignificant in comparison to that from the relative wind,
+so it will make little difference which is used in wind calculations,
+but it appears at least in this case that ROCKF contributes less false
+high-frequency noise than GGVSPD so it is the preferred choice.
+
+\begin{figure}
+\begin{centering}
+\includegraphics[width=0.85\textwidth]{ROCGGVSPDMEMPlot}
+\par\end{centering}
+\caption{Variance spectra for the rate-of-climb measurements from the GPS receiver
+(GGVSPD) and the INS integrated acceleration adjusted to match the
+rate of climb required by the hydrostatic equation (ROCKF). The thin
+red line shows the unsmoothed spectrum for ROCKF; other lines have
+been smoothed in 50 bins in the logarithm of frequency. Data from
+a period of strong waves encountered during DEEPWAVE flight 16 on
+4 July 2014 over New Zealand.\label{fig:Variance-spectra-ROC}}
+
+\end{figure}
+
+The variance spectra for the measurement of vertical wind for the
+same flight segment are shown in Fig.~\ref{fig:Variance-spectra-WI}.
+The small differences between these spectra do not arise from using
+ROCKF instead of GGVSPD or from the corrections applied to pitch,
+but rather from the time shift applied to GGVSPD but not to ROCKF
+(or equivalently ACINS). A comparison of the two measurements of vertical
+wind is shown in Fig.~\ref{fig:plot-WIC}. While the two represent
+almost the same signal, the differences at any given time can be significant,
+as emphasized by the bottom panel in the figure. The standard deviation
+of the difference between measurements for the period shown in this
+figure is \Sexpr{round(sdWIdif, 2)}~m/s, so the difference is significant
+in comparison to the claimed uncertainty in measuring vertical wind. 
+
+\begin{figure}
+\begin{centering}
+\includegraphics[width=0.85\textwidth]{WIKFWICMEMPlot}
+\par\end{centering}
+\caption{Variance spectra for two measurements of the vertical wind, WIKF from
+the Kalman-filter processing and WIC from conventional processing.
+The thin red line shows the unsmoothed spectrum for WIKF; other lines
+hae been smoothed in 50 logarithmic frequency bins. Measurements from
+a period where strong waves were encounted during DEEPWAVE flight
+16, 4 July 2014.\label{fig:Variance-spectra-WI}}
+
+\end{figure}
+
+An aspect of the Kalman-filter-corrected vertical wind that needs
+further investigation is the relative timing of measurements entering
+the calculation, especially the INS-provided variables PITCH and ACINS
+as they might be offset from the vertical component of the relative
+wind as determined from the airspeed (TASX) and angle of attack (AKRD).
+{[}XXX consider pitch maneuvers and what minimizes the error.{]}
+
+<<plot-WIC, include=TRUE, fig.cap='Vertical wind calculated using the results from the Kalman filter (WIKF) and the original calculation. The difference is shown in the bottom panel. WIKF is calculated using ROCKF and other results after correction by the Kalman filter, while WIC was calculated using GGVSPD from the GPS for the rate-of-climb of the aircraft. Data from a segment of DEEPWAVE flight 16 where strong waves were encountered.'>>=
+
+layout(matrix(1:2, ncol = 1), widths = 1,  heights = c(5,6))
+op <- par (mar=c(2,4,1,1)+0.1)
+with(Data[setRange(Data, 83400, 83800),], plotWAC (data.frame(Time, WIKF, WICC),
+                                                   legend.position=NA))
+legend ('bottomleft', legend=c('WIKF', 'WIC'), col=c('blue', 'darkgreen'), lwd=c(2,1), cex=0.8)
+op <- par (mar=c(5,4,1,1)+0.1)
+with(Data[setRange(Data, 83400, 83800),], plotWAC (data.frame(Time, WIKF-WICC), ylab='WIKF-WIC'))
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+
+@
+
+\subsubsection{The horizontal wind}
+
+The conventional measurements of horizontal wind, represented by the
+direction WDC and speed WSC, are based on the relative wind added
+to the ground-speed components VEWC and VNSC. These are adjusted to
+match the GPS measurements via a complementary filter that uses the
+slowly varying components from the GPS and the faster varying components
+from the INS. This therefore should produce results quite similar
+to the variables VEWKF and VNSKF from the Kalman filter. For the example
+flight being used (DEEPWAVE flight 16), the standard deviation of
+the difference is 0.1~m/s and the mean difference is $<0.0001$~m/s,
+so these are in good agreement. The difference shows a component that
+varies with the Schuler oscillation, so the centered-filter result
+from the Kalman filter may be preferable to the recursive-filter result
+from the complementary filter. In addition, there are some perturbations
+in turns that likely arise from timing differences. The other result
+from the Kalman filter that affects the measured horizontal wind is
+the heading, but in this case the heading correction is small and
+slowly varying so it will have little effect on the results. The heading-change
+correction needed to account for the displacement between the INS
+and GPS antenna has little effect on the horizontal wind because both
+the Kalman filter and the complementary filter smooth any short-term
+effects on the GPS-provided measurements. For completeness, however,
+the GPS measurements GGVEW and GGVNS have been corrected for the effect
+of heading change before use in the Kalman filter or the complementary
+filter, so this does not introduce any change between the two measurements
+of horizontal wind. The resulting measurements of horizontal wind
+direction match with a standard deviation of 0.3$^{\circ}$and the
+magnitudes of the horizontal winds match with a standard deviation
+of 0.1~m/s. These differences are plotted in Fig.~\ref{fig:hw-plot}.
+In both cases the differences show signs of a Schuler oscillation,
+indicating that the recursive-filter applied in the standard calculation
+likely leaves some residual error, and they show larger deviations
+in turns that likely point to timing differences among the components
+entering the calculation of the wind. Timing considerations are explored
+further in Sect.~XXX.
+
+Despite these small differences, representative variance spectra for
+the longitudinal and lateral wind overlap in plots so well that the
+spectra are indistinguishable. An example is shown in Fig.~\ref{fig:Variance-spectra-UXVY}.
+Although differences do not appear in the variance spectra for horizontal
+wind, Fig.~\ref{fig:hw-plot} and the standard deviations quoted
+above indicate that there are significant differences and some preference
+indicated for using the Kalman-filter results to reduce errors in
+individual measurements.
+
+<<GS-comparison, include=FALSE, eval=FALSE, fig.cap=''>>=
+
+DT <- getNetCDF (fname, c('VEWC', 'VNSC'))
+Data$VEWC <- DT$VEWC
+Data$VNSC <- DT$VNSC
+layout(matrix(1:2, ncol = 1), widths = 1,  heights = c(5,6))
+op <- par (mar=c(2,4,1,1)+0.1)
+with(Data[r,], plotWAC (data.frame(Time, VEWKF-GGVEW)))
+op <- par (mar=c(5,4,1,1)+0.1)
+with(Data[r,], plotWAC (data.frame(Time, VNSKF-GGVNS)))
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+
+@
+
+<<hw-plot, include=TRUE, fig.cap='Differences between the conventional measurements of horizontal wind (WDC and WSC) and the results from the Kalman filter (WDKF and WSKF).'>>=
+
+layout(matrix(1:2, ncol = 1), widths = 1,  heights = c(5,6))
+op <- par (mar=c(2,4,1,1)+0.1)
+with(Data[r,], plotWAC (data.frame(Time, WDKF-WDCC), ylab='WDKF-WDC'))
+op <- par (mar=c(5,4,1,1)+0.1)
+with(Data[r,], plotWAC (data.frame(Time, WSKF-WSCC), ylab='WSKF-WSC'))
+op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
+
+@
+
+\begin{figure}
+\begin{centering}
+\includegraphics[width=0.85\textwidth]{UXVYMEMPlot}
+\par\end{centering}
+\caption{Variance spectra for the standard variables UXC and VYC, representing
+the longitudinal and lateral components of the horizontal wind relative
+to the orientation of the aircraft, and the corresponding results
+for the winds produced after the Kalman filter (UXKF and VYKF). The
+thin red line shows the unsmoothed spectrum for UXKF; the other lines
+have been smoothed in 50 logarithmic-spaced bins in frequency. Data
+are from DEEPWAVE flight 16, 4 July 2014, in waves over New Zealand.\label{fig:Variance-spectra-UXVY}}
+
+\end{figure}
 
 <<create-new-netcdf>>=
 
@@ -1919,14 +2156,16 @@ DATT <- D1  ## save to ensure that attributes are preserved
 
 ## variables to add to the netCDF file:
 VarNew <- c('LATKF', 'LONKF', 'ALTKF', 'VEWKF', 'VNSKF', 'ROCKF', 'PITCHKF', 'ROLLKF', 'THDGKF',
-            'WDKF', 'WSKF', 'WIKF', 'WIKFG')
-VarOld <- c('LAT', 'LON', 'ALT', 'VEW', 'VNS', 'VSPD', 'PITCH', 'ROLL', 'THDG', 'WD', 'WS', 'WI', 'WIC')
+            'WDKF', 'WSKF', 'WIKF', 'WIKFG', 'WICC', 'WDCC', 'WSCC', 'UXKF', 'VYKF')
+VarOld <- c('LAT', 'LON', 'ALT', 'VEW', 'VNS', 'VSPD', 'PITCH', 'ROLL', 'THDG', 'WD', 'WS', 'WI', 'WIC', 'WIC', 'WDC', 'WSC', 'UXC', 'VYC')
 VarUnits <- c('degrees', 'degrees', 'm', 'm/s', 'm/s', 'm/s', 'degrees', 'degrees', 'degrees',
-              'degrees', 'm/s', 'm/s', 'm/s')
+              'degrees', 'm/s', 'm/s', 'm/s', 'm/s', 'degrees', 'm/s', 'm/s', 'm/s')
 VarLongName <- c('latitude, KF', 'longitude, KF', 'altitude MSL, KF',
                  'eastward groundspeed, KF', 'northward groundspeed, KF', 'rate of climb, KF',
                  'pitch, KF', 'roll, KF', 'heading, KF',
-                 'wind direction, KF', 'wind speed, KF', 'vertical wind, KF', 'vertical wind, KF and GGVSPD')
+                 'wind direction, KF', 'wind speed, KF', 'vertical wind, KF', 
+                 'vertical wind, KF and GGVSPD', 'WIC recalc', 'WDC recalc', 'WSC recalc',
+				 'longitudinal wind, KF', 'lateral wind, KF')
 VarStdName <- c('INS latitude, Kalman-filter-corrected',
                 'INS longitude, Kalman-filter-corrected',
 				'INS altitude, Kalman-filter-corrected',
@@ -1939,7 +2178,12 @@ VarStdName <- c('INS latitude, Kalman-filter-corrected',
 				'horizontal wind direction, Kalman-filter-corrected',
 				'horizontal wind speed, Kalman-filter-corrected',
 				'vertical wind speed, Kalman-filter-corrected',
-				'vertical wind speed, Kalman-filter-corrected but using GPS VSPD')
+				'vertical wind speed, Kalman-filter-corrected but using GPS VSPD',
+				'original WIC, recalculated',
+				'original WDC, recalculated',
+				'original WSC, recalculated',
+				'longitudinal component of the horizontal wind, Kalman-filter-corrected',
+				'lateral component of the horizontal wind, Kalman-filter-corrected')
 
 ## create the new variables
 nv <- length (VarNew)
@@ -1966,6 +2210,142 @@ for (i in 1:nv) {
   }
 }
 nc_close (newfile)
+
+@
+
+\section{Material for the Appendix}
+
+The rotation rates and accelerations measured by the IRU \{BPITCHR,
+BROLLR, BYAWR, BLATA, BLONGA, BNORMA\} are the rotation rates and
+accelerations of the a-frame relative to an inertial frame. For early
+projects these measurements were not recorded, and for most projects
+they have not been retained in the archived files. This appendix describes
+how they can be retrieved from the measurements of attitude angles
+and the aircraft velocity vector. Without Coriolis corrections, the
+answers would be straightforward: Differentiate the measured angles
+and components of the aircraft velocity and transform the results
+to the a-frame. However, the inertial contributions from motion and
+rotation of the a-frame, while minor, are not negligible. The needed
+corrections are developed in this Appendix.
+
+\subsection{Accelerations}
+
+\subsection{Rotation rates}
+
+The equations used for mechanization were developed in this report
+and in the workflow description that accompanies it. In the case of
+the attitude angles, the derivatives of the attitude angles were obtained
+by expressing those angles in terms of appropriate components of the
+rotation matrix, for example by finding the time derivative of pitch
+from \\
+\[
+\dot{\theta}=d(\frac{\mathrm{d(}\arcsin(-R_{a}^{l}[3,1])\mathrm{)}}{\mathrm{d}t}=\frac{-1}{\sqrt{1-R_{a}^{l}[3,1]^{2}}}\dot{R}_{a}^{l}[3,1]
+\]
+where $\boldsymbol{R}_{a}^{l}$ is the transformation matrix from
+the a-frame to the l-frame, which has component {[}3,1{]} equal to
+$-\sin\theta$. The derivative of the transformation matrix $\boldsymbol{\dot{R}_{a}^{l}}$
+is found by transforming the measured body rotation rates to the l-frame
+and then adding the inertial correction term $-\Omega_{il}^{a}\boldsymbol{R}_{a}^{l}$
+where, if $\omega$ is defined as\\
+\[
+\omega=\left[\begin{array}{c}
+-v_{e}/(R_{M}+z)\\
+\Omega_{E}\cos\lambda+(v_{n}/(R_{n}+z))\\
+\Omega_{E}\sin\lambda+(v_{n}\tan\lambda/(R_{N}+z))
+\end{array}\right]
+\]
+with $\Omega_{E}$ the angular rotation rate of the Earth, the skew-symmetric
+representation of $\omega$ is $\Omega_{il}^{l}$: \\
+\[
+\Omega_{il}^{l}=\left[\begin{array}{ccc}
+0 & -\omega_{3} & \omega_{2}\\
+\omega_{3} & 0 & -\omega_{1}\\
+-\omega_{2} & \omega_{1} & 0
+\end{array}\right]
+\]
+To reverse this procedure, start with the representation of the derivative
+of the transformation matrix, now expressed in terms of the l-frame
+angular rates represented by \{$\dot{\theta}$, $\dot{\phi}$, $\dot{\psi}$\},
+which can be determined by differentiating the measurements of pitch,
+roll, and heading. This is $\dot{\boldsymbol{R}}_{a}^{l}$, and its
+components in terms of the derivatives of the measured angles are
+as follows:
+\begin{quotation}
+{[}1,1{]}: dR{[}1,1{]}dt = d($\sin\psi\cos\theta$)/dt = $\dot{\psi}\cos\psi\cos\theta-\dot{\theta}\sin\psi\sin\theta$
+
+{[}1,2{]}: $\sin\psi\sin\theta\sin\phi+\cos\psi\cos\phi\rightarrow\dot{\psi}(\cos\psi\sin\theta\sin\phi-\sin\psi\cos\phi)+\dot{\theta}\sin\psi\cos\theta\sin\phi+\dot{\phi}(\sin\psi\sin\theta\cos\phi-\cos\psi\sin\phi)$
+
+{[}1,3{]}: $\cos\psi\sin\phi-\sin\psi\sin\theta\cos\phi\rightarrow\dot{\psi}(-\sin\psi\sin\phi-\cos\psi\sin\theta\cos\phi)+\dot{\theta(-}\sin\psi\cos\theta\cos\phi)+\dot{\phi}(\cos\psi\cos\phi+\sin\psi\sin\theta\sin\phi)$
+
+{[}2,1{]}: $\cos\psi\cos\theta\rightarrow\dot{\psi}(-\sin\psi\cos\theta)+\dot{\theta}(-\cos\psi\sin\theta)$
+
+{[}2.2{]}: $\cos\psi\sin\theta\sin\phi-\sin\psi\cos\phi\rightarrow\dot{\psi}(-\sin\psi\sin\theta\sin\phi-\cos\psi\cos\phi)+\dot{\theta}\cos\psi\cos\theta\sin\phi+\dot{\phi}(\cos\psi\sin\theta\cos\phi+\sin\psi\sin\phi)$
+
+{[}2.3{]}: $-\cos\psi\sin\theta\cos\phi-\sin\psi\sin\phi\rightarrow\dot{\psi}(\sin\psi\sin\theta\cos\phi-\cos\psi\sin\phi)+\dot{\theta}(-\cos\psi\cos\theta\cos\phi)+\dot{\phi}(\cos\psi\sin\theta\sin\phi-\sin\psi\cos\phi)$
+
+{[}3,1{]}: $-\sin\theta\rightarrow\dot{\theta}(-\cos\theta)$
+
+{[}3,2{]}: $\cos\theta\sin\phi\rightarrow\dot{\theta}(-\sin\theta\sin\phi)+\dot{\phi}\cos\theta\cos\phi$
+
+{[}3,3{]}: $-\cos\theta\cos\phi\rightarrow\dot{\theta}\sin\theta\cos\phi+\dot{\phi}\cos\theta\sin\phi$
+\end{quotation}
+Add to this the correction for inertial effects (i.e., $+\boldsymbol{\Omega}_{il}^{a}\boldsymbol{R}_{a}^{l}$),
+then transform back to the a-frame using $\boldsymbol{R}_{l}^{a}$
+(i.e., the inverse of $\boldsymbol{R}_{a}^{l}$) to get the skew-symmetric
+representation of the rotation rates as measured in the a-frame. Then,
+for example, the {[}3,1{]} component of the result is $-$BPITCHR.
+
+<<recover-rotation-rates, include=TRUE, fig.cap=''>>=
+
+D1$pdot <- c(0, diff(D1$PITCH)) *  Rate
+D1$rdot <- c(0, diff(D1$ROLL)) * Rate
+D1$hdot <- c(0, diff(D1$THDG))
+D1$hdot <- (D1$hdot + 540) %% 360 - 180
+D1$hdot <- D1$hdot * Rate
+shift <- -500/Rate
+D1$pdot <- ShiftInTime(D1$pdot, Rate, shift)
+D1$rdot <- ShiftInTime(D1$rdot, Rate, shift)
+D1$hdot <- ShiftInTime(D1$hdot, Rate, shift)
+## the derivative of the transformation matrix in terms of hdot etc.
+with (D1, {
+  ch <- cos(THDG*Cradeg)
+  sh <- sin(THDG*Cradeg)
+  cp <- cos(PITCH*Cradeg)
+  sp <- sin(PITCH*Cradeg)
+  cr <- cos(ROLL*Cradeg)
+  sr <- sin(ROLL*Cradeg)
+  Rd <<- c(hdot*ch*cp-pdot*sh*sp, 
+          hdot*(ch*sp*sr-sh*cr)  + pdot*sh*cp*sr    + rdot*(sh*sp*cr-ch*sr),
+          hdot*(-sh*sr-ch*sp*cr) + pdot*(-sh*cp*cr) + rdot*(ch*cr+sh*sp*sr),
+          hdot*(-sh*cp)          + pdot*(-ch*sp),
+          hdot*(-sh*sp*sr-ch*cr) + pdot*ch*cp*sr    + rdot*(ch*sp*cr+sh*sr),
+          hdot*(sh*sp*cr-ch*sr)  + pdot*(-ch*cp*cr) + rdot*(ch*sp*sr-sh*cr),
+                                 - pdot*cp,
+                                   pdot*(-sp*sr)    + rdot*cp*cr,
+                                   pdot*sp*cr       + rdot*cp*sr)
+})
+RdM <- aperm (array (Rd, dim=c(nrow(D1),3,3)))
+OmegaA <- array (dim=c(nrow(D1),3,3))
+
+for (i in 1:nrow(D1)) {
+  sv <- with(D1[i,], c(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL, THDG, 
+                       BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
+  sv[c(1:2,7:12)] <- sv[c(1:2, 7:12)] * Cradeg
+  rlm <- XfLArV(sv)
+  omega <- as.vector (c(-sv[5] / Rm, 
+                        omegaE*cos(sv[1])+sv[4]/(Rn),
+                        omegaE*sin(sv[1])+sv[4]*tan(sv[1])/Rn), mode='numeric')
+  ## signs account for b-frame to a-frame: reverse sign of 3, swap 1 and 2
+  Oill <- aperm(matrix (c(0, omega[3], omega[2], -omega[3], 0, -omega[1], -omega[2], omega[1], 0), ncol=3))
+  Oilb <- Oill %*% rlm
+  OmegaA[i,,] <- t(rlm) %*% (RdM[,,i] + Oilb/Cradeg)
+}
+D1$BP <- -OmegaA[,1,3]
+D1$BR <- OmegaA[,2,3]
+D1$BY <- -OmegaA[,1,2]
+with(D1[setRange(D1, 80000,83000),], plotWAC(data.frame(Time, BY, BYAWR)))
+with(D1[setRange(D1, 80000,83000),], plotWAC(data.frame(Time, BP, BPITCHR)))
+with(D1[setRange(D1, 80000,83000),], plotWAC(data.frame(Time, BR, BROLLR)))
 
 @
 \begin{center}
