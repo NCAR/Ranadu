@@ -147,7 +147,8 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   for (A in names (ATT)) {
     attr(d, A) <- ATT[[A]]
   }
-  attr (d, "R_dataframe_created") <- date()    # add one global attribute
+  attr (d, "R_dataframe_created") <- date()    # add two global attributes
+  attr (d, "Rate") <- Rate
   
   ######------------------------------------------------------------------
   IntFilter <- function (X, inRate, outRate) {

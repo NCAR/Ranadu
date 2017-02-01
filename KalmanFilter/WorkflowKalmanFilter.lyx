@@ -1198,6 +1198,620 @@ R_{a}^{l}=\begin{bmatrix}\sin\psi\cos\theta & \sin\psi\sin\theta\sin\phi+\cos\ps
 \end_layout
 
 \begin_layout Section
+Comments on 
+\begin_inset Quotes eld
+\end_inset
+
+The components of the derivatives
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The calculations are explained in the document, but it may be useful to
+ elaborate on some of the choices that were made in regard to corrections
+ for inertial effects.
+ Such corrections enter during calculation of the accelerations and again
+ during calculations of the rate of change in attitude angles.
+\end_layout
+
+\begin_layout Subsection
+Accelerations
+\end_layout
+
+\begin_layout Standard
+There are two corrections needed if the accelerations measured in the a-frame
+ are to be used in the l-frame.
+ First, a correction must be made for the Coriolis acceleration that arises
+ from motion relative to a spherical Earch.
+ In addition, a correction is needed because the l-frame itself moves and
+ remains oriented to match the local-level orientation.
+ The Coriolis acceleration is
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{C}_{c}=-2\boldsymbol{\Omega}_{e}\times\boldsymbol{V}\label{eq:Coriolis}
+\end{equation}
+
+\end_inset
+
+where 
+\begin_inset Formula $\boldsymbol{\Omega_{e}}$
+\end_inset
+
+ is the angular rotation rate of the Earch and 
+\begin_inset Formula $\boldsymbol{V}$
+\end_inset
+
+ is the velocity of the aircraft relative to the Earth.
+ 
+\end_layout
+
+\begin_layout Standard
+In the R code, this equation and others involving vector cross products
+ is represented in a skew-symmetric matrix, so this choice merits some explanati
+on.
+ Strangely, core R mathematical functions do not include the cross product
+ needed by this equation.
+ Instead, in R, the 
+\begin_inset Quotes eld
+\end_inset
+
+cross product
+\begin_inset Quotes erd
+\end_inset
+
+ has a different meaning.
+ Of course, there are many solutions that contributors have produced that
+ could be used, but it seemed awkward to use a non-standard package for
+ such a basic function, and it seemed appropriate to select a solution that
+ ensured reproducibility in the future.
+ The representation of the cross product via a skew-symmetric matrix provides
+ such a solution, but it is unfamiliar to many, so an elaboration is provided
+ here: If an angular-rotation vector has coordinates 
+\begin_inset Formula $\boldsymbol{{\bf \omega}}=(\omega_{1},\,\omega_{2},\,\omega_{3})$
+\end_inset
+
+ then the skew-symmetric representation is 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{S}=\left(\begin{array}{ccc}
+0 & -\omega_{3} & \omega_{2}\\
+\omega_{3} & 0 & -\omega_{1}\\
+-\omega_{2} & \omega_{1} & 0
+\end{array}\right)\label{eq:skew-symmetric}
+\end{equation}
+
+\end_inset
+
+Then the cross produce 
+\begin_inset Formula $\boldsymbol{\omega}\times\boldsymbol{\mathbf{V}}$
+\end_inset
+
+ can be found by matrix multiplication via 
+\begin_inset Formula $\boldsymbol{S\thinspace V}$
+\end_inset
+
+ with 
+\begin_inset Formula $\boldsymbol{V}$
+\end_inset
+
+ the column matrix representing the velocity.
+ This equality can be verified by comparing the result of the matrix multiplicat
+ion to the standard formula for the vector product.
+ In particular, the vector representing the rotation of the Earth (
+\begin_inset Formula $\omega_{ie}^{l}$
+\end_inset
+
+, where the notation denotes the rotation rate of the Earth relative to
+ an inertial frame, as observed in the l-frame) has components (0, 
+\begin_inset Formula $\omega_{e}\cos\lambda,$
+\end_inset
+
+ 
+\begin_inset Formula $\omega_{e}\sin\lambda$
+\end_inset
+
+) where 
+\begin_inset Formula $\omega_{e}$
+\end_inset
+
+ is the rotation rate and 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ is the latitude, so the Coriolis acceleration can be represented by
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{C}_{c}=-2\omega_{e}\left(\begin{array}{ccc}
+0 & -\sin\lambda & \cos\lambda\\
+\sin\lambda & 0 & 0\\
+-\cos\lambda & 0 & 0
+\end{array}\right)\left(\begin{array}{c}
+V_{1}\\
+V_{2}\\
+V_{3}
+\end{array}\right)\label{eq:Cor-matrix}
+\end{equation}
+
+\end_inset
+
+This is the form chosen to represent the Coriolis acceleration in the derivative
+ function.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset citation
+LatexCommand citet
+key "noureldin2013fundamentals"
+
+\end_inset
+
+, p.
+\begin_inset space ~
+\end_inset
+
+179, give the components of the rotation rate of the l-frame relative to
+ the Earth, as expressed in the l-frame, as 
+\begin_inset Formula $\omega_{el}^{l}=(-V_{2}/(R_{m}+h),\,V_{1}/(R_{n}+h),\,V_{1}\tan\lambda/(R_{n}+h)$
+\end_inset
+
+ where 
+\begin_inset Formula $R_{m}$
+\end_inset
+
+ and 
+\begin_inset Formula $R_{n}$
+\end_inset
+
+ are respectively the meridional and normal radii of the earth, and 
+\begin_inset Formula $h$
+\end_inset
+
+ is the altitude above the Earth.
+ Expressed as a skew-symmetric matrix, this isel the other component used
+ to correct the measured accelerations when transforming from the a-frame
+ to the l-frame.
+\end_layout
+
+\begin_layout Subsection
+Attitude angles
+\end_layout
+
+\begin_layout Standard
+The approach to finding the derivatives of the attitude angles is to find
+ the derivative (
+\begin_inset Formula $\dot{R_{a}^{l}})$
+\end_inset
+
+ of the transformation matrix from the a-frame to the l-frame and then find
+ the attitude-angle derivatives from the definition of the transformation
+ matrix.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+This material relies heavily on the development in 
+\begin_inset CommandInset citation
+LatexCommand citet
+key "noureldin2013fundamentals"
+
+\end_inset
+
+, pp.
+\begin_inset space ~
+\end_inset
+
+178–180.
+\end_layout
+
+\end_inset
+
+ The steps are these:
+\end_layout
+
+\begin_layout Enumerate
+The IRU measures the rotation rate 
+\begin_inset Formula $\omega_{ia}^{a}$
+\end_inset
+
+ of the a-frame relative to an inertial frame, as observed in the a-frame.
+ In the a-frame, the roll axis is the x-axis forward along the longitudinal
+ axis of the aircraft, the pitch axis is the y-axis to starboard, and the
+ yaw axis is the downward z-axis but with a sign reversal arising from inverse
+ relationship between yaw angle and heading angle, so 
+\begin_inset Formula $\omega_{ia}^{a}=(\mathrm{BROLLR},\,\mathrm{BPITCHR},\,-\mathrm{BYAWR)}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+The derivative needed to find (
+\begin_inset Formula $\dot{R_{a}^{l}})$
+\end_inset
+
+ is instead the rotation rate of the a-frame relative to the l-frame, as
+ observed in the a-frame (
+\begin_inset Formula $\omega_{la}^{a}$
+\end_inset
+
+).
+ This differs from 
+\begin_inset Formula $\omega_{ia}^{a}$
+\end_inset
+
+ by the rotation rate of the l-frame relative to the a-frame, as observed
+ in an inertial frame (
+\begin_inset Formula $\omega_{il}^{a}$
+\end_inset
+
+): 
+\begin_inset Formula $\omega_{la}^{a}=\omega_{ia}^{a}-\omega_{il}^{a}$
+\end_inset
+
+.
+ Transforming 
+\begin_inset Formula $\omega_{la}^{a}$
+\end_inset
+
+ from the a-frame to the l-frame then gives the desired derivative 
+\begin_inset Formula $\dot{R_{a}^{l}}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+As for velocity, the term 
+\begin_inset Formula $\omega_{il}^{a}$
+\end_inset
+
+ contains two contributions, one from the rotation of the Earth (
+\begin_inset Formula $\omega_{ie}^{a}$
+\end_inset
+
+) and the second from the rotation of the l-frame relative to an inertial
+ frame (
+\begin_inset Formula $\omega_{el}^{a}$
+\end_inset
+
+).
+ The first can be obtained by transforming 
+\begin_inset Formula $\omega_{ie}^{l}$
+\end_inset
+
+ as defined in the previous subsection to the a-frame, and the second also
+ is obtained by transforming 
+\begin_inset Formula $\omega_{el}^{l}$
+\end_inset
+
+ as defined previously to the a-frame.
+ The appropriate transformation is the inverse of 
+\begin_inset Formula $R_{a}^{l}$
+\end_inset
+
+, denoted 
+\begin_inset Formula $R_{l}^{a}=t(R_{a}^{l}$
+\end_inset
+
+) where 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $t"$
+\end_inset
+
+denotes the matrix transpose operator: 
+\begin_inset Formula $\omega_{ie}^{a}=R_{l}^{a}\omega_{ie}^{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $\omega_{el}^{a}=R_{l}^{a}\omega_{el}^{l}$
+\end_inset
+
+.
+ In the code, this is replaced by the skew-symmetric equivalent: If 
+\begin_inset Formula $\boldsymbol{\Omega}^{l}$
+\end_inset
+
+ is the skew-symmetric representation of 
+\begin_inset Formula $\omega_{ie}^{l}+\omega_{el}^{l}$
+\end_inset
+
+, the representation in the a-frame is 
+\begin_inset Formula $\boldsymbol{\Omega}^{a}=R_{l}^{a}\boldsymbol{\Omega}^{l}R_{a}^{l}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Expressing 
+\begin_inset Formula $\omega_{ia}^{a}$
+\end_inset
+
+ also as a skew-symmetric matrix, following (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:skew-symmetric"
+
+\end_inset
+
+), and subtracting 
+\begin_inset Formula $\boldsymbol{\Omega}^{a}$
+\end_inset
+
+ from it, gives a skew-symmetric matrix that, when multiplied by 
+\begin_inset Formula $R_{a}^{l}$
+\end_inset
+
+, gives the desired derivative 
+\begin_inset Formula $\dot{\boldsymbol{R}_{a}^{l}}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Enumerate
+The attitude angles can be found from the definitions of the transformation
+ matrix, as specified by (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:XformLA"
+
+\end_inset
+
+):
+\begin_inset Formula 
+\begin{eqnarray*}
+\theta & = & \arcsin(-R_{l}^{a}[3,1])\\
+\phi & = & \arctan2(R_{l}^{a}[3,2],\,-R_{l}^{a}[3,3])\\
+\Psi & = & \arctan2(R_{l}^{a}[1,1],\,R_{l}^{a}[2,1])
+\end{eqnarray*}
+
+\end_inset
+
+The derivatives of the attitude angles are then given by the derivatives
+ of the arcsin and arctan functions:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray*}
+\frac{d(\arcsin(x))}{dx} & = & \frac{1}{\sqrt{1-x^{2}}}\\
+\frac{d(\arctan(x))}{dx} & = & \frac{1}{1+x^{2}}\\
+\dot{\theta} & = & \frac{-1}{\sqrt{1-R_{l}^{a}[3,1]^{2}}}\dot{R}_{l}^{a}[3,1]\\
+\dot{\phi} & = & \frac{1}{1+\left(R_{l}^{a}[3,2]/R_{l}^{a}[3.3]\right)^{2}}\frac{R_{l}^{a}[3,2]}{R_{l}^{a}[3,3]}\left(\frac{\dot{R}_{l}^{a}[3,3]}{R_{l}^{a}[3,3]}-\frac{\dot{R}_{l}^{a}[3,2]}{R_{l}^{a}[3,2]}\right)\\
+\dot{\psi} & = & \frac{1}{1+\left(R_{l}^{a}[1,1]/R_{l}^{a}[2,1]\right)^{2}}\frac{R_{l}^{a}[1,1]}{R_{l}^{a}[2,1]}\left(\frac{\dot{R}_{l}^{a}[1,1]}{R_{l}^{a}[1,1]}-\frac{\dot{R}_{l}^{a}[2,1]}{R_{l}^{a}[2,1]}\right)\\
+ & = & \frac{1}{1+\left(R_{l}^{a}[1,1]/R_{l}^{a}[2,1]\right)^{2}}\left(\frac{\dot{R}_{l}^{a}[1,1]}{R_{l}^{a}[2,1]}-\frac{\dot{R}_{l}^{a}[2,1]R_{l}^{a}[1,1]}{R_{l}^{a}[2,1]^{2}}\right)
+\end{eqnarray*}
+
+\end_inset
+
+Because 
+\begin_inset Formula $R_{l}^{1}[2,1]$
+\end_inset
+
+ (equal to 
+\begin_inset Formula $\cos\psi\cos\theta$
+\end_inset
+
+) can pass through zero for heading of 90 or 270
+\begin_inset Formula $^{\circ},$
+\end_inset
+
+ some numerical problems arise when the last equation is used.
+ (Avoiding similar problems at the zero for 
+\begin_inset Formula $R_{l}^{a}[1,1]$
+\end_inset
+
+ is the justification for using the second form of the last equation.) For
+ small 
+\begin_inset Formula $R_{l}^{a}[2,1]$
+\end_inset
+
+, the last equation becomes
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\dot{\psi}=\left(\frac{R_{l}^{a}[2,1]\dot{R}_{l}^{a}[1,1]}{R_{l}^{a}[1,1]^{2}}-\frac{\dot{R}_{l}^{a}[2,1]}{R_{l}^{a}[1,1]}\right)
+\]
+
+\end_inset
+
+which avoids the singularity, so this form will be used when the absolute
+ value of 
+\begin_inset Formula $R_{l}^{a}[2,1]$
+\end_inset
+
+ is smaller than 
+\begin_inset Formula $R_{l}^{a}[1,1]/10$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Discussion of the 
+\begin_inset Quotes eld
+\end_inset
+
+Tests of the derivatives
+\begin_inset Quotes erd
+\end_inset
+
+ section
+\end_layout
+
+\begin_layout Standard
+An important part of the work that is background to this section was determining
+ the time shifts to apply to various measurements from the INS.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+initialization
+\begin_inset Quotes erd
+\end_inset
+
+ chunk of R code applies these time shifts, using the 
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu::ShiftInTime()
+\begin_inset Quotes erd
+\end_inset
+
+ function.
+ The time shifts quoted in the text were determined by varying the shifts
+ specified in that section and observing the result by plotting the plot
+ generated in the 
+\begin_inset Quotes eld
+\end_inset
+
+plot-acc
+\begin_inset Quotes erd
+\end_inset
+
+ chunk but modified to display only the pitch maneuver (3::16:00 to 3:18:00)
+ and observing the difference between the measured values and the values
+ determined from the derivatives of the velocity measurements.
+ This was not done systematically but rather by trial-and-error to find
+ a combination of time shifts that showed small fluctuations during the
+ maneuver.
+ These results are sensitive to pitch and roll as well because, in the case
+ of pitch, gravity is resolved into a longitudinal component of acceleration
+ that affects the comparison to BLONGA, and in the case of roll small roll
+ angles created similar contributions to the lateral acceleration represented
+ by BLATA.
+ In the exploration of time shifts, the measured accelerations were assumed
+ to have the same time delays, and similar assumptions were made about the
+ pitch-roll pair and the set of velocities.
+ With the listed shifts, the residual errors (shown in Tables 1 and 2) were
+ so small that further refinement did not seem warranted.
+\end_layout
+
+\begin_layout Standard
+Not discussed here are the small differences that persisted in the circle
+ maneuvers.
+ These were very small in magnitude (
+\begin_inset Formula $<0.05$
+\end_inset
+
+
+\begin_inset space \thinspace{}
+\end_inset
+
+m
+\begin_inset space \thinspace{}
+\end_inset
+
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+) but nevertheless systematic and correctable.
+ For example, the difference between lateral acceleration components measured
+ by the INS and deduced by differentiating the GPS signals needs the approximate
+ correction term,
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\delta a_{lat}=0.43\,\dot{\psi}(1+\sin\psi)
+\]
+
+\end_inset
+
+which has typical magnitude in the range (0–0.03
+\begin_inset space ~
+\end_inset
+
+m
+\begin_inset space \thinspace{}
+\end_inset
+
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+.
+ The difference between the acceleration at the location of the GPS antenna
+ and that at the INS, if they are separated by 
+\begin_inset Formula $L\approx4.3$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+m along the longitudinal axis of the aircraft, would be expected to be
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\delta a_{long}=\dot{\psi}^{2}L
+\]
+
+\end_inset
+
+and the typical values in the turn are 
+\begin_inset Formula $\dot{\psi}=0.035$
+\end_inset
+
+, so the expected magnitude of this centripetal acceleration would be about
+ 0.005
+\begin_inset space ~
+\end_inset
+
+m
+\begin_inset space \thinspace{}
+\end_inset
+
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+, smaller than needed to account for these errors.
+ If there is also a rotation 
+\begin_inset Formula $\dot{\theta}$
+\end_inset
+
+ about the pitch axis, there would be a similar contribution from that rotation,
+ but the typical magnidute of 
+\begin_inset Formula $\dot{\theta}$
+\end_inset
+
+ is only about 0.001, so this contribution is yet smaller.
+ No explanation for these small perturbations has been found, and they appear
+ only in prolonged turns.
+ 
+\end_layout
+
+\begin_layout Section
 Discussion of the 
 \begin_inset Quotes eld
 \end_inset
@@ -1331,7 +1945,7 @@ frame instead of the
 b-
 \emph default
 frame (body frame) used in that source.
- In addition, the derivatives for the attitude-angle components were calculated
+ In addition, the derivatives of the attitude-angle components were calculated
  differently, so some detail regarding this function is approproate.
 \end_layout
 

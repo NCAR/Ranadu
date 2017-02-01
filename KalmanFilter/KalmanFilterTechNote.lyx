@@ -710,6 +710,11 @@ source ('~/RStudio/Ranadu/R/theme_WAC2.R')
 
 \begin_layout Plain Layout
 
+source ('~/RStudio/Ranadu/R/getNetCDF.R')
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -874,32 +879,112 @@ Cradeg <- pi/180
 
 \begin_layout Plain Layout
 
+## Remove time lags imposed during processing:
+\end_layout
+
+\begin_layout Plain Layout
+
+for (V in VarList) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  if (V == 'THDG') {next}
+\end_layout
+
+\begin_layout Plain Layout
+
+  Z <- data.frame(getAttributes(Data[, V], .print=FALSE))
+\end_layout
+
+\begin_layout Plain Layout
+
+  ## re signs: assumed lag has been corrected, so use - sign to remove
+\end_layout
+
+\begin_layout Plain Layout
+
+  if ('TimeLag' %in% names(Z)) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    Data[, V] <- ShiftInTime(Data[, V], .rate=25, .shift=-Z$TimeLag[1])
+\end_layout
+
+\begin_layout Plain Layout
+
+  }
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+# .shift <- -70
+\end_layout
+
+\begin_layout Plain Layout
+
+VV <- c('BLONGA', 'BLATA', 'BNORMA')
+\end_layout
+
+\begin_layout Plain Layout
+
+.shift <- c(-50,-50,-50)
+\end_layout
+
+\begin_layout Plain Layout
+
+names(.shift) <- VV
+\end_layout
+
+\begin_layout Plain Layout
+
+for (V in VV) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  Data[, V] <- ShiftInTime (Data[, V], 25, .shift[V])
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+# Data[, 'VSPD'] <- ShiftInTime (Data[, 'VSPD'], 25, 40)
+\end_layout
+
+\begin_layout Plain Layout
+
+# Data[, 'VEW'] <- ShiftInTime (Data[, 'VEW'], 25, 60)
+\end_layout
+
+\begin_layout Plain Layout
+
+# Data[, 'VNS'] <- ShiftInTime (Data[, 'VNS'], 25, 60)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data[, 'PITCH'] <- ShiftInTime (Data[, 'PITCH'], 25, 20)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data[, 'ROLL'] <- ShiftInTime (Data[, 'ROLL'], 25, 20)
+\end_layout
+
+\begin_layout Plain Layout
+
 .shift = 60
-\end_layout
-
-\begin_layout Plain Layout
-
-Data$PITCH <- ShiftInTime (Data$PITCH, .rate=25, .shift)
-\end_layout
-
-\begin_layout Plain Layout
-
-Data$ROLL <- ShiftInTime (Data$ROLL, .rate=25, .shift)
-\end_layout
-
-\begin_layout Plain Layout
-
-# for (V in c('BYAWR')) {
-\end_layout
-
-\begin_layout Plain Layout
-
-#   Data[, V] <- ShiftInTime (Data[, V], 25, .shift)
-\end_layout
-
-\begin_layout Plain Layout
-
-# }
 \end_layout
 
 \begin_layout Plain Layout
@@ -914,12 +999,17 @@ Data$ROLL <- ShiftInTime (Data$ROLL, .rate=25, .shift)
 
 \begin_layout Plain Layout
 
-Data$pdot <- c(0, diff (Data$PITCH)) * 25
+Rate <- attr (Data, 'Rate')
 \end_layout
 
 \begin_layout Plain Layout
 
-Data$rdot <- c(0, diff (Data$ROLL)) * 25
+Data$pdot <- c(0, diff (Data$PITCH)) * Rate
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$rdot <- c(0, diff (Data$ROLL)) * Rate
 \end_layout
 
 \begin_layout Plain Layout
@@ -934,7 +1024,27 @@ Data$hdot <- (Data$hdot + 540) %% 360 - 180
 
 \begin_layout Plain Layout
 
-Data$hdot <- Data$hdot * 25
+Data$hdot <- Data$hdot * Rate
+\end_layout
+
+\begin_layout Plain Layout
+
+shift <- -500 / Rate
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$pdot <- ShiftInTime (Data$pdot, Rate, shift)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$rdot <- ShiftInTime (Data$rdot, Rate, shift)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$hdot <- ShiftInTime (Data$hdot, Rate, shift)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1282,12 +1392,12 @@ status open
 
 \begin_layout Plain Layout
 
-ATT <- getAttributes(Data, .print=FALSE)
+# ATT <- getAttributes(Data, .print=FALSE)
 \end_layout
 
 \begin_layout Plain Layout
 
-Rate <- DataFileInfo (fname)$Rate  ## only rates 1 and 25 supported
+# Rate <- DataFileInfo (fname)$Rate  ## only rates 1 and 25 supported
 \end_layout
 
 \begin_layout Plain Layout
@@ -1303,6 +1413,11 @@ DL <- nrow(Data)
 \begin_layout Plain Layout
 
 OmegaE <- StandardConstant ('Omega')  ## Earth's rotation rate
+\end_layout
+
+\begin_layout Plain Layout
+
+OmegaE <- 15*Cradeg/3600              ## better match to INS?
 \end_layout
 
 \begin_layout Plain Layout
@@ -1368,133 +1483,7 @@ r <- setRange (Data, 31000, 35500)
 
 \begin_layout Plain Layout
 
-SP <- with (Data[r,], data.frame (LAT, LON, ALT, VEW, VNS, VSPD, 
-\end_layout
-
-\begin_layout Plain Layout
-
-                              ROLL, PITCH, THDG, GGALT, GGVSPD, BLATA, BLONGA,
- BNORMA, 
-\end_layout
-
-\begin_layout Plain Layout
-
-                              BPITCHR, BROLLR, BYAWR,
-\end_layout
-
-\begin_layout Plain Layout
-
-                              GGVEW, GGVNS, Grav))
-\end_layout
-
-\begin_layout Plain Layout
-
 Data <- Data[r,]
-\end_layout
-
-\begin_layout Plain Layout
-
-## adjustments:
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BYAWR <- (SP$BYAWR - 0.0003) * 1.008
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BROLLR <- SP$BROLLR + 0.0005
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BPITCHR <- SP$BPITCHR + 0.0003
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BNORMA <- SP$BNORMA*1.0086 - 0.0083
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BLONGA <- SP$BLONGA * 1.0062 - 0.0002
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BLATA <- SP$BLATA * 1.0604 + 0.0030
-\end_layout
-
-\begin_layout Plain Layout
-
-## consider the possible effects of misalignment of INS wrt AC axes
-\end_layout
-
-\begin_layout Plain Layout
-
-VROT <- array(c(SP$BPITCHR, SP$BROLLR, SP$BYAWR), dim=c(nrow(SP), 3))
-\end_layout
-
-\begin_layout Plain Layout
-
-SX <- data.frame(ROLL=rep(0.05,nrow(SP)), PITCH=rep(0.15,nrow(SP)), THDG=rep(0,nrow
-(SP)))
-\end_layout
-
-\begin_layout Plain Layout
-
-VROTA <- XformLA(SX, VROT)
-\end_layout
-
-\begin_layout Plain Layout
-
-# SP$BPITCHR <- VROTA[,2]
-\end_layout
-
-\begin_layout Plain Layout
-
-# SP$BROLLR <- VROTA[,1]
-\end_layout
-
-\begin_layout Plain Layout
-
-# SP$BYAWR <- -VROTA[,3]
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BPITCHR <- SP$BPITCHR * Cradeg
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BROLLR <- SP$BROLLR * Cradeg
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$BYAWR <- SP$BYAWR * Cradeg
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$Rn <- Ree / (1 - (Ecc*sin(Data$GGLAT*Cradeg))^2)^0.5 + Data$GGALT
-\end_layout
-
-\begin_layout Plain Layout
-
-SP$Rm <- SP$Rn * (1-Ecc^2) / (1-(Ecc*sin(Data$GGLAT*Cradeg))^2) + Data$GGALT
-\end_layout
-
-\begin_layout Plain Layout
-
-SPR <- SP   ## save what INS produced, as reference
 \end_layout
 
 \begin_layout Plain Layout
@@ -1647,6 +1636,13 @@ mechanization
 \end_deeper
 \begin_layout Subsection
 The components of the derivative array
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:deriv-array"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1834,12 +1830,12 @@ Calculating the derivatives of the attitude angles is more involved.
 
  is known by using the definitions of the components of that matrix in terms
  of the attitude angles.
- For example, the [1,2] component of that matrix is 
+ For example, the [3.1] component of that matrix is 
 \begin_inset Formula $-\sin\theta$
 \end_inset
 
 , so 
-\begin_inset Formula $\theta=-\arcsin(R_{a}^{l}[1,2])$
+\begin_inset Formula $\theta=-\arcsin(R_{a}^{l}[3,1])$
 \end_inset
 
 .
@@ -1904,7 +1900,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<check-accelerations, include=TRUE, digits=4, fig.cap='', cache=TRUE>>=
+<<check-accelerations, include=TRUE, digits=4, fig.cap='', cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -1938,6 +1934,57 @@ D1$Rm <- D1$Rn * (1-Ecc^2) / (1-(Ecc*sin(D1$GGLAT*Cradeg))^2) + D1$GGALT
 \begin_layout Plain Layout
 
 D1$Grav <- Gravity (D1$LAT, D1$GGALT)
+\end_layout
+
+\begin_layout Plain Layout
+
+PC <- CorrectPitch (D1)
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$PITCH <- D1$PITCH - PC[, 1]
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$ROLL <- D1$ROLL - PC[, 2]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## adjust GPS velocity components for GPS antenna location
+\end_layout
+
+\begin_layout Plain Layout
+
+LG <- -4.30 
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$GGVEW <- D1$GGVEW - LG * D1$hdot * cos(D1$ROLL*Cradeg) * sin(D1$THDG*Cradeg
+) * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$GGVNS <- D1$GGVNS + LG * D1$hdot * cos(D1$ROLL*Cradeg) * cos(D1$THDG*Cradeg
+) * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+# D1$GGVSPD <- D1$GGVSPD - LG * (D1$pdot + D1$hdot * sin(D1$ROLL*Cradeg))
+ * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -2040,7 +2087,12 @@ G <- D1$Grav
 
 \begin_layout Plain Layout
 
-VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3)
+VL <- matrix(c(D1$GGVEW, D1$GGVNS, D1$GGVSPD), ncol=3)
+\end_layout
+
+\begin_layout Plain Layout
+
+VL2 <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3)
 \end_layout
 
 \begin_layout Plain Layout
@@ -2052,7 +2104,7 @@ LA <- matrix (c(D1$vedot, D1$vndot, -D1$vudot - G), ncol=3) + RotationCorrection
 \begin_layout Plain Layout
 
 LA2 <- matrix (c(D1$vedot2, D1$vndot2, -D1$vudot2 - G), ncol=3) + RotationCorrec
-tion (D1, VL)
+tion (D1, VL2)
 \end_layout
 
 \begin_layout Plain Layout
@@ -2092,17 +2144,37 @@ fa3 <- lm(AA[, 3] ~ D1$BNORMA)
 
 \begin_layout Plain Layout
 
-fb1 <- lm(D1$BLONGA ~ AA2[, 1])
+fb1 <- lm(AA2[, 1] ~ D1$BLONGA)
 \end_layout
 
 \begin_layout Plain Layout
 
-fb2 <- lm(D1$BLATA ~ AA2[, 2])
+fb2 <- lm(AA2[, 2] ~ D1$BLATA)
 \end_layout
 
 \begin_layout Plain Layout
 
-fb3 <- lm(D1$BNORMA ~ AA2[, 3])
+fb3 <- lm(AA2[, 3] ~ D1$BNORMA)
+\end_layout
+
+\begin_layout Plain Layout
+
+cfa1 <- coef(fa1); cfa2 <- coef(fa2); cfa3 <- coef(fa3)
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$BLONGA <- cfa1[1] + cfa1[2] * Data$BLONGA
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$BLATA  <- cfa2[1] + cfa2[2] * Data$BLATA
+\end_layout
+
+\begin_layout Plain Layout
+
+D1$BNORMA <- cfa3[1] + cfa3[2] * Data$BNORMA
 \end_layout
 
 \begin_layout Plain Layout
@@ -2128,8 +2200,12 @@ AL <- XformLA (D1, AB)                                    #l-frame
 
 \begin_layout Plain Layout
 
-AL <- AL - RotationCorrection (D1, VL)  ##### check this sign and prev call
- above
+RC <- RotationCorrection (D1, VL)
+\end_layout
+
+\begin_layout Plain Layout
+
+AL <- AL - RC  ##### note this sign and prev call above -- checked!
 \end_layout
 
 \begin_layout Plain Layout
@@ -2343,6 +2419,11 @@ r6 <- summary(fn3)$r.squared
 
 \begin_layout Plain Layout
 
+options(digits=5)
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \begin_layout Plain Layout
@@ -2369,10 +2450,72 @@ on of the accelerometers.
 \end_layout
 
 \begin_layout Standard
+Relative timing among the measurements can influence these results.
+ Many of the variables have corrections applied for assumed lags, so in
+ this check of accelerations those lags were first removed.
+ Then there were additional lags apparent among variables provided by the
+ INS, even when tagged with the same times.
+ To determine these lags, a pitch maneuver (where the pilots induce rapid
+ changes in pitch with associated climbs and descents during straight flight)
+ was used, from DEEPWAVE flight 15, 3:16:00–3:18:00 UTC.
+ Shifting among the measurements from the INS was explored to see what provided
+ the best agreement between measured accelerations (variables BLONGA, BLATA,
+ BNORMA) and the accelerations determined by differentiating the INS variables
+ for aircraft velocity (VEW, VNS, VSPD) and then transforming the resulting
+ accelerations to the a-frame (where the IRU-provided accelerations are
+ measured).
+ That transformation must include correction for inertial effects as discussed
+ in Sect.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:deriv-array"
+
+\end_inset
+
+, item 2.
+ The standard deviation of the difference between the measured acceleration
+ and that determined by differentiating the measured aircraft velocity was
+ minimized if the measurements of acceleration were moved 50
+\begin_inset space ~
+\end_inset
+
+ms earlier in time, the measurements of pitch and roll were shifted 20
+\begin_inset space ~
+\end_inset
+
+ms later in time, and no shift was applied to the measurements of aircraft
+ velocity.
+ These are all important only in relation to each other; the same result
+ is obtained if the accelerations are moved earlier by 70
+\begin_inset space ~
+\end_inset
+
+ms, measurements of velocity moved earlier by 20
+\begin_inset space ~
+\end_inset
+
+ms, and measurements of pitch and roll left unshifted.
+ The specifications for the INS state that there may be lags in the times
+ when variables are transmitted from the unit of up to about 70
+\begin_inset space ~
+\end_inset
+
+ms for accelerations and attitude angles and up to 110
+\begin_inset space ~
+\end_inset
+
+ms for velocity components, so these shifts are within the approximate range
+ expected.
+ For the purpose of comparing accelerations, the optimal shifts were applied
+ to the measurements.
 \begin_inset Float table
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \noindent
@@ -2404,7 +2547,15 @@ fit
 \begin_inset Formula $c_{0}$
 \end_inset
 
+ [m
+\begin_inset space \thinspace{}
+\end_inset
 
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+]
 \end_layout
 
 \end_inset
@@ -2428,7 +2579,15 @@ fit
 \begin_inset Formula $\sigma$
 \end_inset
 
+ [m
+\begin_inset space \thinspace{}
+\end_inset
 
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+]
 \end_layout
 
 \end_inset
@@ -2713,7 +2872,19 @@ Sexpr{s4}
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.99997
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{r4}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2796,7 +2967,19 @@ Sexpr{s5}
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.99997
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{r5}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2836,7 +3019,7 @@ fit
 \begin_inset Formula $\sigma,$
 \end_inset
 
-and the square of the correlation coefficient is 
+ and the square of the correlation coefficient is 
 \begin_inset Formula $R^{2}$
 \end_inset
 
@@ -2862,58 +3045,12 @@ name "tab:accel-fits"
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-Table 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "tab:accel-fits"
-
-\end_inset
-
- shows the results of fitting linear polynomials in the measured accelerations,
- after transformation to the l-frame and inertial corrections, to the derivative
-s determined by differentiation.
- The GPS measurements provide independent measurements of the accelerations,
- so the first two fits can be considered checks of the calibrations of the
- accelerometers as well as a test of the calculation procedures.
- They indicate only small offsets and near-unity slopes.
- 
-\begin_inset Note Note
+\begin_inset Float table
+wide false
+sideways false
 status open
 
 \begin_layout Plain Layout
-The third is an indication that the calibration of the normal component
- needs adjustment, because the slope is only about 0.95.
- 
-\end_layout
-
-\end_inset
-
-The last two fits compare only INS-dependent values, so they test the validity
- of the transformations and protect against any unknown calibration adjustments
- that might have been applied by the INS without affecting the reported
- accelerations.
- 
-\end_layout
-
-\begin_layout Standard
-A better estimate of accelerometer calibration can be obtained by transforming
- the l-frame accelerations determined by differentiating the GPS-provided
- velocities to the a-frame, where they can be compared directly to the component
-s of the measured accelerations.
- When this is done, the calibrations in the following table result from
- linear fits.
- Lateral accelerations are usually small, so the second calibration is not
- as reliable as the other two, but all show reasonable agreement between
- the calibrations in use and those indicated by these fits.
- Although the small adjustments have little effect, the calibrations indicated
- in this table will be applied to the measured accelerations in the remainder
- of this technical note.
-\end_layout
-
-\begin_layout Standard
 \noindent
 \align center
 \begin_inset Tabular
@@ -2941,7 +3078,15 @@ Component
 \begin_inset Formula $c_{0}$
 \end_inset
 
+ [m
+\begin_inset space ~
+\end_inset
 
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+ ]
 \end_layout
 
 \end_inset
@@ -3123,40 +3268,89 @@ Sexpr{summary(fa3)$coef[2]}
 \end_inset
 
 
-\begin_inset Newline newline
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Results like those in the preceding table but for accelerations in the a-frame.
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:a-frame-fits"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \end_inset
 
 
 \end_layout
 
 \begin_layout Standard
-Figure 
-\begin_inset ERT
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:accel-fits"
+
+\end_inset
+
+ shows the results of fitting linear polynomials in the measured accelerations
+ after transformation to the l-frame (with inertial corrections) to the
+ derivatives determined by differentiation.
+ The GPS measurements provide independent measurements of the accelerations,
+ so the first two fits can be considered checks of the calibrations of the
+ accelerometers as well as a test of the calculation procedures.
+ They indicate only small offsets and near-unity slopes.
+ 
+\begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-
-
-\backslash
-ref{fig:plot-acc}
+The third is an indication that the calibration of the normal component
+ needs adjustment, because the slope is only about 0.95.
+ 
 \end_layout
 
 \end_inset
 
- shows a short flight segment comparing the measured accelerations and the
- accelerations determined by differentiating the GPS-provided velocities
- and transforming to the a-frame.
- There were three maneuvers that introduced accelerations: (i) a pitch maneuver
- near 3:17:00 UTC where pilots varied the pitch rapidly, causing periodic
- accelerations normal to the aircraft; (ii) a speed run centered near 3:25:00
- UTC where the airspeed was varied through the flight envelope of the GV,
- producing large changes in pitch and resulting resolution of the acceleration
- of gravity into varying contributions to the longitudinal acceleration;
- and (iii) yaw maneuvers near 3:34:00 UTC where strong lateral accelerations
- were induced by rudder action.
- The good agreement and the near-identity calibrations tabulated above support
- that the accelerations are being treated properly in the calculations and
- also that the calibrations of the accelerometers are good.
+The last two fits compare only INS-dependent values, so they test the validity
+ of the transformations and protect against any unknown calibration adjustments
+ that might have been applied by the INS without affecting the reported
+ accelerations.
+ 
+\end_layout
+
+\begin_layout Standard
+A better estimate of accelerometer calibration can be obtained by transforming
+ the l-frame accelerations determined by differentiating the GPS-provided
+ velocities to the a-frame, where they can be compared directly to the component
+s of the measured accelerations.
+ When this is done, the calibrations in Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:a-frame-fits"
+
+\end_inset
+
+ result from linear fits.
+ Lateral accelerations are usually small, so the second calibration is not
+ as reliable as the other two, but all show reasonable agreement between
+ the calibrations in use and those indicated by these fits.
+ Although the small adjustments have little effect, the calibrations indicated
+ in this table will be applied to the measured accelerations in the remainder
+ of this technical note.
 \end_layout
 
 \begin_layout Standard
@@ -3165,13 +3359,13 @@ status open
 
 \begin_layout Plain Layout
 
-<<plot-acc, include=TRUE, fig.height=7,fig.cap='Comparison of measured acceleratio
+<<plot-acc, include=TRUE, fig.height=6,fig.cap='Comparison of measured acceleratio
 ns {BLONGA, BLATA, BNORMA, blue lines} to the accelerations determined by
  differentiating the velocity components measured by the GPS receiver and
- then translating these to the a-frame ({AA1, AA2, AA3}, dashed red lines),
- from a period during DEEPWAVE flight 15 that includes pitch maneuvers,
- a speed run, and yaw maneuvers (in sequence in this time segment).', cache=TRUE>
->=
+ then translating these to the a-frame (dashed red lines), from a period
+ during DEEPWAVE flight 15 that includes a pitch maneuver, a speed run and
+ a yaw maneuver at the times corresponding to the plot annotations.', cache=FALSE
+>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -3238,6 +3432,36 @@ D1$AA3 <- AA[,3]
 
 \begin_layout Plain Layout
 
+t1 <- D1$Time[getIndex(D1, 31700)]
+\end_layout
+
+\begin_layout Plain Layout
+
+t2 <- D1$Time[getIndex(D1, 32535)]
+\end_layout
+
+\begin_layout Plain Layout
+
+t3 <- D1$Time[getIndex(D1, 33320)]
+\end_layout
+
+\begin_layout Plain Layout
+
+PanelGroup <- gl (3, 3, labels=c('longitudinal', 'lateral', 'normal'))
+\end_layout
+
+\begin_layout Plain Layout
+
+label.df <- data.frame (t=c(t1,t2,t3), y=c(-0.4,1.7,0.3), 
+\end_layout
+
+\begin_layout Plain Layout
+
+                        PanelGroup, label=c('pitch', 'speed-run', 'yaw'))
+\end_layout
+
+\begin_layout Plain Layout
+
 d <- with (D1[setRange(D1, 31300, 33600), ], data.frame(Time, BLONGA, AA1,
  BLATA, AA2, BNORMA, AA3))
 \end_layout
@@ -3265,7 +3489,25 @@ ggplotWAC(d, col=c('blue', 'red'), lwd=c(0.8,0.6), lty=c(1,42), panels=3,
 
 \begin_layout Plain Layout
 
-          legend.position=c(0.8, 0.94))
+          legend.position=c(0.8, 0.94)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+        + geom_label (aes(x=t, y=y, label=label), data=label.df[4,], inherit.aes=F
+ALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+        + geom_label (aes(x=t, y=y, label=label), data=label.df[2,], inherit.aes=F
+ALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+        + geom_label (aes(x=t, y=y, label=label), data=label.df[6,], inherit.aes=F
+ALSE)
 \end_layout
 
 \begin_layout Plain Layout
@@ -3275,6 +3517,31 @@ ggplotWAC(d, col=c('blue', 'red'), lwd=c(0.8,0.6), lty=c(1,42), panels=3,
 
 \begin_layout Plain Layout
 
+\end_layout
+
+\begin_layout Plain Layout
+
+## use the calibration determined by comparison to GPS:
+\end_layout
+
+\begin_layout Plain Layout
+
+cfa1 <- coef(fa1); cfa2 <- coef(fa2); cfa3 <- coef(fa3)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$BLONGA <- cfa1[1] + cfa1[2] * Data$BLONGA
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$BLATA  <- cfa2[1] + cfa2[2] * Data$BLATA
+\end_layout
+
+\begin_layout Plain Layout
+
+Data$BNORMA <- cfa3[1] + cfa3[2] * Data$BNORMA
 \end_layout
 
 \begin_layout Plain Layout
@@ -3289,6 +3556,36 @@ ggplotWAC(d, col=c('blue', 'red'), lwd=c(0.8,0.6), lty=c(1,42), panels=3,
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:plot-acc}
+\end_layout
+
+\end_inset
+
+ shows a short flight segment comparing the measured accelerations and the
+ accelerations determined by differentiating the GPS-provided velocities
+ and transforming to the a-frame.
+ There were three maneuvers that introduced accelerations: (i) a pitch maneuver
+ near 3:17:00 UTC where pilots varied the pitch rapidly, causing periodic
+ accelerations normal to the aircraft; (ii) a speed run centered near 3:25:00
+ UTC where the airspeed was varied through the flight envelope of the GV,
+ producing large changes in pitch and resulting resolution of the acceleration
+ of gravity into varying contributions to the longitudinal acceleration;
+ and (iii) a yaw maneuver near 3:34:00 UTC where strong lateral accelerations
+ were induced by rudder action.
+ The good agreement and the near-identity calibrations tabulated above support
+ that the accelerations are being treated properly in the calculations and
+ also that the calibrations of the accelerometers are good.
 \end_layout
 
 \begin_layout Standard
@@ -3443,7 +3740,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<mechanization, include=TRUE, fig.lp='fig:', fig.cap=' ', cache=TRUE>>=
+<<mechanization, include=TRUE, fig.lp='fig:', fig.cap=' ', cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -3452,8 +3749,148 @@ status open
 
 \begin_layout Plain Layout
 
-SV <- with(Data[1, ], data.frame(LAT, LON, GGALT, VEW, VNS, VSPD, PITCH,
- ROLL, THDG,
+SP <- with (Data, data.frame (LAT, LON, ALT, VEW, VNS, VSPD, 
+\end_layout
+
+\begin_layout Plain Layout
+
+                              ROLL, PITCH, THDG, GGALT, GGVSPD, BLATA, BLONGA,
+ BNORMA, 
+\end_layout
+
+\begin_layout Plain Layout
+
+                              BPITCHR, BROLLR, BYAWR,
+\end_layout
+
+\begin_layout Plain Layout
+
+                              GGVEW, GGVNS, Grav))
+\end_layout
+
+\begin_layout Plain Layout
+
+## adjustments:
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BYAWR <- (SP$BYAWR - 0.0003) * 1.008
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$BROLLR <- SP$BROLLR + 0.0002
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$BPITCHR <- SP$BPITCHR + 0.001
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BNORMA <- SP$BNORMA*1.0086 - 0.0083
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BLONGA <- SP$BLONGA * 1.0062 - 0.0002
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BLATA <- SP$BLATA * 1.0604 + 0.0030
+\end_layout
+
+\begin_layout Plain Layout
+
+## consider the possible effects of misalignment of INS wrt AC axes
+\end_layout
+
+\begin_layout Plain Layout
+
+VROT <- array(c(SP$BPITCHR, SP$BROLLR, SP$BYAWR), dim=c(nrow(SP), 3))
+\end_layout
+
+\begin_layout Plain Layout
+
+SX <- data.frame(ROLL=rep(0.05,nrow(SP)), PITCH=rep(0.15,nrow(SP)), THDG=rep(0,nrow
+(SP)))
+\end_layout
+
+\begin_layout Plain Layout
+
+VROTA <- XformLA(SX, VROT)
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BPITCHR <- VROTA[,2]
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BROLLR <- VROTA[,1]
+\end_layout
+
+\begin_layout Plain Layout
+
+# SP$BYAWR <- -VROTA[,3]
+\end_layout
+
+\begin_layout Plain Layout
+
+#SP$BPITCHR <- SP$BPITCHR * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+#SP$BROLLR <- SP$BROLLR * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+#SP$BYAWR <- SP$BYAWR * Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$Rn <- Ree / (1 - (Ecc*sin(Data$GGLAT*Cradeg))^2)^0.5 
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$Rm <- SP$Rn * (1-Ecc^2) / (1-(Ecc*sin(Data$GGLAT*Cradeg))^2) + Data$GGALT
+\end_layout
+
+\begin_layout Plain Layout
+
+SP$Rn <- SP$Rn + Data$GGALT
+\end_layout
+
+\begin_layout Plain Layout
+
+SPR <- SP   ## save what INS produced, as reference
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## the starting point for the integration:
+\end_layout
+
+\begin_layout Plain Layout
+
+SV <- with(D1[1, ], data.frame(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL,
+ THDG,
 \end_layout
 
 \begin_layout Plain Layout
@@ -3479,7 +3916,7 @@ SP$LON[1] <- SV$LON
 
 \begin_layout Plain Layout
 
-SP$ALT[1] <- SV$GGALT
+SP$ALT[1] <- SV$ALT
 \end_layout
 
 \begin_layout Plain Layout
@@ -3523,7 +3960,12 @@ twoPi <- 2*pi
 
 \begin_layout Plain Layout
 
-sv <- as.vector (SV, mode='numeric')
+sv <- matrix (as.vector(SV, 'numeric'), nrow=1)
+\end_layout
+
+\begin_layout Plain Layout
+
+## these are expected to be global in STMFV
 \end_layout
 
 \begin_layout Plain Layout
@@ -3578,6 +4020,11 @@ RK <- TRUE    ## use Runge-Kutta integration if true
 
 \begin_layout Plain Layout
 
+RK <- FALSE
+\end_layout
+
+\begin_layout Plain Layout
+
 DL <- nrow(SP)
 \end_layout
 
@@ -3603,17 +4050,17 @@ for (i in 2:DL) {
 
 \begin_layout Plain Layout
 
-  sv[10] <- SP$BPITCHR[i]
+  sv[10] <- SP$BPITCHR[i] * Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  sv[11] <- SP$BROLLR[i]
+  sv[11] <- SP$BROLLR[i] * Cradeg
 \end_layout
 
 \begin_layout Plain Layout
 
-  sv[12] <- SP$BYAWR[i]
+  sv[12] <- SP$BYAWR[i] * Cradeg
 \end_layout
 
 \begin_layout Plain Layout
@@ -3638,7 +4085,7 @@ for (i in 2:DL) {
 
 \begin_layout Plain Layout
 
-    stmf1 <- STMFV (sv)
+    stmf1 <- c(STMFV (sv), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3648,7 +4095,7 @@ for (i in 2:DL) {
 
 \begin_layout Plain Layout
 
-    stmf2 <- STMFV (sv1)
+    stmf2 <- c(STMFV (sv1), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3658,7 +4105,7 @@ for (i in 2:DL) {
 
 \begin_layout Plain Layout
 
-    stmf3 <- STMFV (sv2)
+    stmf3 <- c(STMFV (sv2), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3668,7 +4115,7 @@ for (i in 2:DL) {
 
 \begin_layout Plain Layout
 
-    stmf4 <- STMFV (sv3)
+    stmf4 <- c(STMFV (sv3), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3683,7 +4130,34 @@ for (i in 2:DL) {
 
 \begin_layout Plain Layout
 
-    stmf <- STMFV (sv)
+    ## here the original state-vector components are used to calculate the
+ derivatives:
+\end_layout
+
+\begin_layout Plain Layout
+
+    svp <- with(D1[i,], 
+\end_layout
+
+\begin_layout Plain Layout
+
+      c(LAT,LON,ALT,VEW,VNS,VSPD,PITCH,ROLL,THDG,BPITCHR,BROLLR,BYAWR,BLATA,BLON
+GA,BNORMA))
+\end_layout
+
+\begin_layout Plain Layout
+
+    svp[c(1:2,7:12)] <- svp[c(1:2,7:12)]*Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+    svp <- matrix (as.vector(svp, 'numeric'), nrow=1)
+\end_layout
+
+\begin_layout Plain Layout
+
+    stmf <- c(STMFV (svp), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3837,8 +4311,8 @@ name "subsec:Checking-the-rotation"
 \end_layout
 
 \begin_layout Standard
-Independent measurements of rotation rates are not available as they were
- for accelerations, so a similar test and calibration is not possible.
+Independent measurements of rotation rates are not available as they are
+ for accelerations, so a similar direct test and calibration are not possible.
  However, if the wind remains constant, a flight maneuver consisting of
  a circular pattern should produce a 360
 \begin_inset Formula $^{\circ}$
@@ -3850,8 +4324,8 @@ ded measurements by finding the times when the groundspeed components return
  DEEPWAVE flight 15 included several circle patterns in the flight plan,
  including four from 3:38:00 to 3:55:00 UTC, two counterclockwise and then
  two clockwise.
- Approximately, omitting inertial corrections, the rate of change in heading
- should be 
+ Without inertial corrections, which are very small integrated over the
+ circles, the rate of change in heading should be 
 \begin_inset Formula $\dot{\psi}$
 \end_inset
 
@@ -3887,13 +4361,554 @@ ded measurements by finding the times when the groundspeed components return
  This only checks for consistency, because the INS mechanization should
  produce the same result as that obtained by the difference in output variables,
  but one significant conclusion is that the inertial corrections have only
- a negligible effect on the rotation rate about the heading or yaw axis.
+ a very small net effect on the rotation rate about the heading or yaw axis.
  
 \end_layout
 
 \begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<psi-dot, include=TRUE, fig.cap=''>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+A <- atan2(D1$vedot, D1$vndot)/Cradeg
+\end_layout
+
+\begin_layout Plain Layout
+
+r1 <- setRange(D1, 33938, 34610)
+\end_layout
+
+\begin_layout Plain Layout
+
+r2 <- setRange (D1, 34710, 35348)
+\end_layout
+
+\begin_layout Plain Layout
+
+dA <- c(0, diff(A))
+\end_layout
+
+\begin_layout Plain Layout
+
+dA[dA > 180] <- dA[dA > 180] - 360
+\end_layout
+
+\begin_layout Plain Layout
+
+dA[dA < -180] <- dA[dA < -180] + 360
+\end_layout
+
+\begin_layout Plain Layout
+
+mdh1 <- mean(D1$hdot[r1])
+\end_layout
+
+\begin_layout Plain Layout
+
+mda1 <- mean(dA[r1]) * Rate
+\end_layout
+
+\begin_layout Plain Layout
+
+mdh2 <- mean(D1$hdot[r2])
+\end_layout
+
+\begin_layout Plain Layout
+
+mda2 <- mean(dA[r2]) * Rate
+\end_layout
+
+\begin_layout Plain Layout
+
+sdmh1 <- sd(D1$hdot[r1]) / sqrt(length(r1)-1)
+\end_layout
+
+\begin_layout Plain Layout
+
+sdmh2 <- sd(D1$hdot[r1]) / sqrt(length(r2)-1)
+\end_layout
+
+\begin_layout Plain Layout
+
+sdma1 <- sd(dA[r1]) * Rate / sqrt(length(r1)-1)
+\end_layout
+
+\begin_layout Plain Layout
+
+sdma2 <- sd(dA[r1]) * Rate / sqrt (length(r2)-1)
+\end_layout
+
+\begin_layout Plain Layout
+
+cfydot <- coef(lm (c(mda1, mda2) ~ c(mdh1, mdh2)))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Another test of the rotation rate about the yaw axis can be obtained by
+ comparing 
+\begin_inset Formula $\dot{\psi}$
+\end_inset
+
+ in steady turns to the rate of change in the orientation of the acceleration
+ vector determined from the GPS.
+ In circle maneuvers, the horizontal component of the acceleration vector
+ should rotate at a rate equal to 
+\begin_inset Formula $\dot{\psi}$
+\end_inset
+
+, so this provides a test of the calibration of the rotation rate provided
+ by the gyros.
+ Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:hrot-comparison"
+
+\end_inset
+
+ shows the comparison of rotation rates obtained in these two independent
+ ways.
+ There is a small but significant difference between the two turn directions,
+ which suggests that a calibration representing both would be 
+\begin_inset Formula $\dot{\psi}_{cal}=a_{0}+a_{1}\dot{\psi}$
+\end_inset
+
+ where 
+\begin_inset Formula $a_{0}=$
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(cfydot[1], 3)}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $^{\circ}\mathrm{s^{-1}}$
+\end_inset
+
+ and 
+\begin_inset Formula $a_{1}$
+\end_inset
+
+=
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(cfydot[2],3)}
+\end_layout
+
+\end_inset
+
+.
+ Because the cosine of the mean roll angle was steady at 0.89
+\begin_inset Formula $_{4}$
+\end_inset
+
+, the corresponding calibration of BYAWR would use the first coefficient
+ multiplied by 0.894; i.e., 
+\begin_inset Formula $\mathrm{BYAWR}{}_{cal}=a_{0}^{*}+a_{1}\mathrm{BYAWR}$
+\end_inset
+
+ where 
+\begin_inset Formula $a_{0}^{*}=$
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(cfydot[1]*0.894,3)}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Formula $^{\circ}\mathrm{s^{-1}}$
+\end_inset
+
+.
+ This confirms that the offset in the measured rotation rate about the heading
+ axis is small and the sensitivity coefficient is within about 1% of unity.
+ However, even an offset of this small magnitude warrants correction because
+ the offset accumulates with time and so would make a significant contribution
+ during flights lasting several hours.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="5">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+turn direction
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+mean, 
+\begin_inset Formula $\left\langle \dot{\psi}\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+std.
+ dev.
+ in 
+\begin_inset Formula $\left\langle \dot{\psi}\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+mean, 
+\begin_inset Formula $\left\langle \dot{\psi}^{*}\right\rangle $
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+std.
+ dev.
+ in 
+\begin_inset Formula $\left\langle \dot{\psi}^{*}\right\rangle $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+left
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(mdh1,3)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(sdmh1,3)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(mda1,3)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(sdma1,3)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+right
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(mdh2,3)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(sdmh2,3)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(mda2,3)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+Sexpr{round(sdma2,3)}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Comparison of the rate of change in heading (
+\begin_inset Formula $\dot{\psi}$
+\end_inset
+
+) to the rate of change in the direction of the acceleration vector determined
+ from differentiation of GPS-derived velocity components (
+\begin_inset Formula $\dot{\psi}^{*}$
+\end_inset
+
+).
+ All units are [
+\begin_inset Formula $^{\circ}\mathrm{s}^{-1}]$
+\end_inset
+
+.
+ The listed standard deviations are those estimated for the mean measurement.
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:hrot-comparison"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Inertial effects are expected to be more significant for the pitch and roll
- angles, so similar tests applied to those angles are useful.
+ angles, so similar tests applied to those angles are useful checks of the
+ analytical formulas for the derivatives.
  To first order and without inertial corrections, the expected relationships
  are
 \begin_inset Newline newline
@@ -3908,7 +4923,21 @@ Inertial effects are expected to be more significant for the pitch and roll
 
 \end_inset
 
-For roll, the sum of the left side for the counterclockwise turns is 
+where 
+\begin_inset Formula $\theta,$
+\end_inset
+
+ 
+\begin_inset Formula $\phi$
+\end_inset
+
+ and 
+\begin_inset Formula $\psi$
+\end_inset
+
+ are respectively the pitch, roll, and heading angles and dots over the
+ symbols denote time derivatives.
+ For roll, the sum of the left side for the counterclockwise turns is 
 \begin_inset Formula $37.2^{\circ}$
 \end_inset
 
@@ -3949,23 +4978,34 @@ For roll, the sum of the left side for the counterclockwise turns is
 \end_inset
 
 .
- The actual change in pitch from start to end of the two periods of circular
- flight is near zero, but in the a-frame and with a significant roll angle
- the rotation about the yaw axis makes a contribution to the measured rotation
- rate about the roll axis.
+ As for roll, the actual change in pitch from start to end of the two periods
+ of circular flight is near zero, but in the a-frame and with a significant
+ roll angle the rotation about the yaw axis makes a contribution to the
+ measured rotation rate about the pitch axis.
  In addition, the difference for clockwise vs counterclockwise turns is
  attributable to the need for corrections for inertial effects.
  
 \end_layout
 
 \begin_layout Standard
-A good check on the angle derivatives is to transform the measured derivatives
- for pitch, roll, and heading to the a-frame, with appropriate correction
- for inertial effects, and check that the result matches the measured rotation
+A critical test of the angle derivatives is to transform the measured derivative
+s for pitch, roll, and heading to the a-frame, with appropriate correction
+ for inertial effects, and check that the results match the measured rotation
  rates.
- The procedure is discussed in a following section because the procedure
- is also useful for obtaining substitutes for the body rotation rates in
- cases where they were not recorded or were not in the archive files.
+ The procedure is discussed in a following section (Sect.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Rotations"
+
+\end_inset
+
+) because the procedure is also useful for obtaining substitutes for the
+ body rotation rates in cases where they were not recorded or were not in
+ the archive files.
  Plots and fits confirm that the transformed rotation rates obtained in
  this way match the measured rotation rates to within very small tolerances.
  For example, for the yaw rotation rate, a linear fit gives coefficients
@@ -3996,12 +5036,82 @@ s found in the preceding paragraph are indeed the result of the need for
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+# op <- par (mar=c(2,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+with(Data[r,], {
+\end_layout
+
+\begin_layout Plain Layout
+ggplotWAC (data.frame(Time, VEW, VEWX), lwd=c(1.2,0.8),
+\end_layout
+
+\begin_layout Plain Layout
+                           col=c('blue', 'red', 'darkorange','black'),
+\end_layout
+
+\begin_layout Plain Layout
+             lty=c(1,42), position=c(2,2), legend.position=c(0.2,0.91))
+\end_layout
+
+\begin_layout Plain Layout
+# op <- par (mar=c(5,4,1,1)+0.1)
+\end_layout
+
+\begin_layout Plain Layout
+  ggplotWAC (data.frame(Time, VNS, VNSX), lwd=c(1.2,0.8),
+\end_layout
+
+\begin_layout Plain Layout
+                           col=c('blue', 'red', 'darkorange','black'),
+\end_layout
+
+\begin_layout Plain Layout
+             lty=c(1,42), position=c(1,2), legend.position=c(0.2,0.91))
+\end_layout
+
+\begin_layout Plain Layout
+})
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The preceding subsection tested the handling of the measurements of rotation
+ rate and acceleration provided by the IRU and supported the validity of
+ the transformation of those body measurements to the l-frame.
+ However, as indicated in Sect.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:mech-procedures"
+
+\end_inset
+
+, integration using the calculated derivatives and comparison to the INS-produce
+d solution is a critical test of the derivatives.
+ Results from that calculation are presented in the next section and provide
+ a critical test of the derivatives.
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status open
 
 \begin_layout Plain Layout
 
-<<find-rotation-correction, include=TRUE, cache=TRUE>>=
+<<find-rotation-correction, include=TRUE, cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -4100,7 +5210,8 @@ with (D1, {
 
 \begin_layout Plain Layout
 
-  Rd <<- c(hdot*ch*cp-pdot*sh*sp, 
+  Rd <<- c(hdot*ch*cp-pdot*sh*sp,    ## note <<- assignment to get out of
+ with() environment
 \end_layout
 
 \begin_layout Plain Layout
@@ -4155,7 +5266,7 @@ RdM <- aperm (array (Rd, dim=c(nrow(D1),3,3)))
 
 \begin_layout Plain Layout
 
-OmegaA <- array (dim=c(nrow(D1),3,3))
+OmegaA <- array (0, dim=c(nrow(D1),3,3))
 \end_layout
 
 \begin_layout Plain Layout
@@ -4180,7 +5291,7 @@ for (i in 1:nrow(D1)) {
 
 \begin_layout Plain Layout
 
-  rlm <- XformLA (data.frame(PITCH=sv[7], ROLL=sv[8], THDG=sv[9]))
+  rlm <- XformLA (D1[i, ])
 \end_layout
 
 \begin_layout Plain Layout
@@ -4190,23 +5301,23 @@ for (i in 1:nrow(D1)) {
 
 \begin_layout Plain Layout
 
-  omega <- as.vector (c(-sv[5] / Rm, 
+  omega <- as.vector (c(-sv[5] / D1$Rm, 
 \end_layout
 
 \begin_layout Plain Layout
 
-                        OmegaE*cos(sv[1])+sv[4]/(Rn),
+                        OmegaE*cos(sv[1])+sv[4]/(D1$Rn),
 \end_layout
 
 \begin_layout Plain Layout
 
-                        OmegaE*sin(sv[1])+sv[4]*tan(sv[1])/Rn), mode='numeric')
+                        OmegaE*sin(sv[1])+sv[4]*tan(sv[1])/D1$Rn), mode='numeric
+')
 \end_layout
 
 \begin_layout Plain Layout
 
-  ## signs account for b-frame to a-frame: reverse sign of 3, swap 1 and
- 2
+  ## signs account for b-frame to a-frame: reverse sign of 3
 \end_layout
 
 \begin_layout Plain Layout
@@ -4222,7 +5333,7 @@ for (i in 1:nrow(D1)) {
 
 \begin_layout Plain Layout
 
-  OmegaA[i,,] <- t(rlm) %*% (RdM[,,i] - Oilb/Cradeg)
+  OmegaA[i,,] <- t(rlm) %*% (RdM[,,i] + Oilb / Cradeg)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4309,8 +5420,8 @@ mparison of INS-provided and integration-derived attitude angles, labeled
  and integration-derived components of the aircraft velocity, the latter
  plotted as dashed green lines.
  The former are {VEW, VNS} and the latter {VEWX, VNSX}, for respectively
- the northbound and eastbound components of the aircraft velocity.'), cache=TRUE>
->=
+ the northbound and eastbound components of the aircraft velocity.'), cache=FALSE
+>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -4668,115 +5779,9 @@ op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-# op <- par (mar=c(2,4,1,1)+0.1)
-\end_layout
-
-\begin_layout Plain Layout
-with(Data[r,], {
-\end_layout
-
-\begin_layout Plain Layout
-ggplotWAC (data.frame(Time, VEW, VEWX), lwd=c(1.2,0.8),
-\end_layout
-
-\begin_layout Plain Layout
-                           col=c('blue', 'red', 'darkorange','black'),
-\end_layout
-
-\begin_layout Plain Layout
-             lty=c(1,42), position=c(2,2), legend.position=c(0.2,0.91))
-\end_layout
-
-\begin_layout Plain Layout
-# op <- par (mar=c(5,4,1,1)+0.1)
-\end_layout
-
-\begin_layout Plain Layout
-  ggplotWAC (data.frame(Time, VNS, VNSX), lwd=c(1.2,0.8),
-\end_layout
-
-\begin_layout Plain Layout
-                           col=c('blue', 'red', 'darkorange','black'),
-\end_layout
-
-\begin_layout Plain Layout
-             lty=c(1,42), position=c(1,2), legend.position=c(0.2,0.91))
-\end_layout
-
-\begin_layout Plain Layout
-})
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The preceding subsection tested the handling of the measurements of rotation
- rate and acceleration provided by the IRU and supported the validity of
- the transformation of those body measurements to the l-frame.
- However, as indicated in Sect.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "subsec:mech-procedures"
-
-\end_inset
-
-, integration using the calculated derivatives and comparison to the INS-produce
-d solution is a critical test of the derivatives.
- When the procedure outlined in that section was followed, the integrated
- values for attitude angles and aircraft horizontal velocity components
- as shown in Figs.
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-ref{fig:plot-mechanization1}
-\end_layout
-
-\end_inset
-
-
-\begin_inset space ~
-\end_inset
-
-and
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-ref{fig:plot-mechanization2}
-\end_layout
-
-\end_inset
-
- were obtained.
- The flight segment includes a period from 3:32:00 to 3:36:00 UTC where
- modest pitch changes were forced and then four circles, two flown counterclockw
-ise and two flown clockwise.
+The flight segment includes a period from 3:32:00 to 3:36:00 UTC where modest
+ pitch changes were forced and then four circles, two flown counterclockwise
+ and two flown clockwise.
  To produce the right values of the state vector through these maneuvers
  is therefore a good test of the mechanization.
  Figure
@@ -4850,7 +5855,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<new-data, include=TRUE, cache=TRUE>>=
+<<new-data, include=TRUE, cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -5392,6 +6397,13 @@ Retrieving IRU measurements by differentiation
 
 \begin_layout Subsubsection
 Rotations
+\begin_inset CommandInset label
+LatexCommand label
+name "subsec:Rotations"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5488,12 +6500,12 @@ status open
 <<plot-retrieved-rotations, include=TRUE, fig.cap='Comparison of measured
  body rotation rates and those determined by differentiating the attitude
  angles.
- The red lines denoted as "delta*100" show the difference between the two
- rates after multiplication by 100 to make the small differences visible.
+ The red lines denoted as "delta*10" show the difference between the two
+ rates after multiplication by 10 to make the small differences visible.
  The measurements are from DEEPWAVE flight 15, from a period that included,
  chronologically in the plot, maneuvers with rapid pitch variations, a speed
  run with slow pitch variations, a maneuver with rapid changes in sideslip,
- and a full circle.', cache=TRUE>>=
+ and a full circle.', cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -5513,12 +6525,12 @@ ggplotWAC (with(D15[setRange(D15, 31200, 34630),],
 
 \begin_layout Plain Layout
 
-                data.frame(Time, BPITCHR, BP, 100*DBP, BROLLR, BR, 100*DBR,
+                data.frame(Time, BPITCHR, BP, 10*DBP, BROLLR, BR, 10*DBR,
 \end_layout
 
 \begin_layout Plain Layout
 
-                                BYAWR, BY, 100*DBY)),
+                                BYAWR, BY, 10*DBY)),
 \end_layout
 
 \begin_layout Plain Layout
