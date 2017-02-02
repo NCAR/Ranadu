@@ -15,12 +15,22 @@
 #' @author William Cooper
 #' @export standardVariables
 #' @param list An optional list of variable names to add to the standard list
+#' @param SRC An indicator of which institution's list should be used. Default
+#' is 'NCAR'; other choices are 'UWYO' and 'FAAM'.
 #' @examples 
 #' standardVariables (c("VEW", "PLWCC"))
-standardVariables <- function (list=NULL) {
-  VarList <-c("ATX", "DPXC", "EWX", "GGALT", "LATC", "LONC", 
-              "MACHX", "MR", "PALT", "PSXC", "QCXC", "TASX", 
-              "WDC", "WSC", "WIC") 
+standardVariables <- function (list=NULL, SRC='NCAR') {
+  if (SRC == 'UWYO') {
+    VarList <- c('trose', 'tdp', 'h2omx', 'GALT', 'LATC', 'LONC',
+                 'PALT', 'ps_hads_a', 'tas', 'hwdir', 'hwmag', 'hw')
+  } else if (SRC == 'FAAM') {
+    VarList <- c('TTDI', 'DEWP', 'GALT', 'CLAT', 'CLNG', 'PHGT', 'SPR',
+                 'PSP', 'TAS', 'LWC', 'TWC')
+  } else {
+    VarList <-c("ATX", "DPXC", "EWX", "GGALT", "LATC", "LONC", 
+                "MACHX", "MR", "PALT", "PSXC", "QCXC", "TASX", 
+                "WDC", "WSC", "WIC") 
+  }
   if (length(list) > 0) {
     VarList <- c(VarList, list)
   }  
@@ -78,30 +88,76 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   # a POSIXct date/time variable.
   
   ## get the header information
-  netCDFfile = nc_open (fname)
+  netCDFfile = nc_open (fname) 
+  namesCDF <- names (netCDFfile$var)
+  ## check source/institution:
+  ATTG <- ncatt_get (netCDFfile, 0)   # get list of global attributes
+  SOURCE <- 'NCAR'
+  if ('Source' %in% names (ATTG) && grepl('Wyoming', ATTG$Source)) {
+    SOURCE <- 'UWYO'
+  }
+  ## special section for FAAM data ##
+  if ('source' %in% names (ATTG) && grepl('FAAM', ATTG$source)) {
+    SOURCE <- 'FAAM'
+  }
+  FAAM <- ifelse (SOURCE == 'FAAM', TRUE, FALSE)
+  UWYO <- ifelse (SOURCE == 'UWYO', TRUE, FALSE)
+  if (FAAM) {
+    ## get short names for variables instead of netCDF var name
+    snames <- namesCDF
+    for (VFAAM in namesCDF) {
+      ATTV <- ncatt_get (netCDFfile, VFAAM)
+      snames <- snames [-which (VFAAM == snames)] # remove and replace
+      if ('short_name' %in% names(ATTV)) {
+        snames[VFAAM] <- sub (' ', '', ATTV$short_name)
+      } 
+    }
+  }
   if ("ALL" %in% VarList) {
     VarList <- names (netCDFfile$var)
+    if (FAAM) {
+      ## get short names for variables instead of netCDF var name
+      snames <- namesCDF
+      for (VFAAM in namesCDF) {
+        ATTV <- ncatt_get (netCDFfile, VFAAM)
+        snames <- snames [-which (VFAAM == snames)] # remove and replace
+        if ('short_name' %in% names(ATTV)) {
+          snames[VFAAM] <- sub (' ', '', ATTV$short_name)
+        } 
+      }
+      VarList <- snames
+    }
   }
-  if ('Time' %in% VarList) {
+  if ('Time' %in% VarList) { ## if "Time" is present, remove it
     VarList <- VarList[-which(VarList == 'Time')]
   }
+ 
   ## check that requested variables are present in netCDF file; fail otherwise
-  namesCDF <- names (netCDFfile$var)
   for (V in VarList) {
     if (is.na(V)) {next}
-    if (length (which (grepl (V, namesCDF)))) {next}
+    if (FAAM) {
+      if (length (which (grepl (V, snames)))) {next}
+    } else if (length (which (grepl (V, namesCDF)))) {next}
     cat (sprintf ("requested variable %s not in netCDF file;\n ----> getNetCDF returning with error", V))
     return (-1)
   }
-  Time <- ncvar_get (netCDFfile, "Time")
+  if (UWYO) {
+    Time <- ncvar_get (netCDFfile, 'time')
+    time_units <- ncatt_get (netCDFfile, "time", "units")
+  } else {
+    Time <- ncvar_get (netCDFfile, "Time")
+    time_units <- ncatt_get (netCDFfile, 'Time', 'units')
+  }
   DL <- length (Time)
   ## set the maximum data rate (but not above 100 Hz):
   Rate <- 1
   nms <- names(netCDFfile$dim)
-  if ("sps25" %in% nms) {Rate <- 25}
-  if ("sps50" %in% nms) {Rate <- 50}
-  ## comment next line when LAMS 100-Hz vector present but no others
-  if ("sps100" %in% nms) {Rate <- 100}
+  if (!UWYO) {    ## only use Rate=1 for UWYO for now
+    if ("sps25" %in% nms) {Rate <- 25}
+    if ("sps50" %in% nms) {Rate <- 50}
+    ## comment next line when LAMS 100-Hz vector present but no others
+    if ("sps100" %in% nms) {Rate <- 100}
+  }
   # print (sprintf ("output rate for this data.frame is %d", Rate))
   # Expand Time to be high-rate if necessary
   if (Rate > 1) {
@@ -113,7 +169,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     }
     Time <- T
   }
-  time_units <- ncatt_get (netCDFfile, "Time", "units")
+  # time_units <- ncatt_get (netCDFfile, "Time", "units")
   tref <- sub ('seconds since ', '', time_units$value)
   Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
   # see if limited time range wanted:
@@ -132,7 +188,11 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   Time <- Time[r]
   SE <- getStartEnd (Time)
   ## save 'Time' attributes:
-  ATT <- ncatt_get (netCDFfile, "Time")   # get list of Time attributes
+  if (UWYO) {
+    ATT <- ncatt_get (netCDFfile, "time")   # get list of Time attributes
+  } else {
+    ATT <- ncatt_get (netCDFfile, "Time")   # get list of Time attributes
+  }
   for (A in names (ATT)) {
     attr(Time, A) <- ATT[[A]]
   }
@@ -140,7 +200,11 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   ## save the dimensions, useful for archiving or re-writing to netCDF:-------------
   ##    but, to save space, omit the list of times
   nf <- netCDFfile
-  nf$dim[1]$Time$vals <- NULL
+  if (UWYO) {
+    nf$dim[1]$time$vals <- NULL
+  } else {
+    nf$dim[1]$Time$vals <- NULL
+  }
   attr (d, "Dimensions") <- nf$dim
   ## Save all the global attributes in the netCDF file as 'd' attributes:----------
   ATT <- ncatt_get (netCDFfile, 0)   # get list of global attributes
@@ -172,6 +236,9 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   ## Add the requested variables:------------------------------------------------
   for (V in VarList) {
     if (is.na(V)) {next}
+    if (FAAM) {
+      SV <- names(snames[which(V == snames)])
+    } 
     ## fill in location-tag for variable name if needed:
     if (substr(V, nchar(V), nchar(V)) == '_') {
       for (ncn in namesCDF) {
@@ -180,11 +247,19 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     }
     ## save dimensions for the variable:
     datt <- list()
-    for (dd in netCDFfile$var[[V]]$dim) {
-      datt[[length(datt)+1]] <- dd$name
-    }    ## later, save datt as an attribute of V
-    X <- ncvar_get (netCDFfile, V)
-    ATT <- ncatt_get (netCDFfile, V)
+    if (FAAM) {
+      for (dd in netCDFfile$var[[SV]]$dim) {
+        datt[[length(datt)+1]] <- dd$name
+      } 
+      X <- ncvar_get (netCDFfile, SV)
+      ATT <- ncatt_get (netCDFfile, SV)
+    } else {
+      for (dd in netCDFfile$var[[V]]$dim) {
+        datt[[length(datt)+1]] <- dd$name
+      }    ## later, save datt as an attribute of V
+      X <- ncvar_get (netCDFfile, V)
+      ATT <- ncatt_get (netCDFfile, V)
+    }
     ## for Rate == 1, nothing special is needed:
     if (Rate == 1) {
       X <- X[r1]
