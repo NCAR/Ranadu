@@ -871,15 +871,25 @@ that the calibrations of the accelerometers are good.
 
 <<mechanization, include=TRUE, fig.lp='fig:', fig.cap=' ', cache=FALSE>>=
 
+D1 <- D1S
+D1$BROLLR <- D1$BROLLR + 0.00026
+D1$BPITCHR <- D1$BPITCHR + 0.00026
 stm <- STMFV (D1)  ## get the whole-flight derivative matrix
 DXN <- c('VEW', 'VNS', 'VSPD', 'PITCH', 'ROLL', 'THDG')
+CRF <- c(rep(1,3), rep(Cradeg,3))
 for (j in 1:6) {
-  D1[, gsub ('$', 'X', DXN[j])] <- D1[1, DXN[j]] + dt * cumsum (stm[, j+3])
+  D1[, gsub ('$', 'X', DXN[j])] <- CRF[j] * D1[1, DXN[j]] + dt * cumsum (stm[, j+3])
 }
 D1$THDGX <- (D1$THDGX + 10 * pi) %% (2*pi)
 D1$PITCHX <- D1$PITCHX / Cradeg
 D1$ROLLX <- D1$ROLLX / Cradeg
 D1$THDGX <- D1$THDGX / Cradeg
+DTHDG <- D1$THDG - D1$THDGX
+DTHDG[DTHDG < -180] <- DTHDG[DTHDG < -180] + 360
+DTHDG[DTHDG > 180] <- DTHDG[DTHDG > 180] - 360
+with(D1, plotWAC(data.frame(Time, PITCH, PITCHX, 10*(PITCH-PITCHX))))
+with(D1, plotWAC(data.frame(Time, ROLL, ROLLX, 10*(ROLL-ROLLX))))
+
 DL <- nrow(D1)
 D1$DPITCH <- cumsum (stm[,7])
 D1$DROLL <-  cumsum (stm[,8])
@@ -1146,6 +1156,8 @@ test of the derivatives.
 
 <<find-rotation-correction, include=TRUE, cache=FALSE>>=
 
+DL <- nrow(D1)
+OmegaE <- StandardConstant ('Omega')
 D1$pdot <- c(0, diff(D1$PITCH)) *  Rate
 D1$rdot <- c(0, diff(D1$ROLL)) * Rate
 D1$hdot <- c(0, diff(D1$THDG))
@@ -1165,30 +1177,30 @@ with (D1, {
   cr <- cos(ROLL*Cradeg)
   sr <- sin(ROLL*Cradeg)
   Rd <<- c(hdot*ch*cp-pdot*sh*sp,    ## note <<- assignment to get out of with() environment
-          hdot*(ch*sp*sr-sh*cr)  + pdot*sh*cp*sr    + rdot*(sh*sp*cr-ch*sr),
-          hdot*(-sh*sr-ch*sp*cr) + pdot*(-sh*cp*cr) + rdot*(ch*cr+sh*sp*sr),
-          hdot*(-sh*cp)          + pdot*(-ch*sp),
-          hdot*(-sh*sp*sr-ch*cr) + pdot*ch*cp*sr    + rdot*(ch*sp*cr+sh*sr),
-          hdot*(sh*sp*cr-ch*sr)  + pdot*(-ch*cp*cr) + rdot*(ch*sp*sr-sh*cr),
-                                 - pdot*cp,
-                                   pdot*(-sp*sr)    + rdot*cp*cr,
-                                   pdot*sp*cr       + rdot*cp*sr)
+           hdot*(ch*sp*sr-sh*cr)  + pdot*sh*cp*sr    + rdot*(sh*sp*cr-ch*sr),
+           hdot*(-sh*sr-ch*sp*cr) + pdot*(-sh*cp*cr) + rdot*(ch*cr+sh*sp*sr),
+           hdot*(-sh*cp)          + pdot*(-ch*sp),
+           hdot*(-sh*sp*sr-ch*cr) + pdot*ch*cp*sr    + rdot*(ch*sp*cr+sh*sr),
+           hdot*(sh*sp*cr-ch*sr)  + pdot*(-ch*cp*cr) + rdot*(ch*sp*sr-sh*cr),
+           - pdot*cp,
+           pdot*(-sp*sr)    + rdot*cp*cr,
+           pdot*sp*cr       + rdot*cp*sr)
 })
-RdM <- aperm (array (Rd, dim=c(nrow(D1),3,3)))
+RdM <- aperm(array (Rd, dim=c(nrow(D1),3,3)))
 OmegaA <- array (0, dim=c(nrow(D1),3,3))
+rlmA <- XformLA (D1)
+lat <- D1$LAT * Cradeg
+sinLat <- sin(lat); cosLat <- cos(lat); tanLat <- sinLat / cosLat
+omega1 <- matrix (c (rep(0, DL), OmegaE * cosLat, OmegaE * sinLat), ncol=3)
+omega2 <- with(D1, matrix (c (-VNS / Rm,  VEW / Rn, VEW * tanLat / Rn), ncol=3))
+omega <- omega1 + omega2
+zro <- c(rep(0, DL))
+SRRI <- array(c(zro, omega[,3], omega[,2],
+                -omega[,3], zro, -omega[,1],
+                -omega[,2], omega[,1], zro), dim=c(DL,3,3))
 
 for (i in 1:nrow(D1)) {
-  sv <- with(D1[i,], c(LAT, LON, ALT, VEW, VNS, VSPD, PITCH, ROLL, THDG, 
-                       BPITCHR, BROLLR, BYAWR, BLATA, BLONGA, BNORMA))
-  rlm <- XformLA (D1[i, ])
-  sv[c(1:2,7:12)] <- sv[c(1:2, 7:12)] * Cradeg
-  omega <- as.vector (c(-sv[5] / D1$Rm, 
-                        OmegaE*cos(sv[1])+sv[4]/(D1$Rn),
-                        OmegaE*sin(sv[1])+sv[4]*tan(sv[1])/D1$Rn), mode='numeric')
-  ## signs account for b-frame to a-frame: reverse sign of 3
-  Oill <- aperm(matrix (c(0, omega[3], omega[2], -omega[3], 0, -omega[1], -omega[2], omega[1], 0), ncol=3))
-  Oilb <- Oill %*% rlm
-  OmegaA[i,,] <- t(rlm) %*% (RdM[,,i] + Oilb / Cradeg)
+  OmegaA[i,,] <- t(rlmA[,,i]) %*% (RdM[,,i] + SRRI[i,,] %*% rlmA[,,i])
 }
 D1$BP <- -OmegaA[,1,3]
 D1$BR <- OmegaA[,2,3]

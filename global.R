@@ -26,12 +26,13 @@ library(tcltk)
 ## of interactions when window entries are changed.
 Trace <- FALSE
 Trace <- TRUE
+load ('InputDF.Rdata')
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
 
 PJ <- c('ORCAS', 'CSET', 'NOREASTER', 'HCRTEST',
-        'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3',
+        'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
         'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
         'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')
 for (P in PJ) {
@@ -283,6 +284,24 @@ loadConfig <- function (inp) {
   load (file=inp$restore)
   plotSpec <<- plotSpec
   print (sprintf ('loadConfig, file=%s', inp$restore))
+  ## restore FI to have variables available for reassignment
+  if (plotSpec$SRC != 'NCAR') {
+    FI <<- with (plotSpec, DataFileInfo (sprintf('%s%s/%s/%s%s%02d.nc', 
+                                                DataDirectory (), 
+                                                SRC, Project, Project, 
+                                                TypeFlight, Flight)))
+  } else {
+    if (plotSpec$TypeFlight %in% c('F','KF')) {
+      FI <<- with (plotSpec, DataFileInfo (sprintf ('%s%s/%srf%02d%s.nc',
+                                                    DataDirectory (),
+                                                    Project, Project, Flight, TypeFlight)))
+    } else {
+      FI <<- with (plotSpec, DataFileInfo (sprintf('%s%s/%s%s%02d.nc', 
+                                                DataDirectory (), 
+                                                Project, Project, 
+                                                TypeFlight, Flight)))
+    }
+  }
 }
 load (file='plotSpec.def')  ## this loads initial values of plotSpec and Restrictions
 
@@ -557,25 +576,29 @@ addedVariables <- c('PITCH', 'THETA', 'THETAP')
 
 makeVarList <- function () {
   if (Trace) {print ('entered VarList')}
-  VarList <- standardVariables (addedVariables)
+  if (plotSpec$SRC == 'NCAR') {
+    VarList <- standardVariables (addedVariables)
+  } else {
+    VarList <- standardVariables (SRC=plotSpec$SRC)
+  }
   for (plt in 1:length(plotSpec$Plot)) {
-    for (pnl in 1:plotSpec$Plot[[plt]]$panels) {
+    for (pnl in 1:length(plotSpec$Plot[[plt]]$panel)) {
       VarList <- c(VarList, plotSpec$Plot[[plt]]$panel[[pnl]]$var)
     }
   }
   for (plt in 1:length(plotSpec$Hist)) {
-    for (pnl in 1:plotSpec$Hist[[plt]]$panels) {
+    for (pnl in 1:length(plotSpec$Hist[[plt]]$panel)) {
       VarList <- c(VarList, plotSpec$Hist[[plt]]$panel[[pnl]]$var)
     }
   }
   for (plt in 1:length(plotSpec$Scat)) {
-    for (pnl in 1:plotSpec$Scat[[plt]]$panels) {
+    for (pnl in 1:length(plotSpec$Scat[[plt]]$panel)) {
       VarList <- c(VarList, plotSpec$Scat[[plt]]$panel[[pnl]]$varx)
       VarList <- c(VarList, plotSpec$Scat[[plt]]$panel[[pnl]]$vary)
     }
   }
   for (plt in 1:length(plotSpec$Bin)) {
-    for (pnl in 1:plotSpec$Bin[[plt]]$panels) {
+    for (pnl in 1:length (plotSpec$Bin[[plt]]$panel)) {
       VarList <- c(VarList, plotSpec$Bin[[plt]]$panel[[pnl]]$varx)
       VarList <- c(VarList, plotSpec$Bin[[plt]]$panel[[pnl]]$vary)
     }
@@ -589,10 +612,23 @@ makeVarList <- function () {
     VarList <- c(VarList, FI$Variables[nwc])
     if (Trace) {print (sprintf ('added %s to VarList', FI$Variables[nwc]))}
   }
-  VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 
-                          'DPXC', 'TASX', 'ROLL', 'VSPD',
-                          'THDG', 'SSLIP'), plotSpec$StatVar, quickPlotVar)
+  VarList <- c(VarList, plotSpec$StatVar)
+  if (plotSpec$SRC == 'NCAR') {
+    VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 
+                            'DPXC', 'TASX', 'ROLL', 'VSPD',
+                            'THDG', 'SSLIP'), quickPlotVar)
+  } else if (plotSpec$SRC == 'UWYO') {
+    VarList <- c(VarList, 'ps_hads_a', 'trose', 'tdp', 'tas', 'hwdir', 
+                 'hwmag', 'hw', 'GALT', 'LATC', 'LONC', 'PALT', quickPlotVar)
+  } else if (plotSpec$SRC == 'FAAM') {
+    VarList <- c(VarList, 'SPR', 'PSP', 'TTDI', 'DEWP', 'TAS', 'PHGT', 'CLAT', 'CLNG', quickPlotVar)
+  } else {
+    VarList <- c(VarList, quickPlotVar)
+  }
   VarList <- unique (VarList)
+  if ('' %in% VarList) {
+    VarList <- VarList[-which ('' == VarList)]   ## shouldn't need this -- ??
+  }
   ## if variable is in specialData, exclude it:
   if (exists ('specialData')) {
     vwh <- which (VarList %in% names (specialData))
@@ -600,8 +636,10 @@ makeVarList <- function () {
       VarList <- VarList [-vwh]
     }
   }
-  print (sprintf ('at end of VarList, VarList is:'))
-  print (VarList)
+  if (Trace) {
+    print (sprintf ('at end of VarList, VarList is:'))
+    print (VarList)
+  }
   return (VarList)
 }
 VarList <- makeVarList()

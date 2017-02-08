@@ -5,7 +5,7 @@
 \alias{windProcessor}
 \title{WindProcessor}
 \usage{
-WindProcessor(data)
+WindProcessor(data, LR = 4.42, LG = -4.3, CompF = TRUE)
 }
 \arguments{
 \item{data}{A data.frame containing these variables (and possibly others): 

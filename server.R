@@ -69,14 +69,15 @@ shinyServer(function(input, output, session) {
       updateTextInput (session, 'paluchCEnd', value='36:00:00')
     }
     ## set list of available probes
-    CH <- vector ('character')
-    if (any (grepl ('CCDP', FI$Variables))) {CH <- c(CH, 'CDP')}
-    if (any (grepl ('CSP100', FI$Variables))) {CH <- c(CH, 'FSSP')}
-    if (any (grepl ('CUHSAS', FI$Variables))) {CH <- c(CH, 'UHSAS')}
-    if (any (grepl ('CS200', FI$Variables))) {CH <- c(CH, 'PCASP')}
-    if (any (grepl ('C1DC', FI$Variables))) {CH <- c(CH, '2DC')}
-    updateCheckboxGroupInput (session, 'probe', choices=CH, selected=CH)
-    if (Trace) {print (sprintf ('Project: choices are %s', CH))}
+    CHP <- vector ('character')
+    if (any (grepl ('CCDP', FI$Variables))) {CHP <- c(CHP, 'CDP')}
+    if (any (grepl ('CSP100', FI$Variables))) {CHP <- c(CHP, 'FSSP')}
+    if (any (grepl ('CUHSAS', FI$Variables))) {CHP <- c(CHP, 'UHSAS')}
+    if (any (grepl ('CS200', FI$Variables))) {CHP <- c(CHP, 'PCASP')}
+    if (any (grepl ('C1DC', FI$Variables))) {CHP <- c(CHP, '2DC')}
+    updateCheckboxGroupInput (session, 'probe', choices=CHP, selected=CHP)
+    CHP <<- CHP
+    if (Trace) {print (sprintf ('Project: probe choices are %s', CHP))}
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('Project: reset newdata')}
   })
@@ -97,6 +98,14 @@ shinyServer(function(input, output, session) {
     if (Trace) {print ('Flight: reset newdata')}
   })
   obsFlight <- observe (exprFlight, quoted=TRUE)
+  
+  exprSRC <- quote ({
+    plotSpec$SRC <<- input$SRC
+    if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
+    isolate (reac$newdata <- reac$newdata + 1)
+    if (Trace) {print ('SRC: reset newdata')}
+  })
+  obsSRC <- observe (exprSRC, quoted=TRUE)
   
   exprTypeFlight <- quote ({
     plotSpec$TypeFlight <<- input$typeFlight
@@ -127,7 +136,7 @@ shinyServer(function(input, output, session) {
       }
     }
   })
-  obsTime <- observe (exprTime, quoted=TRUE, priority=101)
+  obsTime <- observe (exprTime, quoted=TRUE, priority=-10)
   
   exprPlotVar <- quote ({
     input$addVarP
@@ -144,6 +153,7 @@ shinyServer(function(input, output, session) {
         if (input$addVarP == 'select') {
         } else {
           plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv] <<- input$addVarP
+          print (sprintf (' addVarP is %s', input$addVarP))
           if (lv == 1) {
             plotSpec$Plot[[plt]]$panel[[pnl]]$lab[lv] <<- input$addVarP
             updateTextInput (session, 'ylbl', value=input$addVarP)
@@ -161,6 +171,7 @@ shinyServer(function(input, output, session) {
         v <- v[-lv]
         if (Trace) {print (sprintf ('PlotVar: new var list is %s', v))}
         plotSpec$Plot[[plt]]$panel[[pnl]]$var <<- v
+        print (sprintf (' variable deleted; remaining is %s', v))
         # nms <- names (data ())  ## just a data ref to get reset
         updateSelectInput (session, 'addVarP', selected='select')  
       }
@@ -172,6 +183,7 @@ shinyServer(function(input, output, session) {
     ## ignore it if before start or after finish
     if (Trace) {print (sprintf ('Tstart: input$tstart=%s, min/maxT=%s %s',
                                 input$tstart, minT, maxT))}
+    # invalidateLater (500, session)
     txt <- input$tstart
     ## protect against typing errors that insert a character:
     if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
@@ -180,6 +192,7 @@ shinyServer(function(input, output, session) {
       if (i1 > 0) {
         if (plotSpec$Times[1] != Data$Time[i1]) {
           plotSpec$Times[1] <<- Data$Time[i1]
+          # freezeReactiveValue (input, 'times')
           updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
           isolate (reac$newdisplay <- reac$newdisplay + 1)
           isolate (reac$newhistogram <- reac$newhistogram + 1)
@@ -256,6 +269,7 @@ shinyServer(function(input, output, session) {
   
   exprTend <- quote ({
     ## ignore it if before start or after finish
+    # invalidateLater (500, session)
     txt <- input$tend
     ## protect against typing errors that insert a character:
     if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
@@ -272,6 +286,8 @@ shinyServer(function(input, output, session) {
           isolate (reac$newskewT <- reac$newskewT + 1)
           isolate (reac$newvarp <- reac$newvarp + 1)
         }
+        
+        # freezeReactiveValue (input, 'times')
         updateSliderInput (session, 'times', value=plotSpec$Times)
         if (Trace) {print (sprintf ('Tend:, updating time to %s %s', formatTime(plotSpec$Times[1]), formatTime(plotSpec$Times[2])))}
         #     isolate (reac$newdisplay <- reac$newdisplay + 1)
@@ -437,7 +453,9 @@ shinyServer(function(input, output, session) {
     updateCheckboxInput (session, 'hlogY', value=plotSpec$Hist[[plt]]$panel[[pnl]]$logY)
     updateCheckboxInput (session, 'hfixed', value=plotSpec$Hist[[plt]]$panel[[pnl]]$fixed)
     updateNumericInput (session, 'hlineV', value=1)
-    updateSelectInput (session, 'haddVarP', selected=plotSpec$Hist[[plt]]$panel[[pnl]]$var[1])
+    updateSelectInput (session, 'haddVarP', 
+                       choices=sort(FI$Variables),
+                       selected=plotSpec$Hist[[plt]]$panel[[pnl]]$var[1])
     updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[plt]]$panel[[pnl]]$col[1])
     updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[plt]]$panel[[pnl]]$lw[1])
     updateRadioButtons (session, 'hlineStyle', selected=ltyps[plotSpec$Hist[[plt]]$panel[[pnl]]$lt[1]])
@@ -760,6 +778,7 @@ shinyServer(function(input, output, session) {
     plt <- isolate(input$plot)
     pnl <- isolate(input$bpanel)
     lv <- input$blineV
+    print (sprintf ('blineV: plt=%d, pnl=%d, lv=%d', plt,pnl,lv))
     if (lv <= length (plotSpec$Bin[[plt]]$panel[[pnl]]$vary)) {
       updateSelectInput (session, 'baddVarP1', selected=plotSpec$Bin[[plt]]$panel[[pnl]]$varx)
       updateSelectInput (session, 'baddVarP2', selected=plotSpec$Bin[[plt]]$panel[[pnl]]$vary[lv])
@@ -841,7 +860,9 @@ shinyServer(function(input, output, session) {
     updateCheckboxInput (session, 'hfixed', value=plotSpec$Hist[[plt]]$panel[[1]]$fixed)
     updateCheckboxInput (session, 'hrestrict', value=plotSpec$Hist[[plt]]$restrict)
     updateNumericInput (session, 'hlineV', value=1)
-    updateSelectInput (session, 'haddVarP', selected=plotSpec$Hist[[plt]]$panel[[1]]$var[1])
+    updateSelectInput (session, 'haddVarP', 
+                       choices=c('select', 'omit', sort(FI$Variables)),
+                       selected=plotSpec$Hist[[plt]]$panel[[1]]$var[1])
     updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[plt]]$panel[[1]]$col[1])
     updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[plt]]$panel[[1]]$lw[1])
     updateRadioButtons (session, 'hlineStyle', selected=ltyps[plotSpec$Hist[[plt]]$panel[[1]]$lt[1]])
@@ -932,6 +953,7 @@ shinyServer(function(input, output, session) {
     isolate (pnl <- input$hpanel)
     isolate (lv <- input$hlineV)
     
+    if (Trace) {print (sprintf ('HistVar: entry with haddVarp=%s', input$haddVarP))}
     if (input$haddVarP != 'omit') {
       if (input$haddVarP == 'select') {
       } else {
@@ -1126,9 +1148,9 @@ shinyServer(function(input, output, session) {
     lv <- isolate (input$lineV)
     plotSpec$Plot[[plt]]$panel[[pnl]]$SGlength[lv] <<- input$SGpoints
     isolate (reac$newdisplay <- reac$newdisplay + 1)
-    if (Trace) {print ('LineWidth: reset newdisplay')}
+    if (Trace) {print ('SGpoints: reset newdisplay')}
   })
-  obsLineWidth <- observe (exprLineWidth, quoted=TRUE)
+  obsSGlength <- observe (exprSGlength, quoted=TRUE)
   
   exprLineStyle <- quote ({
     plt <- isolate (input$plot)
@@ -1321,40 +1343,131 @@ shinyServer(function(input, output, session) {
   observeEvent (input$specSave, saveConfig (input))
   observeEvent (input$specRead, 
                 {loadConfig (input)
-                  updateSelectInput (session, 'Project', selected=plotSpec$Project)
-                  updateNumericInput (session, 'Flight', value=plotSpec$Flight)
-                  updateRadioButtons (session, 'typeFlight', selected=plotSpec$TypeFlight)
-                  updateNumericInput (session, 'plot', value=1)
-                  updateNumericInput (session, 'panels', value=plotSpec$Plot[[1]]$panels)
-                  updateNumericInput (session, 'cols', value=plotSpec$Plot[[1]]$columns)
-                  updateNumericInput (session, 'panel', value=1)
-                  updateCheckboxInput (session, 'logY', value=plotSpec$Plot[[1]]$panel[[1]]$logY)
-                  updateCheckboxInput (session, 'fixed', value=plotSpec$Plot[[1]]$panel[[1]]$fixed)
-                  updateCheckboxInput (session, 'smooth', value=plotSpec$Plot[[1]]$panel[[1]]$smooth[1])
-                  updateNumericInput (session, 'SGpoints', value=plotSpec$Plot[[1]]$panel[[1]]$SGlength[1])
-                  updateNumericInput (session, 'panelMin', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[1])
-                  updateNumericInput (session, 'panelMax', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[2])
-                  updateNumericInput (session, 'lineV', value=1)
-                  updateSelectInput (session, 'addVarP', selected=plotSpec$Plot[[1]]$panel[[1]]$var[1])
-                  updateSelectInput (session, 'varColor', selected=plotSpec$Plot[[1]]$panel[[1]]$col[1])
-                  updateNumericInput (session, 'lineW', value=plotSpec$Plot[[1]]$panel[[1]]$lw[1])
-                  updateRadioButtons (session, 'lineStyle', selected=plotSpec$Plot[[1]]$panel[[1]]$lt[1])
+                  ## When a configuration is loaded, the entire ui needs to be
+                  ## updated. The order needs to be: Change everything needed
+                  ## to get new data first, with 'freezeReactiveValues()', then
+                  ## allow data access to update.
+                  # updateSelectInput (session, 'Project', selected=plotSpec$Project)
+                  ##
+                  # get the full list of input variables
+                  InputNames <<- names(input)
+                  quickPlotVar <<- ''  ## reset to avoid not-found errors
+                  CH <- sort(FI$Variables)  ## for the variable names requiring choices
+                  ch.var <- c('addVarP', 'haddVarP', 'saddVarP1', 'saddVarP2', 'baddVarP1',
+                              'baddVarP2', 'paluchLWC', 'specvar', 'speccovar', 'rvar')
+                  # print (FI$Variables)
+                  # freezeReactiveValue (input, 'Project')
+                  # freezeReactiveValue (input, 'Flight')
+                  # freezeReactiveValue (input, 'addVarP')
+                  # freezeReactiveValue (input, 'haddVarP')
+                  updateSliderInput (session, 'times', value=plotSpec$Times)
+                  updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+                  updateTextInput (session, 'tend',   value=formatTime (plotSpec$Times[2]))
+                  updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
+                  updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
+                  updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
+                  updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
+                  ## checkboxes
+                  for (i in 1:nrow(InputDF)) {
+                    if (InputDF$Type[i] == 'cB') {
+                      # freezeReactiveValue (input, InputDF$ID[i])
+                      updateCheckboxInput (session, InputDF$ID[i], value=FALSE)
+                    } else {
+                      if (!is.na(InputDF$Force[i])) {
+                        # freezeReactiveValue (input, InputDF$ID[i])
+                        if (InputDF$Type[i] == 'nI') {
+                          updateNumericInput(session, InputDF$ID[i], value=InputDF$Force[i])
+                        } else if (InputDF$Type[i] == 'sI') {
+                          updateSelectInput(session, InputDF$ID[i], value=InputDF$Force[i])
+                        }
+                      } else {
+                        if (InputDF$I1[i] == 0) {
+                          vvv <- NA
+                          next
+                        } else {
+                          if (InputDF$I2[i] == 0) {
+                            vvv <- plotSpec[[InputDF$I1[i]]]
+                          } else {
+                            if (InputDF$I3[i] == 0) {
+                              vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]]
+                            } else {
+                              if (InputDF$I4[i] == 0) {
+                                vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]]
+                              } else {
+                                if (InputDF$I5[i] == 0) {
+                                  vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]]
+                                } else {
+                                  if (InputDF$I6[i] == 0) {
+                                    vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]][[InputDF$I5[i]]]
+                                  } else {
+                                    vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]][[InputDF$I5[i]]][[InputDF$I6[i]]]
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                        
+                        if (InputDF$Type[i] == 'nI') {
+                          updateNumericInput(session, InputDF$ID[i], value=vvv)
+                        } else if (InputDF$Type[i] == 'Rb') {
+                          updateRadioButtons(session, InputDF$ID[i], selected=vvv)
+                        } else if (InputDF$Type[i] == 'sI') {
+                          if (InputDF$ID[i] %in% ch.var) {
+                            updateSelectInput(session, InputDF$ID[i], selected=vvv, choices=CH)
+                          } else {
+                            print (sprintf('ID=%s, i=%d, vvv=%s', InputDF$ID[i], i, vvv))
+                            updateSelectInput(session, InputDF$ID[i], selected=vvv)
+                          }
+                        }
+                      }
+                    }
+                  }
                   
-                  updateNumericInput (session, 'hpanels', value=plotSpec$Hist[[1]]$panels)
-                  updateNumericInput (session, 'hcols', value=plotSpec$Hist[[1]]$columns)
-                  updateNumericInput (session, 'hpanel', value=1)
-                  updateCheckboxInput (session, 'hlogY', value=plotSpec$Hist[[1]]$panel[[1]]$logY)
-                  updateCheckboxInput (session, 'hfixed', value=plotSpec$Hist[[1]]$panel[[1]]$fixed)
-                  updateNumericInput (session, 'hpanelMin', value=plotSpec$Hist[[1]]$panel[[1]]$ylim[1])
-                  updateNumericInput (session, 'hpanelMax', value=plotSpec$Hist[[1]]$panel[[1]]$ylim[2])
-                  updateNumericInput (session, 'hlineV', value=1)
-                  updateSelectInput (session, 'haddVarP', selected=plotSpec$Hist[[1]]$panel[[1]]$var[1])
-                  updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[1]]$panel[[1]]$col[1])
-                  updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[1]]$panel[[1]]$lw[1])
-                  updateRadioButtons (session, 'hlineStyle', selected=plotSpec$Hist[[1]]$panel[[1]]$lt[1])
-                  updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
+                  # plt <- 1; pnl <- 1; lv <- 1; CC <- sort(FI$Variables)
+                  updateSelectInput(session, inputId='Project',
+                                    selected=plotSpec$Project, choices=PJ)
+                  # updateSelectInput (session, 'addVarP', 
+                  #                    selected=plotSpec$Plot[[1]]$panel[[1]]$var[1])
+                  # updateNumericInput (session, 'Flight', value=plotSpec$Flight)
+                  # updateRadioButtons (session, 'typeFlight', selected=plotSpec$TypeFlight)
+                  # updateRadioButtons (session, 'SRC', selected=plotSpec$SRC)
+                  # updateNumericInput (session, 'plot', value=1)
+                  # updateNumericInput (session, 'panels', value=plotSpec$Plot[[1]]$panels)
+                  # updateNumericInput (session, 'cols', value=plotSpec$Plot[[1]]$columns)
+                  # updateNumericInput (session, 'panel', value=1)
+                  # updateCheckboxInput (session, 'logY', value=plotSpec$Plot[[1]]$panel[[1]]$logY)
+                  # updateCheckboxInput (session, 'fixed', value=plotSpec$Plot[[1]]$panel[[1]]$fixed)
+                  # updateCheckboxInput (session, 'smooth', value=plotSpec$Plot[[1]]$panel[[1]]$smooth[1])
+                  # updateNumericInput (session, 'SGpoints', value=plotSpec$Plot[[1]]$panel[[1]]$SGlength[1])
+                  # updateNumericInput (session, 'panelMin', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[1])
+                  # updateNumericInput (session, 'panelMax', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[2])
+                  # updateNumericInput (session, 'lineV', value=1)
+                  # updateSelectInput (session, 'varColor', selected=plotSpec$Plot[[1]]$panel[[1]]$col[1])
+                  # updateNumericInput (session, 'lineW', value=plotSpec$Plot[[1]]$panel[[1]]$lw[1])
+                  # updateRadioButtons (session, 'lineStyle', selected=plotSpec$Plot[[1]]$panel[[1]]$lt[1])
+                  # 
+                  # updateNumericInput (session, 'hpanels', value=plotSpec$Hist[[1]]$panels)
+                  # updateNumericInput (session, 'hcols', value=plotSpec$Hist[[1]]$columns)
+                  # updateNumericInput (session, 'hpanel', value=1)
+                  # updateCheckboxInput (session, 'hlogY', value=plotSpec$Hist[[1]]$panel[[1]]$logY)
+                  # updateCheckboxInput (session, 'hfixed', value=plotSpec$Hist[[1]]$panel[[1]]$fixed)
+                  # updateNumericInput (session, 'hpanelMin', value=plotSpec$Hist[[1]]$panel[[1]]$ylim[1])
+                  # updateNumericInput (session, 'hpanelMax', value=plotSpec$Hist[[1]]$panel[[1]]$ylim[2])
+                  # updateNumericInput (session, 'hlineV', value=1)
+                  # updateSelectInput (session, 'haddVarP', 
+                  #                    choices=c('select', 'omit', sort(FI$Variables)),
+                  #                    selected=plotSpec$Hist[[1]]$panel[[1]]$var[1])
+                  # updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[1]]$panel[[1]]$col[1])
+                  # updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[1]]$panel[[1]]$lw[1])
+                  # updateRadioButtons (session, 'hlineStyle', selected=plotSpec$Hist[[1]]$panel[[1]]$lt[1])
+                  # updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
+                  isolate (reac$newdata <- reac$newdata + 1)
                   isolate (reac$newdisplay <- reac$newdisplay + 1)
                   isolate (reac$newhistogram <- reac$newhistogram + 1)
+                  isolate (reac$newstats <- reac$newstats + 1)
+                  isolate (reac$newscat <- reac$newscat + 1)
+                  isolate (reac$newbin <- reac$newbin + 1)
                 } )
   #   observeEvent (input$savePDF,
   #                 savePDF (Data=data(), inp=input))
@@ -1427,7 +1540,12 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent (input$fname2d, {
-    newwd <- sprintf('%s%s', DataDirectory (), plotSpec$Project)
+    if (plotSpec$SRC != 'NCAR') {
+      newwd <- sprintf ('%s%s/%s', DataDirectory (), plotSpec$SRC,
+                        plotSpec$Project)
+    } else {
+      newwd <- sprintf('%s%s', DataDirectory (), plotSpec$Project)
+    }
     plotSpec$fname2d <<- fileChoose (newwd)
     rm(cfile, pos=1)
     updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
@@ -1575,7 +1693,12 @@ shinyServer(function(input, output, session) {
   reac <- reactiveValues (newdata=0, newdisplay=0, newtrack=0, 
                           newstats=0, newhistogram=0, newscat=0, 
                           newbin=0, newskewT=1, newvarp=0, updatefit=0, new2d=0, quick=0)
-  
+  SRCreac <- reactive ({              ## SRC
+    ## reset SRC to 'NCAR'
+    updateRadioButtons (session, 'SRC', label=NULL, selected='NCAR')
+    'rf'
+  })
+    
   flightType <- reactive ({              ## typeFlight
     ## reset typeFlight to rf
     updateRadioButtons (session, 'typeFlight', label=NULL, selected='rf')
@@ -1586,6 +1709,13 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print (sprintf ('data: entered, newdata is %d', reac$newdata))
     }
+    ## I don't know why these are needed, but apparently they are on loadConfig
+    updateSelectInput(session, inputId='SRC',
+                      selected=plotSpec$SRC)
+    updateSelectInput(session, inputId='Project',
+                      selected=plotSpec$Project, choices=PJ)
+    updateSliderInput (session, inputId='times', value=plotSpec$Times, min=plotSpec$Times[1],
+                       max=plotSpec$Times[2])
     # Project <<- Project <- isolate(input$Project)
     reac$newdata
     if (exists ('specialData')) {rm ('specialData')}  ## this doesn't work; fix someday
@@ -1606,12 +1736,19 @@ shinyServer(function(input, output, session) {
       if (plotSpec$TypeFlight == 'F') {
         fname <<- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
                            plotSpec$Project, plotSpec$Flight)
+        print (sprintf ('in data, file name is %s', fname))
       } else if (plotSpec$TypeFlight == 'KF') {
         fname <<- sprintf ('%s%s/%srf%02dKF.nc', DataDirectory (), plotSpec$Project,
                            plotSpec$Project, plotSpec$Flight)
       } else {
-        fname <<- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
-                         plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+        if (plotSpec$SRC != 'NCAR') {
+          fname <<- sprintf ('%s%s/%s/%s%s%02d.nc', DataDirectory (),
+                             plotSpec$SRC, plotSpec$Project, plotSpec$Project,
+                             plotSpec$TypeFlight, plotSpec$Flight)
+        } else {
+          fname <<- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
+                       plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+        }
       }
     }
     #     if (input$Production) {
@@ -1633,6 +1770,14 @@ shinyServer(function(input, output, session) {
     # reac$newdisplay <- reac$newdisplay + 1
     if (file.exists(fname)) {
       FI <<- DataFileInfo (fname)
+      ## set list of available probes
+      CHP <- vector ('character')
+      if (any (grepl ('CCDP', FI$Variables))) {CHP <- c(CHP, 'CDP')}
+      if (any (grepl ('CSP100', FI$Variables))) {CHP <- c(CHP, 'FSSP')}
+      if (any (grepl ('CUHSAS', FI$Variables))) {CHP <- c(CHP, 'UHSAS')}
+      if (any (grepl ('CS200', FI$Variables))) {CHP <- c(CHP, 'PCASP')}
+      if (any (grepl ('C1DC', FI$Variables))) {CHP <- c(CHP, '2DC')}
+      updateCheckboxGroupInput (session, 'probe', choices=CHP, selected=CHP)
       if (exists ('specialData')) {
         FI$Variables <- c(FI$Variables, names (specialData)[-1])
       }
@@ -1682,6 +1827,12 @@ shinyServer(function(input, output, session) {
                            selected=plotSpec$Variance[[1]]$Definition$cvar)
         updateSelectInput (session, 'addVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
                            selected=plotSpec$Plot[[input$plot]]$panel[[input$panel]]$var[1])
+        updateSelectInput (session, 'haddVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
+                           selected=plotSpec$Hist[[input$plot]]$panel[[input$panel]]$var[1])
+        updateSelectInput (session, 'saddVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
+                           selected=plotSpec$Scat[[input$plot]]$panel[[input$panel]]$var[1])
+        updateSelectInput (session, 'baddVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
+                           selected=plotSpec$Bin[[input$plot]]$panel[[input$panel]]$var[1])
         Data <<- D
         return (D)
       } else {
@@ -1703,13 +1854,19 @@ shinyServer(function(input, output, session) {
         return (Data)
       }
       ## try tf01
-      fn <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
-                     plotSpec$Project, 'tf', plotSpec$Flight)
+      if (plotSpec$SRC != 'NCAR') {
+        fn <<- sprintf ('%s%s/%s/%s%s%02d.nc', DataDirectory (),
+                         plotSpec$SRC, plotSpec$Project, plotSpec$Project,
+                         'tf', plotSpec$Flight)
+      } else {
+        fn <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
+                       plotSpec$Project, 'tf', plotSpec$Flight)
+      }
       if (file.exists (fn)) {
         warning (sprintf ('switched to tf%02d because rf%02d does not exist',
                           plotSpec$Flight, plotSpec$Flight))
         updateRadioButtons (session, 'typeFlight', label=NULL, selected='tf')
-        typeFlight <<- 'tf'
+        plotSpec$TypeFlight <<- 'tf'
         return (getNetCDF (fn, VarList))
       } else {
         if (Trace) {print ('data: error in data, returning -1')}
@@ -2301,7 +2458,7 @@ shinyServer(function(input, output, session) {
       idx1 <- getIndex (Time, as.integer (gsub(':', '', formatTime(plotSpec$Times[1]))))
       if (idx1 < 1) {idx1 <- 1}
       idx2 <- getIndex (Time, as.integer (gsub(':', '', formatTime(plotSpec$Times[2]))))
-      if (idx1 < 1) {idx2 <- length(Time)}
+      if (idx2 < 1) {idx2 <- length(Time)}
       if ('UHSAS' %in% input$probe) {
         nm3 <- namesCDF[grepl("CUHSAS_", namesCDF)]
         if (length (nm3) > 0) {
@@ -2492,35 +2649,45 @@ shinyServer(function(input, output, session) {
                 col='darkgreen', lwd=2)
         legend.names <- c(legend.names, 'UHSAS')
         legend.colors <- c(legend.colors, 'darkgreen')
-        ttl <- paste (ttl, sprintf("CONCU=%.1f", UHSAStot), sep=' ')
+        if (!is.na(UHSAStot)) {
+          ttl <- paste (ttl, sprintf("CONCU=%.1f", UHSAStot), sep=' ')
+        }
       }
       if (('PCASP' %in% input$probe) && (length (nm4) > 0) && (!is.na(PCASPtot))) {
         points (CellLimitsP[2:nbP], PCASP[2:nbP], type='s', 
                 col='darkorange', lwd=2)
         legend.names <- c(legend.names, 'PCASP')
         legend.colors <- c(legend.colors, 'darkorange')
-        ttl <- paste (ttl, sprintf("CONCP=%.1f", PCASPtot), sep=' ')
+        if (!is.na(PCASPtot)) {
+          ttl <- paste (ttl, sprintf("CONCP=%.1f", PCASPtot), sep=' ')
+        }
       }
       if ('CDP' %in% input$probe && (length (nm1) > 0)) {
         points (CellLimitsD[2:nbC], CDP[2:nbC], type='s', 
                 col='blue', lwd=2)
         legend.names <- c(legend.names, 'CDP')
         legend.colors <- c(legend.colors, 'blue')
-        ttl <- paste (ttl, sprintf("CONCD=%.1f", CDPtot), sep=' ')
+        if (!is.na(CDPtot)) {
+          ttl <- paste (ttl, sprintf("CONCD=%.1f", CDPtot), sep=' ')
+        }
       }
       if ('FSSP' %in% input$probe && (length (nm2) > 0)) {
         points (CellLimitsF[2:nbF], FSSP[2:nbF], type='s', 
                 col='violet', lwd=2)
         legend.names <- c(legend.names, 'FSSP')
         legend.colors <- c(legend.colors, 'violet')
-        ttl <- paste (ttl, sprintf("CONCF=%.1f", FSSPtot), sep=' ')
+        if (!is.na(FSSPtot)) {
+          ttl <- paste (ttl, sprintf("CONCF=%.1f", FSSPtot), sep=' ')
+        }
       }
       if ('2DC' %in% input$probe && (length (nm5) > 0)) {
         points (CellLimits2[7:nb2], S1DC[7:nb2], type='s', 
                 col='red', lwd=2)
         legend.names <- c(legend.names, '2DC')
         legend.colors <- c(legend.colors, 'red')
-        ttl <- paste (ttl, sprintf("CONC1DC=%.4f", S1DCtot), sep=' ')
+        if (!is.na(S1DCtot)) {
+          ttl <- paste (ttl, sprintf("CONC1DC=%.4f", S1DCtot), sep=' ')
+        }
       }
       
       if (length (input$probe) > 0) {
@@ -3035,6 +3202,10 @@ shinyServer(function(input, output, session) {
     } else {
       DataT <- DataR
     }
+    if (plotSpec$SRC == 'FAAM') {
+      DataT$LONC <- DataT$CLNG
+      DataT$LATC <- DataT$CLAT
+    }
     if (input$drift) {
       xc <- NA
       #         DataT$TASX <- SmoothInterp (DataT$TASX)
@@ -3124,10 +3295,15 @@ shinyServer(function(input, output, session) {
       }
       
       par(oma=c(1.1,0,0,0))
-      if (input$limits2) {
-        plotWAC (DataV[, c('Time', 'GGALT')])
+      if (plotSpec$SRC == 'NCAR') {
+        Data$Z <- Data$GGALT
       } else {
-        plotWAC (Data[, c('Time', 'GGALT')])
+        Data$Z <- Data$GALT
+      }
+      if (input$limits2) {
+        plotWAC (DataV[, c('Time', 'Z')])
+      } else {
+        plotWAC (Data[, c('Time', 'Z')])
       }
       AddFooter ()
       
@@ -3139,6 +3315,7 @@ shinyServer(function(input, output, session) {
   }, width=640, height=640)  
   
   output$skewT <- renderPlot ({  ## skewT
+    reac$newskewT
     # input$typeFlight
     if (is.null(input$times[1])) {
       if (Trace) {print ('skewT: input time is NULL, returning')}
@@ -3167,7 +3344,12 @@ shinyServer(function(input, output, session) {
         print (sprintf ('skewT: global plotSpec$Times are %s %s',
                         formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
-      if ((input$times[1] != plotSpec$Times[1]) || (input$times[2] != plotSpec$Times[2])) {return()}
+      updateSliderInput (session, 'times', value=plotSpec$Times)
+      if ((input$times[1] != plotSpec$Times[1]) || (input$times[2] != plotSpec$Times[2])) {
+        if (Trace) {print('skewT: skipping because times do not match')}
+        # reac$newskewT <- reac$newskewT + 1
+        return()
+      }
       namesV <- names(Data)
       namesV <- namesV[namesV != "Time"]
       for (n in namesV) {
@@ -3178,7 +3360,7 @@ shinyServer(function(input, output, session) {
       if (nrow (Data) <= 0) {
         plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
         text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
-        isolate(reac$newskewT <- reac$newskewT + 1)
+        reac$newskewT <- reac$newskewT + 1
         isolate(reac$newdata <- reac$newdata + 1)
         return()
       }
@@ -3208,12 +3390,22 @@ shinyServer(function(input, output, session) {
                     FigDatestr),1,outer=T,cex=0.75)
       }
       op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1,oma=c(1.1,0,0,0))
+      print (ndv)
+      if (plotSpec$SRC == 'NCAR') {VSKT <- c('PSXC', 'ATX', 'DPXC')}
+      if (plotSpec$SRC == 'UWYO') {VSKT <- c('ps_hads_a', 'trose', 'tdp')}
+      if (plotSpec$SRC == 'FAAM') {VSKT <- c('SPR', 'TTDI', 'DEWP')}
+      print (VSKT)
+      print (names(Data))
       if (input$limits6) {
-        DF <- DataV[, c("PSXC", "ATX", "DPXC")]
+        DF <- DataV[, VSKT]
       } else {
-        DF <- Data[, c("PSXC", "ATX", "DPXC")]
+        DF <- Data[, VSKT]
       }
       colnames(DF) <- c("Pressure", "Temperature", "DewPoint")
+      if (input$SRC == 'FAAM') {
+        DF$Temperature <- DF$Temperature - 273.15
+        DF$DewPoint <- DF$DewPoint - 273.15
+      }
       suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagram.Rdata")
                         + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
                                           formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
@@ -3796,34 +3988,41 @@ shinyServer(function(input, output, session) {
   }, width=780, height=640)
   
   output$barWvsZ <- renderPlot ({
-    if (Trace) {print ('barXvsZ: entered')}
+    if (Trace) {print ('barWvsZ: entered')}
     input$times
     input$panels
     layout (matrix(1:6, ncol=3), widths=c(5,5,5), heights=c(8,8))
     op <- par (mar=c(5.2,5,1,1)+0.1,oma=c(1.1,0,0,0))
     Ds <- limitData (data(), input)
+    if ('GGALT' %in% names(Ds)) {
+      Ds$Z <- Ds$GGALT
+    } else if ('GALT' %in% names(Ds)) {
+      Ds$Z <- Ds$GALT
+    } else if ('ALT' %in% names(Ds)) {
+      Ds$Z <- Ds$ALT
+    }
     plotV <- vector ()
     for (i in 1:plotSpec$Plot[[input$plot]]$panels) {
       plotV <- c(plotV, plotSpec$Plot[[input$plot]]$panel[[i]]$var)
     }
     plotV <- unique (plotV)
-    Ds <- Ds[, c('Time', plotV)]
+    Ds <- Ds[, c('Time', plotV, 'Z')]
     Ds <- Ds[(Ds$Time >= plotSpec$Times[1]) & (Ds$Time < plotSpec$Times[2]), ]
-    Ds <- Ds[!is.na (Ds$GGALT), ]
+    Ds <- Ds[!is.na (Ds$Z), ]
     kount <- 0
     for (nm in names (Ds)) {
       if (nm == 'Time') {next}
-      if (nm == 'GGALT') {next}
+      if (nm == 'Z') {next}
       kount <- kount + 1
       if (kount > 6) {break}
       DB <- data.frame ('Z1'=Ds[, nm])
-      DB[Ds$GGALT > 1000, 'Z1'] <- NA
+      DB[Ds$Z > 1000, 'Z1'] <- NA
       for (j in 2:15) {
         zmax <- j*1000
         zmin <- zmax-1000
         V <- sprintf ('Z%d', j)
         DB[,V] <- Ds[, nm]
-        DB[(Ds$GGALT < zmin) | (Ds$GGALT > zmax), V] <- NA
+        DB[(Ds$Z < zmin) | (Ds$Z > zmax), V] <- NA
       }
       boxplot (DB, horizontal=TRUE, outline=TRUE, 
                xlab=nm, ylab='altitude [km]', names=NULL)

@@ -38,7 +38,7 @@ DataFileInfo <- function (fileLocation) {
         Time <- ncvar_get (netCDFfile, "time")
         time_units <- ncatt_get (netCDFfile, "time", "units")        
       }
-    } else if ('Time' %in% namesCDF) {
+    } else if ('Time' %in% namesCDF || 'Time' %in% nms) {
       Time <- ncvar_get (netCDFfile, "Time")
       time_units <- ncatt_get (netCDFfile, "Time", "units")
     } 
@@ -84,14 +84,14 @@ DataFileInfo <- function (fileLocation) {
       ## get short names for variables instead of netCDF var name
       snames <- namesCDF
       for (VFAAM in namesCDF) {
-        print (VFAAM)
+        # print (VFAAM)
         ATTV <- ncatt_get (netCDFfile, VFAAM)
         if ('short_name' %in% names(ATTV)) {
           snames <- snames [-which (VFAAM == snames)]
           snames[VFAAM] <- sub (' ', '', ATTV$short_name)
-          print (sprintf ('short_name %s', ATTV$short_name))
+          # print (sprintf ('short_name %s', ATTV$short_name))
         } else {
-          print (sprintf (' remove variable %s', VFAAM))
+          # print (sprintf (' remove variable %s', VFAAM))
           snames <- snames [-which (VFAAM == snames)]
         }
       }
