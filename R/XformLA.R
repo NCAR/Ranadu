@@ -17,8 +17,9 @@
 #' the acceleration of gravity G subtracted, so G should be added before
 #' transforming and subtracted afterward. The matrix should have 3 columns
 #' representing the components and a number of rows corresponding to the
-#' number of observations. Special case: If Avector is NA, the routine
-#' instead returns the 3x3 transformation matrix that would multiply Avector.
+#' number of observations. Special case: If Avector is NA (the default), 
+#' the routine instead returns the 3x3 transformation matrix that would
+#' multiply Avector.
 #' @param .inverse Logical, transform from l-frame to a-frame if TRUE
 #' @import zoo
 #' @return The vector components transformed to l-frame or ENU coordinates, local

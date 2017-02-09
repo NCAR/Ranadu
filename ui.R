@@ -12,22 +12,26 @@ shinyUI(
     navlistPanel (tabPanel (strong('data & plot'), fluidRow (
       column (4, wellPanel (
         fluidRow (
-          column (6, selectInput (inputId='Project', label=NULL,
+          column (3, radioButtons ('SRC', label='AC', choices=c('NCAR', 'UWYO', 'FAAM'),
+                                   width='60px', inline=FALSE)),
+          column (8, 
+            fluidRow (
+          column (8, selectInput (inputId='Project', label=NULL,
                        choices=PJ, selected=plotSpec$Project, width='100px')),
-          column (6, actionButton (inputId='manual', label = 'see\nmanual'))
-        ),
+          column (4, actionButton (inputId='manual', label = 'help'))
+        )),
 
         fluidRow (
-          column (4, downloadButton ('savePDF', label='PDF')), # icon=icon('file-pdf-o'))),
+          # column (4, downloadButton ('savePDF', label='PDF')), # icon=icon('file-pdf-o'))),
           column (4, downloadButton (outputId='savePNG', label='PNG')), # icon=icon('file-image-o'))),
           column (4, actionButton (inputId='saveRdata', label='R', icon=icon('file-archive-o')))
         )
-      )),
+      ))),
       column (2, wellPanel (
         fluidRow (
           column (8, numericInput (inputId='Flight', label='Flight', value=1,
                                    min=1, max=99, step=1, width='80px')),
-          column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff', 'F', 'KF'),
+          column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff'), #, 'F', 'KF'),
                                    width='70px', inline=FALSE))))),
       column (1, 
               numericInput (inputId='plot', label='plot', value=1,
@@ -277,7 +281,7 @@ shinyUI(
                                                         numericInput ('symbol', 'symbol', plotSpec$Scat[[1]]$panel[[1]]$symbol[1], width='90px'),
                                                         fluidRow (
                                                           column (6, numericInput ('spanelMinx', 'xmin', plotSpec$Scat[[1]]$panel[[1]]$xlim[1])),
-                                                          column (6, numericInput ('spanelMaxx', 'xmax', plotSpec$Scat[[1]]$panel[[1]]$lim[2]))),
+                                                          column (6, numericInput ('spanelMaxx', 'xmax', plotSpec$Scat[[1]]$panel[[1]]$xlim[2]))),
                                                         fluidRow (
                                                           column (6, numericInput ('spanelMiny', 'ymin', plotSpec$Scat[[1]]$panel[[1]]$ylim[1])),
                                                           column (6, numericInput ('spanelMaxy', 'ymax', plotSpec$Scat[[1]]$panel[[1]]$ylim[2])))),
@@ -328,7 +332,7 @@ shinyUI(
                                                         numericInput ('bsymbol', 'symbol', plotSpec$Bin[[1]]$panel[[1]]$symbol[1], width='90px'),
                                                         fluidRow (
                                                           column (6, numericInput ('bpanelMinx', 'xmin', plotSpec$Bin[[1]]$panel[[1]]$xlim[1])),
-                                                          column (6, numericInput ('bpanelMaxx', 'xmax', plotSpec$Bin[[1]]$panel[[1]]$lim[2]))),
+                                                          column (6, numericInput ('bpanelMaxx', 'xmax', plotSpec$Bin[[1]]$panel[[1]]$xlim[2]))),
                                                         fluidRow (
                                                           column (6, numericInput ('bpanelMiny', 'ymin', plotSpec$Bin[[1]]$panel[[1]]$ylim[1])),
                                                           column (6, numericInput ('bpanelMaxy', 'ymax', plotSpec$Bin[[1]]$panel[[1]]$ylim[2])))),
