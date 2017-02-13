@@ -5,10 +5,13 @@
 \alias{standardVariables}
 \title{standardVariables}
 \usage{
-standardVariables(list = NULL)
+standardVariables(list = NULL, SRC = "NCAR")
 }
 \arguments{
 \item{list}{An optional list of variable names to add to the standard list}
+
+\item{SRC}{An indicator of which institution's list should be used. Default
+is 'NCAR'; other choices are 'UWYO' and 'FAAM'.}
 }
 \description{
 Standard set of variables, usually used in a call to getNetCDF
