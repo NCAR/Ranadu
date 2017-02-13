@@ -12,13 +12,15 @@ shinyUI(
     navlistPanel (tabPanel (strong('data & plot'), fluidRow (
       column (4, wellPanel (
         fluidRow (
-          column (6, selectInput (inputId='Project', label=NULL,
+          column (3, radioButtons ('SRC', label='SRC', choices=c('NCAR','FAAM','UWyo'),
+                                   width='60px', inline=FALSE)),
+          column (5, selectInput (inputId='Project', label=NULL,
                        choices=PJ, selected=plotSpec$Project, width='100px')),
-          column (6, actionButton (inputId='manual', label = 'see\nmanual'))
+          column (3, actionButton (inputId='manual', label = 'help'))
         ),
 
         fluidRow (
-          column (4, downloadButton ('savePDF', label='PDF')), # icon=icon('file-pdf-o'))),
+          # column (4, downloadButton ('savePDF', label='PDF')), # icon=icon('file-pdf-o'))),
           column (4, downloadButton (outputId='savePNG', label='PNG')), # icon=icon('file-image-o'))),
           column (4, actionButton (inputId='saveRdata', label='R', icon=icon('file-archive-o')))
         )
@@ -26,7 +28,7 @@ shinyUI(
       column (2, wellPanel (
         fluidRow (
           column (8, numericInput (inputId='Flight', label='Flight', value=1,
-                                   min=1, max=99, step=1, width='80px')),
+                                   min=1, max=99, step=1, width='120px')),
           column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff', 'F', 'KF'),
                                    width='70px', inline=FALSE))))),
       column (1, 
