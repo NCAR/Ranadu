@@ -1349,6 +1349,7 @@ shinyServer(function(input, output, session) {
                   ## allow data access to update.
                   # updateSelectInput (session, 'Project', selected=plotSpec$Project)
                   ##
+                  if (exists ('specialData')) {rm (specialData, pos=1)}
                   # get the full list of input variables
                   InputNames <<- names(input)
                   quickPlotVar <<- ''  ## reset to avoid not-found errors
@@ -1718,7 +1719,7 @@ shinyServer(function(input, output, session) {
                        max=plotSpec$Times[2])
     # Project <<- Project <- isolate(input$Project)
     reac$newdata
-    if (exists ('specialData')) {rm ('specialData')}  ## this doesn't work; fix someday
+    # if (exists ('specialData')) {rm (specialData, pos=1)}  ## this doesn't work; fix someday
     # isolate (reac$newdisplay <- reac$newdisplay + 1)
     # isolate (reac$newskewT <- reac$newskewT + 1)
     ## these would be needed for translation to new cal coefficients
