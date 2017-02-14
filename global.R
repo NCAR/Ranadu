@@ -305,6 +305,40 @@ loadConfig <- function (inp) {
 }
 load (file='plotSpec.def')  ## this loads initial values of plotSpec and Restrictions
 
+#. calculate special variables as defined here, for addition to data.frame
+#. D input data.frame containing variables needed; ensure this by
+#. additions to VarList defaults
+#. Function returns a data.frame with the added variables
+specialVar <- function (D) {
+  ## ROC.R -- chunk to add ROC variable
+  ## needs: data.frame Data containing netCDF variables PSXC, GGLAT, GGALT, ACINS, Grav
+  ## also assumes Rate is set
+  print (sprintf ('entry to specialVar, variables are:'))
+  print (sort(names (D)))
+  DPDT <- c(0, diff(D$PSXC)) * FI$Rate
+  print (summary(DPDT))
+  g <- Gravity (D$LATC, D$GGALT)
+  g[is.na(g)] <- 9.80
+  WPPRIME <- -StandardConstant('Rd') * (273.15 + D$ATX) /
+    (D$PSXC * g) * DPDT
+  print (summary (WPPRIME))
+  ACINS <- zoo::na.approx (as.vector(D$ACINS), maxgap=1000, na.rm=FALSE)
+  WPSTAR <- cumsum(ACINS)
+  print (summary(WPSTAR))
+  DIF <- zoo::na.approx (as.vector(WPPRIME-WPSTAR), maxgap=10000, na.rm=FALSE)
+  DIF <<- DIF
+  tau <- 300
+  DIF <- signal::filtfilt (signal::butter (3, 2/(tau*FI$Rate)), DIF)
+  d <- data.frame('Time' <- D$Time, 'ROC'= WPSTAR + DIF)
+  rm (DPDT, g, WPPRIME, WPSTAR, DIF, ACINS)
+  
+  ## add variable for new QCRC, named QCRY
+  d$QCRY <- D$QCRC - 0.5635 - 0.0018*D$QCR +0.0273*D$AKRD^2+0.0562*D$SSLIP^2
+  d$DQC <- d$QCRY - D$QCXC
+  print (str(d))
+  return (d)
+}
+
 fileChoose <- function (newwd) {
   oldwd <- setwd (newwd)
 #   while(getwd() != normalizePath(newwd)) {
@@ -614,7 +648,8 @@ makeVarList <- function () {
   }
   VarList <- c(VarList, plotSpec$StatVar)
   if (plotSpec$SRC == 'NCAR') {
-    VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 
+    VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 'PSXC', 'GGALT',
+                            'ACINS', 'GGVSPD', 'AKRD', 'QCR', 'QCRC', 'QCXC',
                             'DPXC', 'TASX', 'ROLL', 'VSPD',
                             'THDG', 'SSLIP'), quickPlotVar)
   } else if (plotSpec$SRC == 'UWYO') {
@@ -675,6 +710,8 @@ defFiles <- list.files(pattern = "^plotSpec")
 transferAttributes <- function (d, dsub) {    
   ds <- dsub
   for (nm in names (d)) {
+    if (exists ('specialData') && (nm == names(specialData)[1] || 
+                                   nm %in% names (specialData))) {next}
     if (nm %in% names (dsub)) {
       var <- sprintf ("d$%s", nm)
       A <- attributes (eval (parse (text=var)))
@@ -683,6 +720,7 @@ transferAttributes <- function (d, dsub) {
         A$dim <- NULL
         A$class <- NULL
       }
+      # print (sprintf ('tA: nm=%s, A=%s', nm, A))
       attributes (ds[,nm]) <- A
     }
   }

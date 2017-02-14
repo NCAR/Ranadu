@@ -194,7 +194,7 @@ William A.
 \color red
 DRAFT
 \color inherit
- 1/23/2017
+ 2/10/2017
 \end_layout
 
 \begin_layout Standard
@@ -459,13 +459,13 @@ Section
  the rate of climb of the aircraft that is an improvement over the measurement
  provided by the INS; (ii) determining the IRU-provided measurements of
  rotation and acceleration by differentiating the recorded attitude angles;
- (iii) Simplified algorithms for finding the errors in pitch and heading;
+ (iii) simplified algorithms for finding the errors in pitch and heading;
  and (iv) a revision to the empirical representation of angle of attack.
  The first is useful because the INS inherently updates the variable representin
 g the vertical speed of the aircraft by comparison to the pressure altitude,
  while the measurement of wind needs a variable representing the rate of
  change in geometric altitude.
- The second topic is useful because, for many of the early projects with
+ The second topic is needed because, for many of the early projects with
  the GV, the body rotations and body accelerations were not recorded, yet
  they are needed by the Kalman filter.
  Reconstructing them makes it possible to process those older projects or
@@ -557,11 +557,11 @@ workflow document (KalmanFilterWorkflow.pdf) accompanies this technical note
  It serves several purposes, primarily to elaborate upon the material in
  the present document.
  Some of the derivations are justified in more detail, and instructions
- are provided for running the R script to added the corrected variables
- to a netCDF file.
+ are provided for running the R script to add the corrected variables to
+ a netCDF file.
  Some details of how that modification of an existing file is done are included
  in the workflow document, and there is also some discussion of methods
- that were explored but abandoned.
+ that were explored but abandoned in the course of this work.
  The workflow document should provide valuable information to anyone wanting
  to modify the R script.
  
@@ -692,6 +692,15 @@ library(grid)
 \begin_layout Plain Layout
 
 options(stringsAsFactors=FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+CACHE <- TRUE
 \end_layout
 
 \begin_layout Plain Layout
@@ -1102,13 +1111,10 @@ mechanization
  (i.e., determining the next step by using the measured acceleration and rotation
  from the IRU) and the independent measurements from GPS.
  Because errors in the state vector are coupled, the update procedure can
- estimate errors in the attitude angles as well as the components of the
- state vector that are measured directly by the GPS.
- This is the primary reason for using a Kalman filter to improve the wind
- measurements: Although the measurements of position and velocity that result
- should differ little from those provided by the GPS, appropriate corrections
- to the attitude angles (pitch, roll, and heading) can be estimated even
- though there is no direct measurement of these except from the INS.
+ estimate errors in the attitude angles as well as in the components of
+ the state vector that are measured directly by the GPS.
+ This correction to attitude angles is the primary reason for using a Kalman
+ filter to improve the wind measurements: 
 \end_layout
 
 \begin_layout Standard
@@ -1248,11 +1254,11 @@ covariance matrix
 
 \end_inset
 
-covariance matrix that applies to the state vector 
+15x15 covariance matrix that applies to the state vector 
 \begin_inset Formula $\delta\mathbf{x}$
 \end_inset
 
-, a 15x15 matrix
+
 \end_layout
 
 \begin_layout Labeling
@@ -1287,8 +1293,8 @@ Kalman-gain matrix representing how the error-state vector is updated using
 \begin_inset space ~
 \end_inset
 
-[DZ] The 6-component measured differences between the INS and GPS measurements
- of position and velocity.
+[DZ] The 6-component error vector containing the measured differences between
+ the INS and GPS measurements of position and velocity.
  
 \end_layout
 
@@ -1323,9 +1329,9 @@ Kalman-gain matrix representing how the error-state vector is updated using
 \begin_inset space ~
 \end_inset
 
-R] Matrices representing respectively the anticipated noise contributions
- affecting the error-state vector (15x15) and the measurements from the
- GPS (6x6).
+R] Matrices representing respectively the noise contributions (15x15) characteri
+zing the forward propagation of the error-state vector and the measurements
+ from the GPS (6x6).
 \begin_inset Index idx
 status open
 
@@ -1342,7 +1348,7 @@ noise|measurement
 The approach taken here will be to filter the error-state vector that represents
  the difference between the best-estimate measurements and those originally
  provided by the INS.
- The INS integration does not need to be duplicated here to obtain the reference
+ The INS integration does not need to be duplicated to obtain the reference
  solution because that is already available.
  However, the Kalman filter does need the 
 \begin_inset Quotes eld
@@ -1353,8 +1359,19 @@ state transition matrix
 \end_inset
 
  that represents the forward integration, so the first step in this analysis
- is to obtain such a matrix and validate results using it against the available
- INS solution.
+ was to obtain such a matrix and validate results using it against the available
+ INS solution, as described in Sect.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:Mechanization"
+
+\end_inset
+
+.
  The Jacobian
 \begin_inset Index idx
 status open
@@ -1369,7 +1386,19 @@ Jacobian
 \begin_inset Formula $\mathbf{T}$
 \end_inset
 
- later used in this filter.
+ used in this filter.
+ The implementation of the procedure outlined here then follows in Sect.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:The-Kalman-filter"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1540,8 +1569,8 @@ mechanization
  exact duplicate of the INS mechanization because the INS has calibration
  information and high-rate data not available to this new calculation.
  However, if the results are reasonably close to those from the INS then
- that provides some evidence that the derivatives being calculated are reeasonab
-ly close to the correct values.
+ that provides some evidence that the derivatives being calculated are reasonabl
+y close to the correct values.
  These derivatives will then be used in the implementation of the Kalman
  filter, where the filter will adjust to compensate for remaining errors
  in these derivatives.
@@ -1587,6 +1616,7 @@ With appropriate transformations these calculations of attitude angles can
  the l-frame values of errors in pitch and roll, respectively representing
  southward and westward tilts of the inertial platform, are not mixed together
  when the heading changes as they are in the a-frame.
+ This was not done in the calculations presented here.
 \end_layout
 
 \end_inset
@@ -1605,7 +1635,7 @@ For each time increment:
 
 \begin_deeper
 \begin_layout Enumerate
-calculated the time derivative of the state vector.
+Calculate the time derivative of the state vector.
  In the case of the attitude angles, this is done by calculating the derivative
  of the transformation matrix from the a-frame to the l-frame and then using
  the definition of components of that matrix to find the derivative of the
@@ -1693,13 +1723,17 @@ key "noureldin2013fundamentals"
 
 \begin_inset Formula 
 \begin{eqnarray}
-\dot{\lambda} & = & \frac{v_{n}}{R_{m}}\label{eq:dlat}\\
-\dot{\Phi} & = & \frac{v_{e}}{R_{n}\cos\lambda}\label{eq:dlong}
+\dot{\lambda} & = & \frac{v_{n}}{R_{m}+z}\label{eq:dlat}\\
+\dot{\Phi} & = & \frac{v_{e}}{(R_{n}+z)\cos\lambda}\label{eq:dlong}
 \end{eqnarray}
 
 \end_inset
 
-and the derivative of the altitude is
+where 
+\begin_inset Formula $z$
+\end_inset
+
+ is the altitude of the aircraft, with the derivative
 \begin_inset Newline newline
 \end_inset
 
@@ -1711,7 +1745,7 @@ and the derivative of the altitude is
 
 \end_inset
 
-where dots over quantities denote the time derivative.
+where dots over quantities denote the time derivatives.
 \begin_inset Newline newline
 \end_inset
 
@@ -1734,16 +1768,15 @@ The velocity derivatives are determined from the measured accelerations,
 \end_inset
 
  along the direction determined by their cross product and generally downward.
- These measurements of acceleration must be transformed to the l-frame where
- the velocities are defined, using the attitude angles for pitch, roll,
- and heading, denoted {
+ These measurements of acceleration must be transformed to the l-frame using
+ the attitude angles for pitch, roll, and heading, denoted {
 \begin_inset Formula $\theta,\,\phi,\,\psi$
 \end_inset
 
-}.
+}, because the components of velocity are defined in that frame.
  In addition, because the accelerations are measured in an inertial frame,
  corrections must be made for the inertial forces that arise because the
- l-frame is moving relative to the Earth and so it changing orientation,
+ l-frame is moving relative to the Earth and so is changing orientation,
  and because the rotation of the Earth introduces additional Coriolis accelerati
 ons relative to an inertial frame.
  The coordinate transformation matrix that transforms a vector from the
@@ -1807,19 +1840,7 @@ key "noureldin2013fundamentals"
 \end_inset
 
 178–179, give the equations used, and these are repeated in the workflow
- document and are coded into the transformation function 
-\begin_inset Quotes eld
-\end_inset
-
-STMFV
-\begin_inset space ~
-\end_inset
-
-()
-\begin_inset Quotes erd
-\end_inset
-
- in the R code embedded in the program that generates this document.
+ document.
 \end_layout
 
 \begin_layout Enumerate
@@ -1830,7 +1851,7 @@ Calculating the derivatives of the attitude angles is more involved.
 
  is known by using the definitions of the components of that matrix in terms
  of the attitude angles.
- For example, the [3.1] component of that matrix is 
+ For example, the [3, 1] component of that matrix is 
 \begin_inset Formula $-\sin\theta$
 \end_inset
 
@@ -1900,7 +1921,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<check-accelerations, include=TRUE, digits=4, fig.cap='', cache=FALSE>>=
+<<check-accelerations, include=TRUE, digits=4, fig.cap='', cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -2462,7 +2483,7 @@ Relative timing among the measurements can influence these results.
  INS, even when tagged with the same times.
  To determine these lags, a pitch maneuver (where the pilots induce rapid
  changes in pitch with associated climbs and descents during straight flight)
- was used, from DEEPWAVE flight 15, 3:16:00–3:18:00 UTC.
+ from DEEPWAVE flight 15, 3:16:00–3:18:00 UTC was used.
  Shifting among the measurements from the INS was explored to see what provided
  the best agreement between measured accelerations (variables BLONGA, BLATA,
  BNORMA) and the accelerations determined by differentiating the INS variables
@@ -2516,7 +2537,17 @@ ms for accelerations and attitude angles and up to 110
 ms for velocity components, so these shifts are within the approximate range
  expected.
  For the purpose of comparing accelerations, the optimal shifts were applied
- to the measurements.
+ to the measurements for this pitch maneuver.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+There is no assurance that these shifts will be constant.
+\end_layout
+
+\end_inset
+
+
 \begin_inset Float table
 wide false
 sideways false
@@ -3355,9 +3386,9 @@ reference "tab:accel-fits"
 
 \end_inset
 
- shows the results of fitting linear polynomials in the measured accelerations
- after transformation to the l-frame (with inertial corrections) to the
- derivatives determined by differentiation.
+ shows the results of linear fits of the measured accelerations after transforma
+tion to the l-frame (with inertial corrections) to the derivatives determined
+ by differentiation.
  The GPS measurements provide independent measurements of the accelerations,
  so the first two fits can be considered checks of the calibrations of the
  accelerometers as well as a test of the calculation procedures.
@@ -3382,10 +3413,10 @@ The last two fits compare only INS-dependent values, so they test the validity
 \end_layout
 
 \begin_layout Standard
-A better estimate of accelerometer calibration can be obtained by transforming
- the l-frame accelerations determined by differentiating the GPS-provided
- velocities to the a-frame, where they can be compared directly to the component
-s of the measured accelerations.
+A better direct estimate of accelerometer calibration can be obtained by
+ transforming the l-frame accelerations determined by differentiating the
+ GPS-provided velocities to the a-frame, where they can be compared directly
+ to the components of the measured accelerations.
  When this is done, the calibrations in Table
 \begin_inset space ~
 \end_inset
@@ -3417,7 +3448,7 @@ ns {BLONGA, BLATA, BNORMA, blue lines} to the accelerations determined by
  differentiating the velocity components measured by the GPS receiver and
  then translating these to the a-frame (dashed red lines), from a period
  during DEEPWAVE flight 15 that includes a pitch maneuver, a speed run and
- a yaw maneuver at the times corresponding to the plot annotations.', cache=FALSE
+ a yaw maneuver at the times corresponding to the plot annotations.', cache=CACHE
 >>=
 \end_layout
 
@@ -3647,7 +3678,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<mechanization, include=TRUE, fig.lp='fig:', fig.cap=' ', cache=FALSE>>=
+<<mechanization, include=TRUE, fig.lp='fig:', fig.cap=' ', cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -3671,7 +3702,7 @@ D1$BPITCHR <- D1$BPITCHR + 0.00026
 
 \begin_layout Plain Layout
 
-stm <- STMFV (D1)  ## get the whole-flight derivative matrix
+stm <- STMFV (D1, .components=9)  ## get the whole-flight derivative matrix
 \end_layout
 
 \begin_layout Plain Layout
@@ -3795,7 +3826,7 @@ DTHDG[DTHDG > 180] <- DTHDG[DTHDG > 180] - 360
 
 \begin_layout Plain Layout
 
-#     stmf1 <- c(STMFV (sv), rep(0,6))
+#     stmf1 <- c(STMFV (sv, .components=9), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3805,7 +3836,7 @@ DTHDG[DTHDG > 180] <- DTHDG[DTHDG > 180] - 360
 
 \begin_layout Plain Layout
 
-#     stmf2 <- c(STMFV (sv1), rep(0,6))
+#     stmf2 <- c(STMFV (sv1, .components=9), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3815,7 +3846,7 @@ DTHDG[DTHDG > 180] <- DTHDG[DTHDG > 180] - 360
 
 \begin_layout Plain Layout
 
-#     stmf3 <- c(STMFV (sv2), rep(0,6))
+#     stmf3 <- c(STMFV (sv2, .components=9), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3825,7 +3856,7 @@ DTHDG[DTHDG > 180] <- DTHDG[DTHDG > 180] - 360
 
 \begin_layout Plain Layout
 
-#     stmf4 <- c(STMFV (sv3), rep(0,6))
+#     stmf4 <- c(STMFV (sv3, .components=9), rep(0,6))
 \end_layout
 
 \begin_layout Plain Layout
@@ -3890,7 +3921,7 @@ name "subsec:Checking-the-rotation"
 
 \begin_layout Standard
 Independent measurements of rotation rates are not available as they are
- for accelerations, so a similar direct test and calibration are not possible.
+ for accelerations, so similar direct tests and calibrations are not possible.
  However, if the wind remains constant, a flight maneuver consisting of
  a circular pattern should produce a 360
 \begin_inset Formula $^{\circ}$
@@ -3968,7 +3999,7 @@ r1 <- setRange(D1, 33938, 34610)
 
 \begin_layout Plain Layout
 
-r2 <- setRange (D1, 34710, 35348)
+r2 <- setRange (D1, 34730, 35348)
 \end_layout
 
 \begin_layout Plain Layout
@@ -4077,8 +4108,8 @@ reference "tab:hrot-comparison"
 
  shows the comparison of rotation rates obtained in these two independent
  ways.
- There is a small but significant difference between the two turn directions,
- which suggests that a calibration representing both would be 
+ The consistency between turn rates is remarkable, and a calibration representin
+g both turn directions is 
 \begin_inset Formula $\dot{\psi}_{cal}=a_{0}+a_{1}\dot{\psi}$
 \end_inset
 
@@ -4126,7 +4157,11 @@ Sexpr{round(cfydot[2],3)}
 \end_inset
 
 , the corresponding calibration of BYAWR would use the first coefficient
- multiplied by 0.894; i.e., 
+ multiplied by 0.89
+\begin_inset Formula $_{4}$
+\end_inset
+
+; i.e., 
 \begin_inset Formula $\mathrm{BYAWR}{}_{cal}=a_{0}^{*}+a_{1}\mathrm{BYAWR}$
 \end_inset
 
@@ -4153,10 +4188,8 @@ Sexpr{round(cfydot[1]*0.894,3)}
 
 .
  This confirms that the offset in the measured rotation rate about the heading
- axis is small and the sensitivity coefficient is within about 1% of unity.
- However, even an offset of this small magnitude warrants correction because
- the offset accumulates with time and so would make a significant contribution
- during flights lasting several hours.
+ axis is small and the sensitivity coefficient is indistinguishable from
+ unity in this test.
 \end_layout
 
 \begin_layout Standard
@@ -4510,6 +4543,10 @@ name "tab:hrot-comparison"
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
 Inertial effects are expected to be more significant for the pitch and roll
  angles, so similar tests applied to those angles are useful checks of the
  analytical formulas for the derivatives.
@@ -4591,11 +4628,18 @@ where
  
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
-A critical test of the angle derivatives is to transform the measured derivative
-s for pitch, roll, and heading to the a-frame, with appropriate correction
- for inertial effects, and check that the results match the measured rotation
- rates.
+Similar tests of the pitch and roll angles based on the GPS measurements
+ are not possible.
+ However, the critical test of the angle derivatives is to transform the
+ measured derivatives for pitch, roll, and heading to the a-frame, with
+ appropriate correction for inertial effects, and check that the results
+ match the measured rotation rates.
  The procedure is discussed in a following section (Sect.
 \begin_inset space ~
 \end_inset
@@ -4631,68 +4675,15 @@ s
 \end_inset
 
  and correlation coefficient 0.99997.
- For roll and pitch, similar agreement indicates that the accumulated difference
-s found in the preceding paragraph are indeed the result of the need for
- inertial corrections and that, as formulated in the code of the present
- program, the inertial corrections match those applied by the INS during
- the original mechanization.
+ Similar agreement was obtained for the pitch and roll angles.
+ This is evidence that, as formulated in the code of the present program,
+ the coordinate transformations and inertial corrections match those applied
+ by the INS during the original mechanization.
  
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-# op <- par (mar=c(2,4,1,1)+0.1)
-\end_layout
-
-\begin_layout Plain Layout
-with(Data[r,], {
-\end_layout
-
-\begin_layout Plain Layout
-ggplotWAC (data.frame(Time, VEW, VEWX), lwd=c(1.2,0.8),
-\end_layout
-
-\begin_layout Plain Layout
-                           col=c('blue', 'red', 'darkorange','black'),
-\end_layout
-
-\begin_layout Plain Layout
-             lty=c(1,42), position=c(2,2), legend.position=c(0.2,0.91))
-\end_layout
-
-\begin_layout Plain Layout
-# op <- par (mar=c(5,4,1,1)+0.1)
-\end_layout
-
-\begin_layout Plain Layout
-  ggplotWAC (data.frame(Time, VNS, VNSX), lwd=c(1.2,0.8),
-\end_layout
-
-\begin_layout Plain Layout
-                           col=c('blue', 'red', 'darkorange','black'),
-\end_layout
-
-\begin_layout Plain Layout
-             lty=c(1,42), position=c(1,2), legend.position=c(0.2,0.91))
-\end_layout
-
-\begin_layout Plain Layout
-})
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The preceding subsection tested the handling of the measurements of rotation
- rate and acceleration provided by the IRU and supported the validity of
- the transformation of those body measurements to the l-frame.
- However, as indicated in Sect.
+As argued in Sect.
 \begin_inset space ~
 \end_inset
 
@@ -4704,9 +4695,8 @@ reference "subsec:mech-procedures"
 \end_inset
 
 , integration using the calculated derivatives and comparison to the INS-produce
-d solution is the crucial test of the derivatives, so results from that
- comparison are the critical test that the derivative function must pass
- if it is to be used in the Kalman filter.
+d solution is the crucial test of the derivatives that the derivative function
+ must pass if it is to be used in the Kalman filter.
  That is the topic of the next subsection.
 \end_layout
 
@@ -4716,7 +4706,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<find-rotation-correction, include=TRUE, cache=FALSE>>=
+<<find-rotation-correction, include=TRUE, cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -4969,22 +4959,6 @@ rm (stm, rlmA, OmegaA, RdM, omega, omega1, omega2, zro, lat, sinLat, cosLat,
 
 \end_layout
 
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-newpage
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Subsection
 Mechanization using the derivatives
 \begin_inset CommandInset label
@@ -5009,7 +4983,7 @@ mparison of INS-provided and integration-derived attitude angles, labeled
  of INS-provided and integration-derived components of the aircraft velocity,
  the latter plotted as dashed green lines.
  The former are {VEW, VNS} and the latter {VEWX, VNSX}, for respectively
- the northbound and eastbound components of the aircraft velocity.'), cache=FALSE
+ the northbound and eastbound components of the aircraft velocity.'), cache=CACHE
 >>=
 \end_layout
 
@@ -5130,7 +5104,7 @@ d <- with(D1[r,], data.frame(Time, VEW, VEWX, VNS, VNSX))
 
 \begin_layout Plain Layout
 
-ggplotWAC(d, col=c('blue', 'red'), lwd=c(1.4,0.8), lty=c(1.42),
+ggplotWAC(d, col=c('blue', 'red'), lwd=c(1.4,0.8), lty=c(1,42),
 \end_layout
 
 \begin_layout Plain Layout
@@ -5200,7 +5174,8 @@ op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1)  # reset
 \end_layout
 
 \begin_layout Standard
-The flight segment included a 
+The flight segment to be used to test the derivative function, from DEEPWAVE
+ flight 15 3:20:00 to 3:55:00 UTC, included a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5209,8 +5184,8 @@ speed run
 \end_inset
 
  during which the aircraft airspeed varied from near-minimum to near-maximum
- (centered on 3:25:00 UTC) and four complete circles, two flown counterclockwise
- and two flown clockwise.
+ (centered on 3:25:00 UTC), a maneuver with variation in sideslip angle,
+ and four complete circles, two flown counterclockwise and two flown clockwise.
  To produce the right values of the state vector through these maneuvers
  is therefore a good test of the mechanization.
  Figure
@@ -5243,8 +5218,8 @@ ref{fig:plot-mechanization1}
 \begin_inset Formula $^{\circ}$
 \end_inset
 
-, so this is not a serious weakness, especially because wind measurements
- are not considered valid in turns.
+, so this is not a serious weakness, especially because GV wind measurements
+ are usually not considered valid in turns.
  Figure
 \begin_inset space ~
 \end_inset
@@ -5264,10 +5239,9 @@ ref{fig:plot-mechanization2}
 
  shows that the ground-speed components tracked the INS values very closely
  through all the maneuvers.
- The key result from this part of the study is that as implemented above
- the derivatives of components of the state vector are approximately correct
- and integrate to values very close to those originally produced by the
- INS.
+ The key result is thus that as implemented above the derivatives of components
+ of the state vector are approximately correct and integrate to values very
+ close to those originally produced by the INS.
  The function providing those derivatives is therefore a reasonable basis
  for the Kalman filter that follows in Sect.
 \begin_inset space ~
@@ -5537,7 +5511,14 @@ reference "eq:w-hydro"
 \end_inset
 
 .
- The specific implementation of this uses a Butterworth filter to find 
+ The resulting rate of climb can then be integrated again, starting from
+ a reference value provided by the GPS, to obtain a measure of altitude
+ that, except for the initial reference, is independent of the GPS and is
+ a useful representation of geometric altitude.
+\end_layout
+
+\begin_layout Standard
+The specific implementation of this uses a Butterworth filter to find 
 \begin_inset Formula $\overline{\Delta w_{p}}$
 \end_inset
 
@@ -5595,7 +5576,7 @@ status open
  representing rate of climb (ROC) to the GPS-provided measurement (GGVSPD)
  and, in the bottom panel, the measurement provided by the INS (VSPD).
  The time covered in the bottom panel is a small segment from the time interval
- used for the top two panels.', cache=TRUE>>=
+ used for the top two panels.', cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -6016,7 +5997,7 @@ status open
  The measurements are from DEEPWAVE flight 15, from a period that included,
  chronologically in the plot, maneuvers with rapid pitch variations, a speed
  run with slow pitch variations, a maneuver with rapid changes in sideslip,
- and two full left-turn circles.', cache=FALSE>>=
+ and two full left-turn circles.', cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -7685,8 +7666,8 @@ reference "subsec:Mechanization"
 
 \end_inset
 
- verified that at least an approximate calculation of the derivatives of
- the state variables is available.
+ verified that a valid representation of the derivatives of the state variables
+ is available.
  On that basis, an error-state Kalman filter can be developed, as follows:
  
 \begin_inset Note Note
@@ -7757,7 +7738,7 @@ The Kalman filter is then constructed as follows:
 \end_layout
 
 \begin_layout Enumerate
-The first step is to initialize an error-state-vector 
+The first step is to initialize an error-state vector 
 \begin_inset Formula $\delta\mathbf{x}$
 \end_inset
 
@@ -7770,6 +7751,12 @@ The first step is to initialize an error-state-vector
  of climb, pitch, roll, heading, pitch-axis rotation rate, roll-axis rotation
  rate, yaw-axis rotation rate, lateral component of acceleration, longitudinal
  component of acceleration, and normal component of acceleration.
+ The rotation-rate errors and acceleration errors are biases; random errors
+ enter instead through the noise-covariance matrix 
+\begin_inset Formula $\mathbf{Q}$
+\end_inset
+
+ below.
 \end_layout
 
 \begin_layout Enumerate
@@ -7778,10 +7765,10 @@ The covariance matrix
 \end_inset
 
  characterizing the errors in the error-state-vector is also needed.
- This is here initialized to have rather large components because it is
- expected that the GPS measurements will have much lower unceertainty than
- these INS-provided components and that will constrain the covariance matrix
- during the calculation.
+ This is here initialized to have rather large components corresponding
+ to the INS measurements because it is expected that the GPS measurements
+ will have much lower unceertainty than these INS-provided components and
+ that will constrain the covariance matrix during the calculation.
  
 \begin_inset Formula $\mathbf{V}$
 \end_inset
@@ -7837,20 +7824,40 @@ cos
 \begin_inset Formula $R_{n}$
 \end_inset
 
- are appropriate radii of the Earth and 
+ are appropriate radii of the Earth, as discussed in Sect.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsec:deriv-array"
+
+\end_inset
+
+, and 
 \begin_inset Formula $\lambda$
 \end_inset
 
  is the latitude.
- (See the code) 
+ 
 \end_layout
 
 \begin_layout Enumerate
-The function STMFV() was verified above and so provides at least an approximate
- calculation of the derivatives of the state vector.
+The function STMFV() was verified above and so provides appropriate derivatives
+ of the state vector, for the first nine components.
+ The error-state vector, however, also includes errors in the additional
+ six components representing the rotation and acceleration vectors.
+ The derivatives of the first nine components depend on the derivatives
+ of the additional six components, so all 15 elements in the error-state
+ vector must be considered.
  For an error-state Kalman filter, the propagation of the error state can
- be found from the Jacobian of that function of the state vector, so the
- error-state transition matrix 
+ be found from the Jacobian 
+\begin_inset Formula $\mathbf{J}(\mathbf{x})$
+\end_inset
+
+ of that derivative function of the state vector, so the error-state transition
+ matrix 
 \begin_inset Formula $\mathbf{T}$
 \end_inset
 
@@ -7862,57 +7869,132 @@ The function STMFV() was verified above and so provides at least an approximate
 
 \begin_inset Formula 
 \begin{equation}
-\delta\mathbf{X}_{k}=\mathbf{T}\thinspace\delta\mathbf{x}_{k-1}=(\mathbf{J}(\mathbf{x})\thinspace\Delta t+\mathbf{I})\thinspace\delta\mathbf{x}_{k-1}\label{eq:error-state-transition}
+\delta\mathbf{x}_{k}=\mathbf{T}\thinspace\delta\mathbf{x}_{k-1}=(\mathbf{J}(\mathbf{x}_{k-1})\thinspace\Delta t+\mathbf{I})\thinspace\delta\mathbf{x}_{k-1}\label{eq:error-state-transition}
 \end{equation}
 
 \end_inset
 
-
+The derivative function must be extended for this use beyond that used for
+ mechanization, because the dependence of the first nine components on the
+ additional six components is needed for the complete Jacobian.
+ Furthermore, the dependence of the additional six derivatives on each other
+ and the first nine components is needed.
+ This is added as follows:
 \end_layout
 
+\begin_deeper
+\begin_layout Enumerate
+Expanding the state-vector 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ to include all 15 components naturally includes the effect of the added
+ six components on the first nine components because the derivative calculation
+ outlined earlier already includes these dependencies.
+ The corresponding components of the Jacobian will therefore be included
+ naturally.
+\end_layout
+
+\begin_layout Enumerate
+The dependence that is not included in that case is the dependence of the
+ derivatives of the last six components on the values of the first nine.
+ There is no such dependence, though, because these are direct measurements
+ in an inertial frame and so are not affected by other components of the
+ state vector.
+ The change in acceleration or rotation components does not depend analytically
+ on any other part of the state vector, so the terms in the Jacobian involving
+ these components will be zero.
+ This arises naturally if the state vector is expanded to 15 components
+ and then used to calculate the Jacobian numerically.
+ There will be new terms in the Jacobian describing how, for example, a
+ derivative of a velocity component changes with the change in a component
+ of acceleration, but not the reverse component describing how the derivative
+ of a component of acceleration changes with the change in velocity component.
+ The highest 6x6 submatrix in the Jacobian will have 0 for all terms.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Implementation then involves having the derivative function return a 15-componen
+t derivative where the first nine components are as before and the last
+ six components are zero.
+ Using that derivative function to find the Jacobian will then include terms
+ that involve all the components and so describe the full interdependence
+ of the errors.
+ For example, errors in the rotation-rate components will affect all of
+ the error terms for the first nine components and so will enter most of
+ the Jacobian terms involving the derivatives of the first nine components
+ with respect to the rotation-rate components.
+\end_layout
+
+\end_deeper
 \begin_layout Enumerate
 The noise-covariance matrix 
 \begin_inset Formula $\mathbf{Q}$
 \end_inset
 
- represents the noise in the solution.
- This is initialized as indicated in the code, via function GCF.
- The results can be sensitively dependent on these values, and the choices
- made here are the result of tuning to find a set of values that provides
- reasonable results.
- The 15 values used are the squares of the following: {30/
+ represents the estimated noise in the INS forward solution.
+ The results vary significantly with different choices for these values,
+ and the choices made here are the result of tuning to find a set of values
+ that provides reasonable results.
+ The 15 values used for the diagonal components of this matrix are the squares
+ of the following: {1/
 \begin_inset Formula $R_{m}$
 \end_inset
 
-, 30/
+, 1/
 \begin_inset Formula $(R_{n}\cos\lambda$
 \end_inset
 
-), 150, 0.3, 0.3, 0.3, 0.005
+), 0.1, 0.02, 0.02, 0.05, 0.01
 \begin_inset Formula $^{\circ}$
 \end_inset
 
-, 0.005
+, 0.01
 \begin_inset Formula $^{\circ}$
 \end_inset
 
-, 0.05
+, 0.01
 \begin_inset Formula $^{\circ}$
 \end_inset
 
-, 0.003
+, 0.02
 \begin_inset Formula $^{\circ}$
 \end_inset
 
-/s, 0.003
+/s, 0.02
 \begin_inset Formula $^{\circ}$
 \end_inset
 
-/s, 0.003
+/s, 0.02
 \begin_inset Formula $^{\circ}$
 \end_inset
 
-/s, 0.00002
+/s, 0.01
+\begin_inset space \thinspace{}
+\end_inset
+
+m
+\begin_inset space \thinspace{}
+\end_inset
+
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+, 0.01
+\begin_inset space \thinspace{}
+\end_inset
+
+m
+\begin_inset space \thinspace{}
+\end_inset
+
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+, 0.01
 \begin_inset space \thinspace{}
 \end_inset
 
@@ -7929,12 +8011,51 @@ s
  cases the values are converted to radians before use.
  These values are used with a 5-s time step, and they may need adjustment
  if a different time step is used.
- The very low value representing noise in the measured accelerations had
- a significant effect on the results.
- Larger values tended to degrade the results for the attitude angles, presumably
- because errors could be attributed to errors in measured accelerations.
- The results from this particular filter will then rely on the assumption
- that, for the most part, errors in acceleration are not significant.
+ To estimate these values, a high-pass filter of high-rate measurements
+ for a straight-and-level flight segment was used to find the standard deviation
+ of such signals.
+ In the case of accelerations, very strong evidence for the appropriate
+ noise limit comes from variance spectra of these measurements, which show
+ characteristics of a noise limit at an amplitude of about 0.01
+\begin_inset space ~
+\end_inset
+
+m
+\begin_inset space \thinspace{}
+\end_inset
+
+s
+\begin_inset Formula $^{-2}$
+\end_inset
+
+.
+ Further support for this estimate comes from the standard deviations listed
+ as the first two entries in Table
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:accel-fits"
+
+\end_inset
+
+.
+ All the values listed may be higher than the true noise, but at least they
+ are upper limits and so were good starting points for tuning.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+For numerical reasons, the first two components were increased by a factor
+ of 10 to avoid failure to invert the matrix required below for the Kalman-gain
+ matrix because of the large range in values in the resulting matrix.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Enumerate
@@ -7986,15 +8107,24 @@ where
 
  is the measurement-noise-covariance matrix representing the GPS noise,
  a 6x6 matrix having diagonal elements that are the squares of these components:
- {50/
+ {0.5/
 \begin_inset Formula $R_{m}$
 \end_inset
 
-, 50/(
-\begin_inset Formula $R_{n}\cos\Phi$
+, 0.5/(
+\begin_inset Formula $R_{n}\cos\lambda$
 \end_inset
 
-, 100, 0.1, 0.1, 0.1}.
+), 0.5, 0.02, 0.02, 0.05}.
+ These were based on the same procedure used to determine estimates for
+ the components of 
+\begin_inset Formula $\mathbf{Q}$
+\end_inset
+
+ and represent very high confidence in the measurements from the GPS receiver.
+ The particular time interval was one where OMNISTAR corrections were available,
+ so this represents the best performance that can be expected from the GPS
+ receiver.
 \begin_inset Foot
 status open
 
@@ -9029,7 +9159,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<Kalman-setup, include=TRUE, cache=TRUE>>=
+<<Kalman-setup, include=TRUE, cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -9072,7 +9202,7 @@ status open
 
 \begin_layout Plain Layout
 
-SV <- with(D1[1, ], data.frame(LAT, LON, ALT, VEW, VNS, ROC, PITCH, ROLL,
+SV <- with(D1[1, ], data.frame(LAT, LON, ZROC, VEW, VNS, ROC, PITCH, ROLL,
  THDG,
 \end_layout
 
@@ -9109,47 +9239,69 @@ GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data
 
 \begin_layout Plain Layout
 
-  gcf[1] <- 30 / sp$Rm
+  ## For lat and lon, noise evidence indicates 1 m, but when that is used
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[2] <- 30 / (sp$Rn * cos (sv$LAT))
+  ## there are numerical problems in the 'solve' call because of the large
+ range
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[3] <- 150
+  ## in values in the matrix.
+ Forcing these 10 times larger avoids that problem.
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[4:6] <- 0.3    ## 0.3
+  gcf[1] <- 10 / sp$Rm
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[7:8] <- 0.005*Cradeg  ## 0.005
+  gcf[2] <- 10 / (sp$Rn * cos (sv$LAT))
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[9] <- 0.05*Cradeg    ## 0.015
+  gcf[3] <- 0.1
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[10:11] <- 0.003*Cradeg    ## 0.015
+  gcf[4:5] <- 0.02    ## 0.3
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[12] <- 0.003*Cradeg       ## 0.015
+  gcf[6] <- 0.05
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[13:15] <- 0.00002
+  gcf[7:8] <- 0.01*Cradeg  ## 0.005
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[9] <- 0.01*Cradeg    ## 0.015
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[10:11] <- 0.0002*Cradeg    ## 0.015
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[12] <- 0.0002*Cradeg       ## 0.015
+\end_layout
+
+\begin_layout Plain Layout
+
+  gcf[13:15] <- 0.001
 \end_layout
 
 \begin_layout Plain Layout
@@ -9265,7 +9417,7 @@ sinpsi <- sin (D1$THDG*Cradeg)
 
 \begin_layout Plain Layout
 
-DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ALT-GGALT, VEW-GGVEW + LG*Hdot*cospsi,
+DZ <- with(D1, c(LAT-GGLAT, LON-GGLON, ZROC-GGALT, VEW-GGVEW + LG*Hdot*cospsi,
  
 \end_layout
 
@@ -9449,32 +9601,32 @@ RCV <- matrix (rep(0,49), ncol=7)
 
 \begin_layout Plain Layout
 
-RCV[1,1] <- (10/D1$Rm[1])^2  ## latitude
+RCV[1,1] <- (0.5/D1$Rm[1])^2  ## latitude
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[2,2] <- (10/(D1$Rn[1]*cos(SV$LAT)))^2
+RCV[2,2] <- (0.5/(D1$Rn[1]*cos(SV$LAT)))^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[3,3] <- 100^2
+RCV[3,3] <- 0.5^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[4,4] <- 0.3^2            ## ve
+RCV[4,4] <- 0.02^2            ## ve
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[5,5] <- 0.3^2
+RCV[5,5] <- 0.02^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[6,6] <- 0.3^2
+RCV[6,6] <- 0.02^2
 \end_layout
 
 \begin_layout Plain Layout
@@ -9521,7 +9673,13 @@ RCV[7,7] <- 1000  ## but update this each time step
 
 \begin_layout Plain Layout
 
-## initialize covariance matrix with generous variances
+## initialize covariance matrix with generous variances, because Schuler-oscilla
+tion
+\end_layout
+
+\begin_layout Plain Layout
+
+## errors might be large at the start
 \end_layout
 
 \begin_layout Plain Layout
@@ -9576,17 +9734,17 @@ CV[9,9] <- (1*Cradeg)^2
 
 \begin_layout Plain Layout
 
-CV[10,10] <- CV[11,11] <- (0.005*Cradeg)^2
+CV[10,10] <- CV[11,11] <- (0.02*Cradeg)^2
 \end_layout
 
 \begin_layout Plain Layout
 
-CV[12,12] <- (0.01*Cradeg)^2
+CV[12,12] <- (0.02*Cradeg)^2
 \end_layout
 
 \begin_layout Plain Layout
 
-CV[13,13] <- CV[14,14] <- CV[15,15] <- 0.0005^2
+CV[13,13] <- CV[14,14] <- CV[15,15] <- 0.01^2
 \end_layout
 
 \begin_layout Plain Layout
@@ -9631,7 +9789,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<Kalman-loop, include=TRUE, cache=TRUE>>=
+<<Kalman-loop, include=TRUE, cache=FALSE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -9688,7 +9846,7 @@ DL <- nrow (D1)
 
 \begin_layout Plain Layout
 
-NSTEP <- 5      ## update time
+NSTEP <- 30      ## update time
 \end_layout
 
 \begin_layout Plain Layout
@@ -9786,7 +9944,7 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  SV <- with(D1[i, ], data.frame(LAT, LON, ALT, VEW, VNS, ROC, PITCH, ROLL,
+  SV <- with(D1[i, ], data.frame(LAT, LON, ZROC, VEW, VNS, ROC, PITCH, ROLL,
  THDG,
 \end_layout
 
@@ -9828,7 +9986,7 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  dcm <- jacobian (STMFV, sv, .aaframe='a') * dt * NSTEP + diag(15)
+  dcm <- t(jacobian (STMFV, sv)) * dt * NSTEP + diag(15)
 \end_layout
 
 \begin_layout Plain Layout
@@ -10244,7 +10402,7 @@ D1$LONKF <- signal::filtfilt (signal::butter (3, 2/(10*Rate)), D1$LONKF)
 
 \begin_layout Plain Layout
 
-D1$ALTKF <- D1$ALT - Cor[, 3]
+D1$ALTKF <- D1$ZROC - Cor[, 3]
 \end_layout
 
 \begin_layout Plain Layout
@@ -10708,7 +10866,7 @@ status open
  DLAT, DLON, and DALT (blue lines) are the differences between the Kalman-filter
  result and GPS measurement, while CLAT, CLON, and CALT (green lines) are
  the corrections applied to the original INS values by the Kalman filter.',
- cache=TRUE>>=
+ cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -11022,7 +11180,7 @@ status open
  Blue lines show the differences between the Kalman-filter results and the
  corresponding GPS-provided values, while the green lines (red line in the
  bottom panel) show the corrections applied to the original INS values by
- the Kalman filter.", cache=TRUE>>=
+ the Kalman filter.", cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -11510,7 +11668,7 @@ status open
  the filtered result shown in the previous figure back to the a-frame, for
  pitch and roll errors.
  Also shown as red lines are the results from the Ranadu routine CorrectPitch()."
-), dev='cairo_pdf', cache=TRUE>>=
+), dev='cairo_pdf', cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -12257,7 +12415,7 @@ ing (HC, green line).
  A spline representing the smoothed heading correction from the Kalman filter,
  using the estimated inverse variance as weight factor for the spline, is
  shown as the red line.
- Data from DEEPWAVE flight 16.", cache=TRUE>>=
+ Data from DEEPWAVE flight 16.", cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
@@ -12807,7 +12965,7 @@ status open
 
 \begin_layout Plain Layout
 
-<<wind-calculation, include=TRUE, cache=TRUE>>=
+<<wind-calculation, include=TRUE, cache=CACHE>>=
 \end_layout
 
 \begin_layout Plain Layout
