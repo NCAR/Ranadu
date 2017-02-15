@@ -1792,6 +1792,10 @@ shinyServer(function(input, output, session) {
       if ('GGVSPD' %in% VarList && !('GGVSPD' %in% FI$Variables)) {
         if ('GGVSPDB' %in% FI$Variables) {
           VarList[which('GGVSPD' == VarList)] <- 'GGVSPDB'
+        } else if ('VSPD_A' %in% FI$Variables) {
+          VarList[which('GGVSPD' == VarList)] <- 'VSPD_A'
+        } else if ('VSPD_G' %in% FI$Variables) {
+          VarList[which('GGVSPD' == VarList)] <- 'VSPD_G'
         }
       }
       if (exists ('specialData')) {rm (specialData, pos=1)} 
@@ -1799,6 +1803,10 @@ shinyServer(function(input, output, session) {
         D <- getNetCDF (fname, VarList)
         if ('GGVSPDB' %in% VarList) {
           D$GGVSPD <- D$GGVSPDB
+        } else if ('VSPD_A' %in% VarList) {
+          D$GGVSPD <- D$VSPD_A
+        } else if ('VSPD_G' %in% VarList) {
+          D$GGVSPD <- D$VSPD_G
         }
         ## beware of cases with a long string of NAs at the start of the flight
         if ('TASX' %in% names (D)) {
