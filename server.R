@@ -1849,7 +1849,7 @@ shinyServer(function(input, output, session) {
         D <- transferAttributes (DS, D)
       }
       if (exists ('specialData')) {
-        FI$Variables <- c(FI$Variables, names (specialData)[-1])
+        FI$Variables <- unique(c(FI$Variables, names (specialData)[-1]))
       }
       if (length (D) > 1) {
         fname.last <<- fname
