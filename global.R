@@ -322,7 +322,7 @@ specialVar <- function (D) {
   WPPRIME <- -StandardConstant('Rd') * (273.15 + D$ATX) /
     (D$PSXC * g) * DPDT
   print (summary (WPPRIME))
-  ACINS <- zoo::na.approx (as.vector(D$ACINS), maxgap=1000, na.rm=FALSE)
+  ACINS <- zoo::na.approx (as.vector(D$ACINS), maxgap=10000, na.rm=FALSE)
   WPSTAR <- cumsum(ACINS)
   print (summary(WPSTAR))
   DIF <- zoo::na.approx (as.vector(WPPRIME-WPSTAR), maxgap=10000, na.rm=FALSE)
