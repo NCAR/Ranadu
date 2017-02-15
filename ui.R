@@ -9,6 +9,14 @@ shinyUI(
     # titlePanel("Explorer"),
     # tabPanel ('plot vs time',
     # tags$style (type='text/css', '.well {max-height:140px;}'),
+    ## this doesn't work; 115 is F4 key; fix someday
+    tags$script(HTML("$(function() {
+                                     $(document).keyup(function(e) {
+                                       if (e.which == 115) {
+                                         $('#resetT').click()
+                                       }
+                                     });
+                                   })")),
     navlistPanel (tabPanel (strong('data & plot'), fluidRow (
       column (4, wellPanel (
         fluidRow (
