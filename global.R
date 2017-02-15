@@ -329,12 +329,13 @@ specialVar <- function (D) {
   DIF <<- DIF
   tau <- 300
   DIF <- signal::filtfilt (signal::butter (3, 2/(tau*FI$Rate)), DIF)
-  d <- data.frame('Time' <- D$Time, 'ROC'= WPSTAR + DIF)
+  d <- data.frame('Time' = D$Time, 'ROC' = WPSTAR + DIF)
   rm (DPDT, g, WPPRIME, WPSTAR, DIF, ACINS)
   
   ## add variable for new QCRC, named QCRY
   d$QCRY <- D$QCRC - 0.5635 - 0.0018*D$QCR +0.0273*D$AKRD^2+0.0562*D$SSLIP^2
   d$DQC <- d$QCRY - D$QCXC
+  d$DQRC <- D$QCRC - D$QCXC
   print (str(d))
   return (d)
 }
@@ -402,7 +403,7 @@ quickPlotVar <- 'GGALT'
 
 limitData <- function (Data, inp, lim=NA) {
   DataV <- Data
-  namesV <- names(DataV)
+  namesV <- unique(names(DataV))
   namesV <- namesV[namesV != "Time"]
   if (is.na (lim)) {lim <- inp$restrict}
   if (lim) {
