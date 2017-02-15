@@ -67,6 +67,10 @@ shinyServer(function(input, output, session) {
       updateTextInput (session, 'paluchEnd', value='36:00:00')
       updateTextInput (session, 'paluchCStart', value='0')
       updateTextInput (session, 'paluchCEnd', value='36:00:00')
+      if (exists ('specialData')) {
+        VarList <<- VarList [-which (VarList %in% names(specialData))]
+        # rm (specialData, pos=1)
+      }
     }
     ## set list of available probes
     CHP <- vector ('character')
@@ -93,6 +97,10 @@ shinyServer(function(input, output, session) {
       updateTextInput (session, 'paluchEnd', value='36:00:00')
       updateTextInput (session, 'paluchCStart', value='0')
       updateTextInput (session, 'paluchCEnd', value='36:00:00')
+      if (exists ('specialData')) {
+        VarList <<- VarList [-which (VarList %in% names(specialData))]
+        # rm (specialData, pos=1)
+      }
     }
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('Flight: reset newdata')}
@@ -1349,7 +1357,6 @@ shinyServer(function(input, output, session) {
                   ## allow data access to update.
                   # updateSelectInput (session, 'Project', selected=plotSpec$Project)
                   ##
-                  if (exists ('specialData')) {rm (specialData, pos=1)}
                   # get the full list of input variables
                   InputNames <<- names(input)
                   quickPlotVar <<- ''  ## reset to avoid not-found errors
@@ -1719,7 +1726,6 @@ shinyServer(function(input, output, session) {
                        max=plotSpec$Times[2])
     # Project <<- Project <- isolate(input$Project)
     reac$newdata
-    # if (exists ('specialData')) {rm (specialData, pos=1)}  ## this doesn't work; fix someday
     # isolate (reac$newdisplay <- reac$newdisplay + 1)
     # isolate (reac$newskewT <- reac$newskewT + 1)
     ## these would be needed for translation to new cal coefficients
@@ -1783,8 +1789,27 @@ shinyServer(function(input, output, session) {
         FI$Variables <- c(FI$Variables, names (specialData)[-1])
       }
       VarList <<- makeVarList ()  ## saved as global for possible inspection
+      if ('GGVSPD' %in% VarList && !('GGVSPD' %in% FI$Variables)) {
+        if ('GGVSPDB' %in% FI$Variables) {
+          VarList[which('GGVSPD' == VarList)] <- 'GGVSPDB'
+        }
+      }
+      if (exists ('specialData')) {rm (specialData, pos=1)} 
       if ((fname != fname.last) || (any(!(VarList %in% VarListLast)))) {
         D <- getNetCDF (fname, VarList)
+        if ('GGVSPDB' %in% VarList) {
+          D$GGVSPD <- D$GGVSPDB
+        }
+        ## beware of cases with a long string of NAs at the start of the flight
+        if ('TASX' %in% names (D)) {
+          ix <- which (!is.na(D$TASX))
+          TatStart <- D$Time[ix[1]]
+          TatEnd <- D$Time[ix[length(ix)]]
+          DS <- D
+          D <- D[D$Time >= TatStart & D$Time <= TatEnd, ]
+          D <- transferAttributes (DS, D)
+          rm (DS)
+        }
         if (fname != fname.last) {
           # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
           step <- 60
@@ -1808,7 +1833,11 @@ shinyServer(function(input, output, session) {
       } else {
         D <- Data
       }
-      
+      if (exists ('specialData')) {
+        specialData <<- cbind(specialData, specialVar (D))
+      } else {
+        specialData <<- specialVar (D)
+      }
       
       if (exists ('specialData')) {
         SD <- specialData
@@ -1818,6 +1847,9 @@ shinyServer(function(input, output, session) {
         DS <- D
         D <- cbind (D, SD)
         D <- transferAttributes (DS, D)
+      }
+      if (exists ('specialData')) {
+        FI$Variables <- c(FI$Variables, names (specialData)[-1])
       }
       if (length (D) > 1) {
         fname.last <<- fname
