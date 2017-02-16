@@ -133,7 +133,7 @@ NSF/NCAR Gulfstream V Research Aircraft}
 
 \author{William A. Cooper}
 
-\date{\textcolor{red}{DRAFT} 2/10/2017}
+\date{\textcolor{red}{DRAFT} 2/16/2017}
 
 \maketitle
 \vfill{}
@@ -2307,7 +2307,7 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
   Grav <- D1$Grav[i]
   sv <- as.vector (SV, mode='numeric')
   # stmf <- STMFV (sv)
-  dcm <- jacobian (STMFV, sv) * dt * NSTEP + diag(15)
+  dcm <- t(jacobian (STMFV, sv)) * dt * NSTEP + diag(15)
   ## modify to include this?
   ## modify this to include decaying error terms for the measurements:
   # dcm[10,10] <- dcm[11,11] <- dcm[12,12] <- -1/tau

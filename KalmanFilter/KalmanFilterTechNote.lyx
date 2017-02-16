@@ -194,7 +194,7 @@ William A.
 \color red
 DRAFT
 \color inherit
- 2/10/2017
+ 2/16/2017
 \end_layout
 
 \begin_layout Standard
@@ -276,7 +276,7 @@ key "Cooper2016ncartn"
 status open
 
 \begin_layout Plain Layout
-uncertainty
+uncertainty!wind
 \end_layout
 
 \end_inset
@@ -316,7 +316,7 @@ ty for the wind measurements.
 status open
 
 \begin_layout Plain Layout
-standard uncertainty
+uncertainty!standard
 \end_layout
 
 \end_inset
@@ -364,7 +364,7 @@ ts of pitch and heading.
 status open
 
 \begin_layout Plain Layout
-strong coupling
+coupling!strong
 \end_layout
 
 \end_inset
@@ -379,7 +379,7 @@ Schuler oscillation
 
 \end_inset
 
- to evaluate errors in pitch and couples this with a related analysis to
+ to evaluate errors in pitch and combines this with a related analysis to
  find the correction in heading.
  The second implements a full error-state Kalman filter to produce adjusted
  measurements of the attitude angles and also the ground-speed components
@@ -391,12 +391,74 @@ Schuler oscillation
 \begin_layout Standard
 This introduction will present a brief discussion of the steps involved
  in using an error-state Kalman filter to update measurements from the inertial
- systems on the aircraft (which do not have internal Kalman filters) using
- reference measurements from a GPS receiver.
+ systems
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+navigation system!inertial
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+INS|see 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+navigation system, inertial
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ on the aircraft (which do not have internal Kalman filters) using reference
+ measurements from a 
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+navigation system!GPS
+\end_layout
+
+\end_inset
+
+Global Positioning System (GPS) receiver.
  The results from the GPS receiver are very good for aircraft position and
  velocity, so the Kalman filter adds little to these measurements.
- The primary value of the Kalman filter presented here is that it improves
- the measurements of pitch and heading.
+ The primary value of the 
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Kalman filter!primary value
+\end_layout
+
+\end_inset
+
+Kalman filter presented here is that it improves the measurements of pitch
+ and heading.
 \end_layout
 
 \begin_layout Standard
@@ -404,9 +466,18 @@ Section
 \begin_inset space ~
 \end_inset
 
-2 will then develop expressions for the derivatives of the primary measurements
- from the inertial navigation system (INS) and will show that these derivatives
- provide a reasonable basis for mechanization,
+2 next will develop expressions for the derivatives
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+state vector!derivatives
+\end_layout
+
+\end_inset
+
+ of the primary measurements from the inertial navigation system (INS) and
+ will show that these derivatives provide a reasonable basis for mechanization,
 \begin_inset Index idx
 status open
 
@@ -418,7 +489,49 @@ mechanization
 
  i.e., calculating the history of the position, velocity, and attitude angles
  of the aircraft from the basic measurements provided by the inertial reference
- unit (IRU).
+ unit
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+inertial reference unit
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+IRU|see 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+inertial reference unit
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ (IRU).
 \begin_inset Foot
 status open
 
@@ -433,9 +546,19 @@ In this document, the IRU will refer to the portion of the instrument that
 
 \end_inset
 
- Those measurements are the vector rotation rate and vector acceleration
- of the aircraft in an inertial frame, so the test of the calculated derivatives
- is that the results for the 
+ Those measurements
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+measurements!IRU
+\end_layout
+
+\end_inset
+
+ are the vector rotation rate and vector acceleration of the aircraft in
+ an inertial frame, so the test of the calculated derivatives is that the
+ results for the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -446,6 +569,15 @@ state vector
  (consisting of position, velocity, and attitude angles of the aircraft)
  are in reasonable agreement with the values provided by the INS.
  The importance of this step is that the validated state-vector derivative
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+state vector!derivative
+\end_layout
+
+\end_inset
+
  then will be used in implementation of the error-state Kalman filter.
 \end_layout
 
@@ -456,15 +588,73 @@ Section
 
 3 is a diversion from the main development of this technical note.
  It contains several ancillary topics:, (i) defining a new variable representing
- the rate of climb of the aircraft that is an improvement over the measurement
- provided by the INS; (ii) determining the IRU-provided measurements of
- rotation and acceleration by differentiating the recorded attitude angles;
- (iii) simplified algorithms for finding the errors in pitch and heading;
- and (iv) a revision to the empirical representation of angle of attack.
+ the 
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+rate of climb
+\end_layout
+
+\end_inset
+
+rate of climb of the aircraft that is an improvement over the measurement
+ provided by the INS; (ii) determining the IRU-provided measurements
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+IRU!substitute for measurements
+\end_layout
+
+\end_inset
+
+ of rotation and acceleration by differentiating the recorded attitude angles;
+ (iii) simplified algorithms
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+correction algorithms!simplified
+\end_layout
+
+\end_inset
+
+ for finding the errors in pitch and heading; and (iv) a revision to the
+ empirical representation of angle of attack
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+angle of attack!empirical representation
+\end_layout
+
+\end_inset
+
+.
  The first is useful because the INS inherently updates the variable representin
-g the vertical speed of the aircraft by comparison to the pressure altitude,
- while the measurement of wind needs a variable representing the rate of
- change in geometric altitude.
+g the vertical speed of the aircraft by comparison to the pressure
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+altitude!pressure
+\end_layout
+
+\end_inset
+
+ altitude, while the measurement of wind needs a variable representing the
+ rate of change in geometric
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+altitude!geometric
+\end_layout
+
+\end_inset
+
+ altitude.
  The second topic is needed because, for many of the early projects with
  the GV, the body rotations and body accelerations were not recorded, yet
  they are needed by the Kalman filter.
@@ -500,11 +690,31 @@ Section
 \begin_inset space ~
 \end_inset
 
-4 then discusses the details of the Kalman filter.
+4 then discusses the details of the 
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Kalman filter!processing script
+\end_layout
+
+\end_inset
+
+Kalman filter.
  A script based on the programming language R has been developed to calculate
  the estimated errors from the Kalman filter, apply the indicated corrections
  to the measured state vector, and add those new variables to the standard
- netCDF data file.
+ netCDF
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+netCDF file!create new
+\end_layout
+
+\end_inset
+
+ data file.
  This section includes discussion of the aspects of that code that represent
  the Kalman filter.
  The results are shown and compared to reference results and to the alternate
@@ -518,17 +728,45 @@ Section
 \end_layout
 
 \begin_layout Standard
-Section 5 the presents results from calculating the wind using the corrected
- state vector.
+Section 5 the presents results from calculating the wind
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+wind!corrected, Kalman filter
+\end_layout
+
+\end_inset
+
+ using the corrected state vector.
  The conclusion of this section is a summary of the value of the Kalman
  filter and so serves as a conclusion to the report.
 \end_layout
 
 \begin_layout Standard
 Several steps have been taken with the goal of making this work internally
- documented and reproducible, as discussed in the Appendix.
- The program that produces this document (via LaTeX), named KalmanFilterTechNote.
-Rnw,
+ documented and 
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+reproducibility
+\end_layout
+
+\end_inset
+
+reproducible, as discussed in the Appendix.
+ The program
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+script!processing
+\end_layout
+
+\end_inset
+
+ that produces this document (via LaTeX), named KalmanFilterTechNote.Rnw,
 \begin_inset Index idx
 status open
 
@@ -563,7 +801,17 @@ workflow document (KalmanFilterWorkflow.pdf) accompanies this technical note
  in the workflow document, and there is also some discussion of methods
  that were explored but abandoned in the course of this work.
  The workflow document should provide valuable information to anyone wanting
- to modify the R script.
+ to modify the R script or use it to process archival
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+data file!archive
+\end_layout
+
+\end_inset
+
+ data files.
  
 \end_layout
 
@@ -574,21 +822,6 @@ status open
 \begin_layout Plain Layout
 
 <<initialization, echo=FALSE,include=FALSE>>=
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-# Initialization.R
-\end_layout
-
-\begin_layout Plain Layout
-
-# version as of 160110; note that source statement in header over-rides
- this code
 \end_layout
 
 \begin_layout Plain Layout
@@ -636,11 +869,6 @@ status open
 
 \begin_layout Plain Layout
 
-## chunk "initialization.R"
-\end_layout
-
-\begin_layout Plain Layout
-
 library(knitr)
 \end_layout
 
@@ -676,12 +904,12 @@ require(numDeriv)    ## needed for the jacobian() function
 
 \begin_layout Plain Layout
 
-library(signal)
+library(signal)      ## used for filtering
 \end_layout
 
 \begin_layout Plain Layout
 
-library(reshape2)
+library(reshape2)    ## used with ggplot facet plots
 \end_layout
 
 \begin_layout Plain Layout
@@ -700,7 +928,7 @@ options(stringsAsFactors=FALSE)
 
 \begin_layout Plain Layout
 
-CACHE <- TRUE
+CACHE <- FALSE
 \end_layout
 
 \begin_layout Plain Layout
@@ -933,7 +1161,6 @@ for (V in VarList) {
 
 \begin_layout Plain Layout
 
-# .shift <- -70
 \end_layout
 
 \begin_layout Plain Layout
@@ -9256,52 +9483,52 @@ GCF <- function (sv, sp) {    ## sv is the state vector; sp is the data
 
 \begin_layout Plain Layout
 
-  gcf[1] <- 10 / sp$Rm
+  gcf[1] <- 30 / sp$Rm
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[2] <- 10 / (sp$Rn * cos (sv$LAT))
+  gcf[2] <- 30 / (sp$Rn * cos (sv$LAT))
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[3] <- 0.1
+  gcf[3] <- 150
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[4:5] <- 0.02    ## 0.3
+  gcf[4:5] <- 0.3    ## 0.3
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[6] <- 0.05
+  gcf[6] <- 0.3
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[7:8] <- 0.01*Cradeg  ## 0.005
+  gcf[7:8] <- 0.005*Cradeg  ## 0.005
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[9] <- 0.01*Cradeg    ## 0.015
+  gcf[9] <- 0.05*Cradeg    ## 0.015
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[10:11] <- 0.0002*Cradeg    ## 0.015
+  gcf[10:11] <- 0.003*Cradeg    ## 0.015
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[12] <- 0.0002*Cradeg       ## 0.015
+  gcf[12] <- 0.003*Cradeg       ## 0.015
 \end_layout
 
 \begin_layout Plain Layout
 
-  gcf[13:15] <- 0.001
+  gcf[13:15] <- 0.00002
 \end_layout
 
 \begin_layout Plain Layout
@@ -9601,32 +9828,32 @@ RCV <- matrix (rep(0,49), ncol=7)
 
 \begin_layout Plain Layout
 
-RCV[1,1] <- (0.5/D1$Rm[1])^2  ## latitude
+RCV[1,1] <- (10/D1$Rm[1])^2  ## latitude
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[2,2] <- (0.5/(D1$Rn[1]*cos(SV$LAT)))^2
+RCV[2,2] <- (10/(D1$Rn[1]*cos(SV$LAT)))^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[3,3] <- 0.5^2
+RCV[3,3] <- 100^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[4,4] <- 0.02^2            ## ve
+RCV[4,4] <- 0.3^2            ## ve
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[5,5] <- 0.02^2
+RCV[5,5] <- 0.3^2
 \end_layout
 
 \begin_layout Plain Layout
 
-RCV[6,6] <- 0.02^2
+RCV[6,6] <- 0.3^2
 \end_layout
 
 \begin_layout Plain Layout
@@ -9734,17 +9961,17 @@ CV[9,9] <- (1*Cradeg)^2
 
 \begin_layout Plain Layout
 
-CV[10,10] <- CV[11,11] <- (0.02*Cradeg)^2
+CV[10,10] <- CV[11,11] <- (0.005*Cradeg)^2
 \end_layout
 
 \begin_layout Plain Layout
 
-CV[12,12] <- (0.02*Cradeg)^2
+CV[12,12] <- (0.01*Cradeg)^2
 \end_layout
 
 \begin_layout Plain Layout
 
-CV[13,13] <- CV[14,14] <- CV[15,15] <- 0.01^2
+CV[13,13] <- CV[14,14] <- CV[15,15] <- 0.0005^2
 \end_layout
 
 \begin_layout Plain Layout
@@ -9986,7 +10213,7 @@ for (i in seq(2*NSTEP, DL, by=NSTEP)) {
 
 \begin_layout Plain Layout
 
-  dcm <- t(jacobian (STMFV, sv)) * dt * NSTEP + diag(15)
+  dcm <- jacobian (STMFV, sv) * dt * NSTEP + diag(15)
 \end_layout
 
 \begin_layout Plain Layout
