@@ -30,4 +30,3 @@ FI <-DataFileInfo (sprintf ("\%s/extdata/RAFdata.nc", path.package ("Ranadu")))
 \author{
 William Cooper
 }
-

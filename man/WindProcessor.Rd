@@ -18,6 +18,14 @@ candidates and selects the first found: {PITCHC, PITCH}, {TASN, TASX},
 {GGVSPD, GGVSPD_NVTL, VSPD_A}, {ATTACK, AKRD}, {SSLIP, SSRD}. If any
 required variables are not found, the function returns the original
 data.frame unchanged and prints an error message.}
+
+\item{LR}{Distance forward from INS to gust pod [m].}
+
+\item{LG}{Distance forward from INS to GPS antenna [m]}
+
+\item{CompF}{Set TRUE to implement the complementary filter that merges
+ground-speed vectors from the INS and GPS to obtain corrected values
+of the wind vector.}
 }
 \value{
 The original data.frame is returned with variables WDN, WSN, WIN added. These
@@ -42,4 +50,3 @@ newData <- WindProcessor (RAFdata)
 \author{
 Al Cooper
 }
-

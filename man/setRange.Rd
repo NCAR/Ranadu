@@ -28,4 +28,3 @@ r <- setRange (RAFdata, 201100, 201200)
 \author{
 William Cooper
 }
-

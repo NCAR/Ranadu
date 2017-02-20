@@ -41,4 +41,3 @@ by interpolation.
 \author{
 William Cooper
 }
-

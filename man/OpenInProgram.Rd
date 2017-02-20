@@ -55,4 +55,3 @@ with python code that can be tailored for special needs.
 \author{
 William Cooper
 }
-

@@ -32,4 +32,3 @@ vlist <- ValueOfAll (RAFdata, 201100)
 \author{
 William Cooper
 }
-

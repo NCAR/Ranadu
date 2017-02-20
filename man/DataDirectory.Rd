@@ -23,4 +23,3 @@ Directory <- DataDirectory ()
 \author{
 William Cooper
 }
-

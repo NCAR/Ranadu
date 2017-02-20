@@ -7,6 +7,7 @@
 #' where ymin=ybar-sigma and ymax=ybar+sigma.
 #' @aliases binStats
 #' @author William Cooper
+#' @importFrom stats sd
 #' @export binStats
 #' @param .d A data-frame containing at least two columns, the first holding
 #' values to partition and summarize and the second the variable used for

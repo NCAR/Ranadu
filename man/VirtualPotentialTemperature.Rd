@@ -29,4 +29,3 @@ THETAV <- VirtualPotentialTemperature (20., 900., 12.)
 \author{
 William Cooper
 }
-

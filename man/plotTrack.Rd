@@ -65,4 +65,3 @@ plotTrack (RAFdata, sz=1, .Spacing=1, .WindFlags=2)
 \author{
 William Cooper
 }
-

@@ -75,4 +75,3 @@ print (SkewTSounding(DS))
 \author{
 William Cooper
 }
-

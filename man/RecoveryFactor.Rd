@@ -30,4 +30,3 @@ rf2 <- RecoveryFactor (MachNumber (RAFdata$PSXC, RAFdata$QCXC))
 \author{
 William Cooper
 }
-

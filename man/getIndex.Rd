@@ -28,4 +28,3 @@ idx <- getIndex (RAFdata, 201130)
 \author{
 William Cooper
 }
-

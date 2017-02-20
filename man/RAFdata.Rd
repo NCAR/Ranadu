@@ -53,4 +53,3 @@ a set of measurements, one row per second, and a "Time"
 variable.
 }
 \keyword{datasets}
-

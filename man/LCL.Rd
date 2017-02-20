@@ -32,4 +32,3 @@ X <- LCL (850, 10, 0.08)  ## expect (825.62, 7.659)
 \author{
 William Cooper
 }
-

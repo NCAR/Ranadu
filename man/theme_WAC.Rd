@@ -2,6 +2,7 @@
 % Please edit documentation in R/theme_WAC.R, R/theme_WAC2.R
 \name{theme_WAC}
 \alias{theme_WAC}
+\alias{theme_WAC}
 \title{theme_WAC}
 \usage{
 theme_WAC()
@@ -32,4 +33,3 @@ William Cooper
 
 William Cooper
 }
-

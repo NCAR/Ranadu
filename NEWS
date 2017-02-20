@@ -10,6 +10,7 @@ Version 2.4-17-01-16
   Corrections:
       WindProcessor.R       -- Corrected handling of GPS-antenna lever arm.
       getNetCDF.R           -- if 'Time' in variable list, skip it (vs fail)
+      various               -- fixes to pass package checking (imports, esp.)
 Version 2.4-16-06-26
   Additions:
       DataFileInfo.R        -- Protected against use on file without LATC/LONC

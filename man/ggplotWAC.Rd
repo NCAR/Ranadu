@@ -88,4 +88,3 @@ ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])
 \author{
 William Cooper
 }
-

@@ -29,4 +29,3 @@ e <- MurphyKoopIce (-60., 200.)
 \author{
 William Cooper
 }
-

@@ -9,7 +9,8 @@
 #' @aliases CAPE
 #' @author William Cooper
 #' @export CAPE
-#' @import nleqslv stats
+#' @import nleqslv 
+#' @importFrom stats integrate
 #' @param SND A data.frame with named variables 'Pressure', 'Temperature', and
 #' 'DewPoint' (note capitalized 'P' in the latter). Respective units should be
 #' hPa, deg.C, and deg.C. This data.frame will often be a data.frame or a subset
