@@ -31,4 +31,3 @@ THETAQ <- WetEquivalentPotentialTemperature (700., 0., 6.11, 1.0)
 \author{
 William Cooper
 }
-

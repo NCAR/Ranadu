@@ -27,4 +27,3 @@ SS <- GV_YawFromRadome (RAFdata$BDIFR, RAFdata$QCXC)
 \author{
 William Cooper
 }
-

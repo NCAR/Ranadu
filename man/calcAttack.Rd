@@ -30,4 +30,3 @@ plot (RAFdata$ATTACK, calcAttack (RAFdata$PITCH, RAFdata$GGVSPD, RAFdata$TASX))
 \author{
 William Cooper
 }
-

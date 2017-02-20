@@ -5,6 +5,7 @@
 #' @author William Cooper
 #' @export plotTrack
 #' @import maps
+#' @importFrom stats median
 #' @param lon A numeric vector of longitude coordinates (degrees). Optionally,
 #' a data.frame containing the variables Time, LONC, LATC, WDC, WSC, in which
 #' case the corresponding parameters below can be omitted. For a drifting plot (described

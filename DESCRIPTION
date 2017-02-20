@@ -28,8 +28,8 @@ Description: This package contains a function for loading a portion of a netCDF
     files and providing such files generated from R data.frames.
 License: GPL
 Depends:
-    R (>= 3.3),ncdf4,maps,ggplot2,ggthemes
+    R (>= 3.3),ncdf4,maps,ggplot2,ggthemes,graphics,grid
 Imports:
     tcltk,nleqslv,zoo,fields, stats, signal, reshape2
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

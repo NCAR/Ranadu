@@ -26,4 +26,3 @@ MR <- MixingRatio (RAFdata$EWX / RAFdata$PSXC)
 \author{
 William Cooper
 }
-

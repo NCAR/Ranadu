@@ -26,4 +26,3 @@ TellAbout (RAFdata)
 \author{
 William Cooper
 }
-

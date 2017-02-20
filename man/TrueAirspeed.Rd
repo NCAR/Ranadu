@@ -29,4 +29,3 @@ TAS <- TrueAirspeed (MachNumber (RAFdata$PSXC, RAFdata$QCXC), RAFdata$ATX, RAFda
 \author{
 William Cooper
 }
-

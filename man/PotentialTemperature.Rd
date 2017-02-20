@@ -28,4 +28,3 @@ THETA <- PotentialTemperature (500.,0.)
 \author{
 William Cooper
 }
-

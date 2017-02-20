@@ -31,4 +31,3 @@ StandardConstant ("MWW")
 \author{
 William Cooper
 }
-

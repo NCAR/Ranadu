@@ -32,4 +32,3 @@ Sets some plot defaults and calls points; assumes a plot with axes has already b
 \author{
 William Cooper
 }
-

@@ -17,6 +17,7 @@
 #' @export CorrectHeading
 #' @import zoo
 #' @importFrom signal sgolayfilt
+#' @importFrom stats sd weighted.mean smooth.spline predict
 #' @param .data A data.frame containing measurements of body accelerations (called
 #' BLATA, BLONGA, BNORMA), ground-speed components from GPS (GGVEW, GGVNS), attitude
 #' angles in units of degrees (PITCH, ROLL, THDG, the latter the heading relative to
@@ -224,7 +225,7 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
                            c(1/EH$hsdR^2, 1/EH$hsdL^2), na.rm=TRUE)
   whsd <- sqrt (1/sum(c(1/EH$hsdR^2, 1/EH$hsdL^2), na.rm=TRUE))
   if (GeneratePlot) {
-    p <- ggplot(EH, aes(x=tbar), na.rm=TRUE)
+    p <- with (EH, ggplot(data=EH, aes(x=tbar), na.rm=TRUE))
     p <- p + geom_errorbar(aes(ymin=hmeanR-hsdR, ymax=hmeanR+hsdR, colour="right"),
                            width=600, size=1.5, na.rm=TRUE) + ylim (-0.25,0.15)
     p <- p + geom_point (aes(y = hmeanR, colour="right"),size=3.5, na.rm=TRUE)
@@ -239,7 +240,9 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
   SS <- smooth.spline(EH$tbar, yss, w=ywts, df=length(yss)-1, spar=0.7)
   if (GeneratePlot) {
     D1$HC <- predict(SS, as.numeric(D1$Time))$y
-    p <- p + geom_line (data=D1, aes (x=Time, y=HC, colour="spline"), lwd=2, na.rm=TRUE)
+    p <- p + with(D1, geom_line (data=D1, 
+                                 aes (x=Time, y=HC, colour="spline"), 
+                                 lwd=2, na.rm=TRUE))
     # SS2 <- smooth.spline(EH$tbar, yss, df=8, spar=0.4)
     # xss2 <- as.POSIXct (SS2$x, origin="1970-01-01", tz="GMT")
     # p <- p + geom_line(aes(x=xss2, y=SS2$y, colour="spline"), lwd=2, lty=2, na.rm=TRUE)

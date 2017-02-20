@@ -29,4 +29,3 @@ THETAB <- BoltonEquivalentPotentialTemperature (700., 10., 9.)
 \author{
 William Cooper
 }
-

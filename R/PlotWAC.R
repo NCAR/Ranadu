@@ -189,6 +189,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
 #' @details Sets some plot defaults and calls points; assumes a plot with axes has already been generated to which to add this line.
 #' @aliases lineWAC
 #' @author William Cooper
+#' @importFrom graphics points plot text lines axTicks legend axis.POSIXct axis
 #' @export lineWAC
 #' @param x Usually, Time from a data.frame; a vector of abscissa values. Default: Data$Time
 #' @param y A vector of ordinate values for points to plot. 

@@ -29,4 +29,3 @@ DPa <- DPfromE (RAFdata$EWX)
 \author{
 William Cooper"
 }
-

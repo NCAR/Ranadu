@@ -45,4 +45,3 @@ E <- binStats(RAFdata[, c("PSXC", "ATX")], bins=10)
 \author{
 William Cooper
 }
-

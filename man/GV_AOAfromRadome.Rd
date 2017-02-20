@@ -35,4 +35,3 @@ AOA <- GV_AOAfromRadome (RAFdata$ADIFR, RAFdata$QCXC,
 \author{
 William Cooper
 }
-

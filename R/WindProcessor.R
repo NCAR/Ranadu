@@ -22,6 +22,11 @@
 #' {GGVSPD, GGVSPD_NVTL, VSPD_A}, {ATTACK, AKRD}, {SSLIP, SSRD}. If any
 #' required variables are not found, the function returns the original
 #' data.frame unchanged and prints an error message.
+#' @param LR Distance forward from INS to gust pod [m].
+#' @param LG Distance forward from INS to GPS antenna [m]
+#' @param CompF Set TRUE to implement the complementary filter that merges
+#' ground-speed vectors from the INS and GPS to obtain corrected values
+#' of the wind vector.
 #' @return The original data.frame is returned with variables WDN, WSN, WIN added. These
 #' variables are the new horizontal wind direction and speed and the vertical wind.
 #' @examples

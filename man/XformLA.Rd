@@ -44,4 +44,3 @@ newDataFrame <- XformLA (data.frame("ROLL"=1:50, "PITCH"=(3+(1:50)/50), "THDG"=9
 \author{
 William Cooper
 }
-

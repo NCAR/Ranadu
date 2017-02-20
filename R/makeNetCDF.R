@@ -37,7 +37,7 @@ makeNetCDF <- function (.d, newNetCDFname) {
     return (-1)
   }
   ## fix missing vals in Time dimension:
-  tref <- sub ("seconds since ", "", Dimensions[["Time"]]$units)
+  tref <- sub ("seconds since ", "", Dimensions$Time$units)
   tstart <- as.integer(difftime (.d$Time[1], tref, units='secs', tz='UTC'))
   tend   <- as.integer(difftime (.d$Time[nrow(.d)],tref, units='secs', tz='UTC'))
   ## search for gaps in time:
@@ -140,20 +140,6 @@ makeNetCDF <- function (.d, newNetCDFname) {
   dT <- as.integer (.d$Time - as.integer(as.POSIXct(strptime (attr (.d$Time, "units"), 
                                                      attr (.d$Time, "strptime_format"), 
                                                      tz="UTC"))))
-  transferAttributes <- function (dsub, d) {    ## unused function, just saved here
-    ds <- dsub
-    for (nm in names (ds)) {
-      var <- sprintf ("d$%s", nm)
-      A <- attributes (eval (parse (text=var)))
-      A[[1]] <- nrow (ds)
-      if (!grepl ('Time', nm)) {
-        A$dim <- NULL
-        A$class <- NULL
-      }
-      attributes (ds[,nm]) <- A
-    }
-    return(ds)
-  }
   #HR <- ("sps25" %in% names (Dimensions))
   if (HR == 25) {
     dT <- dT[seq(1, nrow(.d), by=25)]

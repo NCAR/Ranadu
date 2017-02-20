@@ -18,7 +18,7 @@ library(tcltk)
 # source ('R/PlotWAC.R')
 # source ('R/getNetCDF.R')
 # source ('R/makeNetCDF.R')
-# source ('R/setVariableList.R')
+source ('R/setVariableList.R')
 # source ('R/CAPE.R')
 # source ('R/setVariableList.R')
 ## if this is set TRUE then messages will print in the console
@@ -330,12 +330,18 @@ specialVar <- function (D) {
   tau <- 300
   DIF <- signal::filtfilt (signal::butter (3, 2/(tau*FI$Rate)), DIF)
   d <- data.frame('Time' = D$Time, 'ROC' = WPSTAR + DIF)
+  A <- attributes(D$VSPD)
+  attributes(d$ROC) <- A
   rm (DPDT, g, WPPRIME, WPSTAR, DIF, ACINS)
   
   ## add variable for new QCRC, named QCRY
   d$QCRY <- D$QCRC - 0.5635 - 0.0018*D$QCR +0.0273*D$AKRD^2+0.0562*D$SSLIP^2
+  A <- attributes(D$QCXC)
+  attributes(d$QCRY) <- A
   d$DQC <- d$QCRY - D$QCXC
   d$DQRC <- D$QCRC - D$QCXC
+  attributes(d$DQC) <- A
+  attributes(d$DQRC) <- A
   print (str(d))
   return (d)
 }
@@ -707,23 +713,39 @@ if (plotSpec$Times[2] < times[2]) {times <- c(times[1], plotSpec$Times[2])}
 # Restrictions[1, 'min'] <- 130
 # Restrictions[1, 'max'] <- 300
 defFiles <- list.files(pattern = "^plotSpec")
-
-transferAttributes <- function (d, dsub) {    
+# transferAttributes <- function (dsub, d) {    
+#   ds <- dsub
+#   for (nm in names (ds)) {
+#     var <- sprintf ("d$%s", nm)
+#     A <- attributes (eval (parse (text=var)))
+#     A[[1]] <- nrow (ds)
+#     # print (sprintf ('transfer attributes, nm=%s, var=%s', nm, var))
+#     # print (A)
+#     if (!grepl ('Time', nm)) {
+#       A$dim <- NULL
+#       A$class <- NULL
+#     }
+#     attributes (ds[,nm]) <- A
+#   }
+#   return(ds)
+# }
+transferAttributes <- function (dsub, d) {    
   ds <- dsub
-  for (nm in names (d)) {
-    if (exists ('specialData') && (nm == names(specialData)[1] || 
-                                   nm %in% names (specialData))) {next}
-    if (nm %in% names (dsub)) {
-      var <- sprintf ("d$%s", nm)
-      A <- attributes (eval (parse (text=var)))
-      A[[1]] <- nrow (ds)
-      if (!grepl ('Time', nm)) {
-        A$dim <- NULL
-        A$class <- NULL
-      }
-      # print (sprintf ('tA: nm=%s, A=%s', nm, A))
-      attributes (ds[,nm]) <- A
+  ## ds and dsub are the new variables; 
+  ## d is the original with attributes
+  for (nm in names (ds)) {
+    if ((nm != 'Time') && exists ('specialData') &&  
+        (nm %in% names (specialData))) {next}
+    var <- sprintf ("d$%s", nm)
+    A <- attributes (eval (parse (text=var)))
+    if (!grepl ('Time', nm)) {
+      A$dim <- NULL
+      A$class <- NULL
+    } else {
+      A$dim <- nrow (ds)
     }
+    # print (sprintf ('tA: nm=%s, A=%s', nm, A))
+    attributes (ds[,nm]) <- A
   }
   A <- attributes (d)
   A$Dimensions$Time$len <- nrow (ds)

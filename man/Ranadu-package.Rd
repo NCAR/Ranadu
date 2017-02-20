@@ -12,4 +12,3 @@ aircraft, normally archived in netCDF format. These routines read those
 archives, construct R data.frames containing selected variables, and
 provide utility functions for working with the measurements.
 }
-

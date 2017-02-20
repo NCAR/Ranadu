@@ -38,4 +38,3 @@ existing 'VarList'.
 \author{
 William Cooper
 }
-

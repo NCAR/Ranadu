@@ -30,4 +30,3 @@ THETAP <- EquivalentPotentialTemperature (RAFdata$PSXC, RAFdata$ATX, RAFdata$EWX
 \author{
 William Cooper
 }
-

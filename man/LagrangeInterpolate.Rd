@@ -33,4 +33,3 @@ LagrangeInterpolate (3.3, 3, data.frame (1:5, 1:5+runif(5,-0.1,0.1)))
 \author{
 William Cooper
 }
-

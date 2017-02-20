@@ -26,4 +26,3 @@ PALT2 <- PressureAltitude (RAFdata$PSXC)
 \author{
 William Cooper
 }
-

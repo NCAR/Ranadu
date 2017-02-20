@@ -34,4 +34,3 @@ DPsmoothed <- SmoothInterp (RAFdata$DPXC)
 \author{
 William Cooper
 }
-

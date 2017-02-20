@@ -35,4 +35,3 @@ ValueOf (RAFdata, RAFdata$ATX, 201100)
 \author{
 William Cooper
 }
-

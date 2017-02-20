@@ -67,6 +67,9 @@ setVariableList <- function (fname, VarList=vector(), single=FALSE) {
   vnSel <- vector ("logical", length(vn))
   nc_close (netCDFfile)
   VarNames <- VarList
+  ## exclusions:
+  vn <- vn[-which(grepl('MTP$', vn))]
+  vn <- vn[-which(grepl('^IRIG', vn))]
   guiVar <- tktoplevel()
   tktitle(guiVar) <- sprintf ("Available Variables")
   topMenu <- tkmenu(guiVar)           # Create a menu
@@ -81,8 +84,8 @@ setVariableList <- function (fname, VarList=vector(), single=FALSE) {
   tkadd (fileMenu, "command", label = "Clear ALL selections", command = function () RemoveAll ())
   tkadd(fileMenu, "command", label = "Quit without saving", command = function() tkdestroy(guiVar))
   tkadd(topMenu, "cascade", label = "Actions", menu = fileMenu)
-  myFont <- tkfont.create(family="times",size=8, weight='bold')
-  NC <- 14
+  myFont <- tkfont.create(family="times",size=7, weight='bold')
+  NC <- 16
   for (i in seq(0,length(vn),NC)) {
     for (j in 1:NC) {
       eval(parse(text=sprintf("lbl%d <- tkbutton (guiVar, text=vn[%d], font=myFont, 
@@ -92,8 +95,8 @@ setVariableList <- function (fname, VarList=vector(), single=FALSE) {
         eval(parse(text=sprintf("tkconfigure (lbl%d, foreground='blue', background='yellow')", i+j)))
       }
     }
-    eval (parse (text=sprintf("tkgrid(lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d)",
-                              i+1, i+2, i+3, i+4, i+5, i+6, i+7, i+8, i+9, i+10, i+11, i+12, i+13, i+14)))
+    eval (parse (text=sprintf("tkgrid(lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d, lbl%d)",
+                              i+1, i+2, i+3, i+4, i+5, i+6, i+7, i+8, i+9, i+10, i+11, i+12, i+13, i+14, i+15, i+16)))
   }
   tkfocus(guiVar)
   tkwait.window(guiVar)

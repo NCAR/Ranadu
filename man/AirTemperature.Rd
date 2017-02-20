@@ -35,4 +35,3 @@ AT <- AirTemperature (RAFdata$RTH1, RAFdata$PSXC, RAFdata$QCXC)
 \author{
 William Cooper
 }
-

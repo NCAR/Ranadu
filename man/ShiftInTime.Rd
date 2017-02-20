@@ -56,4 +56,3 @@ newVariable <- ShiftInTime (1:50, .rate=1, .shift=-500)
 \author{
 William Cooper
 }
-
