@@ -1743,7 +1743,7 @@ shinyServer(function(input, output, session) {
       if (plotSpec$TypeFlight == 'F') {
         fname <<- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
                            plotSpec$Project, plotSpec$Flight)
-        print (sprintf ('in data, file name is %s', fname))
+        if (Trace) {print (sprintf ('in data, file name is %s', fname))}
       } else if (plotSpec$TypeFlight == 'KF') {
         fname <<- sprintf ('%s%s/%srf%02dKF.nc', DataDirectory (), plotSpec$Project,
                            plotSpec$Project, plotSpec$Flight)
@@ -1786,7 +1786,7 @@ shinyServer(function(input, output, session) {
       if (any (grepl ('C1DC', FI$Variables))) {CHP <- c(CHP, '2DC')}
       updateCheckboxGroupInput (session, 'probe', choices=CHP, selected=CHP)
       if (exists ('specialData')) {
-        FI$Variables <- c(FI$Variables, names (specialData)[-1])
+        FI$Variables <- unique(c(FI$Variables, names (specialData)[-1]))
       }
       VarList <<- makeVarList ()  ## saved as global for possible inspection
       if ('GGVSPD' %in% VarList && !('GGVSPD' %in% FI$Variables)) {
@@ -1815,7 +1815,7 @@ shinyServer(function(input, output, session) {
           TatEnd <- D$Time[ix[length(ix)]]
           DS <- D
           D <- D[D$Time >= TatStart & D$Time <= TatEnd, ]
-          D <- transferAttributes (DS, D)
+          D <- transferAttributes (D, DS)
           rm (DS)
         }
         if (fname != fname.last) {
@@ -1852,12 +1852,16 @@ shinyServer(function(input, output, session) {
         if ('Time' %in% names (SD)) {
           SD$Time <- NULL
         }
-        DS <- D
-        D <- cbind (D, SD)
-        D <- transferAttributes (DS, D)
+        ## skip if variables are already in D
+        if (!any (names (SD) %in% names (D))) {
+          DS <- D
+          D <- cbind (D, SD)
+          D <- transferAttributes (D, DS)
+          rm(DS)
+        }
       }
       if (exists ('specialData')) {
-        FI$Variables <- unique(c(FI$Variables, names (specialData)[-1]))
+        FI$Variables <<- unique(c(FI$Variables, names (specialData)[-1]))
       }
       if (length (D) > 1) {
         fname.last <<- fname
@@ -2762,20 +2766,7 @@ shinyServer(function(input, output, session) {
       if (Trace) {print ('varplot: exiting for new data')}
       return()
     }
-    transferAttributes <- function (dsub, d) {    ## unused function, just saved here
-      ds <- dsub
-      for (nm in names (ds)) {
-        var <- sprintf ("d$%s", nm)
-        A <- attributes (eval (parse (text=var)))
-        A[[1]] <- nrow (ds)
-        if (!grepl ('Time', nm)) {
-          A$dim <- NULL
-          A$class <- NULL
-        }
-        attributes (ds[,nm]) <- A
-      }
-      return(ds)
-    }
+   
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
@@ -2809,6 +2800,7 @@ shinyServer(function(input, output, session) {
     }
     fnew <- "./R-toXanadu.nc"
     unlink(fnew)
+    DataR <<- DataR
     Z <- makeNetCDF (DataR, fnew)
     if (Trace) {print ('varplot:return from makeNetCDF:');print(Z)}
     ## don't know why this is needed, but makeNetCDF modifies DataR;
@@ -3595,7 +3587,7 @@ shinyServer(function(input, output, session) {
       RT <- binStats (DataS[, c('Rtot', 'PSXC')], xlow=125, xhigh=1025,bins=input$nbsa)
       TQ <- binStats (DataS[, c('THETAQ', 'PSXC')], xlow=125, xhigh=1025, bins=input$nbsa)
       DF2 <- data.frame ('RT'=RT$ybar, 'TQ'=TQ$ybar, 'P'=RT$xc)
-      if (Trace) {print (c('skewT: DF2 is', DF2))}
+      # if (Trace) {print (c('skewT: DF2 is', DF2))}
       g <- ggplot (DF2, aes (x=TQ, y=RT))
       g <- g + geom_path (col='blue', lwd=2) 
       g <- g + geom_point (col='blue', size=4) 
@@ -3903,12 +3895,12 @@ shinyServer(function(input, output, session) {
       ## add cumulative distribution
       if (input$cdf) {
         a <- ggplot_build(g)
-        yrange <- a$panel$ranges[[1]]$y.range
-        xrange <- a$panel$ranges[[1]]$x.range
+        yrange <- a$layout$panel_ranges[[1]]$y.range
+        xrange <- a$layout$panel_ranges[[1]]$x.range
         for (j in 1:length (vr)) {
           yc <- cumsum (a$data[[j]]$density) * (a$data[[j]]$x[3] - a$data[[j]]$x[2])
           yc <- yc * yrange[2]
-          dt <- data.frame (x=a$data[[1]]$x[-1], y=yc[-1])
+          dt <- data.frame (x=a$data[[1]]$x, y=yc)
           # dt[nrow(dt), ] <- NA
           g <- g + geom_line (data=dt, aes(x,y), colour=colrs[[pnl]][j], lty=lts[[pnl]][j], lwd=0.6, na.rm=TRUE)
         }

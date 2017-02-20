@@ -42,6 +42,7 @@ EquivalentPotentialTemperature <- function (P, AT, E=0) {
   L1 <- 1754.
   K2 <- 1.137e6
   TK <- AT + TZERO
+  E[is.na(E)] <- 0
   E[E <= 0] <- MurphyKoop (AT[E <= 0])
   r <- MixingRatio (E/P) 
   CP <- SpecificHeats(0.)     # need dry-air value, don't need vector
