@@ -3565,7 +3565,8 @@ shinyServer(function(input, output, session) {
     DataS <- Data[(Data$Time >= plotSpec$PaluchTimes[1]) & (Data$Time < plotSpec$PaluchTimes[2]), ]
     ## get the saturation point:
     if (grepl ('Betts', input$paluchBetts)) {
-      load (file='satptDiagram.Rdata')  ## this also loads rminBetts, etc, for xygraph
+      load (file=paste(path.package ("Ranadu"), 'satptDiagram.Rdata', sep='/'))
+      load (file='inst/satptDiagram.Rdata')  ## this also loads rminBetts, etc, for xygraph
       cpt <- with(DataS, SpecificHeats ()[, 1] * (1 - Qtot) + StandardConstant('Rw') * Qtot)
       alhv <- 2.501e6
       spt <-  with (DataS, cpt * log (Tk/273.15) - (1-Qtot) * SpecificHeats()[, 3] * log ((PSXC-EWX) / 1000.) + alhv * R / ((1+R)*Tk))
