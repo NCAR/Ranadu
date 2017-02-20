@@ -32,4 +32,4 @@ Depends:
 Imports:
     tcltk,nleqslv,zoo,fields, stats, signal, reshape2
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
