@@ -33,4 +33,3 @@ MACH <- MachNumber (RAFdata$PSXC, RAFdata$QCXC, RAFdata$EWX)
 \author{
 William Cooper
 }
-

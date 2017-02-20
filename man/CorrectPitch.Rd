@@ -38,4 +38,3 @@ ROLLC <- RAFdata$ROLL - CorrectPitch (RAFdata, .span=51)[, 2]
 \author{
 William Cooper
 }
-

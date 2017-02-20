@@ -38,4 +38,3 @@ DemingFit (RAFdata$RTH1, RAFdata$RTH2)
 \author{
 William Cooper
 }
-

@@ -69,4 +69,3 @@ NSND <- CAPE (Data)
 \author{
 William Cooper
 }
-

@@ -32,4 +32,3 @@ EW2 <- MurphyKoop (RAFdata$DPXC, RAFdata$PSXC)
 \author{
 William Cooper
 }
-

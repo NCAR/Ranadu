@@ -26,4 +26,3 @@ Tvir <- VirtualTemperature (20., 0.005)
 \author{
 William Cooper
 }
-

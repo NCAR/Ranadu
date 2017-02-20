@@ -5,6 +5,7 @@
 #' @aliases ggplotWAC
 #' @author William Cooper
 #' @import ggplot2 ggthemes reshape2
+#' @importFrom grid viewport
 #' @export ggplotWAC
 #' @param .data A data.frame containing vectors to plot. The first will be the
 #' abscissa and the remainder ordinate vectors to plot vs the abscissa.
@@ -138,7 +139,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       lwd <- rep(lwd, panels)
       lty <- rep(lty, panels)
       lvl <- levels(dd$VarGroup)
-      g <- ggplot (dd, aes(Time, value, colour=VarGroup, linetype=VarGroup))
+      g <- with(dd, ggplot (dd, aes(Time, value, colour=VarGroup, linetype=VarGroup)))
       g <- g + geom_line(aes(size=VarGroup))
       g <- g + scale_size_manual ('', labels=lvl, breaks=lvl, values = lwd)
       g <- g + scale_linetype_manual ('', labels=lvl, breaks=lvl, values = lty)

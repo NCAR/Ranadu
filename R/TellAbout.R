@@ -3,6 +3,7 @@
 #' @details Prints the variable type, dimensions, and summary.
 #' @aliases tellAbout
 #' @author William Cooper
+#' @importFrom stats sd
 #' @export TellAbout
 #' @param V A variable that may be scalar, vector, data.frame
 #' @return The summary, which is also printed by the function.

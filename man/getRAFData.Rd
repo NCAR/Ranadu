@@ -50,4 +50,3 @@ script will overwrite the output file without warning.
 \author{
 William Cooper
 }
-

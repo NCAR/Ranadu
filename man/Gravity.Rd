@@ -28,4 +28,3 @@ G <- Gravity (RAFdata$GGLAT, RAFdata$GGALT)
 \author{
 William Cooper
 }
-

@@ -60,4 +60,3 @@ HeadingCorrection <- CorrectHeading (RAFdata)
 \author{
 William Cooper
 }
-
