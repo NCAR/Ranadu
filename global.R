@@ -313,15 +313,15 @@ specialVar <- function (D) {
   ## ROC.R -- chunk to add ROC variable
   ## needs: data.frame Data containing netCDF variables PSXC, GGLAT, GGALT, ACINS, Grav
   ## also assumes Rate is set
-  print (sprintf ('entry to specialVar, variables are:'))
-  print (sort(names (D)))
+  # print (sprintf ('entry to specialVar, variables are:'))
+  # print (sort(names (D)))
   DPDT <- c(0, diff(D$PSXC)) * FI$Rate
-  print (summary(DPDT))
+  # print (summary(DPDT))
   g <- Gravity (D$LATC, D$GGALT)
   g[is.na(g)] <- 9.80
   WPPRIME <- -StandardConstant('Rd') * (273.15 + D$ATX) /
     (D$PSXC * g) * DPDT
-  print (summary (WPPRIME))
+  # print (summary (WPPRIME))
   ACINS <- zoo::na.approx (as.vector(D$ACINS), maxgap=10000, na.rm=FALSE)
   WPSTAR <- cumsum(ACINS)
   print (summary(WPSTAR))
@@ -342,7 +342,7 @@ specialVar <- function (D) {
   d$DQRC <- D$QCRC - D$QCXC
   attributes(d$DQC) <- A
   attributes(d$DQRC) <- A
-  print (str(d))
+  # print (str(d))
   return (d)
 }
 

@@ -129,8 +129,14 @@ shinyServer(function(input, output, session) {
                                 input$times[1], input$times[2]))}
     if (any (input$times != plotSpec$Times)) {
       plotSpec$Times <<- input$times
+      plotSpec$PaluchTimes <<- input$times
+      plotSpec$PaluchCTimes <<- input$times
       updateTextInput (session, 'tstart', value=formatTime(plotSpec$Times[1]))
       updateTextInput (session, 'tend', value=formatTime(plotSpec$Times[2]))
+      updateTextInput (session, 'paluchStart', value=formatTime(plotSpec$Times[1]))
+      updateTextInput (session, 'paluchEnd', value=formatTime(plotSpec$Times[2]))
+      updateTextInput (session, 'paluchCStart', value=formatTime(plotSpec$Times[1]))
+      updateTextInput (session, 'paluchCEnd', value=formatTime(plotSpec$Times[2]))
       isolate (reac$newdisplay <- reac$newdisplay + 1)
       isolate (reac$newhistogram <- reac$newhistogram + 1)
       isolate (reac$newstats <- reac$newstats + 1)
@@ -1236,6 +1242,12 @@ shinyServer(function(input, output, session) {
   })
   obsRvar <- observe (exprRvar, quoted=TRUE)
   
+  exprPaluchLWC <- quote ({
+    plotSpec$paluchLWC <- input$paluchLWC
+    isolate (reac$newdata <- reac$newdata + 1)
+  })
+  obsPaluchLWC <- observe (exprPaluchLWC, quoted=TRUE)
+  
   exprVvar <- quote ({
     plt <- isolate(input$plot)
     plotSpec$Variance[[plt]]$Definition$var <<- input$specvar
@@ -1375,6 +1387,8 @@ shinyServer(function(input, output, session) {
                   updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
                   updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
                   updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
+                  updateSelectInput (session, 'paluchLWC', choices=sort(FI$Variables), 
+                                     selected=plotSpec$paluchLWC)
                   ## checkboxes
                   for (i in 1:nrow(InputDF)) {
                     if (InputDF$Type[i] == 'cB') {
@@ -1423,6 +1437,7 @@ shinyServer(function(input, output, session) {
                         } else if (InputDF$Type[i] == 'sI') {
                           if (InputDF$ID[i] %in% ch.var) {
                             updateSelectInput(session, InputDF$ID[i], selected=vvv, choices=CH)
+                            if (i == 100) {print (sprintf ('update %s choices',vvv));print(CH)}
                           } else {
                             print (sprintf('ID=%s, i=%d, vvv=%s', InputDF$ID[i], i, vvv))
                             updateSelectInput(session, InputDF$ID[i], selected=vvv)
@@ -3540,11 +3555,12 @@ shinyServer(function(input, output, session) {
       t <- EWX > EWS
       ## Assume sounding measurements with supersaturation are erronous;
       ## replace with equilibrium humidity
-      t[is.na (EWX) | is.na (EWS) | is.na (Data$THETAQ)] <- FALSE
+      t[is.na (t)] <- FALSE
+      # t[is.na (Data$THETAQ)] <- FALSE
       EWX[t] <- EWS[t]
-      Data$THETAQ[t] <- WetEquivalentPotentialTemperature(Data$PSXC[t], Data$ATX[t], EWX[t], Data[t, inp$paluchLWC])
+      Data$THETAQ[t] <- WetEquivalentPotentialTemperature(Data$PSXC[t], Data$ATX[t], EWX[t], Data[t, plotSpec$paluchLWC])
       R <- 0.622 * EWX / (Data$PSXC - EWX)
-      LWC <- Data[, inp$paluchLWC]
+      LWC <- Data[, plotSpec$paluchLWC]
       EbyP <- with (Data, EWX / PSXC)
       Ra <- SpecificHeats (EbyP)[, 3]
       Tk <- Data$ATX + 273.15
@@ -3670,27 +3686,29 @@ shinyServer(function(input, output, session) {
     }
     ## now add in-cloud points
     CDPconc <- names(Data)[which (grepl ('CONCD_', names(Data)))]
-    DIC <- Data[Data[, CDPconc] > 5, ]
-    
-    DIC <- DIC[(DIC$Time >= plotSpec$PaluchCTimes[1]) & (DIC$Time < plotSpec$PaluchCTimes[2]), ]
-    if (grepl ('Betts', input$paluchBetts)) {
-      cpt <- with(DIC, SpecificHeats ()[, 1] * (1 - Qtot) + StandardConstant('Rw') * Qtot)
-      alhv <- 2.501e6
-      spt <- with (DIC, cpt * log (Tk/273.15) - (1-Qtot) * SpecificHeats()[, 3] * log ((PSXC-EWX) / 1000.) + alhv * R / ((1+R)*Tk))
-      XP <- xygraph (DIC$Rtot*1000, spt)
-      dim(XP) <- c(length(XP)/2, 2)
-      DSC <- data.frame (X=XP[,1], Y=XP[,2], spt=spt)
-      g <- g + geom_point (data=DSC, aes(x=X, y=Y), colour='red', pch=20, size=1)
-    }
-    if (grepl ('Paluch', input$paluchBetts)) {
-      DIC$Rtot <- DIC$Rtot * 1000
-      g <- g + geom_point (data=DIC, aes(x=THETAQ, y=Rtot), colour='red', pch=20)
-      g <- g + theme_WAC()
+    if (any(CDPconc > 5)) {
+      DIC <- Data[Data[, CDPconc] > 5, ]
+      
+      DIC <- DIC[(DIC$Time >= plotSpec$PaluchCTimes[1]) & (DIC$Time < plotSpec$PaluchCTimes[2]), ]
+      if (grepl ('Betts', input$paluchBetts)) {
+        cpt <- with(DIC, SpecificHeats ()[, 1] * (1 - Qtot) + StandardConstant('Rw') * Qtot)
+        alhv <- 2.501e6
+        spt <- with (DIC, cpt * log (Tk/273.15) - (1-Qtot) * SpecificHeats()[, 3] * log ((PSXC-EWX) / 1000.) + alhv * R / ((1+R)*Tk))
+        XP <- xygraph (DIC$Rtot*1000, spt)
+        dim(XP) <- c(length(XP)/2, 2)
+        DSC <- data.frame (X=XP[,1], Y=XP[,2], spt=spt)
+        g <- g + geom_point (data=DSC, aes(x=X, y=Y), colour='red', pch=20, size=1)
+      }
+      if (grepl ('Paluch', input$paluchBetts)) {
+        DIC$Rtot <- DIC$Rtot * 1000
+        g <- g + geom_point (data=DIC, aes(x=THETAQ, y=Rtot), colour='red', pch=20)
+      }
     }
     if (!grepl ('stab', input$paluchBetts)) {
       vp <- viewport()
       suppressWarnings (print (g, vp=vp))
     }
+    
     #     with (Data, plotWAC (THETAQ, Rtot, type='l', xlab='wet-equivalent potential temperature',
     #                          ylim=rev(range(Rtot, na.rm=TRUE)),
     #                          ylab='total water mixing ratio [g/kg]', col='blue', cex.lab=2))
