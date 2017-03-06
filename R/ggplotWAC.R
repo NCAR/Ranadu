@@ -56,6 +56,7 @@
 #' of each panel. These labels will appear at the right side of each panel. The
 #' default is NA, in which case generic "panel1", "panel2", etc., names will
 #' be used.
+#' @param theme.version The theme version to pass to theme_WAC; default is 0.
 #' @param ... Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt
 #' @examples 
 #' ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])
@@ -66,7 +67,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
                        position=NA, lmargin=NA, ylim=NA,
                        legend.position=c(0.5, 0.92), 
                        panels=1,
-                       labelL=NA, labelP=NA, ...) {
+                       labelL=NA, labelP=NA, theme.version=0, ...) {
   if (!is.data.frame (.data)) {
     print ("Error, first argument to ggplotWAC must be a data.frame")
   } else {
@@ -173,7 +174,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       # print (c(clr, colrs, lwd, lty))
       # print (names(colrs))
     }
-    g <- g + theme_WAC()
+    g <- g + theme_WAC(theme.version)
     if (panels > 1) {
       g <- g + theme(axis.text.x = element_text (size=11.5, margin=margin(15,0,0,0)))
       g <- g + theme(axis.title.x = element_text (size=12))
