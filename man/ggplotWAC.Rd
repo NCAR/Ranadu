@@ -7,7 +7,7 @@
 ggplotWAC(.data, col = "blue", xlab = "TIME [UTC]", ylab = "", lwd = 1,
   lty = 1, logxy = "", position = NA, lmargin = NA, ylim = NA,
   legend.position = c(0.5, 0.92), panels = 1, labelL = NA, labelP = NA,
-  ...)
+  theme.version = 0, ...)
 }
 \arguments{
 \item{.data}{A data.frame containing vectors to plot. The first will be the
@@ -72,6 +72,8 @@ in the legend. The default is NA, in which case the legend will be suppressed.}
 of each panel. These labels will appear at the right side of each panel. The
 default is NA, in which case generic "panel1", "panel2", etc., names will
 be used.}
+
+\item{theme.version}{The theme version to pass to theme_WAC; default is 0.}
 
 \item{...}{Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt}
 }
