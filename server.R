@@ -1437,7 +1437,7 @@ shinyServer(function(input, output, session) {
                         } else if (InputDF$Type[i] == 'sI') {
                           if (InputDF$ID[i] %in% ch.var) {
                             updateSelectInput(session, InputDF$ID[i], selected=vvv, choices=CH)
-                            if (i == 100) {print (sprintf ('update %s choices',vvv));print(CH)}
+                            # if (i == 100) {print (sprintf ('update %s choices',vvv));print(CH)}
                           } else {
                             print (sprintf('ID=%s, i=%d, vvv=%s', InputDF$ID[i], i, vvv))
                             updateSelectInput(session, InputDF$ID[i], selected=vvv)
