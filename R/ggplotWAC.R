@@ -56,6 +56,7 @@
 #' of each panel. These labels will appear at the right side of each panel. The
 #' default is NA, in which case generic "panel1", "panel2", etc., names will
 #' be used.
+#' @param gtitle The title to appear above the plot (default NA).
 #' @param theme.version The theme version to pass to theme_WAC; default is 0.
 #' @param ... Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt
 #' @examples 
@@ -67,7 +68,8 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
                        position=NA, lmargin=NA, ylim=NA,
                        legend.position=c(0.5, 0.92), 
                        panels=1,
-                       labelL=NA, labelP=NA, theme.version=0, ...) {
+                       labelL=NA, labelP=NA, 
+                       gtitle=NA, theme.version=0, ...) {
   if (!is.data.frame (.data)) {
     print ("Error, first argument to ggplotWAC must be a data.frame")
   } else {
@@ -173,6 +175,9 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       #                 size=guide_legend(reverse=TRUE))
       # print (c(clr, colrs, lwd, lty))
       # print (names(colrs))
+    }
+    if (!is.na(gtitle)) {
+      g <- g + ggtitle (gtitle)
     }
     g <- g + theme_WAC(theme.version)
     if (panels > 1) {

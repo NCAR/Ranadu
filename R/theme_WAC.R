@@ -15,7 +15,7 @@
 theme_WAC <- function (version=0) {
   if (version == 1) {
     themeWAC <- theme_gdocs() + theme(
-      plot.title = element_text(hjust=0.5, vjust=1.3),
+      plot.title = element_text(hjust=0.5, vjust=1.3, size=12),
       # axis.text = element_text(size = 16),
       panel.grid.major = element_line(color = "lightblue", linetype=5, size=0.6),
       panel.grid.minor = element_line(color = "gray90", linetype=5, size=0.6),

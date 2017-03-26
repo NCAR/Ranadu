@@ -31,7 +31,7 @@ load ('InputDF.Rdata')
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
 
-PJ <- c('ORCAS', 'CSET', 'NOREASTER', 'HCRTEST',
+PJ <- c('ARISTO2017', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST',
         'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
         'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
         'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')
@@ -323,6 +323,7 @@ specialVar <- function (D) {
     (D$PSXC * g) * DPDT
   # print (summary (WPPRIME))
   ACINS <- zoo::na.approx (as.vector(D$ACINS), maxgap=10000, na.rm=FALSE)
+  ACINS[is.na(ACINS)] <- 0
   WPSTAR <- cumsum(ACINS)
   print (summary(WPSTAR))
   DIF <- zoo::na.approx (as.vector(WPPRIME-WPSTAR), maxgap=10000, na.rm=FALSE)
