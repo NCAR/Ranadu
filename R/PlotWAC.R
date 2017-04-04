@@ -202,11 +202,13 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
 #' \dontrun{lineWAC (Time, PSXC, lty=2)}
 lineWAC <- function (x, y, col="blue", lwd=2, type='l', ...) {
   ## correct for offset if abscissa is Time, because value is centered in interval
-  data.rate <- 1
-  itg <- x[!is.na(x)]  # protect against missing values at start
-  if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
-  if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
-  x <- x + 0.5 / data.rate
+  if (grepl ('TIME', xlab) || grepl ('Time', xlab)) {
+    data.rate <- 1
+    itg <- x[!is.na(x)]  # protect against missing values at start
+    if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
+    if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
+    x <- x + 0.5 / data.rate
+  }
   points(x, y, lwd=lwd, type=type, col=col, ...)
 }
 

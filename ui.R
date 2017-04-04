@@ -39,7 +39,7 @@ shinyUI(
         fluidRow (
           column (8, numericInput (inputId='Flight', label='Flight', value=1,
                                    min=1, max=99, step=1, width='80px')),
-          column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff'), #, 'F', 'KF'),
+          column (4, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff', 'F', 'KF'),
                                    width='70px', inline=FALSE))))),
       column (1, 
               numericInput (inputId='plot', label='plot', value=1,
@@ -477,7 +477,7 @@ shinyUI(
                                                                   tags$li('multiple variables separated by + signs (e.g., A+B)'),
                                                                   tags$li('additional expressions enclosed in isolating expressions ',
                                                                           tags$strong('+I()'),', where the enclosed formula may',
-                                                                          'use operatioins like *, /, etc., or ^ for powers (e.g., A^2 for the square of A)'),
+                                                                          'use operations like *, /, etc., or ^ for powers (e.g., A^2 for the square of A)'),
                                                                   tags$li('you can also use new variables previously defined by the utility \"create new variable\"')
                                                                 )),
                                                        textInput ('fformula', 'fit formula (example shown)', placeholder='I(ADIFR/QCF)+I(MACHX^3)'),
