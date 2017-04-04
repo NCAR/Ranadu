@@ -83,7 +83,7 @@ XformLA <- function (data, Avector=NA, .inverse=FALSE) {
            cospsi*costheta, -sinpsi*cosphi+cospsi*sintheta*sinphi, -sinpsi*sinphi-cospsi*sintheta*cosphi,
            -sintheta, costheta*sinphi, -costheta*cosphi)
   RblM <- aperm( array (Rbl, dim=c(DL,3,3)))
-  if (is.na (Avector[1])) {
+  if (is.na (Avector[1]) && length(Avector) == 1) {
     if (DL == 1) {dim(RblM) <- c(3,3)}
     if (.inverse) {
       return (t(RblM))
