@@ -175,6 +175,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
   i2 <- ifelse ((End != 0), getIndex (Time, End) + Rate - 1, length (Time))
+  if (i2 < 1) {i2 <- length(Time)}
   # if (End != 0) {
   #   i2 <- getIndex (Time, End) + Rate - 1
   # } else {
@@ -218,13 +219,14 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   IntFilter <- function (X, inRate, outRate) {
     if (inRate == outRate) {return (X)}
     ratio <- as.integer(outRate/inRate)    ## expected to be an integer
+    ratio <- outRate / inRate              ## try 2.5 for CDP etc.
     ## beware of missing values
     z <- zoo::na.approx (as.vector(X), maxgap=1000, na.rm = FALSE)
     z[is.na(z)] <- 0
     x <- 0:(length(X)-1)
     A <- stats::approx (x, z, n=length(X)*ratio-ratio+1)
     T <- A$y
-    T <- signal::filter(signal::sgolay(4,75),T)
+    T <- signal::filter(signal::sgolay(4,15),T)  # normally 75 pts
     ## now shift to match 25-Hz:
     n <- as.integer (ratio / 2)
     NL = length(T)
