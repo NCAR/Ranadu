@@ -31,7 +31,7 @@ load ('InputDF.Rdata')
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
 
-PJ <- c('ARISTO2017', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST',
+PJ <- c('ARISTO2017', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER',
         'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
         'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
         'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')
@@ -273,7 +273,7 @@ hline <<- function(y, col='black', lwd=1, lty=2) {
 
 formatTime <- function (time) {
   t <- as.POSIXlt (time, tz='UTC')
-  tt <- sprintf ("%d:%02d:%02d", t$hour, t$min, t$sec)
+  tt <- sprintf ("%d:%02d:%02d", t$hour, t$min, as.integer(t$sec))
   return (tt)
 }
 

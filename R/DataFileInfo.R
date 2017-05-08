@@ -8,15 +8,18 @@
 #' @author William Cooper
 #' @export DataFileInfo
 #' @import ncdf4
-#' @param fileLocation A complete address to the netCDF data file
+#' @param fileLocation A complete address to the netCDF data file.
+#' @param LLrange Logical, if TRUE, range in latitude and longitude for the
+#' flight is included in the returned list. Set FALSE to get a faster return
+#' in case the range in positions is not needed.
 #' @return A list containing named characteristics of the file. For example, 
 #' in the example below the variables in the file are returned in FI$Variables.
 #' See names(FI) for a list of characteristics that are returned.
 #' @examples 
 #' FI <-DataFileInfo (sprintf ("%s/extdata/RAFdata.nc", path.package ("Ranadu")))
 
-DataFileInfo <- function (fileLocation) {
-  # get information about a netCDF data file
+DataFileInfo <- function (fileLocation, LLrange=TRUE) {
+  # get information about a netCDF data file or saved data.frame, Rdata format
   if (!(grepl ('Rdata$', fileLocation))) {
     netCDFfile <- nc_open (fileLocation)
     namesCDF <- names (netCDFfile$var)
@@ -44,9 +47,10 @@ DataFileInfo <- function (fileLocation) {
     } 
     tref <- sub ('seconds since ', '', time_units$value)
     Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
-    if ('LATC' %in% namesCDF) {LATC <- ncvar_get (netCDFfile, "LATC")}
-    if ('LONC' %in% namesCDF) {LONC <- ncvar_get (netCDFfile, "LONC")}
-    
+    if (LLrange) {
+      if ('LATC' %in% namesCDF) {LATC <- ncvar_get (netCDFfile, "LATC")}
+      if ('LONC' %in% namesCDF) {LONC <- ncvar_get (netCDFfile, "LONC")}
+    }
 
     sampleRate <- 1
     if (!UWYO) {
@@ -65,14 +69,14 @@ DataFileInfo <- function (fileLocation) {
     Flight$Start <- min (Time, na.rm=TRUE)
     Flight$End <- max (Time, na.rm=TRUE)
     Flight$Rate <- sampleRate
-    if (exists ('LATC')) {
+    if (LLrange && exists ('LATC')) {
       Flight$LatMin <- min (LATC, na.rm=TRUE)
       Flight$LatMax <- max (LATC, na.rm=TRUE)
     } else {
       Flight$LatMin <- NA
       Flight$LatMax <- NA
     }
-    if (exists ('LONC')) {
+    if (LLrange && exists ('LONC')) {
       Flight$LonMin <- min (LONC, na.rm=TRUE)
       Flight$LonMax <- max (LONC, na.rm=TRUE)
     } else {
