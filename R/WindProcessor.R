@@ -22,8 +22,7 @@
 #' {GGVSPD, GGVSPD_NVTL, VSPD_A}, {ATTACK, AKRD}, {SSLIP, SSRD}. If any
 #' required variables are not found, the function returns the original
 #' data.frame unchanged and prints an error message.
-#' @param LR Distance forward from INS to gust pod [m].
-#' @param LG Distance forward from INS to GPS antenna [m]
+#' @param AC Aircraft identifier, either "GV" or "C130"; default "GV"
 #' @param CompF Set TRUE to implement the complementary filter that merges
 #' ground-speed vectors from the INS and GPS to obtain corrected values
 #' of the wind vector.
@@ -32,7 +31,7 @@
 #' @examples
 #' newData <- WindProcessor (RAFdata)
 
-WindProcessor <- function (data, LR=4.42, LG=-4.30, CompF=TRUE) {
+WindProcessor <- function (data, AC='GV', CompF=TRUE) {
   Cradeg <- pi/180
   Names <- names (data)
   if ("PITCHC" %in% Names) {
@@ -103,7 +102,21 @@ WindProcessor <- function (data, LR=4.42, LG=-4.30, CompF=TRUE) {
   if ((tg[2]-tg[1]) <= 0.045) {Rate <- 25}
   if ((tg[2]-tg[1]) <= 0.025) {Rate <- 50}
   ## correct for aircraft rotation rate
-  LR <- 4.42; LG <- -4.30
+  # LR <- 4.42; LG <- -4.30  ## these are normal GV values
+  # LR <- 5.18; LG <- -9.88 (Feb 2015 and later) or -4.93 (pre-Feb 2015)
+  Platform <- attr(data, 'Platform')
+  if ((length(Platform) > 0) && (Platform == 'N130AR')) {
+    AC <- 'C130'
+  }
+  if (AC == 'C130') {
+    LR <- 5.18
+    LG <- -9.88
+    FlightDate <- attr(data, 'FlightDate')
+    if ((length(FlightDate) > 0) && (as.integer(sub('.*/', '', attr(data, 'FlightDate'))) < 2015)) {
+	    LG <- -4.93
+    }
+  }
+  else {LR <- 4.42; LG <- -4.30}
   Pdot <- c(0, diff (PITCH)) * Rate  # diff does step-wise differentiation
   Hdot <- c(0, diff (THDG))          # see Rate multiplication few lines down
   Hdot[is.na(Hdot)] <- 0
