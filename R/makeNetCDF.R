@@ -150,15 +150,18 @@ makeNetCDF <- function (.d, newNetCDFname) {
     if (V == "Time") {
       ncvar_put (nc, V, dT, count=length(dT))
     } else {
+      A <- eval(parse(text=sprintf(".d$%s", V)))
       if (HR == 25) {
-        ncvar_put (nc, V, eval (parse (text=sprintf (".d$%s", V))), count=c(25, nrow(.d)/25))
+        ncvar_put (nc, V, A, count=c(25, nrow(.d)/25))
       } else if (HR == 50) {
-        ncvar_put (nc, V, eval (parse (text=sprintf (".d$%s", V))), count=c(50, nrow(.d)/50))
+        ncvar_put (nc, V, A, count=c(50, nrow(.d)/50))
       } else {
         Vvalue <- eval (parse (text=sprintf ('.d$%s', V)))
         Vvalue[is.na(Vvalue)] <- -32767
         ncvar_put (nc, V, Vvalue)
       }
+      ## Note: strangely, the preceding puts -32767 into .d data.frame, so fix it:      
+      .d[abs (.d[,V]+32767) < 1, V] <- NA
       ## Note: strangely, the following puts -32767 into .d data.frame, so fix it:
       # ncvar_put (nc, V, eval (parse (text=sprintf (".d$%s", V))))
       # .d[abs (.d[,V]+32767) < 1, V] <- NA
