@@ -97,6 +97,9 @@ WindProcessor <- function (data, AC='GV', CompF=TRUE) {
   d <- data.frame ("U" = TASX)
   SSLIP <- SSLIP * Cradeg; ATTACK <- ATTACK * Cradeg
   PITCH <- PITCH * Cradeg; ROLL <- ROLL * Cradeg; THDG <- THDG * Cradeg
+  PITCH <- zoo::na.approx (as.vector(PITCH), maxgap=5000, na.rm = FALSE)
+  ROLL <- zoo::na.approx (as.vector(ROLL), maxgap=5000, na.rm = FALSE)
+  THDG <- zoo::na.approx (as.vector(THDG), maxgap=5000, na.rm = FALSE)
   Rate <- 1
   tg <- data$Time[!is.na(data$Time)]  # protect against missing values at start
   if ((tg[2]-tg[1]) <= 0.045) {Rate <- 25}
