@@ -226,7 +226,8 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     x <- 0:(length(X)-1)
     A <- stats::approx (x, z, n=length(X)*ratio-ratio+1)
     T <- A$y
-    T <- signal::filter(signal::sgolay(4,15),T)  # normally 75 pts
+    T <- signal::filter(signal::sgolay(3,21),T)  # normally 75 pts
+    # T <- signal::filter(signal::butter(3, 0.5), T)
     ## now shift to match 25-Hz:
     n <- as.integer (ratio / 2)
     NL = length(T)
