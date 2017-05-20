@@ -23,12 +23,15 @@
 #' makeNetCDF (RAFdata, "RAFdata.nc")
 #' \dontrun{makeNetCDF (Data, "./newFile.nc")}
 
-makeNetCDF <- function (.d, newNetCDFname) {
+makeNetCDF <- function (.data, newNetCDFname) {
   if (file.exists (newNetCDFname)) {
     cat (sprintf ("file %s exists. \nmakeNetCDF won't overwrite; quitting\n", newNetCDFname))
     return ("makeNetCDF returned without file creation")
   }
+  # saveFrame <- sub('.*_', '_', tempfile('_WAC'))
+  # assign(saveFrame, .data, envir = .GlobalEnv)  ## save the data.frame
   ## modify the data.frame, hoping to force a copy:
+  .d <- .data
   attr (.d, "R_dataframe_date") <- date()
   ## get the dimensions
   Dimensions <- attr(.d, "Dimensions")
@@ -151,6 +154,7 @@ makeNetCDF <- function (.d, newNetCDFname) {
       ncvar_put (nc, V, dT, count=length(dT))
     } else {
       A <- eval(parse(text=sprintf(".d$%s", V)))
+      A[is.na(A)] <- -32767
       if (HR == 25) {
         ncvar_put (nc, V, A, count=c(25, nrow(.d)/25))
       } else if (HR == 50) {
@@ -160,11 +164,9 @@ makeNetCDF <- function (.d, newNetCDFname) {
         Vvalue[is.na(Vvalue)] <- -32767
         ncvar_put (nc, V, Vvalue)
       }
-      ## Note: strangely, the preceding puts -32767 into .d data.frame, so fix it:      
-      .d[abs (.d[,V]+32767) < 1, V] <- NA
-      ## Note: strangely, the following puts -32767 into .d data.frame, so fix it:
-      # ncvar_put (nc, V, eval (parse (text=sprintf (".d$%s", V))))
-      # .d[abs (.d[,V]+32767) < 1, V] <- NA
+      ## Note: strangely, the preceding puts -32767 into .d data.frame, so fix it,
+      ## although I don't understand why this is necessary
+      .data[!is.na(.data[,V]) & abs (.data[,V]+32767) < 1, V] <- NA
     }
   }
   nc_close (nc)

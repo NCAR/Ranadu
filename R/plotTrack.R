@@ -32,6 +32,10 @@
 #' @param .WindFlags A scale factor for wind flags placed along the track, 
 #' in units of percentage of the plot size. The default is 0 which suppresses the flags. 
 #' A common value is 5.
+#' @param .Add A logical flag that, if true, does not generate the plot frame and axes
+#' but instead just adds a new line to an existing track. This will not reset the
+#' scales, so to span a full flight it may be useful to include the full flight in the
+#' definition of the data.frame and then use .Range for individual plots with .Add=TRUE.
 #' @param ... Additional arguments passed to the plot routine to control 
 #' graphics parameters etc. 
 #' @return none -- The result is the plot.
@@ -41,7 +45,7 @@
 
 plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL, 
                        WSC=NULL, .Range=0, xc=NULL, yc=NULL, 
-                       sz=NULL, .Spacing=15, .WindFlags=0, ...) {
+                       sz=NULL, .Spacing=15, .WindFlags=0, .Add=FALSE, ...) {
   DRIFT <- FALSE
   # suppressMessages (library ("maps"))
   
@@ -62,7 +66,7 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
       data.rate <- 1
       if (df$Time[2] - df$Time[1] <= 0.04) {data.rate <- 25}
       if (df$Time[2] - df$Time[1] <= 0.02) {data.rate <- 50}
-      df <- df[.Range, ]
+      # df <- df[.Range, ]
       THDG <- (df$THDG + df$SSLIP) * pi / 180
       TASX <- df$TASX
       ## try to interpolate for missing values
@@ -91,8 +95,12 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
         xl <- c(xc-sz/2, xc+sz/2)
         yl <- c(yc-sz/2, yc+sz/2)
       }
-      plot (xa, ya, type='l', xlim=xl, ylim=yl, asp=1, lwd=2, col='blue',
-            xlab="distance east [km]", ylab="distance north [km]")
+      if (.Add) {
+        lines (xa[.Range], ya[.Range], ...)
+      } else {
+        plot (xa[.Range], ya[.Range], type='l', xlim=xl, ylim=yl, asp=1, lwd=2, col='blue',
+              xlab="distance east [km]", ylab="distance north [km]", ...)
+      }
       ltm <- as.POSIXlt(Time)
       inx <- 1:length(ltm)
       ltime <- Time[(ltm$min %% .Spacing == 0) & (ltm$sec == 0)]
@@ -135,25 +143,29 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
     sz <- max (xl[2] - xl[1], yl[2] - yl[1])
     
     ap <- 1. / cos (median (lat[.Range], na.rm=TRUE)*pi/180.)
-    plot (lon[.Range], lat[.Range], type='n', xlim=xl, ylim=yl, asp=ap, pty='s',
-          xlab=expression(paste("Longitude [",degree,
-                                "]")), ylab=expression(paste("Latitude [",degree,"]")))
-    suppressWarnings (
-      if ((min(lon[.Range], na.rm=TRUE) < -130) 
-          | (max(lon[.Range], na.rm=TRUE) > -70.)
-          | (min(lat[.Range], na.rm=TRUE) < 30.) 
-          | (max(lat[.Range], na.rm=TRUE) > 50.)) {
-        if (requireNamespace("maps", quietly=TRUE)) {
-          maps::map("world", add=TRUE, fill=FALSE, col="black", lty=2)
+    if (.Add) {
+      lines (lon[.Range], lat[.Range], ...)
+    } else {
+      plot (lon[.Range], lat[.Range], type='n', xlim=xl, ylim=yl, asp=ap, pty='s',
+            xlab=expression(paste("Longitude [",degree,
+                                  "]")), ylab=expression(paste("Latitude [",degree,"]")), ...)
+      suppressWarnings (
+        if ((min(lon[.Range], na.rm=TRUE) < -130) 
+            | (max(lon[.Range], na.rm=TRUE) > -70.)
+            | (min(lat[.Range], na.rm=TRUE) < 30.) 
+            | (max(lat[.Range], na.rm=TRUE) > 50.)) {
+          if (requireNamespace("maps", quietly=TRUE)) {
+            maps::map("world", add=TRUE, fill=FALSE, col="black", lty=2)
+          }
+        } else {
+          if (requireNamespace ("maps", quietly=TRUE)) {
+            maps::map('state', add=TRUE, fill=FALSE, col="black", lty=2)
+          }
         }
-      } else {
-        if (requireNamespace ("maps", quietly=TRUE)) {
-          maps::map('state', add=TRUE, fill=FALSE, col="black", lty=2)
-        }
-      }
-    )
-    points (lon[.Range], lat[.Range], type='l', col='blue', 
-            xlab='Latitude [deg.]', ylab='Longitude [deg.]')
+      )
+      points (lon[.Range], lat[.Range], type='l', col='blue', 
+              xlab='Latitude [deg.]', ylab='Longitude [deg.]', ...)
+    }
     ltm <- as.POSIXlt(Time)
     inx <- 1:length(ltm)
     ltime <- Time[(ltm$min %% .Spacing == 0) & (ltm$sec == 0)]
