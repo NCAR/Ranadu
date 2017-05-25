@@ -15,7 +15,7 @@
 #' @author William Cooper
 #' @export makeNetCDF
 #' @import ncdf4
-#' @param .d A data.frame produced by getNetCDF() or otherwise converted to the corresponding
+#' @param .data A data.frame produced by getNetCDF() or otherwise converted to the corresponding
 #' structure from that function.
 #' @param newNetCDFname A character path name for the file to be created
 #' @return a text message indicating successful creation of the new file.

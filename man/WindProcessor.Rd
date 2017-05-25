@@ -5,7 +5,7 @@
 \alias{windProcessor}
 \title{WindProcessor}
 \usage{
-WindProcessor(data, LR = 4.42, LG = -4.3, CompF = TRUE)
+WindProcessor(data, AC = "GV", CompF = TRUE)
 }
 \arguments{
 \item{data}{A data.frame containing these variables (and possibly others): 
@@ -19,9 +19,7 @@ candidates and selects the first found: {PITCHC, PITCH}, {TASN, TASX},
 required variables are not found, the function returns the original
 data.frame unchanged and prints an error message.}
 
-\item{LR}{Distance forward from INS to gust pod [m].}
-
-\item{LG}{Distance forward from INS to GPS antenna [m]}
+\item{AC}{Aircraft identifier, either "GV" or "C130"; default "GV"}
 
 \item{CompF}{Set TRUE to implement the complementary filter that merges
 ground-speed vectors from the INS and GPS to obtain corrected values

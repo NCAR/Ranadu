@@ -5,10 +5,14 @@
 \alias{dataFileInfo}
 \title{DataFileInfo}
 \usage{
-DataFileInfo(fileLocation)
+DataFileInfo(fileLocation, LLrange = TRUE)
 }
 \arguments{
-\item{fileLocation}{A complete address to the netCDF data file}
+\item{fileLocation}{A complete address to the netCDF data file.}
+
+\item{LLrange}{Logical, if TRUE, range in latitude and longitude for the
+flight is included in the returned list. Set FALSE to get a faster return
+in case the range in positions is not needed.}
 }
 \value{
 A list containing named characteristics of the file. For example, 

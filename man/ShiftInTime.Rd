@@ -9,7 +9,7 @@ ShiftInTime(.X, .rate = 1, .shift = 0, .smooth = 0, .mod = NA)
 \arguments{
 \item{.X}{A numeric vector, usually representing a measurement history.}
 
-\item{.rate}{The assumed sampling rate in Hz (default 1 Hz).}
+\item{.rate}{The data rate in Hz (default 1 Hz).}
 
 \item{.shift}{The shift to be applied, in milliseconds. Can be positive 
 or negative. A negative value moves the time series earlier in time, 

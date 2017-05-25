@@ -6,7 +6,7 @@
 \usage{
 plotTrack(lon, lat = NULL, Time = NULL, WDC = NULL, WSC = NULL,
   .Range = 0, xc = NULL, yc = NULL, sz = NULL, .Spacing = 15,
-  .WindFlags = 0, ...)
+  .WindFlags = 0, .Add = FALSE, ...)
 }
 \arguments{
 \item{lon}{A numeric vector of longitude coordinates (degrees). Optionally,
@@ -45,6 +45,11 @@ in minutes. The default is 15 min.}
 \item{.WindFlags}{A scale factor for wind flags placed along the track, 
 in units of percentage of the plot size. The default is 0 which suppresses the flags. 
 A common value is 5.}
+
+\item{.Add}{A logical flag that, if true, does not generate the plot frame and axes
+but instead just adds a new line to an existing track. This will not reset the
+scales, so to span a full flight it may be useful to include the full flight in the
+definition of the data.frame and then use .Range for individual plots with .Add=TRUE.}
 
 \item{...}{Additional arguments passed to the plot routine to control 
 graphics parameters etc.}

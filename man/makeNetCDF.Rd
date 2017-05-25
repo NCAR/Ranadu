@@ -5,13 +5,13 @@
 \alias{MakeNetCDF}
 \title{makeNetCDF}
 \usage{
-makeNetCDF(.d, newNetCDFname)
+makeNetCDF(.data, newNetCDFname)
 }
 \arguments{
+\item{newNetCDFname}{A character path name for the file to be created}
+
 \item{.d}{A data.frame produced by getNetCDF() or otherwise converted to the corresponding
 structure from that function.}
-
-\item{newNetCDFname}{A character path name for the file to be created}
 }
 \value{
 a text message indicating successful creation of the new file.
