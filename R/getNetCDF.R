@@ -11,7 +11,7 @@
 #' true north), wind speed (m/s), and vertical wind (m/s). For additional information
 #' on these and other variables used in those data archives, see the document 
 #' ProcessingAlgorithms.pdf with link in the github Wiki for this R package.
-#' @aliases StandardVariables
+#' @aliases StandardVariables,standardVariables
 #' @author William Cooper
 #' @export standardVariables
 #' @param list An optional list of variable names to add to the standard list
