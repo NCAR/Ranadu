@@ -49,9 +49,17 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' When working with attributes, it is a feature of R data.frames that subsetting loses 
 #' all the assigned variable attributes. To preserve them, copy them via 
 #' A <- attributes (Data$VAR), remove A$dim (e.g., A$dim <- NULL),
-#' and re-assign via attributes (DataNew$VAR) <- A. The function does not handle 
-#' multi-dimensional variables (e.g., CCDP, the size distribution measured by a cloud
-#' droplet probe) yet; it does work for 25-Hz files, and returns with fractional-second times.
+#' and re-assign via attributes (DataNew$VAR) <- A. The function does handle some
+#' multi-dimensional variables (e.g., CCDP, CFSSP, the size distributions measured by the CDP
+#' and FSSP); these are returned as data.frame variables that are columns in the returned
+#' more general data.frame. They are two-dimensional, with the first dimension matching the
+#' rows in the returned data.frame and the second having a length equal to the measured size
+#' distribution (e.g., 30 for the CDP, 15 for the FSSP). The values are the number concentration
+#' in each bin, and the variable is assigned an attribute "BinSize" that contains the mid-points
+#' of the bins in the size distribution. The returned values are concentrations per bin (units
+#' /cm^3) and, for BinSize, diameter in micrometers. The returned size distribution does not 
+#' include the legacy first bin in the netCDF files; the first bin is the first measurement. 
+#' The routine does work for 25-Hz files, for which it returns with fractional-second times.
 #' @aliases getnetcdf GetNetCDF
 #' @author William Cooper
 #' @import ncdf4
@@ -60,8 +68,8 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' @export getNetCDF
 #' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
 #' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load 
-#' everything. (May produce quite large data.frames.) The default is the list given by
-#' standardVariables (). 
+#' everything except vector variables like the size distributions. (This option may produce 
+#' quite large data.frames.) The default is the list given by standardVariables (). 
 #' SPECIAL NOTE: Some variable names
 #' have a suffix indicating the location on the aircraft, like _LWI (left-wing inboard).
 #' To avoid having to supply these, a partial name can be supplied, like "CONCD_", and
@@ -262,10 +270,28 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       }    ## later, save datt as an attribute of V
       X <- ncvar_get (netCDFfile, V)
       ATT <- ncatt_get (netCDFfile, V)
+      ## special treatment for CCDP
+      if (grepl ('CCDP_', V)) {
+        CellSizes <- ncatt_get (netCDFfile, V, "CellSizes")
+        CellLimitsD <- CellSizes$value
+        attr (X, 'CellLimits') <- CellLimitsD
+        BinSize <- vector('numeric', 30)
+        for (j in 1:30) {
+          BinSize[j] <- (CellLimitsD[j] + CellLimitsD[j+1]) / 2    
+        }
+        CCDP1 <- X[2:31,]
+        X <- t(CCDP1)
+        attr (X, 'BinSize') <- BinSize
+        # V <- 'CCDP'
+      }
     }
     ## for Rate == 1, nothing special is needed:
     if (Rate == 1) {
-      X <- X[r1]
+      if (grepl('CCDP_', V)) {
+        X <- X[r1,]
+      } else {
+        X <- X[r1]
+      }
     } else { ## other rates require flattening and possibly interpolation and filtering
       DM <- length(dim(X))           
       if (DM == 2) {    # flatten
@@ -285,7 +311,11 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       attr (X, A) <- ATT[[A]]
     }
     attr (X, "Dimensions") <- datt
-    d[V] <- X
+    if (grepl('CCDP_', V)) {
+      d$CCDP <- X
+    } else {
+      d[V] <- X
+    }
   }
   if (F != 0) {    # if specified, include the flight number
     RF <- rep (F, times=length(Time))    # label flight number
