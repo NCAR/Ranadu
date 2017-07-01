@@ -245,6 +245,18 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   ######------------------------------------------------------------------
   
   ## Add the requested variables:------------------------------------------------
+  SizeDist <- function (V, netCDFfile, X) { ## used for size-distribution variables
+    CellSizes <- ncatt_get (netCDFfile, V, "CellSizes")
+    CellLimits <- CellSizes$value
+    Bins <- length(CellLimits)-1
+    BinSize <- vector('numeric', Bins)
+    for (j in 1:Bins) {
+      BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+    }
+    CC <- X[2:(Bins+1),]
+    XN <- t(CC)
+    return(list(XN, BinSize, CellLimits))
+  }
   for (V in VarList) {
     if (is.na(V)) {next}
     if (FAAM) {
@@ -270,25 +282,53 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       }    ## later, save datt as an attribute of V
       X <- ncvar_get (netCDFfile, V)
       ATT <- ncatt_get (netCDFfile, V)
-      ## special treatment for CCDP
+      ## special treatment for CCDP, CSP100, CUHSAS, C1DC, CS200:
       if (grepl ('CCDP_', V)) {
-        CellSizes <- ncatt_get (netCDFfile, V, "CellSizes")
-        CellLimitsD <- CellSizes$value
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsD <- RL[[2]]
+        BinSizeD <- RL[[3]]
         attr (X, 'CellLimits') <- CellLimitsD
-        BinSize <- vector('numeric', 30)
-        for (j in 1:30) {
-          BinSize[j] <- (CellLimitsD[j] + CellLimitsD[j+1]) / 2    
-        }
-        CCDP1 <- X[2:31,]
-        X <- t(CCDP1)
-        attr (X, 'BinSize') <- BinSize
-        # V <- 'CCDP'
+        attr (X, 'BinSize') <- BinSizeD
+      }
+      if (grepl ('^C1DC_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimits2 <- RL[[2]]
+        BinSize2 <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimits2
+        attr (X, 'BinSize') <- BinSize2
+      }
+      if (grepl ('CS200_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsP <- RL[[2]]
+        BinSizeP <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimitsP
+        attr (X, 'BinSize') <- BinSizeP
+      }
+      if (grepl ('CSP100_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsF <- RL[[2]]
+        BinSizeF <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimitsF
+        attr (X, 'BinSize') <- BinSizeF
+      }
+      if (grepl ('CUHSAS_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsU <- RL[[2]]
+        BinSizeU <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimitsU
+        attr (X, 'BinSize') <- BinSizeU
       }
     }
     ## for Rate == 1, nothing special is needed:
     if (Rate == 1) {
-      if (grepl('CCDP_', V)) {
-        X <- X[r1,]
+      if (grepl('CCDP_', V) || grepl('CSP100_', V) || grepl('CUHSAS_', V) ||
+          grepl('^C1DC_', V) || grepl('CS200_', V)) {
+        X <- X[r1, ]
       } else {
         X <- X[r1]
       }
@@ -313,6 +353,14 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     attr (X, "Dimensions") <- datt
     if (grepl('CCDP_', V)) {
       d$CCDP <- X
+    } else if (grepl('CSP100_', V)) {
+      d$CSP100 <- X
+    } else if (grepl('CUHSAS_', V)) {
+      d$CUHSAS <- X
+    } else if (grepl('^C1DC_', V)) {
+      d$C1DC <- X
+    } else if (grepl('CS200', V)) {
+      d$CS200 <- X
     } else {
       d[V] <- X
     }

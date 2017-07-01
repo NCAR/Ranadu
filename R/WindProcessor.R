@@ -25,7 +25,7 @@
 #' @param AC Aircraft identifier, either "GV" or "C130"; default "GV"
 #' @param CompF Set TRUE to implement the complementary filter that merges
 #' ground-speed vectors from the INS and GPS to obtain corrected values
-#' of the wind vector.
+#' of the wind vector. If set FALSE, the GPS lever arm (LG) is also set to 0.
 #' @return The original data.frame is returned with variables WDN, WSN, WIN added. These
 #' variables are the new horizontal wind direction and speed and the vertical wind.
 #' @examples
@@ -119,6 +119,7 @@ WindProcessor <- function (data, AC='GV', CompF=TRUE) {
 	    LG <- -4.93
     }
   } else {LR <- 4.42; LG <- -4.30}
+  if (!CompF) {LG <- 0}
   Pdot <- c(0, diff (PITCH)) * Rate  # diff does step-wise differentiation
   Hdot <- c(0, diff (THDG))          # see Rate multiplication few lines down
   Hdot[is.na(Hdot)] <- 0
