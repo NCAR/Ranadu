@@ -23,7 +23,7 @@ data.frame unchanged and prints an error message.}
 
 \item{CompF}{Set TRUE to implement the complementary filter that merges
 ground-speed vectors from the INS and GPS to obtain corrected values
-of the wind vector.}
+of the wind vector. If set FALSE, the GPS lever arm (LG) is also set to 0.}
 }
 \value{
 The original data.frame is returned with variables WDN, WSN, WIN added. These
@@ -46,5 +46,5 @@ SSLIP is not present then SSRD, if present, will be used.)
 newData <- WindProcessor (RAFdata)
 }
 \author{
-Al Cooper
+William Cooper
 }

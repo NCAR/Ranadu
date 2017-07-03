@@ -8,7 +8,7 @@
 #' present, it will be used instead of PITCH. If TASN is present it will be used in 
 #' place of TASX. If ATTACK is not present then AKRD, if present, will be used. If
 #' SSLIP is not present then SSRD, if present, will be used.)
-#' @author Al Cooper
+#' @author William Cooper
 #' @export WindProcessor
 #' @aliases windProcessor
 #' @import zoo
