@@ -68,8 +68,14 @@ setVariableList <- function (fname, VarList=vector(), single=FALSE) {
   nc_close (netCDFfile)
   VarNames <- VarList
   ## exclusions:
-  vn <- vn[-which(grepl('MTP$', vn))]
-  vn <- vn[-which(grepl('^IRIG', vn))]
+  iw1 <- which(grepl('MTP$', vn))
+  iw2 <- which(grepl('^IRIG', vn))
+  if (length(iw1) > 0) {
+    vn <- vn[-iw1]
+  }
+  if (length(iw2) > 0) {
+    vn <- vn[-iw2]
+  }
   guiVar <- tktoplevel()
   tktitle(guiVar) <- sprintf ("Available Variables")
   topMenu <- tkmenu(guiVar)           # Create a menu

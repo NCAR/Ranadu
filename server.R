@@ -3156,7 +3156,7 @@ shinyServer(function(input, output, session) {
   
   output$quickPlot <- renderPlot ({
     reac$quick
-    if (Trace) {print ('quickPlotVar: entered')}
+    if (Trace) {print ('quickPlot: entered')}
     Data <- data ()
     if (!(quickPlotVar %in% names (Data))) {
       isolate(reac$newdata <- reac$newdata + 1)
