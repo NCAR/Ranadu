@@ -137,6 +137,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     }
   }
   if ('Time' %in% VarList) { ## if "Time" is present, remove it
+	                     ## (It will be added separately.)
     VarList <- VarList[-which(VarList == 'Time')]
   }
  
@@ -263,8 +264,9 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       SV <- names(snames[which(V == snames)])
     } 
     ## fill in location-tag for variable name if needed:
-    if (substr(V, nchar(V), nchar(V)) == '_') {
-      for (ncn in namesCDF) {
+    if (substr(V, nchar(V), nchar(V)) == '_') {    ## must end in _
+	    ## in case of multiple matches, must supply full names
+      for (ncn in namesCDF) { 
         if (grepl (V, ncn)) {V <- ncn; break}   ## note, takes 1st match
       }
     }
@@ -351,19 +353,19 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       attr (X, A) <- ATT[[A]]
     }
     attr (X, "Dimensions") <- datt
-    if (grepl('CCDP_', V)) {
-      d$CCDP <- X
-    } else if (grepl('CSP100_', V)) {
-      d$CSP100 <- X
-    } else if (grepl('CUHSAS_', V)) {
-      d$CUHSAS <- X
-    } else if (grepl('^C1DC_', V)) {
-      d$C1DC <- X
-    } else if (grepl('CS200', V)) {
-      d$CS200 <- X
-    } else {
+    # if (grepl('CCDP_', V)) {
+      # d$CCDP <- X
+    # } else if (grepl('CSP100_', V)) {
+      # d$CSP100 <- X
+    # } else if (grepl('CUHSAS_', V)) {
+      # d$CUHSAS <- X
+    # } else if (grepl('^C1DC_', V)) {
+      # d$C1DC <- X
+    # } else if (grepl('CS200', V)) {
+      # d$CS200 <- X
+    # } else {
       d[V] <- X
-    }
+    # }
   }
   if (F != 0) {    # if specified, include the flight number
     RF <- rep (F, times=length(Time))    # label flight number
