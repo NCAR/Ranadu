@@ -284,7 +284,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       }    ## later, save datt as an attribute of V
       X <- ncvar_get (netCDFfile, V)
       ATT <- ncatt_get (netCDFfile, V)
-      ## special treatment for CCDP, CSP100, CUHSAS, C1DC, CS200:
+      ## special treatment for CCDP, CS100, CUHSAS, C1DC, CS200:
       if (grepl ('CCDP_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
@@ -309,7 +309,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
         attr (X, 'CellLimits') <- CellLimitsP
         attr (X, 'BinSize') <- BinSizeP
       }
-      if (grepl ('CSP100_', V)) {
+      if (grepl ('CS100_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
         CellLimitsF <- RL[[2]]
@@ -328,7 +328,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     }
     ## for Rate == 1, nothing special is needed:
     if (Rate == 1) {
-      if (grepl('CCDP_', V) || grepl('CSP100_', V) || grepl('CUHSAS_', V) ||
+      if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
           grepl('^C1DC_', V) || grepl('CS200_', V)) {
         X <- X[r1, ]
       } else {
