@@ -740,7 +740,7 @@ transferAttributes <- function (dsub, d) {
     var <- sprintf ("d$%s", nm)
     A <- attributes (eval (parse (text=var)))
     if (!grepl ('Time', nm)) {
-      A$dim <- NULL
+      A$dim[1] <- nrow(ds)
       A$class <- NULL
     } else {
       A$dim <- nrow (ds)
