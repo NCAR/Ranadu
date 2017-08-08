@@ -18,7 +18,7 @@ library(tcltk)
 # source ('R/PlotWAC.R')
 # source ('R/getNetCDF.R')
 # source ('R/makeNetCDF.R')
-source ('R/setVariableList.R')
+# source ('R/setVariableList.R')
 # source ('R/CAPE.R')
 # source ('R/setVariableList.R')
 ## if this is set TRUE then messages will print in the console
@@ -740,7 +740,7 @@ transferAttributes <- function (dsub, d) {
     var <- sprintf ("d$%s", nm)
     A <- attributes (eval (parse (text=var)))
     if (!grepl ('Time', nm)) {
-      A$dim <- NULL
+      A$dim[1] <- nrow(ds)
       A$class <- NULL
     } else {
       A$dim <- nrow (ds)
