@@ -69,7 +69,7 @@ shinyServer(function(input, output, session) {
       updateTextInput (session, 'paluchCEnd', value='36:00:00')
       if (exists ('specialData')) {
         VarList <<- VarList [-which (VarList %in% names(specialData))]
-        # rm (specialData, pos=1)
+        rm (specialData, pos=1)
       }
     }
     ## set list of available probes
@@ -99,7 +99,7 @@ shinyServer(function(input, output, session) {
       updateTextInput (session, 'paluchCEnd', value='36:00:00')
       if (exists ('specialData')) {
         VarList <<- VarList [-which (VarList %in% names(specialData))]
-        # rm (specialData, pos=1)
+        rm (specialData, pos=1)
       }
     }
     isolate (reac$newdata <- reac$newdata + 1)
@@ -127,10 +127,11 @@ shinyServer(function(input, output, session) {
   exprTime <- quote ({
     if (Trace) {print (sprintf ('Time: Times %s %s times %s %s', plotSpec$Times[1], plotSpec$Times[2],
                                 input$times[1], input$times[2]))}
+    
+    plotSpec$PaluchTimes <<- input$times
+    plotSpec$PaluchCTimes <<- input$times
     if (any (input$times != plotSpec$Times)) {
       plotSpec$Times <<- input$times
-      plotSpec$PaluchTimes <<- input$times
-      plotSpec$PaluchCTimes <<- input$times
       updateTextInput (session, 'tstart', value=formatTime(plotSpec$Times[1]))
       updateTextInput (session, 'tend', value=formatTime(plotSpec$Times[2]))
       updateTextInput (session, 'paluchStart', value=formatTime(plotSpec$Times[1]))
@@ -172,10 +173,12 @@ shinyServer(function(input, output, session) {
             plotSpec$Plot[[plt]]$panel[[pnl]]$lab[lv] <<- input$addVarP
             updateTextInput (session, 'ylbl', value=input$addVarP)
           }
-          if ((length(data ()) < 2) || (!(input$addVarP %in% names (Data)))) {
+          if ((ncol (Data) < 2) || (!(input$addVarP %in% names (Data)))) {
             if (exists ('specialData') && (input$addVarP %in% names (specialData))) {
             } else {
               print ('need new data to include new variable - 4')
+	      print (c('names in Data:', names(Data)))
+	      print (c('names in specialData:', names(specialData)))
               reac$newdata <- reac$newdata + 1
             }
           }
@@ -1819,8 +1822,9 @@ shinyServer(function(input, output, session) {
         }
       }
       VarList <<- VarList ## saved as global for possible inspection
-      if (exists ('specialData')) {rm (specialData, pos=1)} 
+      # if (exists ('specialData')) {rm (specialData, pos=1)} 
       if ((fname != fname.last) || (any(!(VarList %in% VarListLast)))) {
+	if (Trace) {print (c(sprintf ('reading data from %s; VarList is:', fname), VarList))}
         D <- getNetCDF (fname, VarList)
         if ('GGVSPDB' %in% VarList) {
           D$GGVSPD <- D$GGVSPDB
@@ -1859,27 +1863,42 @@ shinyServer(function(input, output, session) {
           updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
         }
         if (Trace) {print (sprintf ('data: loaded data.frame from %s', fname))}
-      } else {
+      } else {  ## fname is the same, so reuse Data
         D <- Data
       }
       if (exists ('specialData')) {
-        specialData <<- cbind(specialData, specialVar (D))
+	  if (!('ROC' %in% names(specialData))) { ## specialVar adds ROC+
+            specialData <<- cbind(specialData, specialVar (D))
+	  }
       } else {
         specialData <<- specialVar (D)
       }
-      
+      if (Trace) {
+        print ('names in Data:')
+        print (sort(names(Data)))
+        print ('names in specialData:')
+        print (sort(names(specialData)))
+      }
       if (exists ('specialData')) {
         SD <- specialData
         if ('Time' %in% names (SD)) {
           SD$Time <- NULL
         }
         ## skip if variables are already in D
-        if (!any (names (SD) %in% names (D))) {
+        if (all (names (SD) %in% names (D))) {
+	} else {
           DS <- D
           D <- cbind (D, SD)
           D <- transferAttributes (D, DS)
           rm(DS)
         }
+      }
+      ## remove duplicates:
+      NMD <- names(D)
+      if (length(unique(NMD)) < length(NMD)) {
+	      DS <- D[, NMD]
+	      D <- transferAttributes (DS, D)
+	      rm (DS)
       }
       if (exists ('specialData')) {
         FI$Variables <<- unique(c(FI$Variables, names (specialData)[-1]))
@@ -2129,18 +2148,30 @@ shinyServer(function(input, output, session) {
       
       ## note that xlab is a necessary argument because otherwise plotWAC uses Time
       if (is.null (yl) || is.null (xl)) {
-        plotWAC (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary)], 
-                 log=logV, col=spec$panel[[pnl]]$col, type='p', 
-                 xlab=spec$panel[[pnl]]$varx, 
-                 pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
-                 legend.position='top')
-        if (Trace) {print (sprintf ('plotScat: symbol used %d', spec$panel[[pnl]]$symbol))}
+        if (input$ssmooth) {
+          smoothScatter (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary[1])], nrpoints=0,
+            colramp=colorRampPalette(blues9), pch=spec$panel[[pnl]]$symbol[1], cex=spec$panel[[pnl]]$size[1])
+          if (Trace) {print (sprintf ('plotScat: symbol used %d', spec$panel[[pnl]]$symbol))}
+        } else {
+          plotWAC (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary)],
+                   log=logV, col=spec$panel[[pnl]]$col, type='p',
+                   xlab=spec$panel[[pnl]]$varx,
+                   pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
+                   legend.position='top')
+        }
       } else {
-        plotWAC (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary)], 
-                 log=logV, col=spec$panel[[pnl]]$col, type='p', xlim=xl,
-                 ylim=yl, xlab=spec$panel[[pnl]]$varx, 
-                 pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
-                 legend.position='top')
+        if (input$ssmooth) {
+          smoothScatter (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary[1])], 
+            log=logV, colramp=colorRampPalette(blues9), xlim=xl,
+            ylim=yl, xlab=spec$panel[[pnl]]$varx,nrpoints=0,
+            pch=spec$panel[[pnl]]$symbol[1], cex=spec$panel[[pnl]]$size[1])
+        } else {
+          plotWAC (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary)],
+                   log=logV, col=spec$panel[[pnl]]$col, type='p', xlim=xl,
+                   ylim=yl, xlab=spec$panel[[pnl]]$varx,
+                   pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
+                   legend.position='top')
+        }
       }
       tt <- ''
       for (iy in 1:length (spec$panel[[pnl]]$vary)) {
@@ -3487,11 +3518,17 @@ shinyServer(function(input, output, session) {
   
   output$paluch <- renderPlot ({
     Data <-  limitData (data (), input, input$limits9)
+    if (!plotSpec$paluchLWC %in% names(Data)) {
+      showModal(modalDialog(title='Needed Variable Not Found', 
+        sprintf ('The Paluch diagram needs a measurement of LWC, but the specified variable (%s) is not present',
+          plotSpec$paluchLWC), easyClose=TRUE))
+      if (input$paluchBetts == 'Paluch') {return()}
+    }
     input$paluchStart
     input$paluchEnd
     input$paluchCStart
     input$paluchCEnd
-    if (Trace) {print (sprintf ('skewT: paluchStart/End %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))}
+    if (Trace) {print (sprintf ('Paluch: paluchStart/End %s %s', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))}
     getMixingData <- function (Data, inp) {
       EWX <- Data$EWX
       EWS <- MurphyKoop (Data$ATX)
@@ -3522,10 +3559,15 @@ shinyServer(function(input, output, session) {
     Data$R <- R 
     ## restrict data to period of specified environmental sounding
     DataS <- Data[(Data$Time >= plotSpec$PaluchTimes[1]) & (Data$Time < plotSpec$PaluchTimes[2]), ]
-    ## get the saturation point:
+    if (Trace) {
+      print (sprintf ('Paluch: times are %s %s; names in DataS are:', plotSpec$PaluchTimes[1], plotSpec$PaluchTimes[2]))
+      print (sort(names(DataS)))
+      DataS <<- DataS  ## save for inspection
+    }
+    ## get the saturation point, if plot type is Betts:
     if (grepl ('Betts', input$paluchBetts)) {
       load (file=paste(path.package ("Ranadu"), 'satptDiagram.Rdata', sep='/'))
-      load (file='inst/satptDiagram.Rdata')  ## this also loads rminBetts, etc, for xygraph
+      # load (file='inst/satptDiagram.Rdata')  ## this also loads rminBetts, etc, for xygraph
       cpt <- with(DataS, SpecificHeats ()[, 1] * (1 - Qtot) + StandardConstant('Rw') * Qtot)
       alhv <- 2.501e6
       spt <-  with (DataS, cpt * log (Tk/273.15) - (1-Qtot) * SpecificHeats()[, 3] * log ((PSXC-EWX) / 1000.) + alhv * R / ((1+R)*Tk))
@@ -3546,8 +3588,13 @@ shinyServer(function(input, output, session) {
       DataS$Rtot <- 1000 * DataS$Rtot
       RT <- binStats (DataS[, c('Rtot', 'PSXC')], xlow=125, xhigh=1025,bins=input$nbsa)
       TQ <- binStats (DataS[, c('THETAQ', 'PSXC')], xlow=125, xhigh=1025, bins=input$nbsa)
-      DF2 <- data.frame ('RT'=RT$ybar, 'TQ'=TQ$ybar, 'P'=RT$xc)
+      DF2 <- data.frame (RT=RT$ybar, TQ=TQ$ybar, P=RT$xc)
       # if (Trace) {print (c('skewT: DF2 is', DF2))}
+      if (Trace) {
+        print (summary(DF2$RT))
+        print (summary(DF2$TQ))
+        print (summary(DF2$P))
+      }
       g <- ggplot (DF2, aes (x=TQ, y=RT))
       g <- g + geom_path (col='blue', lwd=2) 
       g <- g + geom_point (col='blue', size=4) 
@@ -3556,6 +3603,7 @@ shinyServer(function(input, output, session) {
       g <- g + geom_text (aes (label=P), size=4, nudge_y=ny)
       g <- g + ylim(rev(range(RT)))
       g <- g + xlab('wet-equivalent potential temperature [K]') + ylab('total water mixing ratio [g/kg]') 
+      g <- g + theme_WAC()
       DataS$Rtot <- DataS$Rtot * 0.001
       gtest <<- g
     }
@@ -3593,13 +3641,13 @@ shinyServer(function(input, output, session) {
       
       RI1S <- SmoothDeriv (RI1$ybar, .Length=input$nbss)
       RI2S <- SmoothDeriv (RI2$ybar, .Length=input$nbss)
-      lineWAC (RI2$ybar, RI2$xc, type='b', col='darkgreen')
+      lines (RI2$ybar, RI2$xc, type='b', col='darkgreen')
       legend ('topleft', legend=c('THETAV', 'THETAE'), col=c('blue', 'darkgreen'), lwd=2)
       wmin <- min (c(RI3$ybar, RI4$ybar), na.rm=TRUE)
       wmax <- max (c(RI3$ybar, RI4$ybar), na.rm=TRUE)
       plotWAC (RI3$ybar, RI3$xc, xlab='wind component [m/s]', ylab='altitude [m]', type='b', col='blue', xlim=c(wmin, wmax))
       RI3S <- SmoothDeriv (RI3$ybar, .Length=input$nbss)
-      lineWAC (RI4$ybar, RI4$xc, type='b', col='darkgreen')
+      lines (RI4$ybar, RI4$xc, type='b', col='darkgreen')
       legend ('top', legend=c('U', 'V'), col=c('blue', 'darkgreen'), lwd=2)
       RI4S <- SmoothDeriv (RI4$ybar, .Length=input$nbss)
       #       plotWAC (RI1S, RI1$xc, xlab='smoothed THETAV derivative', type='b', col='darkorange')
@@ -3614,7 +3662,7 @@ shinyServer(function(input, output, session) {
           ((RI3S/binNorm)^2 + (RI4S/binNorm)^2)
       }
       plotWAC (Ri, RI3$xc, xlab='Richardson Number', type='b', col='blue', xlim=c(-2,5))
-      lineWAC (c(0,0,NA,0.25,0.25), c(0,15000,NA,0,15000), col='skyblue', lwd=0.8)
+      lines (c(0,0,NA,0.25,0.25), c(0,15000,NA,0,15000), col='skyblue', lwd=0.8)
       if (grepl ('V', input$tvORthetap)) {
         Nbv2 <- StandardConstant ('g_standard') * (RI1S  / binNorm) / RI1$ybar
       } else {
@@ -3624,7 +3672,7 @@ shinyServer(function(input, output, session) {
       Nbv <- sqrt (Nbv2)
       bvmax <- max (Nbv, na.rm=TRUE)
       plotWAC (Nbv, RI3$xc, xlab='Brunt-Vaisala number', type='b', col='blue', xlim=c(0,bvmax))
-      lineWAC (c(0,0), c(0,15000), col='skyblue', lwd=0.8)
+      lines (c(0,0), c(0,15000), col='skyblue', lwd=0.8)
       title (sprintf ('based on %s', input$tvORthetap))
     }
     ## now add in-cloud points
