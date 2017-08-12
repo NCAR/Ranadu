@@ -13,8 +13,8 @@ getNetCDF(fname, VarList = standardVariables(), Start = 0, End = 0,
 \item{fname}{string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"}
 
 \item{VarList}{vector of variable names to load from the netCDF file. Use "ALL" to load 
-everything. (May produce quite large data.frames.) The default is the list given by
-standardVariables (). 
+everything except vector variables like the size distributions. (This option may produce 
+quite large data.frames.) The default is the list given by standardVariables (). 
 SPECIAL NOTE: Some variable names
 have a suffix indicating the location on the aircraft, like _LWI (left-wing inboard).
 To avoid having to supply these, a partial name can be supplied, like "CONCD_", and
@@ -49,9 +49,17 @@ in the data.frame from the variable attributes in the netCDF file.
 When working with attributes, it is a feature of R data.frames that subsetting loses 
 all the assigned variable attributes. To preserve them, copy them via 
 A <- attributes (Data$VAR), remove A$dim (e.g., A$dim <- NULL),
-and re-assign via attributes (DataNew$VAR) <- A. The function does not handle 
-multi-dimensional variables (e.g., CCDP, the size distribution measured by a cloud
-droplet probe) yet; it does work for 25-Hz files, and returns with fractional-second times.
+and re-assign via attributes (DataNew$VAR) <- A. The function does handle some
+multi-dimensional variables (e.g., CCDP, CFSSP, the size distributions measured by the CDP
+and FSSP); these are returned as data.frame variables that are columns in the returned
+more general data.frame. They are two-dimensional, with the first dimension matching the
+rows in the returned data.frame and the second having a length equal to the measured size
+distribution (e.g., 30 for the CDP, 15 for the FSSP). The values are the number concentration
+in each bin, and the variable is assigned an attribute "BinSize" that contains the mid-points
+of the bins in the size distribution. The returned values are concentrations per bin (units
+/cm^3) and, for BinSize, diameter in micrometers. The returned size distribution does not 
+include the legacy first bin in the netCDF files; the first bin is the first measurement. 
+The routine does work for 25-Hz files, for which it returns with fractional-second times.
 }
 \examples{
 \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}

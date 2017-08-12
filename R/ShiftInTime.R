@@ -19,7 +19,7 @@
 #' @importFrom stats approx
 #' @importFrom signal filter sgolay
 #' @param .X A numeric vector, usually representing a measurement history.
-#' @param .rate The assumed sampling rate in Hz (default 1 Hz). 
+#' @param .rate The data rate in Hz (default 1 Hz). 
 #' @param .shift The shift to be applied, in milliseconds. Can be positive 
 #' or negative. A negative value moves the time series earlier in time, 
 #' as would be needed to correct for a delay in recording.

@@ -58,9 +58,9 @@ is generated separately via a "Skew-TDiagram" program, with the plot saved in
 plot definition can be specified as the third parameter.
 }
 \examples{
+\dontrun{
 print (SkewTSounding (data.frame (Pressure=RAFdata$PSXC, Temperature=RAFdata$ATX, 
 DewPoint=RAFdata$DPXC)))
-\dontrun{
 Directory <- DataDirectory ()
 Flight <- "rf16"       	
 Project = "DEEPWAVE"

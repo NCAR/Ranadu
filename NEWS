@@ -1,3 +1,23 @@
+Version 2.5-17-07-01
+  Additions:
+    Sqs.R                   -- Calculates quasi-steady supersaturation in cloud.
+  Updates:
+    getNetCDF               -- Added capability to return size-distribution vectors.
+                            -- Modified to use FAAM and UWYO data files also.
+                            -- Changed SG length for interpolation to 21 points.
+    WindProcessor           -- Suppress GPS correction if CompF suppressed.
+                            -- Added interpolation for some missing values.
+                            -- Modified lever-arm calculations for INS/GPS positions.
+    plotTrack               -- Added capability to add segments to previous track.
+    DataFileInfo            -- Added capability to suppress lat/lon range check.
+    ggplotWAC               -- Added "title" argument.
+    themeWAC                -- Modifications for faceted plots.
+    shinyApp                -- Various mods to still-developing functions
+    (diverse)               -- Various mods to protect against failure in routines.
+  Corrections:
+    makeNetCDF              -- Error re NA-vs-missing-value corrected.
+    lineWAC                 -- Only apply half-interval shift to time series plots.
+    (diverse)               -- Minor changes to many documentation files.
 Version 2.4-17-01-16  
   Updates:
       shinyApp              -- Significant changes to improve and simplify use.

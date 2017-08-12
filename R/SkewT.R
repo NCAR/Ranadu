@@ -40,9 +40,9 @@
 #' and sounding values included in the plot. Additions can be made to this 
 #' specification to add components to the plot (e.g, wind barbs or a hodograph).
 #' @examples 
+#' \dontrun{
 #' print (SkewTSounding (data.frame (Pressure=RAFdata$PSXC, Temperature=RAFdata$ATX, 
 #' DewPoint=RAFdata$DPXC)))
-#' \dontrun{
 #' Directory <- DataDirectory ()
 #' Flight <- "rf16"       	
 #' Project = "DEEPWAVE"

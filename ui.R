@@ -252,8 +252,8 @@ shinyUI(
                                        sidebarLayout(
                                          sidebarPanel(h4('scatterplot'),  
                                                       fluidRow (
-                                                        column (7, checkboxInput ('limits4','restrictions')),
-                                                        column (5, checkboxInput ('sfooter','footer? (NA)'))),
+                                                        column (5, checkboxInput ('limits4','restrictions')),
+                                                        column (6, checkboxInput ('ssmooth','smoothed display?   (1st pair only)'))),
                                                       fluidRow (
                                                         column (6, numericInput ('spanels', 'panels', 
                                                                                  plotSpec$Scat[[1]]$panels, width='60px')),

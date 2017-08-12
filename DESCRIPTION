@@ -1,6 +1,6 @@
 Package: Ranadu
 Title: Functions for use with RAF aircraft data files
-Version: 2.5-17-01-16
+Version: 2.5-17-07-01
 Author: William Cooper
 Maintainer: William Cooper <cooperw@ucar.edu>
 Description: This package contains a function for loading a portion of a netCDF
@@ -17,7 +17,8 @@ Description: This package contains a function for loading a portion of a netCDF
     constant for air, MachNumber, RecoveryFactor, TrueAirspeed, AirTemperature,
     MurphyKoop (for the water vapor pressure), DPfromE (to find the dew point
     corresponding to a specified water vapor pressure), PressureAltitude,
-    PotentialTemperature, EquivalentPotentialTemperature,
+    PotentialTemperature, EquivalentPotentialTemperature, Sqs (the quasi-steady
+    supersaturation in cloud given the updraft and droplet size distribution), 
     WetEquivalentPotentialTemperature, MixingRatio, VirtualTemperature,
     VirtualPotentialTemperature, and plotWAC and lineWAC (convenience routines
     producing some aspects of plots I use routinely). A skew-T background is
@@ -30,6 +31,6 @@ License: GPL
 Depends:
     R (>= 3.3),ncdf4,maps,ggplot2,ggthemes,graphics,grid
 Imports:
-    tcltk,nleqslv,zoo,fields, stats, signal, reshape2
+    tcltk,nleqslv,zoo,fields, stats, signal, reshape2, plyr
 LazyData: true
 RoxygenNote: 6.0.1

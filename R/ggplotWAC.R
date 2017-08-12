@@ -176,7 +176,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       # print (c(clr, colrs, lwd, lty))
       # print (names(colrs))
     }
-    if (!is.na(gtitle)) {
+    if (length(gtitle) > 1) {
       g <- g + ggtitle (gtitle)
     }
     g <- g + theme_WAC(theme.version)

@@ -11,7 +11,7 @@
 #' true north), wind speed (m/s), and vertical wind (m/s). For additional information
 #' on these and other variables used in those data archives, see the document 
 #' ProcessingAlgorithms.pdf with link in the github Wiki for this R package.
-#' @aliases StandardVariables
+#' @aliases StandardVariables,standardVariables
 #' @author William Cooper
 #' @export standardVariables
 #' @param list An optional list of variable names to add to the standard list
@@ -49,9 +49,17 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' When working with attributes, it is a feature of R data.frames that subsetting loses 
 #' all the assigned variable attributes. To preserve them, copy them via 
 #' A <- attributes (Data$VAR), remove A$dim (e.g., A$dim <- NULL),
-#' and re-assign via attributes (DataNew$VAR) <- A. The function does not handle 
-#' multi-dimensional variables (e.g., CCDP, the size distribution measured by a cloud
-#' droplet probe) yet; it does work for 25-Hz files, and returns with fractional-second times.
+#' and re-assign via attributes (DataNew$VAR) <- A. The function does handle some
+#' multi-dimensional variables (e.g., CCDP, CFSSP, the size distributions measured by the CDP
+#' and FSSP); these are returned as data.frame variables that are columns in the returned
+#' more general data.frame. They are two-dimensional, with the first dimension matching the
+#' rows in the returned data.frame and the second having a length equal to the measured size
+#' distribution (e.g., 30 for the CDP, 15 for the FSSP). The values are the number concentration
+#' in each bin, and the variable is assigned an attribute "BinSize" that contains the mid-points
+#' of the bins in the size distribution. The returned values are concentrations per bin (units
+#' /cm^3) and, for BinSize, diameter in micrometers. The returned size distribution does not 
+#' include the legacy first bin in the netCDF files; the first bin is the first measurement. 
+#' The routine does work for 25-Hz files, for which it returns with fractional-second times.
 #' @aliases getnetcdf GetNetCDF
 #' @author William Cooper
 #' @import ncdf4
@@ -60,8 +68,8 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' @export getNetCDF
 #' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
 #' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load 
-#' everything. (May produce quite large data.frames.) The default is the list given by
-#' standardVariables (). 
+#' everything except vector variables like the size distributions. (This option may produce 
+#' quite large data.frames.) The default is the list given by standardVariables (). 
 #' SPECIAL NOTE: Some variable names
 #' have a suffix indicating the location on the aircraft, like _LWI (left-wing inboard).
 #' To avoid having to supply these, a partial name can be supplied, like "CONCD_", and
@@ -129,6 +137,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     }
   }
   if ('Time' %in% VarList) { ## if "Time" is present, remove it
+	                     ## (It will be added separately.)
     VarList <- VarList[-which(VarList == 'Time')]
   }
  
@@ -237,14 +246,27 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   ######------------------------------------------------------------------
   
   ## Add the requested variables:------------------------------------------------
+  SizeDist <- function (V, netCDFfile, X) { ## used for size-distribution variables
+    CellSizes <- ncatt_get (netCDFfile, V, "CellSizes")
+    CellLimits <- CellSizes$value
+    Bins <- length(CellLimits)-1
+    BinSize <- vector('numeric', Bins)
+    for (j in 1:Bins) {
+      BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+    }
+    CC <- X[2:(Bins+1),]
+    XN <- t(CC)
+    return(list(XN, BinSize, CellLimits))
+  }
   for (V in VarList) {
     if (is.na(V)) {next}
     if (FAAM) {
       SV <- names(snames[which(V == snames)])
     } 
     ## fill in location-tag for variable name if needed:
-    if (substr(V, nchar(V), nchar(V)) == '_') {
-      for (ncn in namesCDF) {
+    if (substr(V, nchar(V), nchar(V)) == '_') {    ## must end in _
+	    ## in case of multiple matches, must supply full names
+      for (ncn in namesCDF) { 
         if (grepl (V, ncn)) {V <- ncn; break}   ## note, takes 1st match
       }
     }
@@ -262,10 +284,56 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       }    ## later, save datt as an attribute of V
       X <- ncvar_get (netCDFfile, V)
       ATT <- ncatt_get (netCDFfile, V)
+      ## special treatment for CCDP, CS100, CUHSAS, C1DC, CS200:
+      if (grepl ('CCDP_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsD <- RL[[2]]
+        BinSizeD <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimitsD
+        attr (X, 'BinSize') <- BinSizeD
+      }
+      if (grepl ('^C1DC_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimits2 <- RL[[2]]
+        BinSize2 <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimits2
+        attr (X, 'BinSize') <- BinSize2
+      }
+      if (grepl ('CS200_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsP <- RL[[2]]
+        BinSizeP <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimitsP
+        attr (X, 'BinSize') <- BinSizeP
+      }
+      if (grepl ('CS100_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsF <- RL[[2]]
+        BinSizeF <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimitsF
+        attr (X, 'BinSize') <- BinSizeF
+      }
+      if (grepl ('CUHSAS_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsU <- RL[[2]]
+        BinSizeU <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimitsU
+        attr (X, 'BinSize') <- BinSizeU
+      }
     }
     ## for Rate == 1, nothing special is needed:
     if (Rate == 1) {
-      X <- X[r1]
+      if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
+          grepl('^C1DC_', V) || grepl('CS200_', V)) {
+        X <- X[r1, ]
+      } else {
+        X <- X[r1]
+      }
     } else { ## other rates require flattening and possibly interpolation and filtering
       DM <- length(dim(X))           
       if (DM == 2) {    # flatten
@@ -285,7 +353,19 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       attr (X, A) <- ATT[[A]]
     }
     attr (X, "Dimensions") <- datt
-    d[V] <- X
+    # if (grepl('CCDP_', V)) {
+      # d$CCDP <- X
+    # } else if (grepl('CSP100_', V)) {
+      # d$CSP100 <- X
+    # } else if (grepl('CUHSAS_', V)) {
+      # d$CUHSAS <- X
+    # } else if (grepl('^C1DC_', V)) {
+      # d$C1DC <- X
+    # } else if (grepl('CS200', V)) {
+      # d$CS200 <- X
+    # } else {
+      d[V] <- X
+    # }
   }
   if (F != 0) {    # if specified, include the flight number
     RF <- rep (F, times=length(Time))    # label flight number

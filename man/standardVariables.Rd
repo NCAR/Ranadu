@@ -2,7 +2,7 @@
 % Please edit documentation in R/getNetCDF.R
 \name{standardVariables}
 \alias{standardVariables}
-\alias{StandardVariables}
+\alias{StandardVariables,standardVariables}
 \title{standardVariables}
 \usage{
 standardVariables(list = NULL, SRC = "NCAR")
