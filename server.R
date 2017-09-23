@@ -2958,7 +2958,8 @@ shinyServer(function(input, output, session) {
       isolate (plt <- input$plot)
       v <- plotSpec$Variance[[plt]]$Definition$var
       cv <- plotSpec$Variance[[plt]]$Definition$cvar
-      setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype, isolate(input$MEMadd), isolate(input$MEMcolor))
+      setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype, isolate(input$MEMadd), 
+        isolate(input$MEMcolor))
       XanaduOut <<- system ("Xanadu otto", intern=TRUE)
       if (input$spectype == 'MEM') {
         while (!file.exists ("MEMPlot.png")) {Sys.sleep (1)}
