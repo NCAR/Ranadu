@@ -2960,7 +2960,11 @@ shinyServer(function(input, output, session) {
       cv <- plotSpec$Variance[[plt]]$Definition$cvar
       setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype, isolate(input$MEMadd), 
         isolate(input$MEMcolor))
-      XanaduOut <<- system ("Xanadu otto", intern=TRUE)
+      XanaduOut <<- system2 ("Xanadu", args="otto", stdout=TRUE)
+      if (length (XanaduOut) < 1) {return()}
+      # save (XanaduOut, file='/srv/shiny-server/Ranadu/XanaduOut.Rdata')
+      # print ('return from system2 is:')
+      # print (XanaduOut)
       if (input$spectype == 'MEM') {
         while (!file.exists ("MEMPlot.png")) {Sys.sleep (1)}
         gname <- "SpecialGraphics/PSDMEM.png"
