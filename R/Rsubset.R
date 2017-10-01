@@ -43,13 +43,15 @@ Rsubset <- function (Data, StartT=0, EndT=0, Var=NULL, Test=TRUE) {
   
   transferAttributes <- function (d, dsub) {  
     ds <- dsub
+    ## ds and dsub are the new variables; d is the original
     for (nm in names (ds)) {
       var <- sprintf ("d$%s", nm)
       A <- attributes (eval (parse (text=var)))
-      A$dim <- nrow (ds)
       if (!grepl ('Time', nm)) {
-        A$dim <- NULL
+        A$dim[1] <- nrow(ds)
         A$class <- NULL
+      } else {
+	A$dim <- nrow (ds)
       }
       attributes (ds[,nm]) <- A
     }
