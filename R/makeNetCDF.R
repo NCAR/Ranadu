@@ -78,7 +78,10 @@ makeNetCDF <- function (.data, newNetCDFname) {
     Dim <- list(Dimensions[["sps50"]], Dimensions[["Time"]])
   }
   vdef <- list()   # start with empty list, add variables to it
-  for (V in names(.d)) {
+  Vskip <- c("C1DC", "CCDP", "CUHSAS", "CS100", "CS200")
+  for (V in names (.d)) {
+	  ## this doesn't work for size-distributions, so skip
+	  if (any (grepl (substr(V, 1, 4), Vskip))) {next}
     if (V == "Time") {next}
     var_units <- attr (eval (parse (text=sprintf (".d$%s", V))), "units")
     if (is.null(var_units)) {var_units <- "not defined"}
@@ -119,6 +122,8 @@ makeNetCDF <- function (.data, newNetCDFname) {
   }
   nc_redef (nc)
   for (V in names(.d)) {
+	  ## this doesn't work for size-distributions, so skip
+	  if (any (grepl (substr(V, 1, 4), Vskip))) {next}
     ATV <- attributes (eval (parse (text=sprintf (".d$%s", V))))
     for (i in 1:length(ATV)) {
       ATT <- ATV[i]
@@ -153,6 +158,8 @@ makeNetCDF <- function (.data, newNetCDFname) {
     dT <- dT[seq(1, nrow(.d), by=50)]
   }
   for (V in names (.d)) {
+	  ## this doesn't work for size-distributions, so skip
+	  if (any (grepl (substr(V, 1, 4), Vskip))) {next}
     if (V == "Time") {
       ncvar_put (nc, V, dT, count=length(dT))
     } else {

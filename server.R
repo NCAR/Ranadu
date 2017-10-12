@@ -121,8 +121,23 @@ shinyServer(function(input, output, session) {
     if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('TypeFlight: reset newdata')}
+    rm ('specialData', pos='.GlobalEnv')
   })
   obsTypeFlight <- observe (exprTypeFlight, quoted=TRUE)
+  
+  exprSuffixFlight <- quote ({
+    if (input$suffixFlight != 'none') {
+      plotSpec$TypeFlight <<- input$suffixFlight
+    } else {
+      plotSpec$TypeFlight <<- input$typeFlight
+    }
+    plotSpec$fname2d <<- NULL
+    if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
+    isolate (reac$newdata <- reac$newdata + 1)
+    if (Trace) {print ('SuffixFlight: reset newdata')}
+    rm ('specialData', pos='.GlobalEnv')
+  })
+  obsSuffixFlight <- observe (exprSuffixFlight, quoted=TRUE)
   
   exprTime <- quote ({
     if (Trace) {print (sprintf ('Time: Times %s %s times %s %s', plotSpec$Times[1], plotSpec$Times[2],
@@ -436,10 +451,21 @@ shinyServer(function(input, output, session) {
   })
   obsRestrict <- observe (exprRestrict, quoted=TRUE)
   
+  exprFFTcolor <- quote ({
+    isolate (plt <- input$plot)
+    plotSpec$Variance[[plt]]$Definition$FFTcolor <<- input$FFTcolor
+    if (!isolate (input$FFTadd)) {
+      isolate (reac$newvarp <- reac$newvarp + 1)
+    }
+  })
+  obsFFTcolor <- observe (exprFFTcolor, quoted=TRUE)
+  
   exprMEMcolor <- quote ({
     isolate (plt <- input$plot)
     plotSpec$Variance[[plt]]$Definition$MEMcolor <<- input$MEMcolor
-    ## isolate (reac$newvarp <- reac$newvarp + 1)
+    if (!isolate (input$MEMadd)) {
+      isolate (reac$newvarp <- reac$newvarp + 1)
+    }
   })
   obsMEMcolor <- observe (exprMEMcolor, quoted=TRUE)
   
@@ -1273,7 +1299,7 @@ shinyServer(function(input, output, session) {
     plt <- isolate (input$plot)
     fftpts <- input$fftpts
     ## enforce power-of-2
-    fftpts <- 2 ^ (log (fftpts) %/% log(2))
+    fftpts <- getPower2(fftpts)
     plotSpec$Variance[[plt]]$Definition$fftpts <<- fftpts
     if (fftpts != input$fftpts) {
       updateNumericInput (session, 'fftpts', value=fftpts)
@@ -1761,6 +1787,9 @@ shinyServer(function(input, output, session) {
       if (plotSpec$TypeFlight == 'F') {
         fname <<- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
                            plotSpec$Project, plotSpec$Flight)
+      } else if (plotSpec$TypeFlight == 'HRT') {
+        fname <<- sprintf ('%s%s/%srf%02dHRT.nc', DataDirectory (), plotSpec$Project,
+          plotSpec$Project, plotSpec$Flight)
         if (Trace) {print (sprintf ('in data, file name is %s', fname))}
       } else if (plotSpec$TypeFlight == 'KF') {
         fname <<- sprintf ('%s%s/%srf%02dKF.nc', DataDirectory (), plotSpec$Project,
@@ -1867,9 +1896,9 @@ shinyServer(function(input, output, session) {
         D <- Data
       }
       if (exists ('specialData')) {
-	  if (!('ROC' %in% names(specialData))) { ## specialVar adds ROC+
+	      if (!('ROC' %in% names(specialData))) { ## specialVar adds ROC+
             specialData <<- cbind(specialData, specialVar (D))
-	  }
+	      }  
       } else {
         specialData <<- specialVar (D)
       }
@@ -1886,7 +1915,7 @@ shinyServer(function(input, output, session) {
         }
         ## skip if variables are already in D
         if (all (names (SD) %in% names (D))) {
-	} else {
+	      } else {
           DS <- D
           D <- cbind (D, SD)
           D <- transferAttributes (D, DS)
@@ -2551,7 +2580,7 @@ shinyServer(function(input, output, session) {
     nm1 <- nm2 <- nm3 <- nm4 <- nm5 <- character(0)
     nms <- names (Data)
     op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
-  
+    
     if ('CDP' %in% input$probe) {
       nm1 <- nms [grepl('CCDP_', nms)]
       if (length (nm1) > 0) {
@@ -2582,7 +2611,7 @@ shinyServer(function(input, output, session) {
         CellLimitsP <- attr(Data[, nm5[1]], 'CellSizes')
       }
     }
-
+    
     ## normalize all:
     if (length(nm1 > 0)) {
       for (nm in nm1) {
@@ -2624,116 +2653,118 @@ shinyServer(function(input, output, session) {
         PCASP[PCASP <= 0] <- 1.e-6
       }
     }
-  ## now have size distributions; construct plots
-  dmin <- 1e10
-  dmax <- 0
-  cmin=1e10
-  cmax=0
-  if ('CDP' %in% input$probe && (length(nm1) > 0)) {
-    dmin <- min (c(dmin, CellLimitsD[1]), na.rm=TRUE)
-    dmax <- max (c(dmax, CellLimitsD[length(CellLimitsD)]), na.rm=TRUE)
-    cmin <- min (c(cmin, CDP), na.rm=TRUE)
-    cmax <- max (c(cmax, CDP), na.rm=TRUE)
-  }
-  if ('FSSP' %in% input$probe && (length(nm2) > 0)) {
-    dmin <- min (c(dmin, CellLimitsF[1]), na.rm=TRUE)
-    dmax <- max (c(dmax, CellLimitsF[length(CellLimitsF)]), na.rm=TRUE)
-    cmin <- min (c(cmin, FSSP), na.rm=TRUE)
-    cmax <- max (c(cmax, FSSP), na.rm=TRUE)
-  }
-  if ('UHSAS' %in% input$probe && (length(nm3) > 0)) {
-    dmin <- min (c(dmin, CellLimitsU[1]), na.rm=TRUE)
-    dmax <- max (c(dmax, CellLimitsU[length(CellLimitsU)]), na.rm=TRUE)
-    cmin <- min (c(cmin, UHSAS), na.rm=TRUE)
-    cmax <- max (c(cmax, UHSAS), na.rm=TRUE)
-  }
-  if ('2DC' %in% input$probe && (length(nm4) > 0)) {
-    dmin <- min (c(dmin, CellLimits2[1]), na.rm=TRUE)
-    dmax <- max (c(dmax, CellLimits2[length(CellLimits2)]), na.rm=TRUE)
-    cmin <- min (c(cmin, TWOD), na.rm=TRUE)
-    cmax <- max (c(cmax, TWOD), na.rm=TRUE)
-  }
-  if ('PCASP' %in% input$probe && (length(nm5) > 0)) {
-    dmin <- min (c(dmin, CellLimitsP[1]), na.rm=TRUE)
-    dmax <- max (c(dmax, CellLimitsP[length(CellLimitsP)]), na.rm=TRUE)
-    cmin <- min (c(cmin, PCASP), na.rm=TRUE)
-    cmax <- max (c(cmax, PCASP), na.rm=TRUE)
-  }
-  if (length (input$probe) > 0) {
-    xp <- c(dmin, dmax)
-    yp <- c(cmin, cmax)
-    logT <- ''
-    if (grepl ('log-x', input$sdtype)) {logT <- paste (logT, 'x', sep='')}
-    if (grepl ('log-y', input$sdtype)) {logT <- paste (logT, 'y', sep='')}
-    if (grepl ('both log', input$sdtype)) {logT <- 'xy'}
-    ## this call just sets appropriate axes:
-    yl <- expression (paste("concentration [cm"^"-3", mu, 'm'^'-1', ']'), sep='')
-    plot (xp, yp, type='p', log=logT,
-      xlab=expression (paste('diameter [',mu,'m]', sep='')),
-      ylab=yl, col='white', cex.lab=2, cex.axis=1.4)
-  }
-  ttl <- sprintf ("Time=%s--%s ", strftime (Data$Time[1], format="%H:%M:%S", tz='UTC'), 
-    strftime (Data$Time[nrow(Data)], format="%H:%M:%S", tz='UTC'))
-  legend.names <- vector()
-  legend.colors <- vector()
-  if ('UHSAS' %in% input$probe && (length (nm3) > 0)) {
-    points (CellLimitsU, c(1.e-6, UHSAS), type='S', 
-      col='darkgreen', lwd=2)
-    legend.names <- c(legend.names, 'UHSAS')
-    legend.colors <- c(legend.colors, 'darkgreen')
-    if (!is.na(UHSAStot)) {
-      ttl <- paste0 (ttl, sprintf(" CONCU=%.2f", UHSAStot))
+    ## now have size distributions; construct plots
+    dmin <- 1e10
+    dmax <- 0
+    cmin=1e10
+    cmax=0
+    if ('CDP' %in% input$probe && (length(nm1) > 0)) {
+      dmin <- min (c(dmin, CellLimitsD[1]), na.rm=TRUE)
+      dmax <- max (c(dmax, CellLimitsD[length(CellLimitsD)]), na.rm=TRUE)
+      cmin <- min (c(cmin, CDP), na.rm=TRUE)
+      cmax <- max (c(cmax, CDP), na.rm=TRUE)
     }
-  }
-  if (('PCASP' %in% input$probe) && (length (nm5) > 0) && (!is.na(PCASPtot))) {
-    points (CellLimitsP, c(1.e-6, PCASP), type='S', 
-      col='darkorange', lwd=2)
-    legend.names <- c(legend.names, 'PCASP')
-    legend.colors <- c(legend.colors, 'darkorange')
-    if (!is.na(PCASPtot)) {
-      ttl <- paste0 (ttl, sprintf(" CONCP=%.2f", PCASPtot))
+    if ('FSSP' %in% input$probe && (length(nm2) > 0)) {
+      dmin <- min (c(dmin, CellLimitsF[1]), na.rm=TRUE)
+      dmax <- max (c(dmax, CellLimitsF[length(CellLimitsF)]), na.rm=TRUE)
+      cmin <- min (c(cmin, FSSP), na.rm=TRUE)
+      cmax <- max (c(cmax, FSSP), na.rm=TRUE)
     }
-  }
-  if ('CDP' %in% input$probe && (length (nm1) > 0)) {
-    points (CellLimitsD, c(1.e-6, CDP), type='S', 
-      col='blue', lwd=2)
-    legend.names <- c(legend.names, 'CDP')
-    legend.colors <- c(legend.colors, 'blue')
-    if (!is.na(CDPtot)) {
-      ttl <- paste0 (ttl, sprintf(" CONCD=%.2f", CDPtot))
+    if ('UHSAS' %in% input$probe && (length(nm3) > 0)) {
+      dmin <- min (c(dmin, CellLimitsU[1]), na.rm=TRUE)
+      dmax <- max (c(dmax, CellLimitsU[length(CellLimitsU)]), na.rm=TRUE)
+      cmin <- min (c(cmin, UHSAS), na.rm=TRUE)
+      cmax <- max (c(cmax, UHSAS), na.rm=TRUE)
     }
-  }
-  if ('FSSP' %in% input$probe && (length (nm2) > 0)) {
-    points (CellLimitsF, c(1.e-6, FSSP), type='S', 
-      col='violet', lwd=2)
-    legend.names <- c(legend.names, 'FSSP')
-    legend.colors <- c(legend.colors, 'violet')
-    if (!is.na(FSSPtot)) {
-      ttl <- paste0 (ttl, sprintf(" CONCF=%.2f", FSSPtot))
+    if ('2DC' %in% input$probe && (length(nm4) > 0)) {
+      dmin <- min (c(dmin, CellLimits2[1]), na.rm=TRUE)
+      dmax <- max (c(dmax, CellLimits2[length(CellLimits2)]), na.rm=TRUE)
+      cmin <- min (c(cmin, TWOD), na.rm=TRUE)
+      cmax <- max (c(cmax, TWOD), na.rm=TRUE)
     }
-  }
-  if ('2DC' %in% input$probe && (length (nm4) > 0)) {
-    points (CellLimits2, c(1.e-9, TWOD), type='S', 
-      col='red', lwd=2)
-    legend.names <- c(legend.names, '2DC')
-    legend.colors <- c(legend.colors, 'red')
-    if (!is.na(TWODtot)) {
-      ttl <- paste0 (ttl, sprintf(" CONC1DC=%.4f", TWODtot))
+    if ('PCASP' %in% input$probe && (length(nm5) > 0)) {
+      dmin <- min (c(dmin, CellLimitsP[1]), na.rm=TRUE)
+      dmax <- max (c(dmax, CellLimitsP[length(CellLimitsP)]), na.rm=TRUE)
+      cmin <- min (c(cmin, PCASP), na.rm=TRUE)
+      cmax <- max (c(cmax, PCASP), na.rm=TRUE)
     }
-  }
-  
-  if (length (input$probe) > 0) {
-    title (ttl)
-    print(c('title', ttl))
-    print (legend.names)
-    print (legend.colors)
-    legend ("topright", legend=legend.names, col=legend.colors,
-      lwd=c(2,1), cex=0.75)
-  }
-}, width=800, height=640)
+    if (length (input$probe) > 0) {
+      xp <- c(dmin, dmax)
+      yp <- c(cmin, cmax)
+      logT <- ''
+      if (grepl ('log-x', input$sdtype)) {logT <- paste (logT, 'x', sep='')}
+      if (grepl ('log-y', input$sdtype)) {logT <- paste (logT, 'y', sep='')}
+      if (grepl ('both log', input$sdtype)) {logT <- 'xy'}
+      ## this call just sets appropriate axes:
+      yl <- expression (paste("concentration [cm"^"-3", mu, 'm'^'-1', ']'), sep='')
+      plot (xp, yp, type='p', log=logT,
+        xlab=expression (paste('diameter [',mu,'m]', sep='')),
+        ylab=yl, col='white', cex.lab=2, cex.axis=1.4)
+    }
+    ttl <- sprintf ("Time=%s--%s ", strftime (Data$Time[1], format="%H:%M:%S", tz='UTC'), 
+      strftime (Data$Time[nrow(Data)], format="%H:%M:%S", tz='UTC'))
+    legend.names <- vector()
+    legend.colors <- vector()
+    if ('UHSAS' %in% input$probe && (length (nm3) > 0)) {
+      points (CellLimitsU, c(1.e-6, UHSAS), type='S', 
+        col='darkgreen', lwd=2)
+      legend.names <- c(legend.names, 'UHSAS')
+      legend.colors <- c(legend.colors, 'darkgreen')
+      if (!is.na(UHSAStot)) {
+        ttl <- paste0 (ttl, sprintf(" CONCU=%.2f", UHSAStot))
+      }
+    }
+    if (('PCASP' %in% input$probe) && (length (nm5) > 0) && (!is.na(PCASPtot))) {
+      points (CellLimitsP, c(1.e-6, PCASP), type='S', 
+        col='darkorange', lwd=2)
+      legend.names <- c(legend.names, 'PCASP')
+      legend.colors <- c(legend.colors, 'darkorange')
+      if (!is.na(PCASPtot)) {
+        ttl <- paste0 (ttl, sprintf(" CONCP=%.2f", PCASPtot))
+      }
+    }
+    if ('CDP' %in% input$probe && (length (nm1) > 0)) {
+      points (CellLimitsD, c(1.e-6, CDP), type='S', 
+        col='blue', lwd=2)
+      legend.names <- c(legend.names, 'CDP')
+      legend.colors <- c(legend.colors, 'blue')
+      if (!is.na(CDPtot)) {
+        ttl <- paste0 (ttl, sprintf(" CONCD=%.2f", CDPtot))
+      }
+    }
+    if ('FSSP' %in% input$probe && (length (nm2) > 0)) {
+      points (CellLimitsF, c(1.e-6, FSSP), type='S', 
+        col='violet', lwd=2)
+      legend.names <- c(legend.names, 'FSSP')
+      legend.colors <- c(legend.colors, 'violet')
+      if (!is.na(FSSPtot)) {
+        ttl <- paste0 (ttl, sprintf(" CONCF=%.2f", FSSPtot))
+      }
+    }
+    if ('2DC' %in% input$probe && (length (nm4) > 0)) {
+      points (CellLimits2, c(1.e-9, TWOD), type='S', 
+        col='red', lwd=2)
+      legend.names <- c(legend.names, '2DC')
+      legend.colors <- c(legend.colors, 'red')
+      if (!is.na(TWODtot)) {
+        ttl <- paste0 (ttl, sprintf(" CONC1DC=%.4f", TWODtot))
+      }
+    }
+    
+    if (length (input$probe) > 0) {
+      title (ttl)
+      print(c('title', ttl))
+      print (legend.names)
+      print (legend.colors)
+      legend ("topright", legend=legend.names, col=legend.colors,
+        lwd=c(2,1), cex=0.75)
+    }
+  }, width=800, height=640)
   
   output$varplot <- renderImage ({  ## varplot
     reac$newvarp
+    input$suffixFlight
+    input$TypeFlight
     Project <- plotSpec$Project
     print (sprintf ('spectype is %s', input$spectype))
     # spec <- plotSpec$Var[[input$plot]]
@@ -2744,10 +2775,10 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print (sprintf ('varplot: newvarp is %d', reac$newvarp))
       print (sprintf ('varplot: global plotSpec$Times are %s %s',
-                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
+        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
-    Data <- data()
-    if (nrow (Data) <= 1) {
+    Data <- data()    ## also sets global FI
+    if (length(Data) < 1 || nrow (Data) <= 1) {
       plot (0,0, xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE, ann=FALSE)
       text (0.5, 0.8, sprintf ('loading requested data file (%s)', fname))
       # reac$newvarp <- reac$newvarp + 1 
@@ -2755,10 +2786,12 @@ shinyServer(function(input, output, session) {
       if (Trace) {print ('varplot: exiting for new data')}
       return()
     }
-   
+    
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
+    print (sprintf ('before time limits, nrow(DataR)=%d', nrow(Data)))
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
+    print (sprintf ('nrow(DataR)=%d, start %s end %s', nrow(DataR), getStartEnd(DataR)[1], getStartEnd(DataR)[2]))
     DataR <- transferAttributes (DataR, Data)
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Variance[[input$plot]]$restrict)
@@ -2768,30 +2801,37 @@ shinyServer(function(input, output, session) {
     isolate (
       if (plotSpec$TypeFlight == 'F') {
         FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
-                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                       format="%H:%M:%S", tz='UTC'))        
+          plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))  
+      } else if (plotSpec$TypeFlight == 'HRT') {
+        print (sprintf ('Project %s flight %02d', Project, plotSpec$Flight))
+        FigFooter <<- sprintf("%s rf%02dHRT %s %s-%s UTC,", Project, plotSpec$Flight,
+          strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       } else {
         FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                            plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                            strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                            strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                     format="%H:%M:%S", tz='UTC'))
+          plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
         mtext(paste(FigFooter,'generated by Ranadu plot ', input$plot,
-                    FigDatestr),1,outer=T,cex=0.75)
+          FigDatestr),1,outer=T,cex=0.75)
       )
     }
     fnew <- "./R-toXanadu.nc"
-    unlink(fnew)
+    # unlink(fnew)
     DataR <<- DataR
-    Z <- makeNetCDF (DataR, fnew)
-    if (Trace) {print ('varplot:return from makeNetCDF:');print(Z)}
+    # Z <- makeNetCDF (DataR, fnew)
+    # if (Trace) {print ('varplot:return from makeNetCDF:');print(Z)}
     ## don't know why this is needed, but makeNetCDF modifies DataR;
     ## need to fix that routine
     # DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
@@ -2802,10 +2842,10 @@ shinyServer(function(input, output, session) {
     te <- formatTime(plotSpec$Times[2])
     ts <- as.integer(gsub (':', '', ts))
     te <- as.integer (gsub (':', '', te))
-    if (input$spectype == 'MEM') {
+    if (input$spectype == 'MEM' && exists('MEMPlot.png')) {
       unlink ("MEMPlot.png")
     }
-    if (input$spectype == 'fft') {
+    if (input$spectype == 'fft' && exists ('FFTPlot.png')) {
       unlink ("FFTPlot.png")
     }
     if (input$spectype == 'acv') {
@@ -2843,21 +2883,21 @@ shinyServer(function(input, output, session) {
         dev.off ()
       } else if (input$acvtype == 'crosscorrelation') {
         ccfp <- ccf (vdt, cvdt, lag.max=lagMax, na.action=na.pass, 
-                     plot=FALSE)
+          plot=FALSE)
         gname <- 'SpecialGraphics/ACVPlot.png'
         png (gname)
         plot (ccfp, type='l', lwd=1.5, col='blue', xlab='lag [s]', 
-              ylab=sprintf ('ccf for %s x %s', v, cv),
-              main=sprintf ('zero-lag correlation is %.2f', 
-                            cor (vdt, cvdt, use='pairwise.complete')))
+          ylab=sprintf ('ccf for %s x %s', v, cv),
+          main=sprintf ('zero-lag correlation is %.2f', 
+            cor (vdt, cvdt, use='pairwise.complete')))
         dev.off ()
       } else {  ## this calculation is needed for autocor or spectra
         variance1 <- var (vdt, na.rm=TRUE)
         variance2 <- var (cvdt, na.rm=TRUE)
         acfp <- acf (vdt, lag.max=lagMax, na.action=na.pass, 
-                     plot=FALSE)        
+          plot=FALSE)        
         acfpc <- acf (cvdt, lag.max=lagMax, na.action=na.pass, 
-                      plot=FALSE)
+          plot=FALSE)
         ## smoothed version
         acfps <- acfp$acf
         acfpcs <- acfpc$acf
@@ -2875,16 +2915,16 @@ shinyServer(function(input, output, session) {
           layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
           op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
           plot (acfp, type='l', lwd=1.5, col='blue', xlab='lag [s]', 
-                ylab=sprintf('%s acf', plotSpec$Variance[[1]]$Definition$var))
+            ylab=sprintf('%s acf', plotSpec$Variance[[1]]$Definition$var))
           points (acfps, type='l', col='darkgreen', lty=2)
           legend ('topright', legend=c('ACF', 'smoothed'), col=c('blue', 'darkgreen'),
-                  lwd=c(1.5,1), lty=c(1,2))
+            lwd=c(1.5,1), lty=c(1,2))
           op <- par (mar=c(5,4,1,2)+0.1)
           plot (acfpc, type='l', lwd=1.5, col='blue', xlab='lag [s]', 
-                ylab=sprintf ('%s acf', plotSpec$Variance[[1]]$Definition$cvar))
+            ylab=sprintf ('%s acf', plotSpec$Variance[[1]]$Definition$cvar))
           points (acfpcs, type='l', col='darkgreen', lty=2)
           legend ('topright', legend=c('ACF', 'smoothed'), col=c('blue', 'darkgreen'),
-                  lwd=c(1.5,1), lty=c(1,2))
+            lwd=c(1.5,1), lty=c(1,2))
           dev.off ()
         } else {
           mx <- length(acfps)
@@ -2955,118 +2995,739 @@ shinyServer(function(input, output, session) {
         }
       }
     } else {  ## end of acv section; others need Xanadu routine 'otto'
+      Theme <- input$varTheme
+      Rate <- FI$Rate
       isolate (plt <- input$plot)
       v <- plotSpec$Variance[[plt]]$Definition$var
       cv <- plotSpec$Variance[[plt]]$Definition$cvar
-      setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype, isolate(input$MEMadd), isolate(input$MEMcolor))
-      XanaduOut <<- system ("~/bin/Xanadu otto", intern=TRUE)
+
+      setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype, isolate(input$MEMadd), 
+        isolate(input$MEMcolor))
+      # if (input$varXanadu) {
+      #   if (Trace) {print ('calling Xanadu otto')}
+      #   XanaduOut <<- system2 ("Xanadu", args="otto", stdout=TRUE)
+      #   if (length (XanaduOut) < 1) {return()}
+      # }
       if (input$spectype == 'MEM') {
-        while (!file.exists ("MEMPlot.png")) {Sys.sleep (1)}
-        gname <- "SpecialGraphics/PSDMEM.png"
-        file.rename ("MEMPlot.png", gname)
+        # if (input$varXanadu) {
+        if (0) {
+          while (!file.exists ("MEMPlot.png")) {Sys.sleep (1)}  ## used to wait for Xanadu version
+          gname <- "SpecialGraphics/PSDMEM.png"
+          file.rename ("MEMPlot.png", gname)
+          return(list(
+            src = gname,
+            contentType = "image/png",
+            alt = "PSD"
+          ))
+        } else {
+          gname <- "SpecialGraphics/PSDMEM2.png"
+          ## here is the generation of the plot using the new Ranadu functions memCoef/memEstimate
+          Vr <- detrend (DataR[, c('Time', v)])
+          VrC <- detrend (DataR[, c('Time', cv)])
+          poles <- input$MEMpoles
+          A <- memCoef (Vr, poles)
+          AC <- memCoef (VrC, poles)
+          ld <- nrow (DataR)
+          fmin <- log (Rate / ld)
+          fmax <- log (0.5*Rate)
+          resolution <- input$MEMres
+          df <- (fmax - fmin) * resolution
+          bins <- as.integer (1/resolution)
+          avebin <- input$MEMavg
+          df <- (fmax-fmin)/bins
+          fdtl <- fmin + df * (0:bins)  ## natural logarithms of evaluation pts
+          ## prepare for smoothing
+          fdt <- exp (fdtl)
+          psComplex <- memEstimate(fdt / Rate, A) / Rate
+          pscComplex <- memEstimate(fdt / Rate, AC) / Rate
+          psComplex <<- psComplex
+          pscComplex <<- pscComplex
+          ps <- 2 * Rate *Mod (psComplex)^2 ## equivalent to 2 * sqrt (Re (psComplex * Conj (psComplex)))
+          nups <- fdt * ps
+          pscov <- 2 * Rate * Mod (pscComplex)^2
+          Vps <- psComplex * Conj (pscComplex)
+          edf <- c(0, diff(fdt))
+          variance <- sum (ps * edf)
+          if (input$MEMtype == 'fp(f)') {
+          } else if (grepl ('co-var', input$MEMtype, fixed=TRUE)) {
+            nups <- fdt * pscov
+          } else if (input$MEMtype == 'p(f)') {
+            nups <- ps
+          } else if (grepl ('cosp', input$MEMtype)) {
+            nups <- 2 * Rate * Re (Vps) * fdt
+            nupsi <- 2 * Rate * Im (Vps) * fdt
+          } else if (grepl ('coh', input$MEMtype)) {
+            ## will use Vps, ps, psc below
+          } else {
+            nups <- fdt * ps
+            nupsc <- fdt * pscov
+          }
+          lp <- length (fdt)
+          flow <- (as.integer(log10 (fdt[1])) - 1)
+          fhigh <- (as.integer(log10 (fdt[lp]) + 1))
+          nfSpec <- fhigh - flow
+          flow <- 10^flow; fhigh <- 10^fhigh
+          plow <- (as.integer(log10 (min(nups, na.rm=TRUE)) - 1))
+          phigh <- (as.integer(log10 (max(nups, na.rm=TRUE)) + 1))
+          npSpec <- phigh - plow 
+          # while (phigh - plow < 3) {plow <- plow - 1}
+          # while (phigh - plow < 4) {phigh <- phigh + 1}
+          phigh <- 10^phigh; plow <- 10^plow
+          tasAverage <- mean (DataR$TASX, na.rm=TRUE)
+          print (sprintf ('f %e %e p %e %e fdt[lp] %e %.1f', flow, fhigh, plow, phigh, fdt[lp], tasAverage))
+          ## estimate eddy dissipation rate:
+          .r <- (fdt > 0.1) & (fdt < 8)
+          lr <- length (.r[.r])    ## number of TRUE values
+          ve <- ps[.r] * (fdt[.r])^(5/3)
+          eb <- sum (ve) / lr
+          eb2 <- sum (ve^2) / lr
+          eb2 <- sqrt (eb2 - eb^2) / sqrt(lr)
+          if (grepl('^UX', v) || grepl('TASX', v)) {
+            ae <- 0.15
+          } else {
+            ae <- 0.20
+          }
+          edr <- (eb / ae)^(1.5) / tasAverage
+          eb2 <- (eb2 / ae)^(1.5) / tasAverage
+          print (sprintf ('estimated eddy dissipation rate: %.2e +/- %.2e m^2/s^3', edr, eb2))
+          ## calculate a smoothed version of nups
+          range <- fmax-fmin
+          lineColor <- isolate(input$MEMcolor)
+          X <- binStats(data.frame(nups, fdtl), bins=avebin)
+          X <- rbind (X, data.frame(xc=fdtl[length(fdtl)], ybar=X$ybar[avebin], sigma=1, nb=1))
+          # X$xc[avebin] <- fdtl[length(fdtl)]  ## extend last bin to freq limit
+          X$xc <- exp(X$xc)
+          XMEM <<- X
+          if ('data' == input$MEMtype) {
+            png(filename=gname, width=600, height=600)
+            layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            plotWAC (data.frame(DataR$Time, DataR[, v]), ylab=v, col=lineColor)
+            op <- par (mar=c(5,4,1,2)+0.1)
+            plotWAC (data.frame(DataR$Time, DataR[, cv]), ylab=cv, col=lineColor)
+            dev.off()
+          } else if (grepl ('both', input$MEMtype)) {
+            png(filename=gname, width=600, height=600)
+            layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            df <- data.frame(nups, fdtl)
+            df2 <- data.frame(nupsc, fdtl)
+            pf <- binStats(df, bins=avebin)
+            pf <- pf[!is.na(pf$ybar),]
+            # print (str(pf))
+            pf2 <- binStats(df2, bins=avebin)
+            pf2 <- pf2[!is.na(pf2$ybar),]
+            if (input$MEMshowU) {
+              lclr <- 'red'
+            } else {
+              lclr <- NA
+            }
+            plotWAC (fdt, nups,  type='l', xlab='frequency', col=lclr, xlim=c(flow,fhigh), ylim=c(plow,phigh),
+              log='xy', ylab=sprintf ('%s:  fp(f)', v))
+            lines (exp(pf$xc), pf$ybar, col=lineColor, lwd=2)
+            op <- par (mar=c(5,4,1,2)+0.1)
+            if (max(nupsc, na.rm=TRUE) > phigh) {
+              phigh <- 10^(ceiling(max(log10(nupsc), na.rm=TRUE)))
+            }
+            if (min(nupsc, na.rm=TRUE) < plow) {
+              plow <- 10^(floor(min(log10(nupsc), na.rm=TRUE)))
+            }
+            plotWAC (fdt, nupsc, type='l', xlab='frequency', col=lclr, xlim=c(flow,fhigh), ylim=c(plow,phigh),
+              log='xy', ylab=sprintf ('%s:  fp(f)', cv))
+            lines (exp(pf2$xc), pf2$ybar, col=lineColor, lwd=2)
+            dev.off()
+          }
+        }
+        if (grepl ('cosp', input$MEMtype)) {
+          png(filename=gname, width=600, height=600)
+          layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+          op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+          df <- data.frame(nups, fdtl)
+          df2 <- data.frame(nupsi, fdtl)
+          pf <- binStats(df, bins=avebin)
+          # print (str(pf))
+          pf2 <- binStats(df2, bins=avebin)
+          plotWAC (fdt, nups,  type='l', xlab='frequency', col='red', xlim=c(flow,fhigh), 
+            logxy='x', ylab=sprintf ('%s x %s cospectrum:  fp(f)', v, cv))
+          pf <- pf[!is.na(pf$ybar),]
+          lines (exp(pf$xc), pf$ybar, col=lineColor, lwd=2)
+          op <- par (mar=c(5,4,1,2)+0.1)
+          plotWAC (fdt, nupsi, type='l', xlab='frequency', col='red', xlim=c(flow,fhigh), 
+            logxy='x', ylab=sprintf ('%s x %s quadrature:  fp(f)', v, cv))
+          pf2 <- pf2[!is.na(pf2$ybar),]
+          lines (exp(pf2$xc), pf2$ybar, col=lineColor, lwd=2)
+          dev.off()
+        } 
+        if (grepl ('coh', input$MEMtype)) {
+          png(filename=gname, width=600, height=600)
+          layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+          op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+          ## must use only averaged values
+          df <- data.frame(ps, fdtl)
+          df2 <- data.frame(pscov, fdtl)
+          df3 <- data.frame (Re(Vps), fdtl)
+          df4 <- data.frame (Im(Vps), fdtl)
+          pf1 <- binStats(df, bins=avebin)
+          pf1 <- pf1[!is.na(pf1$ybar),]
+          # print (str(pf))
+          pf2 <- binStats(df2, bins=avebin)
+          pf2 <- pf2[!is.na(pf2$ybar),]
+          pf3 <- binStats(df3, bins=avebin)
+          pf3 <- pf3[!is.na(pf3$ybar),]
+          pf3[pf3$nb < 4,] <- NA
+          pf4 <- binStats (df4, bins=avebin)
+          pf4 <- pf4[!is.na(pf4$ybar),]
+          coh <- 4 * (pf3$ybar^2 + pf4$ybar^2) / (Mod (pf1$ybar) * Mod (pf2$ybar))
+          plotWAC (exp(pf3$xc), coh,  type='l', xlab='frequency', col=lineColor, xlim=c(flow,fhigh), 
+            log='x', ylab=sprintf ('%s x %s coherence', v, cv))
+          # lines (exp(pf$xc), pf$ybar, col='blue', lwd=2)
+          op <- par (mar=c(5,4,1,2)+0.1)
+          ang <- complex (real=pf3$ybar, imaginary=pf4$ybar)
+          angl <- Arg (ang) * 180 / pi
+          plotWAC (exp(pf3$xc), angl, type='l', xlab='frequency', col=lineColor, xlim=c(flow,fhigh), 
+            log='x', ylab=sprintf ('%s x %s phase [degrees]', v, cv))
+          # lines (exp(pf2$xc), pf2$ybar, col='blue', lwd=2)
+          dev.off()
+        } 
+        if (grepl ('p(f)', input$MEMtype, fixed=TRUE)) {
+          
+          if (isolate (input$MEMadd)) {
+            vMEM <- vMEM
+            cMEM <- cMEM
+          } else {
+            vMEM <- vector('character')
+            cMEM <- vector('character')
+            if (exists ('v2MEM', where='.GlobalEnv')) {rm('v2MEM', pos='.GlobalEnv')}
+          }
+          
+          unsmoothedColor <- 'red'
+          xvm <- ifelse(grepl('co-var', input$MEMtype, fixed=TRUE), x <- cv, x <- v)
+          if (input$MEMshowU) {
+            vMEM <- c(vMEM, xvm, sprintf ('unsmoothed %s', xvm))
+            cMEM <- c(cMEM, lineColor, unsmoothedColor) 
+          } else {
+            vMEM <- c(vMEM, xvm)
+            cMEM <- c(cMEM, lineColor)
+          }
+          if (grepl ('p(f)', input$MEMtype, fixed=TRUE) || grepl ('co-var', input$MEMtype, fixed=TRUE)) {
+            if (isolate(input$MEMadd) && exists ('gMEM')) {
+              dd <- reshape2::melt(X, id="xc", measure="ybar")
+              i <-  2
+              while (exists (vnMEM <- sprintf('v%dMEM', i), '.GlobalEnv')) {i <- i + 1}
+              assign(vnMEM, v, '.GlobalEnv')
+              if (i == 2) {
+                g <- gMEM + geom_path (data=dd, aes(x=xc, y=value, colour=v2MEM), lwd=1.2) #+
+              } else if (i == 3) {
+                g <- gMEM + geom_path (data=dd, aes(x=xc, y=value, colour=v3MEM), lwd=1.2)
+              } else if (i == 4) {
+                g <- gMEM + geom_path (data=dd, aes(x=xc, y=value, colour=v4MEM), lwd=1.2)
+              }
+              # guides(colour=FALSE)
+              gSAVE <<- g
+              names(cMEM) <- vMEM
+              g <- g + scale_colour_manual (name='', values=cMEM) 
+            } else {
+              g <- ggplot (data=data.frame(fdt, nups), aes(x=fdt, y=nups))
+              if (input$MEMshowU) {
+                cUS <- sprintf('unsmoothed %s', xvm)
+                g <- g + geom_path (aes_(colour=cUS), lwd=0.5)
+              }
+              g <- g + geom_path (data=X, aes_(x=quote(xc), y=quote(ybar), colour=xvm), lwd=1.2)
+              if (grepl ('p(f)', input$MEMtype, fixed=TRUE) || grepl ('co-var', input$MEMtype, fixed=TRUE)) {
+                epsColor <- 'darkgreen'
+                for (i in (-8):2) {
+                  if (input$MEMtype == 'fp(f)' || grepl ('co-var', input$MEMtype, fixed=TRUE)) {
+                    yl <- ae * (10^i * tasAverage / flow)^(2/3)
+                    yh <- ae * (10^i * tasAverage / fhigh)^(2/3)
+                  } else if (input$MEMtype == 'p(f)') {
+                    yl <- ae * (10^i * tasAverage / flow)^(2/3) / flow
+                    yh <- ae * (10^i * tasAverage / fhigh)^(2/3) / fhigh
+                  }
+                  if (i == -4) {
+                    g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.6, lty=1)
+                  } else {
+                    g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.3, lty=2)
+                  }
+                }
+              }
+              g <- g + coord_cartesian (xlim=c(flow,fhigh), ylim=c(plow,phigh)) +
+                scale_x_continuous(trans='log10', breaks = trans_breaks(trans="log10", n=nfSpec, function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x)), 
+                  sec.axis=sec_axis(~log10(.^(-1)*tasAverage*0.001), name='wavelength [km]', 
+                    breaks=c(1,2,3), labels=c(' 10 ', ' 100 ', ''))) +
+                scale_y_log10(breaks = trans_breaks(trans="log10", n=npSpec, function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+                annotation_logticks() +
+                xlab('frequency [Hz]')
+              if (input$MEMtype == 'fp(f)') {
+                g <- g + ylab (bquote(paste(.(v), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
+              } else if (input$MEMtype == 'p(f)') {
+                g <- g + ylab (bquote(paste(.(v), ': ', 'P(',nu,')', sep='')))
+              } else if (grepl ('co-var', input$MEMtype)) {
+                g <- g + ylab (bquote(paste(.(cv), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
+              }
+              gSAVE <<- g
+              names(cMEM) <- vMEM
+              g <- g + scale_colour_manual (name='', values=cMEM) 
+              
+              Theme <- input$varTheme
+              if (Theme == 'classic') {g <- g + theme_classic()}
+              if (Theme == 'bw')      {g <- g + theme_bw()}
+              if (Theme == 'base')    {g <- g + theme_base()}
+              if (Theme == 'excel')   {g <- g + theme_excel()}
+              if (Theme == 'few')     {g <- g + theme_few()}
+              if (Theme == 'foundation') {g <- g + theme_foundation()}
+              if (Theme == 'igray')   {g <- g + theme_igray()}
+              if (Theme == 'light')   {g <- g + theme_light()}
+              if (Theme == 'linedraw') {g <- g + theme_linedraw()}
+              if (Theme == 'tufte')   {g <- g + theme_tufte()}
+              if (Theme == 'standard') {}  ## this gives the standard ggplot2 theme
+              if (grepl('WAC', Theme))     {
+                g <- g + theme_WAC() + theme (axis.title.x.top=element_text(size=10, hjust=0.5, vjust=3), 
+                  axis.text.x.top=element_text(size=10, hjust=0.02, vjust=1), legend.position=c(0.6,0.94))
+                if (Theme == 'WAC2') {
+                  g <- g + theme(rect=element_rect(fill='bisque'))
+                }
+              } else {
+                g <- g + theme (axis.title.x.top=element_text(size=10, hjust=0.5), 
+                  axis.text.x.top=element_text(size=10, hjust=0.5, vjust=1))
+              }
+              if (input$MEMcaption) {
+                SE <- getStartEnd (DataR$Time)
+                i <- getIndex (DataR$Time, SE[1])
+                cap <- sprintf ('%s %s--%s MEM: %d poles, %d sm. bins, res=%.1e, var.=%.1e, edr=%.1e ', 
+                  strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+                  strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                  strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
+                  poles, avebin, resolution, variance, edr)
+                cap <- bquote(paste(.(cap), ' m'^'2','s'^'-3', sep=''))
+                g <- g + labs (caption=cap)
+                # g <- g + labs (caption=sprintf('MEM, %d poles, %d smoothing bins\nresolution %.1e, variance %.1e, edr %.1e m^2/s^3', poles, avebin, resolution, variance, edr))
+              }
+            }
+            gMEM <<- g  ## save for possible re-use
+            vMEM <<- vMEM
+            cMEM <<- cMEM
+            png(filename=gname, width=600, height=600)
+            print (g)
+            dev.off()
+          }
+        }
       }
       if (input$spectype == 'fft') {
-        if (input$ffttype == 'fp(f)' || input$ffttype == 'p(f)') {
-          while (!file.exists ("FFTPlot.png")) {Sys.sleep (1)}
-          gname <- "SpecialGraphics/PSDFFT.png"
-          file.rename ("FFTPlot.png", gname)
-        } else {  ## cospec / quad / coherence / phase
-          gname <- 'SpecialGraphics/FFTPlot.png'
-          png (gname, width=600, height=600)
-          writeOutput <- FALSE
-          cospecOutput <- vector ('character')
-          fps <- vector ('numeric')
-          fpsc <- vector ('numeric')
-          p <- vector ('numeric')
-          q <- vector ('numeric')
-          coh <- vector ('numeric')
-          for (line in XanaduOut) {
-            if (grepl ('end of cospec', line)) {writeOutput <- FALSE}
-            line <- sub('^ ', '', line)
-            if (writeOutput) {
-              cospecOutput <- c(cospecOutput, line)
-              a <- as.numeric (as.vector (strsplit(line, split=' ')[[1]]))
-              # i <- as.integer(a[1])
-              fps <- c(fps, a[2])
-              fpsc <- c(fpsc, a[3])
-              p <- c(p, a[4])
-              q <- c(q, a[5])
-              coh <- c(coh, a[6])
+        # if (input$varXanadu) {
+        if (0) {    ## used to save this code, altho suppressed in std version
+          if ((input$ffttype == 'fp(f)' || input$ffttype == 'p(f)')) {
+            while (!file.exists ("FFTPlot.png")) {Sys.sleep (1)}
+            gname <- "SpecialGraphics/PSDFFT.png"
+            file.rename ("FFTPlot.png", gname)
+          } else {  ## cospec / quad / coherence / phase
+            gname <- 'SpecialGraphics/FFTPlot.png'
+            png (gname, width=600, height=600)
+            writeOutput <- FALSE
+            cospecOutput <- vector ('character')
+            fps <- vector ('numeric')
+            fpsc <- vector ('numeric')
+            p <- vector ('numeric')
+            q <- vector ('numeric')
+            coh <- vector ('numeric')
+            for (line in XanaduOut) {
+              if (grepl ('end of cospec', line)) {writeOutput <- FALSE}
+              line <- sub('^ ', '', line)
+              if (writeOutput) {
+                cospecOutput <- c(cospecOutput, line)
+                a <- as.numeric (as.vector (strsplit(line, split=' ')[[1]]))
+                # i <- as.integer(a[1])
+                fps <- c(fps, a[2])
+                fpsc <- c(fpsc, a[3])
+                p <- c(p, a[4])
+                q <- c(q, a[5])
+                coh <- c(coh, a[6])
+                
+              }
+              if (grepl ('start of cospec', line)) {writeOutput <- TRUE}
+            }  ## end of lines in XanaduOut
+            segl <- plotSpec$Variance[[1]]$Definition$fftpts
+            freq <- (1:(segl/2))/segl
+            layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+            nbins <- plotSpec$Variance[[1]]$Definition$fftavg
+            if (grepl('both', input$ffttype)) {
+              op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+              df <- data.frame(fxf=segl*freq*fps, V2=log10(freq))
+              df2 <- data.frame(fxf=segl*freq*fpsc, V2=log10(freq))
+              pf <- binStats(df, bins=nbins)
+              pf2 <- binStats(df2, bins=nbins)
+              plotWAC (freq, segl*freq*fps,  type='l', xlab='frequency', col='blue', 
+                log='xy', ylab=sprintf ('%s:  fp(f)', v))
+              pf <- pf[!is.na(pf$ybar),]
+              lines (10^pf$xc, pf$ybar, col='red', lwd=2)
+              op <- par (mar=c(5,4,1,2)+0.1)
+              plotWAC (freq, segl*freq*fpsc, type='l', xlab='frequency', col='blue', 
+                log='xy', ylab=sprintf ('%s:  fp(f)', cv))
+              pf2 <- pf2[!is.na(pf2$ybar),]
+              lines (10^pf2$xc, pf2$ybar, col='red', lwd=2)
+            } else if (grepl ('data', input$ffttype)) {
+              op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+              plotWAC (DataR[, c('Time', v)])
+              op <- par (mar=c(5,4,1,2)+0.1)
+              plotWAC (DataR[, c('Time', cv)])
+            } else {
+              df <- data.frame(fxpf=segl*freq*p, V2=log10(freq))
+              df2 <- data.frame(fxqf=segl*freq*q, V2=log10(freq))
+              pf <- binStats(df, bins=nbins)
+              pf2 <- binStats(df2, bins=nbins)
+              df$fxqf <- df2$fxqf
+              df$freq <- freq
+            }
+            if (grepl('cosp', input$ffttype)) {
+              op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+              plotWAC (df[, c('freq', 'fxpf')], type='l', xlab='frequency', col='blue', 
+                log='x', ylab=sprintf ('%s x %s:  f x cospectrum', v, cv))
+              pf <- pf[!is.na(pf$ybar),]
+              lines (10^pf$xc, pf$ybar, col='red', lwd=2)
+              abline(h=0, lty=3, lwd=0.7)
+              legend('topright', legend=c('f C[f]', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
+              op <- par (mar=c(5,4,1,2)+0.1)
+              plotWAC (df[, c('freq', 'fxqf')], type='l', xlab='frequency', col='blue', 
+                log='x', ylab=sprintf ('%s x %s:  f x quadrature', v, cv))
+              pf2 <- pf2[!is.na(pf2$ybar),]
+              lines (10^pf2$xc, pf2$ybar, col='red', lwd=2)
+              abline(h=0, lty=3, lwd=0.7)
+              legend('topright', legend=c('f Q[f]', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
+            } 
+            if (grepl('coher', input$ffttype)) {
+              op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+              plotWAC(freq, coh, log='x', xlab='frequency', col='blue', 
+                ylab='coherence', ylim=c(0,1))
+              df <- data.frame(coh=coh, V2=log10(freq))
+              pf3 <- binStats(df, bins=nbins)
+              pf3 <- pf3[!is.na (pf3$ybar), ]
+              lines (10^pf3$xc, pf3$ybar, col='red', lwd=2)
+              legend('topleft', legend=c('coherence', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
+              phase <- atan2 (q, p) * 180/pi
+              phase[phase > 180] <- phase[phase > 180] - 360
+              phase[phase < -180] <- phase[phase < -180] + 360
+              ## proper averaging of the phase must account for wrap-around
+              ## better: average q and p, then find phase; already have these from above
+              op <- par (mar=c(5,4,1,2)+0.1)
+              plotWAC (freq, phase, xlab='frequency', type='l', col='blue', 
+                log='x', ylab='phase [deg.]', ylim=c(-180,180))
+              avgphase <- atan2 (pf2$ybar, pf$ybar) * 180/pi
+              lines (10^pf2$xc, avgphase, col='red', lwd=2)
+              abline(h=0, lty=3, lwd=0.7)
+              legend('topleft', legend=c('phase', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
+            }
+            dev.off ()
+          }
+        } else {  ## this does not use Xanadu
+          gname <- 'SpecialGraphics/PSDFFT2.png'
+          Vr <- detrend (DataR[, c('Time', v)])
+          VrC <- detrend (DataR[, c('Time', cv)])
+          avebin <- input$fftavg
+          segmentLength <- input$fftpts * Rate
+          ld <- nrow (DataR)
+          fmin <- log (1 / segmentLength)
+          fmax <- log (0.5*Rate)
+          S <- bspec::welchPSD (ts(Vr), seglength=segmentLength, windowfun=bspec::tukeywindow)
+          Sc <- bspec::welchPSD (ts(VrC), seglength=segmentLength, windowfun=bspec::tukeywindow)
+          fdt <- S$frequency[-1] * Rate    ## remove first component (zero)
+          segUsed <- S$segments     ## overlapping segments used
+          print (sprintf ('data length %d seg L %d segUsed %d', ld, segmentLength, segUsed))
+          lp <- length (fdt)
+          flow <- floor(min(log10 (fdt[1]), na.rm=TRUE))
+          fhigh <- ceiling(max(log10 (fdt[lp]), na.rm=TRUE))
+          nfSpec <- fhigh - flow
+          # while (nfSpec < 4) {
+          #   flow <- flow - 1
+          #   nfSpec <- fhigh - flow
+          # }
+          flow <- 10^flow; fhigh <- 10^fhigh
+          ps <- S$power[-1] / Rate
+          psc <- Sc$power[-1] / Rate
+          nups <- fdt * ps
+          nupsc <- fdt * psc
+          if (input$ffttype == 'fp(f)') {
+          } else if (grepl ('co-var', input$ffttype, fixed=TRUE)) {
+            nups <- fdt * psc
+          } else if (input$ffttype == 'p(f)') {
+            nups <- ps
+            # } else if (grepl ('cosp', input$ffttype)) {
+            #   nups <- 2 * Rate * Re (Vps) * fdt
+            #   nupsi <- 2 * Rate * Im (Vps) * fdt
+            # } else if (grepl ('coh', input$ffttype)) {
+            #   ## will use Vps, ps, psc below
+          } else {
+            nups <- fdt * ps
+            nupsc <- fdt * psc
+          }
+          
+          plow <- floor(log10 (min(nups, na.rm=TRUE)))
+          phigh <- ceiling(log10 (max(nups, na.rm=TRUE)))
+          npSpec <- phigh - plow
+          # while (phigh - plow < 3) {plow <- plow - 1}
+          # while (phigh - plow < 4) {phigh <- phigh + 1}
+          phigh <- 10^phigh; plow <- 10^plow
+          tasAverage <- mean (DataR$TASX, na.rm=TRUE)
+          df <- S$frequency[1] * Rate
+          fdtl <- log(fdt)
+          edf <- c(0, diff(fdt))
+          variance <- sum (ps * edf)
+          .r <- (fdt > 0.1) & (fdt < 8)
+          lr <- length (.r[.r])    ## number of TRUE values
+          ve <- ps[.r] * (fdt[.r])^(5/3)
+          eb <- sum (ve) / lr
+          eb2 <- sum (ve^2) / lr
+          eb2 <- sqrt (eb2 - eb^2) / sqrt(lr)
+          if (grepl('^UX', v) || grepl('TASX', v)) {
+            ae <- 0.15
+          } else {
+            ae <- 0.20
+          }
+          edr <- (eb / ae)^(1.5) / tasAverage
+          eb2 <- (eb2 / ae)^(1.5) / tasAverage
+          print (sprintf ('estimated eddy dissipation rate: %.2e +/- %.2e m^2/s^3', edr, eb2))
+          lineColor <- isolate(input$FFTcolor) 
+          ## calculate a smoothed version of nups
+          ld <- length(fdt)
+          X <- binStats(data.frame(nups, fdtl), bins=avebin)
+          X <- rbind (X, data.frame(xc=fdtl[length(fdtl)], ybar=X$ybar[avebin], sigma=1, nb=1))
+          # X$xc[avebin] <- fdtl[length(fdtl)]  ## extend last bin to freq limit
+          X$xc <- exp(X$xc)
+          if ('data' == input$ffttype) {
+            png(filename=gname, width=600, height=600)
+            layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            plotWAC (data.frame(DataR$Time, DataR[, v]), ylab=v, col=lineColor)
+            op <- par (mar=c(5,4,1,2)+0.1)
+            plotWAC (data.frame(DataR$Time, DataR[, cv]), ylab=cv, col=lineColor)
+            dev.off()
+          } else if (grepl ('both', input$ffttype)) {
+            png(filename=gname, width=600, height=600)
+            layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            df <- data.frame(nups, fdtl)
+            df2 <- data.frame(nupsc, fdtl)
+            pf <- binStats(df, bins=avebin)
+            pf <- pf[!is.na(pf$ybar),]
+            # print (str(pf))
+            pf2 <- binStats(df2, bins=avebin)
+            pf2 <- pf2[!is.na(pf2$ybar),]
+            lclr <- ifelse (input$FFTshowU, 'red', NA)
+            plotWAC (fdt, nups,  type='l', xlab='frequency', col=lclr, xlim=c(flow,fhigh), ylim=c(plow,phigh),
+              log='xy', ylab=sprintf ('%s:  fp(f)', v))
+            lines (exp(pf$xc), pf$ybar, col=lineColor, lwd=2)
+            op <- par (mar=c(5,4,1,2)+0.1)
+            if (max(nupsc, na.rm=TRUE) > phigh) {
+              phigh <- 10^(ceiling(max(log10(nupsc), na.rm=TRUE)))
+            }
+            if (min(nupsc, na.rm=TRUE) < plow) {
+              plow <- 10^(floor(min(log10(nupsc), na.rm=TRUE)))
+            }
+            plotWAC (fdt, nupsc, type='l', xlab='frequency', col=lclr, xlim=c(flow,fhigh), ylim=c(plow,phigh),
+              log='xy', ylab=sprintf ('%s:  fp(f)', cv))
+            lines (exp(pf2$xc), pf2$ybar, col=lineColor, lwd=2)
+            dev.off()
+          } else if (grepl ('cosp', input$ffttype)) {
+            ## pad to power-of-2 points
+            VrPad <- Vr
+            VrCPad <- VrC
+            lenV <- length (Vr)
+            lenPad <- 2^(ceiling (log2(lenV)))
+            VrPad <- c(Vr, rep (0, lenPad-lenV))
+            VrCPad <- c(VrC, rep (0, lenPad-lenV))
+            VrComplex <- 2 * fft (VrPad) / lenPad
+            VrCComplex <- 2 * fft (VrCPad) / lenPad
+            fmin <- 1/lenPad
+            fmax <- 0.5
+            fdt <- seq (fmin, fmax, length.out=lenPad/2)
+            print (sprintf ('length(fdt)=%d', length(fdt)))
+            cs <- VrComplex * Conj (VrCComplex) * lenPad
+            csh <- cs[1:(lenPad/2)]
+            # lagMax <- min(3600, nrow (data ())-1)
+            # cs <- ccf (Vr, VrC, lag.max=lagMax, na.action=na.pass, plot=FALSE, type='covariance')
+            # ## smoothed version
+            # tau <- input$acvtau
+            # lacf <- min (length (acfps), tau)
+            # acfps[1:lacf] <- acfps[1:lacf]*(1-((0:(lacf-1))/tau))
+            # acfpcs[1:lacf] <- acfpcs[1:lacf]*(1-((0:(lacf-1))/tau))
+            # if (tau < length (acfp$acf)) {
+            #   acfps[(tau+1):length (acfps)] <- 0
+            #   acfpcs[(tau+1):length (acfps)] <- 0
+            # }
+            fdtl <- log(fdt)
+            df <- data.frame(fdt*Re(csh), fdtl)
+            df2 <- data.frame(fdt*Im(csh), fdtl)
+            pf <- binStats(df, bins=avebin)
+            pf <- pf[!is.na(pf$ybar),]
+            pf2 <- binStats(df2, bins=avebin)
+            pf2 <- pf2[!is.na(pf2$ybar),]
+            png(filename=gname, width=600, height=600)
+            layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            plotWAC (exp(pf$xc), pf$ybar, xlab='frequency [Hz]', ylab <- sprintf ('%s x %s Cospectrum fp(f)', v, cv), 
+              col=lineColor, log='x')
+            abline(h=0, col='gray', lty=3)
+            op <- par (mar=c(5,4,1,2)+0.1)
+            plotWAC (exp(pf2$xc), pf2$ybar, xlab='frequency [Hz]', ylab <- sprintf ('%s x %s Quadrature fp(f)', v, cv), 
+              col=lineColor, log='x')
+            abline(h=0, col='gray', lty=3)
+            
+            # ccfp <- ccf (Vr, VrC, lag.max=lagMax, na.action=na.pass, type='correlation', plot=FALSE)
+            # ccfp <<- ccfp
+            # ## smooth it
+            # lacf <- min (lagMax, input$acvtau)  ## consider replacing with fft-based input
+            # taper <- 1 - ((0:(lacf-1) / lacf))
+            # if (length (taper) < lagMax) {
+            #   taper <- c(taper, rep(0, lagMax-length(taper)))
+            # }
+            # taper <- c(rev(taper), 1, taper)
+            # ccfp$acf <- ccfp$acf * taper
+            # var1 <- var(Vr)
+            # var2 <- var(VrC)
+            dev.off()
+          } else if (grepl ('coh', input$ffttype)) {
+            png(filename=gname, width=600, height=600)
+            layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
+            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
+            ## must use only averaged values
+            vcv <- cbind(Vr, VrC)
+            P <- spec.pgram(vcv, detrend=FALSE, fast=TRUE, plot=FALSE, spans=c(5,7))
+            P <<- P
+            df <- data.frame(P$coh, log(P$freq))
+            df2 <- data.frame (P$phase, log(P$freq))
+            pf1 <- binStats (df, bins=avebin)
+            pf2 <- binStats (df2, bins=avebin)
+            pf1 <- pf1[!is.na (pf1$ybar), ]
+            pf2 <- pf2[!is.na (pf2$ybar), ]
+            plotWAC (exp(pf1$xc), pf1$ybar, xlab='frequency [Hz]', col=lineColor, log='x', 
+                     ylab=sprintf ('%s x %s coherence', v, cv))
+            op <- par (mar=c(5,4,1,2)+0.1)
+            plotWAC (exp(pf2$xc), pf2$ybar * 180 / pi, xlab='frequency [Hz]', col=lineColor, log='x',
+              ylab=sprintf ('%s x %s phase [degrees]', v, cv))
+            abline(h=0, col='gray', lty=3)
+            # lines (exp(pf2$xc), pf2$ybar, col='blue', lwd=2)
+            dev.off()
+          } else if (grepl ('fp(f)', input$ffttype, fixed=TRUE)) {
+            xvm <- ifelse(grepl('co-var', input$ffttype, fixed=TRUE), cv, v)
+            if (isolate (input$FFTadd)) {
+              vFFT <- vFFT
+              cFFT <- cFFT
+            } else {
+              vFFT <- vector('character')
+              cFFT <- vector('character')
+              if (exists ('v2FFT', where='.GlobalEnv')) {rm('v2FFT', pos='.GlobalEnv')}
+            }
+            
+            unsmoothedColor <- 'red' 
+            if (input$FFTshowU) {
+              vFFT <- c(vFFT, xvm, sprintf ('unsmoothed %s', xvm))
+              cFFT <- c(cFFT, lineColor, unsmoothedColor)
+            } else {
+              vFFT <- c(vFFT, xvm)
+              cFFT <- c(cFFT, lineColor)
+            }              
+            
+            if (isolate(input$FFTadd) && exists ('gFFT')) {
+              dd <- reshape2::melt(X, id="xc", measure="ybar")
+              i <-  2
+              while (exists (vnFFT <- sprintf('v%dFFT', i), '.GlobalEnv')) {i <- i + 1}
+              assign(vnFFT, v, '.GlobalEnv')
+              if (i == 2) {
+                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v2FFT), lwd=1.2) #+
+              } else if (i == 3) {
+                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v3FFT), lwd=1.2)
+              } else if (i == 4) {
+                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v4FFT), lwd=1.2)
+              }
+              names(cFFT) <- vFFT
+              g <- g + scale_colour_manual (name='', values=cFFT)
+            } else {
+              g <- ggplot (data=data.frame(fdt=fdt, nups=nups), aes(x=fdt, y=nups))
+              if (input$FFTshowU) {
+                cUS <- sprintf('unsmoothed %s', xvm)
+                g <- g + geom_path (aes_(colour=cUS), lwd=0.5)
+              }
+              g <- g + geom_path (data=X, aes(x=xc, y=ybar, colour=xvm), lwd=1.2)
+              
+              if (grepl ('p(f)', input$ffttype, fixed=TRUE) || grepl ('co-var', input$ffttype, fixed=TRUE)) {
+                epsColor <- 'darkgreen'
+                for (i in (-8):2) {
+                  if (input$ffttype == 'fp(f)' || grepl ('co-var', input$ffttype, fixed=TRUE)) {
+                    yl <- ae * (10^i * tasAverage / flow)^(2/3)
+                    yh <- ae * (10^i * tasAverage / fhigh)^(2/3)
+                  } else if (input$ffttype == 'p(f)') {
+                    yl <- ae * (10^i * tasAverage / flow)^(2/3) / flow
+                    yh <- ae * (10^i * tasAverage / fhigh)^(2/3) / fhigh
+                  }
+                  if (i == -4) {
+                    g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.6, lty=1)
+                  } else {
+                    g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.3, lty=2)
+                  }
+                }
+              }
               
             }
-            if (grepl ('start of cospec', line)) {writeOutput <- TRUE}
-          }  ## end of lines in XanaduOut
-          segl <- plotSpec$Variance[[1]]$Definition$fftpts
-          freq <- (1:(segl/2))/segl
-          layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,6))
-          nbins <- plotSpec$Variance[[1]]$Definition$fftavg
-          if (grepl('both', input$ffttype)) {
-            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
-            df <- data.frame(fxf=segl*freq*fps, V2=log10(freq))
-            df2 <- data.frame(fxf=segl*freq*fpsc, V2=log10(freq))
-            pf <- binStats(df, bins=nbins)
-            pf2 <- binStats(df2, bins=nbins)
-            plotWAC (freq, segl*freq*fps,  type='l', xlab='frequency', col='blue', 
-                     log='xy', ylab=sprintf ('%s:  fp(f)', v))
-            pf <- pf[!is.na(pf$ybar),]
-            lines (10^pf$xc, pf$ybar, col='red', lwd=2)
-            op <- par (mar=c(5,4,1,2)+0.1)
-            plotWAC (freq, segl*freq*fpsc, type='l', xlab='frequency', col='blue', 
-                     log='xy', ylab=sprintf ('%s:  fp(f)', cv))
-            pf2 <- pf2[!is.na(pf2$ybar),]
-            lines (10^pf2$xc, pf2$ybar, col='red', lwd=2)
-          } else if (grepl ('data', input$ffttype)) {
-            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
-            plotWAC (DataR[, c('Time', v)])
-            op <- par (mar=c(5,4,1,2)+0.1)
-            plotWAC (DataR[, c('Time', cv)])
-          } else {
-            df <- data.frame(fxpf=segl*freq*p, V2=log10(freq))
-            df2 <- data.frame(fxqf=segl*freq*q, V2=log10(freq))
-            pf <- binStats(df, bins=nbins)
-            pf2 <- binStats(df2, bins=nbins)
-            df$fxqf <- df2$fxqf
-            df$freq <- freq
+            g <- g + coord_cartesian (xlim=c(flow,fhigh), ylim=c(plow,phigh)) +
+              scale_x_continuous(trans='log10', breaks = trans_breaks("log10", (function(x) 10^x), n=nfSpec+1),
+                labels = trans_format("log10", math_format(10^.x)),
+                sec.axis=sec_axis(~log10(.^(-1)*tasAverage*0.001), name='wavelength [km]',
+                  breaks=c(0,1,2), labels=c(' 1 ', ' 10 ', ' 100 '))) +
+              scale_y_log10(breaks = trans_breaks("log10", (function(x) 10^x), n=npSpec+1),
+                labels = trans_format("log10", math_format(10^.x))) +
+              annotation_logticks() +
+              xlab('frequency [Hz]') 
+            if (input$ffttype == 'fp(f)') {
+              g <- g + ylab (bquote(paste(.(v), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
+            } else if (input$ffttype == 'p(f)') {
+              g <- g + ylab (bquote(paste(.(v), ': ', 'P(',nu,')', sep='')))
+            } else if (grepl ('co-var', input$ffttype)) {
+              g <- g + ylab (bquote(paste(.(cv), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
+            }
+            names(cFFT) <- vFFT
+            g <- g + scale_colour_manual (name='', values=cFFT)
+            
+            Theme <- input$varTheme
+            if (Theme == 'classic') {g <- g + theme_classic()}
+            if (Theme == 'bw')      {g <- g + theme_bw()}
+            if (Theme == 'base')    {g <- g + theme_base()}
+            if (Theme == 'excel')   {g <- g + theme_excel()}
+            if (Theme == 'few')     {g <- g + theme_few()}
+            if (Theme == 'foundation') {g <- g + theme_foundation()}
+            if (Theme == 'igray')   {g <- g + theme_igrey()}
+            if (Theme == 'light')   {g <- g + theme_light()}
+            if (Theme == 'linedraw') {g <- g + theme_linedraw()}
+            if (Theme == 'tufte')   {g <- g + theme_tufte()}
+            if (Theme == 'standard') {}## g <- g + theme_classic()}
+            if (grepl('WAC', Theme))     {
+              g <- g + theme_WAC() + theme (axis.title.x.top=element_text(size=10, hjust=0.5, vjust=2),
+                axis.text.x.top=element_text(size=10, hjust=0.02, vjust=1))
+              if (Theme == 'WAC2') {
+                g <- g + theme(rect=element_rect(fill='bisque'))
+              }
+            } else {
+              g <- g + theme (axis.title.x.top=element_text(size=10, hjust=0.5),
+                axis.text.x.top=element_text(size=10, hjust=0.5, vjust=1))
+            }
+            if (input$FFTcaption) {
+              SE <- getStartEnd (DataR$Time)
+              i <- getIndex (DataR$Time, SE[1])
+              cap <- sprintf ('%s %s--%s FFT: %d seg (s), %d sm. bins, var.=%.1e, edr=%.1e ',
+                strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+                strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
+                segmentLength/Rate, avebin, variance, edr)
+              cap <- bquote(paste(.(cap), ' m'^'2','s'^'-3', sep=''))
+              g <- g + labs (caption=cap)
+              # g <- g + labs (caption=sprintf('MEM, %d poles, %d smoothing bins\nresolution %.1e, variance %.1e, edr %.1e m^2/s^3', poles, avebin, resolution, variance, edr))
+            }
+            gFFT <<- g
+            vFFT <<- vFFT
+            cFFT <<- cFFT
+            png(filename=gname, width=600, height=600)
+            print (g)
+            dev.off()
           }
-          if (grepl('cosp', input$ffttype)) {
-            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
-            plotWAC (df[, c('freq', 'fxpf')], type='l', xlab='frequency', col='blue', 
-                     log='x', ylab=sprintf ('%s x %s:  f x cospectrum', v, cv))
-            pf <- pf[!is.na(pf$ybar),]
-            lines (10^pf$xc, pf$ybar, col='red', lwd=2)
-            abline(h=0, lty=3, lwd=0.7)
-            legend('topright', legend=c('f C[f]', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
-            op <- par (mar=c(5,4,1,2)+0.1)
-            plotWAC (df[, c('freq', 'fxqf')], type='l', xlab='frequency', col='blue', 
-                     log='x', ylab=sprintf ('%s x %s:  f x quadrature', v, cv))
-            pf2 <- pf2[!is.na(pf2$ybar),]
-            lines (10^pf2$xc, pf2$ybar, col='red', lwd=2)
-            abline(h=0, lty=3, lwd=0.7)
-            legend('topright', legend=c('f Q[f]', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
-          } 
-          if (grepl('coher', input$ffttype)) {
-            op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
-            plotWAC(freq, coh, log='x', xlab='frequency', col='blue', 
-                    ylab='coherence', ylim=c(0,1))
-            df <- data.frame(coh=coh, V2=log10(freq))
-            pf3 <- binStats(df, bins=nbins)
-            pf3 <- pf3[!is.na (pf3$ybar), ]
-            lines (10^pf3$xc, pf3$ybar, col='red', lwd=2)
-            legend('topleft', legend=c('coherence', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
-            phase <- atan2 (q, p) * 180/pi
-            phase[phase > 180] <- phase[phase > 180] - 360
-            phase[phase < -180] <- phase[phase < -180] + 360
-            ## proper averaging of the phase must account for wrap-around
-            ## better: average q and p, then find phase; already have these from above
-            op <- par (mar=c(5,4,1,2)+0.1)
-            plotWAC (freq, phase, xlab='frequency', type='l', col='blue', 
-                     log='x', ylab='phase [deg.]', ylim=c(-180,180))
-            avgphase <- atan2 (pf2$ybar, pf$ybar) * 180/pi
-            lines (10^pf2$xc, avgphase, col='red', lwd=2)
-            abline(h=0, lty=3, lwd=0.7)
-            legend('topleft', legend=c('phase', 'bin-averages'), col=c('blue', 'red'), lwd=c(2,2))
-          }
-          dev.off ()
         }
       }
     }
@@ -3121,7 +3782,11 @@ shinyServer(function(input, output, session) {
         plotBin (input)
       }
       if (grepl ('variance', input$whichTab)) {
-        img <- png::readPNG("SpecialGraphics/PSDMEM.png")
+        if (input$varXanadu) {
+          img <- png::readPNG("SpecialGraphics/PSDMEM.png")
+        } else {
+          img <- png::readPNG("SpecialGraphics/PSDMEM2.png")
+        }
         grid.raster(img)
       }
       dev.off ()

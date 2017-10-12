@@ -11,6 +11,7 @@
 #' @param .maxGap The largest gap across which to interpolate
 #' @param .Length The length of the segment for Savitzky-Golay filtering.
 #' (Must be odd; will be set odd if supplied as even.) Default: 61
+#' If .Length <= 1 there will be no smoothing, only interpolation.
 #' @param .order The order of the polynomials to be used for filtering.
 #' @return The smoothed and filtered series as a vector.
 #' @examples 
@@ -22,5 +23,9 @@ SmoothInterp <- function (.timeSeries, .maxGap=1000, .Length=61, .order=3) {
   d <- zoo::na.approx (as.vector(.timeSeries), maxgap=.maxGap, na.rm = FALSE)
   if (!(.Length %% 2)) {.Length <- .Length + 1}
   d[is.na(d)] <- 0
-  return (as.vector (signal::filter(signal::sgolay(.order, .Length), d)))
+  if (.Length > 2) {
+    return (as.vector (signal::filter(signal::sgolay(.order, .Length), d)))
+  } else {
+    return (d)
+  }
 }
