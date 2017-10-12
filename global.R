@@ -13,6 +13,10 @@ library(gtable)
 library(grid)
 library(XML)
 library(tcltk)
+library(scales)
+
+## temporary
+# source ('makeNetCDF.R')
 
 # source ('R/plotTrack.R')
 # source ('R/PlotWAC.R')
@@ -31,7 +35,7 @@ load ('InputDF.Rdata')
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
 
-PJ <- c('ARISTO2017', 'ECLIPSE', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER',
+PJ <- c('WECAN-TEST', 'ARISTO2017', 'ECLIPSE', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER',
         'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
         'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
         'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')
@@ -230,41 +234,45 @@ C1DC <- NA
 # then plot 1 will go in the upper left, 2 will go in the upper right, and
 # 3 will go all the way across the bottom.
 #
-multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
-  library(grid)
-  
-  # Make a list from the ... arguments and plotlist
-  plots <- c(list(...), plotlist)
-  
-  numPlots = length(plots)
-  
-  # If layout is NULL, then use 'cols' to determine layout
-  if (is.null(layout)) {
-    # Make the panel
-    # ncol: Number of columns of plots
-    # nrow: Number of rows needed, calculated from # of cols
-    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-                     ncol = cols, nrow = ceiling(numPlots/cols))
-  }
-  
-  if (numPlots==1) {
-    print(plots[[1]])
-    
-  } else {
-    # Set up the page
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-    
-    # Make each plot, in the correct location
-    for (i in 1:numPlots) {
-      # Get the i,j matrix positions of the regions that contain this subplot
-      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
-      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-                                      layout.pos.col = matchidx$col))
-    }
-  }
-}
+
+Themes <- c('WAC', 'standard', 'classic', 'WAC2', 'bw', 'base', 'excel', 'few', 'foundation', 'igray', 'light',
+            'linedraw', 'tufte')
+getPower2 <- function (n=512) {x <- log(n)/log(2);y <- x-round(x);ifelse(y >=0, m <- 2^ceiling(x), m <- 2^floor(x))}
+# multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+#   library(grid)
+#   
+#   # Make a list from the ... arguments and plotlist
+#   plots <- c(list(...), plotlist)
+#   
+#   numPlots = length(plots)
+#   
+#   # If layout is NULL, then use 'cols' to determine layout
+#   if (is.null(layout)) {
+#     # Make the panel
+#     # ncol: Number of columns of plots
+#     # nrow: Number of rows needed, calculated from # of cols
+#     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+#                      ncol = cols, nrow = ceiling(numPlots/cols))
+#   }
+#   
+#   if (numPlots==1) {
+#     print(plots[[1]])
+#     
+#   } else {
+#     # Set up the page
+#     grid.newpage()
+#     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+#     
+#     # Make each plot, in the correct location
+#     for (i in 1:numPlots) {
+#       # Get the i,j matrix positions of the regions that contain this subplot
+#       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+#       
+#       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+#                                       layout.pos.col = matchidx$col))
+#     }
+#   }
+# }
 
 # functions used later:
 hline <<- function(y, col='black', lwd=1, lty=2) {
@@ -275,6 +283,14 @@ formatTime <- function (time) {
   t <- as.POSIXlt (time, tz='UTC')
   tt <- sprintf ("%d:%02d:%02d", t$hour, t$min, as.integer(t$sec))
   return (tt)
+}
+
+reverselog10_trans <- function() {
+  trans <- function(x) -log10(x)
+  inv <- function(x) 10^(-x)
+  trans_new("reverselog10", trans, inv, 
+    log_breaks(base = 10), 
+    domain = c(1e-100, Inf))
 }
 
 saveConfig <- function (inp) {
@@ -315,6 +331,7 @@ specialVar <- function (D) {
   ## also assumes Rate is set
   # print (sprintf ('entry to specialVar, variables are:'))
   # print (sort(names (D)))
+  if (Trace) {print (sprintf ('in specialVar, rate=%d', FI$Rate))}
   DPDT <- c(0, diff(D$PSXC)) * FI$Rate
   # print (summary(DPDT))
   g <- Gravity (D$LATC, D$GGALT)
@@ -343,7 +360,7 @@ specialVar <- function (D) {
   d$DQRC <- D$QCRC - D$QCXC
   attributes(d$DQC) <- A
   attributes(d$DQRC) <- A
-  # print (str(d))
+  if (Trace) {print (str(d))}
   return (d)
 }
 
