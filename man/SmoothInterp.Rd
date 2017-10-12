@@ -13,7 +13,8 @@ SmoothInterp(.timeSeries, .maxGap = 1000, .Length = 61, .order = 3)
 \item{.maxGap}{The largest gap across which to interpolate}
 
 \item{.Length}{The length of the segment for Savitzky-Golay filtering.
-(Must be odd; will be set odd if supplied as even.) Default: 61}
+(Must be odd; will be set odd if supplied as even.) Default: 61
+If .Length <= 1 there will be no smoothing, only interpolation.}
 
 \item{.order}{The order of the polynomials to be used for filtering.}
 }
