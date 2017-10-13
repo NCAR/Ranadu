@@ -2765,6 +2765,7 @@ shinyServer(function(input, output, session) {
     reac$newvarp
     input$suffixFlight
     input$TypeFlight
+    input$times
     Project <- plotSpec$Project
     print (sprintf ('spectype is %s', input$spectype))
     # spec <- plotSpec$Var[[input$plot]]
@@ -3425,6 +3426,12 @@ shinyServer(function(input, output, session) {
           avebin <- input$fftavg
           segmentLength <- input$fftpts * Rate
           ld <- nrow (DataR)
+          while (segmentLength > ld) {
+            segmentLength <- segmentLength / 2
+          }
+          if (segmentLength < input$fftpts * Rate) {
+            print (sprintf ('Reset segment length to %d to match data', segmentLength / Rate))
+          }
           fmin <- log (1 / segmentLength)
           fmax <- log (0.5*Rate)
           S <- bspec::welchPSD (ts(Vr), seglength=segmentLength, windowfun=bspec::tukeywindow)
