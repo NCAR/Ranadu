@@ -4157,9 +4157,15 @@ shinyServer(function(input, output, session) {
         DF$Temperature <- DF$Temperature - 273.15
         DF$DewPoint <- DF$DewPoint - 273.15
       }
-      suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagram.Rdata")
+      if (grepl ('130', FI$Platform)) {
+      suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagramC130.Rdata")
         + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
           formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
+      } else {
+        suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagram.Rdata")
+          + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
+            formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
+      }
       if (input$cape) {
         NSND <- CAPE (Data)
         if (length (names (NSND)) > 3) {
