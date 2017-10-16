@@ -2,9 +2,9 @@ require (shiny)
 
 shinyServer(function(input, output, session) {
   
-#   createAlert(session, 'pleasewait', alertId = 'pausing', title = 'start-up window',
-#               content = 'please wait a few seconds for the application to\nfetch data and start, Proceed when this message disappears.')
-#   
+  #   createAlert(session, 'pleasewait', alertId = 'pausing', title = 'start-up window',
+  #               content = 'please wait a few seconds for the application to\nfetch data and start, Proceed when this message disappears.')
+  #   
   ################ OBSERVERS ########################
   
   ## use an observer for each item in the plot definition:
@@ -27,7 +27,7 @@ shinyServer(function(input, output, session) {
     print (sprintf ('click position is %d %f', TB1, ycursor))
   } )
   
-    observeEvent (input$plot_brush, {
+  observeEvent (input$plot_brush, {
     xmin <- as.integer(input$plot_brush$xmin)
     xmax <- as.integer(input$plot_brush$xmax)
     T1 <- as.POSIXlt(xmin, origin='1970-01-01', tz='UTC')
@@ -141,7 +141,7 @@ shinyServer(function(input, output, session) {
   
   exprTime <- quote ({
     if (Trace) {print (sprintf ('Time: Times %s %s times %s %s', plotSpec$Times[1], plotSpec$Times[2],
-                                input$times[1], input$times[2]))}
+      input$times[1], input$times[2]))}
     
     plotSpec$PaluchTimes <<- input$times
     plotSpec$PaluchCTimes <<- input$times
@@ -192,8 +192,8 @@ shinyServer(function(input, output, session) {
             if (exists ('specialData') && (input$addVarP %in% names (specialData))) {
             } else {
               print ('need new data to include new variable - 4')
-	      print (c('names in Data:', names(Data)))
-	      print (c('names in specialData:', names(specialData)))
+              print (c('names in Data:', names(Data)))
+              print (c('names in specialData:', names(specialData)))
               reac$newdata <- reac$newdata + 1
             }
           }
@@ -214,7 +214,7 @@ shinyServer(function(input, output, session) {
   exprTstart <- quote ({
     ## ignore it if before start or after finish
     if (Trace) {print (sprintf ('Tstart: input$tstart=%s, min/maxT=%s %s',
-                                input$tstart, minT, maxT))}
+      input$tstart, minT, maxT))}
     # invalidateLater (500, session)
     txt <- input$tstart
     ## protect against typing errors that insert a character:
@@ -260,7 +260,7 @@ shinyServer(function(input, output, session) {
   exprPaluchstart <- quote ({
     ## ignore it if before start or after finish
     if (Trace) {print (sprintf ('Paluchstart: input$paluchStart=%s, min/maxT=%s %s',
-                                input$paluchStart, minT, maxT))}
+      input$paluchStart, minT, maxT))}
     txt <- input$paluchStart
     ## protect against typing errors that insert a character:
     if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
@@ -281,7 +281,7 @@ shinyServer(function(input, output, session) {
   exprPaluchCstart <- quote ({
     ## ignore it if before start or after finish
     if (Trace) {print (sprintf ('PaluchCstart: input$paluchCStart=%s, min/maxT=%s %s',
-                                input$paluchCStart, minT, maxT))}
+      input$paluchCStart, minT, maxT))}
     txt <- input$paluchCStart
     ## protect against typing errors that insert a character:
     if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
@@ -497,8 +497,8 @@ shinyServer(function(input, output, session) {
     updateCheckboxInput (session, 'hfixed', value=plotSpec$Hist[[plt]]$panel[[pnl]]$fixed)
     updateNumericInput (session, 'hlineV', value=1)
     updateSelectInput (session, 'haddVarP', 
-                       choices=sort(FI$Variables),
-                       selected=plotSpec$Hist[[plt]]$panel[[pnl]]$var[1])
+      choices=sort(FI$Variables),
+      selected=plotSpec$Hist[[plt]]$panel[[pnl]]$var[1])
     updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[plt]]$panel[[pnl]]$col[1])
     updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[plt]]$panel[[pnl]]$lw[1])
     updateRadioButtons (session, 'hlineStyle', selected=ltyps[plotSpec$Hist[[plt]]$panel[[pnl]]$lt[1]])
@@ -904,8 +904,8 @@ shinyServer(function(input, output, session) {
     updateCheckboxInput (session, 'hrestrict', value=plotSpec$Hist[[plt]]$restrict)
     updateNumericInput (session, 'hlineV', value=1)
     updateSelectInput (session, 'haddVarP', 
-                       choices=c('select', 'omit', sort(FI$Variables)),
-                       selected=plotSpec$Hist[[plt]]$panel[[1]]$var[1])
+      choices=c('select', 'omit', sort(FI$Variables)),
+      selected=plotSpec$Hist[[plt]]$panel[[1]]$var[1])
     updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[plt]]$panel[[1]]$col[1])
     updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[plt]]$panel[[1]]$lw[1])
     updateRadioButtons (session, 'hlineStyle', selected=ltyps[plotSpec$Hist[[plt]]$panel[[1]]$lt[1]])
@@ -1239,19 +1239,19 @@ shinyServer(function(input, output, session) {
   exprRNumber <- quote ({
     if (input$rvNumber > nrow (plotSpec$Restrictions)) {
       newRow <- data.frame (RVAR=isolate (input$rvar), 
-                            apply=isolate (input$apply),
-                            min=isolate (input$rmin),
-                            max=isolate (input$rmax))
+        apply=isolate (input$apply),
+        min=isolate (input$rmin),
+        max=isolate (input$rmax))
       plotSpec$Restrictions <<- rbind (plotSpec$Restrictions, newRow)
     } else {
       updateSelectInput(session, 'rvar',  
-                        selected=plotSpec$Restrictions$RVAR[input$rvNumber])
+        selected=plotSpec$Restrictions$RVAR[input$rvNumber])
       updateCheckboxInput (session, 'apply',
-                           value=plotSpec$Restrictions$apply[input$rvNumber])
+        value=plotSpec$Restrictions$apply[input$rvNumber])
       updateNumericInput(session, 'rmin', label=NULL, 
-                         value=plotSpec$Restrictions$min[input$rvNumber])
+        value=plotSpec$Restrictions$min[input$rvNumber])
       updateNumericInput(session, 'rmax', label=NULL, 
-                         value=plotSpec$Restrictions$max[input$rvNumber])
+        value=plotSpec$Restrictions$max[input$rvNumber])
     }
   })
   obsRNumber <- observe (exprRNumber, quoted=TRUE)
@@ -1391,142 +1391,142 @@ shinyServer(function(input, output, session) {
   
   observeEvent (input$specSave, saveConfig (input))
   observeEvent (input$specRead, 
-                {loadConfig (input)
-                  ## When a configuration is loaded, the entire ui needs to be
-                  ## updated. The order needs to be: Change everything needed
-                  ## to get new data first, with 'freezeReactiveValues()', then
-                  ## allow data access to update.
-                  # updateSelectInput (session, 'Project', selected=plotSpec$Project)
-                  ##
-                  # get the full list of input variables
-                  InputNames <<- names(input)
-                  quickPlotVar <<- ''  ## reset to avoid not-found errors
-                  CH <- sort(FI$Variables)  ## for the variable names requiring choices
-                  ch.var <- c('addVarP', 'haddVarP', 'saddVarP1', 'saddVarP2', 'baddVarP1',
-                              'baddVarP2', 'paluchLWC', 'specvar', 'speccovar', 'rvar')
-                  # print (FI$Variables)
-                  # freezeReactiveValue (input, 'Project')
-                  # freezeReactiveValue (input, 'Flight')
-                  # freezeReactiveValue (input, 'addVarP')
-                  # freezeReactiveValue (input, 'haddVarP')
-                  updateSliderInput (session, 'times', value=plotSpec$Times)
-                  updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
-                  updateTextInput (session, 'tend',   value=formatTime (plotSpec$Times[2]))
-                  updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
-                  updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
-                  updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
-                  updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
-                  updateSelectInput (session, 'paluchLWC', choices=sort(FI$Variables), 
-                                     selected=plotSpec$paluchLWC)
-                  ## checkboxes
-                  for (i in 1:nrow(InputDF)) {
-                    if (InputDF$Type[i] == 'cB') {
-                      # freezeReactiveValue (input, InputDF$ID[i])
-                      updateCheckboxInput (session, InputDF$ID[i], value=FALSE)
+    {loadConfig (input)
+      ## When a configuration is loaded, the entire ui needs to be
+      ## updated. The order needs to be: Change everything needed
+      ## to get new data first, with 'freezeReactiveValues()', then
+      ## allow data access to update.
+      # updateSelectInput (session, 'Project', selected=plotSpec$Project)
+      ##
+      # get the full list of input variables
+      InputNames <<- names(input)
+      quickPlotVar <<- ''  ## reset to avoid not-found errors
+      CH <- sort(FI$Variables)  ## for the variable names requiring choices
+      ch.var <- c('addVarP', 'haddVarP', 'saddVarP1', 'saddVarP2', 'baddVarP1',
+        'baddVarP2', 'paluchLWC', 'specvar', 'speccovar', 'rvar')
+      # print (FI$Variables)
+      # freezeReactiveValue (input, 'Project')
+      # freezeReactiveValue (input, 'Flight')
+      # freezeReactiveValue (input, 'addVarP')
+      # freezeReactiveValue (input, 'haddVarP')
+      updateSliderInput (session, 'times', value=plotSpec$Times)
+      updateTextInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+      updateTextInput (session, 'tend',   value=formatTime (plotSpec$Times[2]))
+      updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
+      updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
+      updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
+      updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
+      updateSelectInput (session, 'paluchLWC', choices=sort(FI$Variables), 
+        selected=plotSpec$paluchLWC)
+      ## checkboxes
+      for (i in 1:nrow(InputDF)) {
+        if (InputDF$Type[i] == 'cB') {
+          # freezeReactiveValue (input, InputDF$ID[i])
+          updateCheckboxInput (session, InputDF$ID[i], value=FALSE)
+        } else {
+          if (!is.na(InputDF$Force[i])) {
+            # freezeReactiveValue (input, InputDF$ID[i])
+            if (InputDF$Type[i] == 'nI') {
+              updateNumericInput(session, InputDF$ID[i], value=InputDF$Force[i])
+            } else if (InputDF$Type[i] == 'sI') {
+              updateSelectInput(session, InputDF$ID[i], value=InputDF$Force[i])
+            }
+          } else {
+            if (InputDF$I1[i] == 0) {
+              vvv <- NA
+              next
+            } else {
+              if (InputDF$I2[i] == 0) {
+                vvv <- plotSpec[[InputDF$I1[i]]]
+              } else {
+                if (InputDF$I3[i] == 0) {
+                  vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]]
+                } else {
+                  if (InputDF$I4[i] == 0) {
+                    vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]]
+                  } else {
+                    if (InputDF$I5[i] == 0) {
+                      vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]]
                     } else {
-                      if (!is.na(InputDF$Force[i])) {
-                        # freezeReactiveValue (input, InputDF$ID[i])
-                        if (InputDF$Type[i] == 'nI') {
-                          updateNumericInput(session, InputDF$ID[i], value=InputDF$Force[i])
-                        } else if (InputDF$Type[i] == 'sI') {
-                          updateSelectInput(session, InputDF$ID[i], value=InputDF$Force[i])
-                        }
+                      if (InputDF$I6[i] == 0) {
+                        vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]][[InputDF$I5[i]]]
                       } else {
-                        if (InputDF$I1[i] == 0) {
-                          vvv <- NA
-                          next
-                        } else {
-                          if (InputDF$I2[i] == 0) {
-                            vvv <- plotSpec[[InputDF$I1[i]]]
-                          } else {
-                            if (InputDF$I3[i] == 0) {
-                              vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]]
-                            } else {
-                              if (InputDF$I4[i] == 0) {
-                                vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]]
-                              } else {
-                                if (InputDF$I5[i] == 0) {
-                                  vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]]
-                                } else {
-                                  if (InputDF$I6[i] == 0) {
-                                    vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]][[InputDF$I5[i]]]
-                                  } else {
-                                    vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]][[InputDF$I5[i]]][[InputDF$I6[i]]]
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                        
-                        if (InputDF$Type[i] == 'nI') {
-                          updateNumericInput(session, InputDF$ID[i], value=vvv)
-                        } else if (InputDF$Type[i] == 'Rb') {
-                          updateRadioButtons(session, InputDF$ID[i], selected=vvv)
-                        } else if (InputDF$Type[i] == 'sI') {
-                          if (InputDF$ID[i] %in% ch.var) {
-                            updateSelectInput(session, InputDF$ID[i], selected=vvv, choices=CH)
-                            # if (i == 100) {print (sprintf ('update %s choices',vvv));print(CH)}
-                          } else {
-                            print (sprintf('ID=%s, i=%d, vvv=%s', InputDF$ID[i], i, vvv))
-                            updateSelectInput(session, InputDF$ID[i], selected=vvv)
-                          }
-                        }
+                        vvv <- plotSpec[[InputDF$I1[i]]][[InputDF$I2[i]]][[InputDF$I3[i]]][[InputDF$I4[i]]][[InputDF$I5[i]]][[InputDF$I6[i]]]
                       }
                     }
                   }
-                  
-                  # plt <- 1; pnl <- 1; lv <- 1; CC <- sort(FI$Variables)
-                  updateSelectInput(session, inputId='Project',
-                                    selected=plotSpec$Project, choices=PJ)
-                  # updateSelectInput (session, 'addVarP', 
-                  #                    selected=plotSpec$Plot[[1]]$panel[[1]]$var[1])
-                  # updateNumericInput (session, 'Flight', value=plotSpec$Flight)
-                  # updateRadioButtons (session, 'typeFlight', selected=plotSpec$TypeFlight)
-                  # updateRadioButtons (session, 'SRC', selected=plotSpec$SRC)
-                  # updateNumericInput (session, 'plot', value=1)
-                  # updateNumericInput (session, 'panels', value=plotSpec$Plot[[1]]$panels)
-                  # updateNumericInput (session, 'cols', value=plotSpec$Plot[[1]]$columns)
-                  # updateNumericInput (session, 'panel', value=1)
-                  # updateCheckboxInput (session, 'logY', value=plotSpec$Plot[[1]]$panel[[1]]$logY)
-                  # updateCheckboxInput (session, 'fixed', value=plotSpec$Plot[[1]]$panel[[1]]$fixed)
-                  # updateCheckboxInput (session, 'smooth', value=plotSpec$Plot[[1]]$panel[[1]]$smooth[1])
-                  # updateNumericInput (session, 'SGpoints', value=plotSpec$Plot[[1]]$panel[[1]]$SGlength[1])
-                  # updateNumericInput (session, 'panelMin', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[1])
-                  # updateNumericInput (session, 'panelMax', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[2])
-                  # updateNumericInput (session, 'lineV', value=1)
-                  # updateSelectInput (session, 'varColor', selected=plotSpec$Plot[[1]]$panel[[1]]$col[1])
-                  # updateNumericInput (session, 'lineW', value=plotSpec$Plot[[1]]$panel[[1]]$lw[1])
-                  # updateRadioButtons (session, 'lineStyle', selected=plotSpec$Plot[[1]]$panel[[1]]$lt[1])
-                  # 
-                  # updateNumericInput (session, 'hpanels', value=plotSpec$Hist[[1]]$panels)
-                  # updateNumericInput (session, 'hcols', value=plotSpec$Hist[[1]]$columns)
-                  # updateNumericInput (session, 'hpanel', value=1)
-                  # updateCheckboxInput (session, 'hlogY', value=plotSpec$Hist[[1]]$panel[[1]]$logY)
-                  # updateCheckboxInput (session, 'hfixed', value=plotSpec$Hist[[1]]$panel[[1]]$fixed)
-                  # updateNumericInput (session, 'hpanelMin', value=plotSpec$Hist[[1]]$panel[[1]]$ylim[1])
-                  # updateNumericInput (session, 'hpanelMax', value=plotSpec$Hist[[1]]$panel[[1]]$ylim[2])
-                  # updateNumericInput (session, 'hlineV', value=1)
-                  # updateSelectInput (session, 'haddVarP', 
-                  #                    choices=c('select', 'omit', sort(FI$Variables)),
-                  #                    selected=plotSpec$Hist[[1]]$panel[[1]]$var[1])
-                  # updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[1]]$panel[[1]]$col[1])
-                  # updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[1]]$panel[[1]]$lw[1])
-                  # updateRadioButtons (session, 'hlineStyle', selected=plotSpec$Hist[[1]]$panel[[1]]$lt[1])
-                  # updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
-                  isolate (reac$newdata <- reac$newdata + 1)
-                  isolate (reac$newdisplay <- reac$newdisplay + 1)
-                  isolate (reac$newhistogram <- reac$newhistogram + 1)
-                  isolate (reac$newstats <- reac$newstats + 1)
-                  isolate (reac$newscat <- reac$newscat + 1)
-                  isolate (reac$newbin <- reac$newbin + 1)
-                } )
+                }
+              }
+            }
+            
+            if (InputDF$Type[i] == 'nI') {
+              updateNumericInput(session, InputDF$ID[i], value=vvv)
+            } else if (InputDF$Type[i] == 'Rb') {
+              updateRadioButtons(session, InputDF$ID[i], selected=vvv)
+            } else if (InputDF$Type[i] == 'sI') {
+              if (InputDF$ID[i] %in% ch.var) {
+                updateSelectInput(session, InputDF$ID[i], selected=vvv, choices=CH)
+                # if (i == 100) {print (sprintf ('update %s choices',vvv));print(CH)}
+              } else {
+                print (sprintf('ID=%s, i=%d, vvv=%s', InputDF$ID[i], i, vvv))
+                updateSelectInput(session, InputDF$ID[i], selected=vvv)
+              }
+            }
+          }
+        }
+      }
+      
+      # plt <- 1; pnl <- 1; lv <- 1; CC <- sort(FI$Variables)
+      updateSelectInput(session, inputId='Project',
+        selected=plotSpec$Project, choices=PJ)
+      # updateSelectInput (session, 'addVarP', 
+      #                    selected=plotSpec$Plot[[1]]$panel[[1]]$var[1])
+      # updateNumericInput (session, 'Flight', value=plotSpec$Flight)
+      # updateRadioButtons (session, 'typeFlight', selected=plotSpec$TypeFlight)
+      # updateRadioButtons (session, 'SRC', selected=plotSpec$SRC)
+      # updateNumericInput (session, 'plot', value=1)
+      # updateNumericInput (session, 'panels', value=plotSpec$Plot[[1]]$panels)
+      # updateNumericInput (session, 'cols', value=plotSpec$Plot[[1]]$columns)
+      # updateNumericInput (session, 'panel', value=1)
+      # updateCheckboxInput (session, 'logY', value=plotSpec$Plot[[1]]$panel[[1]]$logY)
+      # updateCheckboxInput (session, 'fixed', value=plotSpec$Plot[[1]]$panel[[1]]$fixed)
+      # updateCheckboxInput (session, 'smooth', value=plotSpec$Plot[[1]]$panel[[1]]$smooth[1])
+      # updateNumericInput (session, 'SGpoints', value=plotSpec$Plot[[1]]$panel[[1]]$SGlength[1])
+      # updateNumericInput (session, 'panelMin', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[1])
+      # updateNumericInput (session, 'panelMax', value=plotSpec$Plot[[1]]$panel[[1]]$ylim[2])
+      # updateNumericInput (session, 'lineV', value=1)
+      # updateSelectInput (session, 'varColor', selected=plotSpec$Plot[[1]]$panel[[1]]$col[1])
+      # updateNumericInput (session, 'lineW', value=plotSpec$Plot[[1]]$panel[[1]]$lw[1])
+      # updateRadioButtons (session, 'lineStyle', selected=plotSpec$Plot[[1]]$panel[[1]]$lt[1])
+      # 
+      # updateNumericInput (session, 'hpanels', value=plotSpec$Hist[[1]]$panels)
+      # updateNumericInput (session, 'hcols', value=plotSpec$Hist[[1]]$columns)
+      # updateNumericInput (session, 'hpanel', value=1)
+      # updateCheckboxInput (session, 'hlogY', value=plotSpec$Hist[[1]]$panel[[1]]$logY)
+      # updateCheckboxInput (session, 'hfixed', value=plotSpec$Hist[[1]]$panel[[1]]$fixed)
+      # updateNumericInput (session, 'hpanelMin', value=plotSpec$Hist[[1]]$panel[[1]]$ylim[1])
+      # updateNumericInput (session, 'hpanelMax', value=plotSpec$Hist[[1]]$panel[[1]]$ylim[2])
+      # updateNumericInput (session, 'hlineV', value=1)
+      # updateSelectInput (session, 'haddVarP', 
+      #                    choices=c('select', 'omit', sort(FI$Variables)),
+      #                    selected=plotSpec$Hist[[1]]$panel[[1]]$var[1])
+      # updateSelectInput (session, 'hvarColor', selected=plotSpec$Hist[[1]]$panel[[1]]$col[1])
+      # updateNumericInput (session, 'hlineW', value=plotSpec$Hist[[1]]$panel[[1]]$lw[1])
+      # updateRadioButtons (session, 'hlineStyle', selected=plotSpec$Hist[[1]]$panel[[1]]$lt[1])
+      # updateTextInput (session, 'fnametext', value=plotSpec$fname2d)
+      isolate (reac$newdata <- reac$newdata + 1)
+      isolate (reac$newdisplay <- reac$newdisplay + 1)
+      isolate (reac$newhistogram <- reac$newhistogram + 1)
+      isolate (reac$newstats <- reac$newstats + 1)
+      isolate (reac$newscat <- reac$newscat + 1)
+      isolate (reac$newbin <- reac$newbin + 1)
+    } )
   #   observeEvent (input$savePDF,
   #                 savePDF (Data=data(), inp=input))
   #   observeEvent (input$savePNG,
   #                 savePNG (Data=data(), inp=input))
   observeEvent (input$saveRdata,
-                saveRdata (Data=data(), inp=input))
+    saveRdata (Data=data(), inp=input))
   observeEvent (input$nextT, {
     dt <- difftime (plotSpec$Times[2], plotSpec$Times[1])
     plotSpec$Times[1] <<- plotSpec$Times[1] + dt
@@ -1594,7 +1594,7 @@ shinyServer(function(input, output, session) {
   observeEvent (input$fname2d, {
     if (plotSpec$SRC != 'NCAR') {
       newwd <- sprintf ('%s%s/%s', DataDirectory (), plotSpec$SRC,
-                        plotSpec$Project)
+        plotSpec$Project)
     } else {
       newwd <- sprintf('%s%s', DataDirectory (), plotSpec$Project)
     }
@@ -1649,21 +1649,21 @@ shinyServer(function(input, output, session) {
     print (sprintf (' setting variable choices to this list:'))
     print (sort(FI$Variables))
     updateSelectInput (session, 'addVarP', choices=choices,
-                       selected=plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv])
+      selected=plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv])
     updateSelectInput (session, 'haddVarP', choices=choices,
-                       selected=plotSpec$Hist[[plt]]$panel[[hpnl]]$var[hlv])
+      selected=plotSpec$Hist[[plt]]$panel[[hpnl]]$var[hlv])
     updateSelectInput (session, 'saddVarP1', choices=choices,
-                       selected=plotSpec$Scat[[plt]]$panel[[spnl]]$varx)
+      selected=plotSpec$Scat[[plt]]$panel[[spnl]]$varx)
     updateSelectInput (session, 'saddVarP2', choices=choices,
-                       selected=plotSpec$Scat[[plt]]$panel[[spnl]]$vary[slv])
+      selected=plotSpec$Scat[[plt]]$panel[[spnl]]$vary[slv])
     updateSelectInput (session, 'baddVarP1', choices=choices,
-                       selected=plotSpec$Bin[[plt]]$panel[[bpnl]]$varx)
+      selected=plotSpec$Bin[[plt]]$panel[[bpnl]]$varx)
     updateSelectInput (session, 'baddVarP2', choices=choices,
-                       selected=plotSpec$Bin[[plt]]$panel[[bpnl]]$vary[blv])
+      selected=plotSpec$Bin[[plt]]$panel[[bpnl]]$vary[blv])
     updateSelectInput (session, 'specvar', choices=choices, selected=plotSpec$Variance[[1]]$Definition$var)
     updateSelectInput (session, 'speccovar', choices=choices, selected=plotSpec$Variance[[1]]$Definition$cvar)
     updateSelectInput (session, 'rvar', choices=choices,
-                       selected=plotSpec$Restrictions$RVAR[rlv])
+      selected=plotSpec$Restrictions$RVAR[rlv])
     VF <- isolate (input$response)
     updateSelectInput (session, 'response', choices=sort(VarList), selected=VF)
     ## force re-read to get this variable added to data:
@@ -1727,7 +1727,7 @@ shinyServer(function(input, output, session) {
     DataF <- limitData (data (), input, lim=input$limitsFit)
     DataF <- DataF[DataF$Time >= plotSpec$Times[1] & DataF$Time < plotSpec$Times[2], ]
     fitm <<- lm(paste(parse (text=isolate(input$response)), '~',  parse (text=isolate(input$fformula)),
-                      sep=''), data=DataF, y=TRUE)
+      sep=''), data=DataF, y=TRUE)
     print (summary (fitm))
     print (anova (fitm))
     isolate (reac$updatefit <- reac$updatefit + 1)
@@ -1743,14 +1743,14 @@ shinyServer(function(input, output, session) {
   ################ REACTIVES ########################
   
   reac <- reactiveValues (newdata=0, newdisplay=0, newtrack=0, 
-                          newstats=0, newhistogram=0, newscat=0, 
-                          newbin=0, newskewT=1, newvarp=0, updatefit=0, new2d=0, quick=0)
+    newstats=0, newhistogram=0, newscat=0, 
+    newbin=0, newskewT=1, newvarp=0, updatefit=0, new2d=0, quick=0)
   SRCreac <- reactive ({              ## SRC
     ## reset SRC to 'NCAR'
     updateRadioButtons (session, 'SRC', label=NULL, selected='NCAR')
     'rf'
   })
-    
+  
   flightType <- reactive ({              ## typeFlight
     ## reset typeFlight to rf
     updateRadioButtons (session, 'typeFlight', label=NULL, selected='rf')
@@ -1763,11 +1763,11 @@ shinyServer(function(input, output, session) {
     }
     ## I don't know why these are needed, but apparently they are on loadConfig
     updateSelectInput(session, inputId='SRC',
-                      selected=plotSpec$SRC)
+      selected=plotSpec$SRC)
     updateSelectInput(session, inputId='Project',
-                      selected=plotSpec$Project, choices=PJ)
+      selected=plotSpec$Project, choices=PJ)
     updateSliderInput (session, inputId='times', value=plotSpec$Times, min=plotSpec$Times[1],
-                       max=plotSpec$Times[2])
+      max=plotSpec$Times[2])
     # Project <<- Project <- isolate(input$Project)
     reac$newdata
     # isolate (reac$newdisplay <- reac$newdisplay + 1)
@@ -1778,30 +1778,30 @@ shinyServer(function(input, output, session) {
     if (grepl ('HIPPO', plotSpec$Project)) {
       if (plotSpec$TypeFlight == 'F') {
         fname <<- sprintf ('%sHIPPO/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
-                            plotSpec$Flight)
+          plotSpec$Flight)
       } else {
         fname <<- sprintf ('%sHIPPO/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
-                         plotSpec$TypeFlight, plotSpec$Flight)
+          plotSpec$TypeFlight, plotSpec$Flight)
       }    
     } else {
       if (plotSpec$TypeFlight == 'F') {
         fname <<- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
-                           plotSpec$Project, plotSpec$Flight)
+          plotSpec$Project, plotSpec$Flight)
       } else if (plotSpec$TypeFlight == 'HRT') {
         fname <<- sprintf ('%s%s/%srf%02dHRT.nc', DataDirectory (), plotSpec$Project,
           plotSpec$Project, plotSpec$Flight)
         if (Trace) {print (sprintf ('in data, file name is %s', fname))}
       } else if (plotSpec$TypeFlight == 'KF') {
         fname <<- sprintf ('%s%s/%srf%02dKF.nc', DataDirectory (), plotSpec$Project,
-                           plotSpec$Project, plotSpec$Flight)
+          plotSpec$Project, plotSpec$Flight)
       } else {
         if (plotSpec$SRC != 'NCAR') {
           fname <<- sprintf ('%s%s/%s/%s%s%02d.nc', DataDirectory (),
-                             plotSpec$SRC, plotSpec$Project, plotSpec$Project,
-                             plotSpec$TypeFlight, plotSpec$Flight)
+            plotSpec$SRC, plotSpec$Project, plotSpec$Project,
+            plotSpec$TypeFlight, plotSpec$Flight)
         } else {
           fname <<- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
-                       plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+            plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
         }
       }
     }
@@ -1853,7 +1853,7 @@ shinyServer(function(input, output, session) {
       VarList <<- VarList ## saved as global for possible inspection
       # if (exists ('specialData')) {rm (specialData, pos=1)} 
       if ((fname != fname.last) || (any(!(VarList %in% VarListLast)))) {
-	if (Trace) {print (c(sprintf ('reading data from %s; VarList is:', fname), VarList))}
+        if (Trace) {print (c(sprintf ('reading data from %s; VarList is:', fname), VarList))}
         D <- getNetCDF (fname, VarList)
         if ('GGVSPDB' %in% VarList) {
           D$GGVSPD <- D$GGVSPDB
@@ -1882,7 +1882,7 @@ shinyServer(function(input, output, session) {
           # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
           plotSpec$Times <<- c(minT, maxT)
           if (Trace) {print (sprintf ('data: setting plotSpec$Times to %s %s', 
-                                      formatTime (minT), formatTime (maxT)))}
+            formatTime (minT), formatTime (maxT)))}
           updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
           updateNumericInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
           updateNumericInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
@@ -1896,9 +1896,9 @@ shinyServer(function(input, output, session) {
         D <- Data
       }
       if (exists ('specialData')) {
-	      if (!('ROC' %in% names(specialData))) { ## specialVar adds ROC+
-            specialData <<- cbind(specialData, specialVar (D))
-	      }  
+        if (!('ROC' %in% names(specialData))) { ## specialVar adds ROC+
+          specialData <<- cbind(specialData, specialVar (D))
+        }  
       } else {
         specialData <<- specialVar (D)
       }
@@ -1915,7 +1915,7 @@ shinyServer(function(input, output, session) {
         }
         ## skip if variables are already in D
         if (all (names (SD) %in% names (D))) {
-	      } else {
+        } else {
           DS <- D
           D <- cbind (D, SD)
           D <- transferAttributes (D, DS)
@@ -1925,9 +1925,9 @@ shinyServer(function(input, output, session) {
       ## remove duplicates:
       NMD <- names(D)
       if (length(unique(NMD)) < length(NMD)) {
-	      DS <- D[, NMD]
-	      D <- transferAttributes (DS, D)
-	      rm (DS)
+        DS <- D[, NMD]
+        D <- transferAttributes (DS, D)
+        rm (DS)
       }
       if (exists ('specialData')) {
         FI$Variables <<- unique(c(FI$Variables, names (specialData)[-1]))
@@ -1936,17 +1936,17 @@ shinyServer(function(input, output, session) {
         fname.last <<- fname
         VarListLast <<- VarList
         updateSelectInput (session, 'specvar', label=NULL, choices=sort(FI$Variables),  
-                           selected=plotSpec$Variance[[1]]$Definition$var)
+          selected=plotSpec$Variance[[1]]$Definition$var)
         updateSelectInput (session, 'speccovar', label=NULL, choices=sort(FI$Variables),  
-                           selected=plotSpec$Variance[[1]]$Definition$cvar)
+          selected=plotSpec$Variance[[1]]$Definition$cvar)
         updateSelectInput (session, 'addVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
-                           selected=plotSpec$Plot[[input$plot]]$panel[[input$panel]]$var[1])
+          selected=plotSpec$Plot[[input$plot]]$panel[[input$panel]]$var[1])
         updateSelectInput (session, 'haddVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
-                           selected=plotSpec$Hist[[input$plot]]$panel[[input$panel]]$var[1])
+          selected=plotSpec$Hist[[input$plot]]$panel[[input$panel]]$var[1])
         updateSelectInput (session, 'saddVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
-                           selected=plotSpec$Scat[[input$plot]]$panel[[input$panel]]$var[1])
+          selected=plotSpec$Scat[[input$plot]]$panel[[input$panel]]$var[1])
         updateSelectInput (session, 'baddVarP', label=NULL, choices=c('select', 'omit', sort(FI$Variables)), 
-                           selected=plotSpec$Bin[[input$plot]]$panel[[input$panel]]$var[1])
+          selected=plotSpec$Bin[[input$plot]]$panel[[input$panel]]$var[1])
         Data <<- D
         return (D)
       } else {
@@ -1970,15 +1970,15 @@ shinyServer(function(input, output, session) {
       ## try tf01
       if (plotSpec$SRC != 'NCAR') {
         fn <<- sprintf ('%s%s/%s/%s%s%02d.nc', DataDirectory (),
-                         plotSpec$SRC, plotSpec$Project, plotSpec$Project,
-                         'tf', plotSpec$Flight)
+          plotSpec$SRC, plotSpec$Project, plotSpec$Project,
+          'tf', plotSpec$Flight)
       } else {
         fn <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
-                       plotSpec$Project, 'tf', plotSpec$Flight)
+          plotSpec$Project, 'tf', plotSpec$Flight)
       }
       if (file.exists (fn)) {
         warning (sprintf ('switched to tf%02d because rf%02d does not exist',
-                          plotSpec$Flight, plotSpec$Flight))
+          plotSpec$Flight, plotSpec$Flight))
         updateRadioButtons (session, 'typeFlight', label=NULL, selected='tf')
         plotSpec$TypeFlight <<- 'tf'
         return (getNetCDF (fn, VarList))
@@ -2002,7 +2002,7 @@ shinyServer(function(input, output, session) {
     nrws <- ceiling ((spec$panels) / spec$columns)
     nmx <- nrws * spec$columns
     layout(matrix(1:nmx, ncol = spec$columns), widths = 1, 
-           heights = c(rep(5,spec$panels-1),6))
+      heights = c(rep(5,spec$panels-1),6))
     op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
     sp <- max (input$panel, spec$panels)
     for (pnl in 1:sp) {
@@ -2037,16 +2037,16 @@ shinyServer(function(input, output, session) {
       if (plotSpec$Plot[[input$plot]]$restrict) {
         if (is.null (yl)) {
           plotWAC (DataV[, c('Time', spec$panel[[pnl]]$var)], log=logY,
-                   ylab=spec$panel[[pnl]]$lab[1],
-                   col=spec$panel[[pnl]]$col,
-                   lwd=spec$panel[[pnl]]$lw,
-                   lty=spec$panel[[pnl]]$lt)  
+            ylab=spec$panel[[pnl]]$lab[1],
+            col=spec$panel[[pnl]]$col,
+            lwd=spec$panel[[pnl]]$lw,
+            lty=spec$panel[[pnl]]$lt)  
         } else {
           plotWAC (DataV[, c('Time', spec$panel[[pnl]]$var)], ylim=yl, log=logY,
-                   ylab=spec$panel[[pnl]]$lab[1],
-                   col=spec$panel[[pnl]]$col,
-                   lwd=spec$panel[[pnl]]$lw,
-                   lty=spec$panel[[pnl]]$lt)  
+            ylab=spec$panel[[pnl]]$lab[1],
+            col=spec$panel[[pnl]]$col,
+            lwd=spec$panel[[pnl]]$lw,
+            lty=spec$panel[[pnl]]$lt)  
         }
       } else {
         if (is.null (yl)) {
@@ -2058,16 +2058,16 @@ shinyServer(function(input, output, session) {
             print (ylabel)
           } 
           plotWAC (DataR[, c('Time', spec$panel[[pnl]]$var)], log=logY,
-                   ylab=ylabel,
-                   col=spec$panel[[pnl]]$col,
-                   lwd=spec$panel[[pnl]]$lw,
-                   lty=spec$panel[[pnl]]$lt) 
+            ylab=ylabel,
+            col=spec$panel[[pnl]]$col,
+            lwd=spec$panel[[pnl]]$lw,
+            lty=spec$panel[[pnl]]$lt) 
         } else {
           plotWAC (DataR[, c('Time', spec$panel[[pnl]]$var)], ylim=yl, log=logY,
-                   ylab=spec$panel[[pnl]]$lab[1],
-                   col=spec$panel[[pnl]]$col,
-                   lwd=spec$panel[[pnl]]$lw,
-                   lty=spec$panel[[pnl]]$lt) 
+            ylab=spec$panel[[pnl]]$lab[1],
+            col=spec$panel[[pnl]]$col,
+            lwd=spec$panel[[pnl]]$lw,
+            lty=spec$panel[[pnl]]$lt) 
         }
         par(cex=1)
       }
@@ -2084,7 +2084,7 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print (sprintf ('display: newdisplay is %d', reac$newdisplay))
       print (sprintf ('display: global plotSpec$Times are %s %s',
-                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
+        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -2098,26 +2098,26 @@ shinyServer(function(input, output, session) {
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
-
+    
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Plot[[input$plot]]$restrict)
     # i <- getIndex (DataR$Time, SE[1])
     if (plotSpec$TypeFlight == 'F') {
       FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
-                            plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
-                            strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
-                            strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
+        plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
+        strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
+        strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
     } else {
       FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                          plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
-                          strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
-                          strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
+        plotSpec$Flight, strftime(plotSpec$Times[1], format="%Y-%m-%d", tz='UTC'),
+        strftime(plotSpec$Times[1], format="%H:%M:%S", tz='UTC'),
+        strftime(plotSpec$Times[2], format="%H:%M:%S", tz='UTC'))
     }
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
         mtext(paste(FigFooter,'generated by Ranadu plot ', input$plot,
-                    FigDatestr),1,outer=T,cex=0.75)
+          FigDatestr),1,outer=T,cex=0.75)
       )
     }
     # closeAlert(session, alertId = 'pausing')
@@ -2139,7 +2139,7 @@ shinyServer(function(input, output, session) {
     nrws <- ceiling (spec$panels / spec$columns)
     nmx <- nrws * spec$columns
     layout(matrix(1:nmx, ncol = spec$columns), widths = 1, 
-           heights = c(rep(5,spec$panels-1),6))
+      heights = c(rep(5,spec$panels-1),6))
     op <- par (mar=c(5,4,1,2)+0.1, oma=c(1.1,0,0,0))
     if (spec$restrict) {
       DataX <- DataV
@@ -2183,10 +2183,10 @@ shinyServer(function(input, output, session) {
           if (Trace) {print (sprintf ('plotScat: symbol used %d', spec$panel[[pnl]]$symbol))}
         } else {
           plotWAC (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary)],
-                   log=logV, col=spec$panel[[pnl]]$col, type='p',
-                   xlab=spec$panel[[pnl]]$varx,
-                   pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
-                   legend.position='top')
+            log=logV, col=spec$panel[[pnl]]$col, type='p',
+            xlab=spec$panel[[pnl]]$varx,
+            pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
+            legend.position='top')
         }
       } else {
         if (input$ssmooth) {
@@ -2196,10 +2196,10 @@ shinyServer(function(input, output, session) {
             pch=spec$panel[[pnl]]$symbol[1], cex=spec$panel[[pnl]]$size[1])
         } else {
           plotWAC (DataX[, c(spec$panel[[pnl]]$varx, spec$panel[[pnl]]$vary)],
-                   log=logV, col=spec$panel[[pnl]]$col, type='p', xlim=xl,
-                   ylim=yl, xlab=spec$panel[[pnl]]$varx,
-                   pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
-                   legend.position='top')
+            log=logV, col=spec$panel[[pnl]]$col, type='p', xlim=xl,
+            ylim=yl, xlab=spec$panel[[pnl]]$varx,
+            pch=spec$panel[[pnl]]$symbol, cex=spec$panel[[pnl]]$size,
+            legend.position='top')
         }
       }
       tt <- ''
@@ -2208,12 +2208,12 @@ shinyServer(function(input, output, session) {
         coef <- coefficients (fm)
         if (coef[1] < 0.) {
           t <- sprintf ("%s=%.3f(%s)%.3f rms %.3f r=%.3f",
-                        spec$panel[[pnl]]$vary[iy], coef[2], spec$panel[[pnl]]$varx, coef[1],
-                        summary(fm)$sigma, sqrt (summary (fm)$r.squared))
+            spec$panel[[pnl]]$vary[iy], coef[2], spec$panel[[pnl]]$varx, coef[1],
+            summary(fm)$sigma, sqrt (summary (fm)$r.squared))
         } else {
           t <- sprintf ("%s=%.3f(%s)+%.3f rms %.3f r=%.3f",
-                        spec$panel[[pnl]]$vary[iy], coef[2], spec$panel[[pnl]]$varx, coef[1],
-                        summary(fm)$sigma, sqrt (summary (fm)$r.squared))
+            spec$panel[[pnl]]$vary[iy], coef[2], spec$panel[[pnl]]$varx, coef[1],
+            summary(fm)$sigma, sqrt (summary (fm)$r.squared))
         }
         if (tt == '') {
           tt <- t
@@ -2236,7 +2236,7 @@ shinyServer(function(input, output, session) {
     nrws <- ceiling (spec$panels / spec$columns)
     nmx <- nrws * spec$columns
     layout(matrix(1:nmx, ncol = spec$columns), widths = 1, 
-           heights = c(rep(5,spec$panels-1),6))
+      heights = c(rep(5,spec$panels-1),6))
     op <- par (mar=c(5,4,1,2)+0.1, oma=c(1.1,0,0,0))
     if (spec$restrict) {
       DataX <- DataV
@@ -2282,11 +2282,11 @@ shinyServer(function(input, output, session) {
       ## find the range in x:
       if (is.null(yl)) {
         xl <- c(min (DataX[, varx], na.rm=TRUE),
-                max (DataX[, varx], na.rm=TRUE))
+          max (DataX[, varx], na.rm=TRUE))
       }
       nm <- vary[1]
       yl <- c(min (DataX[, nm], na.rm=TRUE),
-              max (DataX[, nm], na.rm=TRUE))
+        max (DataX[, nm], na.rm=TRUE))
       for (kl in 2:length (vary)) {
         if ((ymn=min (DataX[, vary[kl]], na.rm=TRUE)) < yl[1]) {
           yl[1] <- ymn
@@ -2324,17 +2324,17 @@ shinyServer(function(input, output, session) {
         symbl <- spec$panel[[pnl]]$symbol[kl]
         sysz <- spec$panel[[pnl]]$size[kl]
         boxplot (DB, horizontal=TRUE, outline=FALSE, 
-                 ylab=spec$panel[[pnl]]$varx, xlab=xlb, 
-                 ylim=yl, names=NULL,  at=at.loc, border=colr,
-                 yaxt='n', add=adp, pars = list(boxwex = 0.7*dz))
+          ylab=spec$panel[[pnl]]$varx, xlab=xlb, 
+          ylim=yl, names=NULL,  at=at.loc, border=colr,
+          yaxt='n', add=adp, pars = list(boxwex = 0.7*dz))
         points (mean.loc, at.loc, col=colr, pch=symbl, cex=sysz)
         lines (mean.loc, at.loc, col=colr, lwd=sysz)
       }
       axis(3, labels=NA, tck=0.02)
       axis (4, labels=NA)
       legend ('top', legend=vary, 
-              text.col=spec$panel[[pnl]]$col, lwd=spec$panel[[pnl]]$size, 
-              cex=0.80, col=spec$panel[[pnl]]$col)
+        text.col=spec$panel[[pnl]]$col, lwd=spec$panel[[pnl]]$size, 
+        cex=0.80, col=spec$panel[[pnl]]$col)
       axis (2)
       DB <<- DB
       tt <- ''
@@ -2343,12 +2343,12 @@ shinyServer(function(input, output, session) {
         coef <- coefficients (fm)
         if (coef[1] < 0.) {
           t <- sprintf ("%s=%.3f(%s)%.3f rms %.3f r=%.3f",
-                        spec$panel[[pnl]]$vary[iy], coef[2], spec$panel[[pnl]]$varx, coef[1],
-                        summary(fm)$sigma, sqrt (summary (fm)$r.squared))
+            spec$panel[[pnl]]$vary[iy], coef[2], spec$panel[[pnl]]$varx, coef[1],
+            summary(fm)$sigma, sqrt (summary (fm)$r.squared))
         } else {
           t <- sprintf ("%s=%.3f(%s)+%.3f rms %.3f r=%.3f",
-                        spec$panel[[pnl]]$vary[iy], coef[2], spec$panel[[pnl]]$varx, coef[1],
-                        summary(fm)$sigma, sqrt (summary (fm)$r.squared))
+            spec$panel[[pnl]]$vary[iy], coef[2], spec$panel[[pnl]]$varx, coef[1],
+            summary(fm)$sigma, sqrt (summary (fm)$r.squared))
         }
         if (tt == '') {
           tt <- t
@@ -2372,7 +2372,7 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print (sprintf ('scatterplot: newscat is %d', reac$newscat))
       print (sprintf ('scatterplot: global plotSpec$Times are %s %s',
-                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
+        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -2394,23 +2394,23 @@ shinyServer(function(input, output, session) {
     isolate (
       if (plotSpec$TypeFlight == 'F') {
         FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
-                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                       format="%H:%M:%S", tz='UTC'))
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       } else {
         FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                            plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                            strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                            strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                     format="%H:%M:%S", tz='UTC'))
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
         mtext(paste(FigFooter,'generated by Ranadu plot ', input$plot,
-                    FigDatestr),1,outer=T,cex=0.75)
+          FigDatestr),1,outer=T,cex=0.75)
       )
     }
     plotScat (input)    ## isolated in function to be able to save via PDF/PNG
@@ -2431,7 +2431,7 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print (sprintf ('binplot: newbin is %d', reac$newbin))
       print (sprintf ('binplot: global plotSpec$Times are %s %s',
-                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
+        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -2453,23 +2453,23 @@ shinyServer(function(input, output, session) {
     isolate (
       if (plotSpec$TypeFlight == 'F') {
         FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
-                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                       format="%H:%M:%S", tz='UTC'))
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       } else {
         FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                            plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                            strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                            strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                     format="%H:%M:%S", tz='UTC'))
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
         mtext(paste(FigFooter,'generated by Ranadu plot ', input$plot,
-                    FigDatestr),1,outer=T,cex=0.75)
+          FigDatestr),1,outer=T,cex=0.75)
       )
     }
     plotBin (input)    ## isolated in function to be able to save via PDF/PNG
@@ -2485,10 +2485,10 @@ shinyServer(function(input, output, session) {
     TXT <- 
       sprintf (
         paste('response variable: %s',
-              'fit formula: %s',
-              'Residual standard deviation: %.3f, dof=%d',
-              'R-squared %.3f', 
-              'Coefficients:', sep='<br/>'), 
+          'fit formula: %s',
+          'Residual standard deviation: %.3f, dof=%d',
+          'R-squared %.3f', 
+          'Coefficients:', sep='<br/>'), 
         input$response,
         input$fformula,
         summary(fitm)$sigma, summary(fitm)$df[2],
@@ -2536,30 +2536,30 @@ shinyServer(function(input, output, session) {
     isolate (
       if (plotSpec$TypeFlight == 'F') {
         FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
-                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                       format="%H:%M:%S", tz='UTC'))        
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))        
       } else {
         FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                            plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                            strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                            strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                     format="%H:%M:%S", tz='UTC'))
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
         mtext(paste(FigFooter,'generated by Ranadu plot ', input$plot,
-                    FigDatestr),1,outer=T,cex=0.75)
+          FigDatestr),1,outer=T,cex=0.75)
       )
     }
     plotWAC (data.frame(x=fitm$y, y=fitm$fitted.values), 
-             col='blue', type='p', 
-             xlab=input$response,
-             ylab='fit value',
-             pch=20, cex=0.8, legend.position=NA) 
+      col='blue', type='p', 
+      xlab=input$response,
+      ylab='fit value',
+      pch=20, cex=0.8, legend.position=NA) 
     V <- DataV[, input$response]
     pts <- c(min(V, na.rm=TRUE), max(V, na.rm=TRUE))
     lines (pts, pts, col='darkorange', lty=2, lwd=2)
@@ -2993,9 +2993,9 @@ shinyServer(function(input, output, session) {
           p <- p + theme_WAC()
           print(p)
           dev.off ()
-        }
-      }
-    } else {  ## end of acv section; others need Xanadu routine 'otto'
+        }  ## end of plot generation for various types
+      }    ## end of plot types needing autocorrelation
+    } else {  ## end of acv section, start of not-acv
       Theme <- input$varTheme
       Rate <- FI$Rate
       isolate (plt <- input$plot)
@@ -3032,8 +3032,8 @@ shinyServer(function(input, output, session) {
           fmin <- log (Rate / ld)
           fmax <- log (0.5*Rate)
           resolution <- input$MEMres
-          df <- (fmax - fmin) * resolution
           bins <- as.integer (1/resolution)
+          tasAverage <- mean (DataR$TASX, na.rm=TRUE)
           avebin <- input$MEMavg
           df <- (fmax-fmin)/bins
           fdtl <- fmin + df * (0:bins)  ## natural logarithms of evaluation pts
@@ -3049,6 +3049,11 @@ shinyServer(function(input, output, session) {
           Vps <- psComplex * Conj (pscComplex)
           edf <- c(0, diff(fdt))
           variance <- sum (ps * edf)
+          if (grepl('^UX', v) || grepl('TASX', v)) {
+            ae <- 0.15
+          } else {
+            ae <- 0.20
+          }
           if (input$MEMtype == 'fp(f)') {
           } else if (grepl ('co-var', input$MEMtype, fixed=TRUE)) {
             nups <- fdt * pscov
@@ -3059,35 +3064,44 @@ shinyServer(function(input, output, session) {
             nupsi <- 2 * Rate * Im (Vps) * fdt
           } else if (grepl ('coh', input$MEMtype)) {
             ## will use Vps, ps, psc below
+          } else if (grepl ('edr', input$MEMtype, fixed=TRUE)) {
+            nups <- (ps * fdt^(5/3) / (ae * tasAverage^(2/3)))    ## proportional to edr^(2/3)
+            nups <- nups ^ 1.5  ## introduces distortion in visual averaging -- but edr is calculated properly
+            nupsEDR <<- nups  ## save for inspection, debugging...
+            fdtEDR <<- fdt
           } else {
             nups <- fdt * ps
             nupsc <- fdt * pscov
           }
           lp <- length (fdt)
-          flow <- (as.integer(log10 (fdt[1])) - 1)
-          fhigh <- (as.integer(log10 (fdt[lp]) + 1))
-          nfSpec <- fhigh - flow
+          flow <- (floor(log10 (fdt[1])))
+          fhigh <- (ceiling(log10 (fdt[lp])))
+          nfSpec <- fhigh - flow + 1
           flow <- 10^flow; fhigh <- 10^fhigh
-          plow <- (as.integer(log10 (min(nups, na.rm=TRUE)) - 1))
-          phigh <- (as.integer(log10 (max(nups, na.rm=TRUE)) + 1))
-          npSpec <- phigh - plow 
+          plow <- (floor(log10 (min(nups, na.rm=TRUE))))
+          phigh <- (ceiling(log10 (max(nups, na.rm=TRUE))))
+          npSpec <- phigh - plow + 1
+          # if (grepl ('edr', input$MEMtype, fixed=TRUE)) {
+          #   npSpec <- ceiling (phigh*1.5) - floor (plow*1.5)
+          #   npSpec <- 1.5 * npSpec
+          #   print (sprintf ('npSpec=%f, plow=%f, phigh=%f', npSpec, plow, phigh))
+          #   if (npSpec < 2) {
+          #     npSpec <- 2
+          #   }
+          # }
           # while (phigh - plow < 3) {plow <- plow - 1}
           # while (phigh - plow < 4) {phigh <- phigh + 1}
           phigh <- 10^phigh; plow <- 10^plow
-          tasAverage <- mean (DataR$TASX, na.rm=TRUE)
           print (sprintf ('f %e %e p %e %e fdt[lp] %e %.1f', flow, fhigh, plow, phigh, fdt[lp], tasAverage))
           ## estimate eddy dissipation rate:
-          .r <- (fdt > 0.1) & (fdt < 8)
+          edrMin <- input$MEMedrRange[1]
+          edrMax <- input$MEMedrRange[2]
+          .r <- (fdt > edrMin) & (fdt < edrMax)
           lr <- length (.r[.r])    ## number of TRUE values
           ve <- ps[.r] * (fdt[.r])^(5/3)
           eb <- sum (ve) / lr
           eb2 <- sum (ve^2) / lr
           eb2 <- sqrt (eb2 - eb^2) / sqrt(lr)
-          if (grepl('^UX', v) || grepl('TASX', v)) {
-            ae <- 0.15
-          } else {
-            ae <- 0.20
-          }
           edr <- (eb / ae)^(1.5) / tasAverage
           eb2 <- (eb2 / ae)^(1.5) / tasAverage
           print (sprintf ('estimated eddy dissipation rate: %.2e +/- %.2e m^2/s^3', edr, eb2))
@@ -3190,8 +3204,7 @@ shinyServer(function(input, output, session) {
           # lines (exp(pf2$xc), pf2$ybar, col='blue', lwd=2)
           dev.off()
         } 
-        if (grepl ('p(f)', input$MEMtype, fixed=TRUE)) {
-          
+        if (grepl ('p(f)', input$MEMtype, fixed=TRUE) || grepl('edr', input$MEMtype, fixed=TRUE)) {
           if (isolate (input$MEMadd)) {
             vMEM <- vMEM
             cMEM <- cMEM
@@ -3210,7 +3223,8 @@ shinyServer(function(input, output, session) {
             vMEM <- c(vMEM, xvm)
             cMEM <- c(cMEM, lineColor)
           }
-          if (grepl ('p(f)', input$MEMtype, fixed=TRUE) || grepl ('co-var', input$MEMtype, fixed=TRUE)) {
+          if (grepl ('p(f)', input$MEMtype, fixed=TRUE) || grepl ('co-var', input$MEMtype, fixed=TRUE) ||
+              grepl ('edr', input$MEMtype, fixed=TRUE)) {
             if (isolate(input$MEMadd) && exists ('gMEM')) {
               dd <- reshape2::melt(X, id="xc", measure="ybar")
               i <-  2
@@ -3233,7 +3247,12 @@ shinyServer(function(input, output, session) {
                 cUS <- sprintf('unsmoothed %s', xvm)
                 g <- g + geom_path (aes_(colour=cUS), lwd=0.5)
               }
+              if (grepl ('edr', input$MEMtype, fixed=TRUE)) {
+                XE <- data.frame(xe=c(edrMin, edrMax), ye=c(edr, edr))
+                g <- g + geom_path (data=XE, aes_(x=quote(xe), y=quote(ye)), colour='brown', lwd=1.5)
+              }
               g <- g + geom_path (data=X, aes_(x=quote(xc), y=quote(ybar), colour=xvm), lwd=1.2)
+              ## skip the following for the edr case:
               if (grepl ('p(f)', input$MEMtype, fixed=TRUE) || grepl ('co-var', input$MEMtype, fixed=TRUE)) {
                 epsColor <- 'darkgreen'
                 for (i in (-8):2) {
@@ -3255,15 +3274,24 @@ shinyServer(function(input, output, session) {
                 scale_x_continuous(trans='log10', breaks = trans_breaks(trans="log10", n=nfSpec, function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x)), 
                   sec.axis=sec_axis(~log10(.^(-1)*tasAverage*0.001), name='wavelength [km]', 
-                    breaks=c(1,2,3), labels=c(' 10 ', ' 100 ', ''))) +
-                scale_y_log10(breaks = trans_breaks(trans="log10", n=npSpec, function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
-                annotation_logticks() +
+                    breaks=c(1,2,3), labels=c(' 10 ', ' 100 ', ''))) 
+              # if (grepl ('edr', input$MEMtype, fixed=TRUE)) {
+              #   g <- g + scale_y_continuous(trans=trans_new(name='23power', transform=function (x) 10^(1.5*x), inverse=function (x) log10(x)/1.5,
+              #     breaks = c(1e-6, 1e-5, 1e-4, 1e-3, 1e-2)), 
+              #     labels = trans_format("log10", math_format(10^.x)))   #,
+              #     # sec.axis=sec_axis (~log10(.^1.5), name='edr', breaks=c(-6,-4,-2), labels=c("1e-6", "1e-4", "1e-2")))
+              # } else {
+              g <- g + scale_y_log10(breaks = trans_breaks(trans="log10", n=npSpec, function(x) 10^x),
+                labels = trans_format("log10", math_format(10^.x)))
+              # }
+              g <- g + annotation_logticks() +
                 xlab('frequency [Hz]')
               if (input$MEMtype == 'fp(f)') {
                 g <- g + ylab (bquote(paste(.(v), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
               } else if (input$MEMtype == 'p(f)') {
                 g <- g + ylab (bquote(paste(.(v), ': ', 'P(',nu,')', sep='')))
+              } else if (grepl ('edr', input$MEMtype, fixed=TRUE)) {
+                g <- g + ylab (bquote(paste(.(v), ': ', epsilon, '(',nu,')', sep='')))
               } else if (grepl ('co-var', input$MEMtype)) {
                 g <- g + ylab (bquote(paste(.(cv), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
               }
@@ -3301,6 +3329,13 @@ shinyServer(function(input, output, session) {
                   strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
                   strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
                   poles, avebin, resolution, variance, edr)
+                if (grepl ('edr', input$MEMtype, fixed=TRUE)) {
+                  cap <- sprintf ('%s %s--%s MEM: %d poles, %d sm. bins, res=%.1e, edr=%.1e +/- %.1e', 
+                    strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+                    strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                    strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
+                    poles, avebin, resolution, edr, eb2*sqrt(lr))
+                }
                 cap <- bquote(paste(.(cap), ' m'^'2','s'^'-3', sep=''))
                 g <- g + labs (caption=cap)
                 # g <- g + labs (caption=sprintf('MEM, %d poles, %d smoothing bins\nresolution %.1e, variance %.1e, edr %.1e m^2/s^3', poles, avebin, resolution, variance, edr))
@@ -3312,9 +3347,9 @@ shinyServer(function(input, output, session) {
             png(filename=gname, width=600, height=600)
             print (g)
             dev.off()
-          }
-        }
-      }
+          }  ## end of similar test -- redundant?
+        }    ## end of sections ising ggplot2 (fp(f) etc.)
+      }      ## end of the MEM section
       if (input$spectype == 'fft') {
         # if (input$varXanadu) {
         if (0) {    ## used to save this code, altho suppressed in std version
@@ -3440,6 +3475,12 @@ shinyServer(function(input, output, session) {
           fdt <- S$frequency[-1] * Rate    ## remove first component (zero)
           segUsed <- S$segments     ## overlapping segments used
           print (sprintf ('data length %d seg L %d segUsed %d', ld, segmentLength, segUsed))
+          if (grepl('^UX', v) || grepl('TASX', v)) {
+            ae <- 0.15
+          } else {
+            ae <- 0.20
+          }
+          tasAverage <- mean (DataR$TASX, na.rm=TRUE)
           lp <- length (fdt)
           flow <- floor(min(log10 (fdt[1]), na.rm=TRUE))
           fhigh <- ceiling(max(log10 (fdt[lp]), na.rm=TRUE))
@@ -3463,6 +3504,9 @@ shinyServer(function(input, output, session) {
             #   nupsi <- 2 * Rate * Im (Vps) * fdt
             # } else if (grepl ('coh', input$ffttype)) {
             #   ## will use Vps, ps, psc below
+          } else if (grepl ('edr', input$ffttype, fixed=TRUE)) {
+            nups <- (ps * fdt^(5/3) / (ae * tasAverage^(2/3)))    ## proportional to edr^(2/3)
+            nups <- nups ^ 1.5  ## introduces distortion in visual averaging -- but edr is calculated properly
           } else {
             nups <- fdt * ps
             nupsc <- fdt * psc
@@ -3474,25 +3518,22 @@ shinyServer(function(input, output, session) {
           # while (phigh - plow < 3) {plow <- plow - 1}
           # while (phigh - plow < 4) {phigh <- phigh + 1}
           phigh <- 10^phigh; plow <- 10^plow
-          tasAverage <- mean (DataR$TASX, na.rm=TRUE)
           df <- S$frequency[1] * Rate
           fdtl <- log(fdt)
           edf <- c(0, diff(fdt))
           variance <- sum (ps * edf)
-          .r <- (fdt > 0.1) & (fdt < 8)
+          edrMin <- input$fftedrRange[1]
+          edrMax <- input$fftedrRange[2]
+          .r <- (fdt > edrMin) & (fdt < edrMax)
           lr <- length (.r[.r])    ## number of TRUE values
           ve <- ps[.r] * (fdt[.r])^(5/3)
           eb <- sum (ve) / lr
           eb2 <- sum (ve^2) / lr
           eb2 <- sqrt (eb2 - eb^2) / sqrt(lr)
-          if (grepl('^UX', v) || grepl('TASX', v)) {
-            ae <- 0.15
-          } else {
-            ae <- 0.20
-          }
           edr <- (eb / ae)^(1.5) / tasAverage
           eb2 <- (eb2 / ae)^(1.5) / tasAverage
           print (sprintf ('estimated eddy dissipation rate: %.2e +/- %.2e m^2/s^3', edr, eb2))
+          ebs <- eb2 * sqrt(lr)
           lineColor <- isolate(input$FFTcolor) 
           ## calculate a smoothed version of nups
           ld <- length(fdt)
@@ -3607,14 +3648,14 @@ shinyServer(function(input, output, session) {
             pf1 <- pf1[!is.na (pf1$ybar), ]
             pf2 <- pf2[!is.na (pf2$ybar), ]
             plotWAC (exp(pf1$xc), pf1$ybar, xlab='frequency [Hz]', col=lineColor, log='x', 
-                     ylab=sprintf ('%s x %s coherence', v, cv))
+              ylab=sprintf ('%s x %s coherence', v, cv))
             op <- par (mar=c(5,4,1,2)+0.1)
             plotWAC (exp(pf2$xc), pf2$ybar * 180 / pi, xlab='frequency [Hz]', col=lineColor, log='x',
               ylab=sprintf ('%s x %s phase [degrees]', v, cv))
             abline(h=0, col='gray', lty=3)
             # lines (exp(pf2$xc), pf2$ybar, col='blue', lwd=2)
             dev.off()
-          } else if (grepl ('fp(f)', input$ffttype, fixed=TRUE)) {
+          } else if (grepl ('fp(f)', input$ffttype, fixed=TRUE) || grepl ('edr', input$ffttype, fixed=TRUE)) {
             xvm <- ifelse(grepl('co-var', input$ffttype, fixed=TRUE), cv, v)
             if (isolate (input$FFTadd)) {
               vFFT <- vFFT
@@ -3633,117 +3674,134 @@ shinyServer(function(input, output, session) {
               vFFT <- c(vFFT, xvm)
               cFFT <- c(cFFT, lineColor)
             }              
-            
-            if (isolate(input$FFTadd) && exists ('gFFT')) {
-              dd <- reshape2::melt(X, id="xc", measure="ybar")
-              i <-  2
-              while (exists (vnFFT <- sprintf('v%dFFT', i), '.GlobalEnv')) {i <- i + 1}
-              assign(vnFFT, v, '.GlobalEnv')
-              if (i == 2) {
-                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v2FFT), lwd=1.2) #+
-              } else if (i == 3) {
-                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v3FFT), lwd=1.2)
-              } else if (i == 4) {
-                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v4FFT), lwd=1.2)
+            # if (grepl ('p(f)', input$ffttype, fixed=TRUE) || grepl ('co-var', input$ffttype, fixed=TRUE) ||
+            #     grepl ('edr', input$ffttype, fixed=TRUE)) {
+              
+              if (isolate(input$FFTadd) && exists ('gFFT')) {
+                dd <- reshape2::melt(X, id="xc", measure="ybar")
+                i <-  2
+                while (exists (vnFFT <- sprintf('v%dFFT', i), '.GlobalEnv')) {i <- i + 1}
+                assign(vnFFT, v, '.GlobalEnv')
+                if (i == 2) {
+                  g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v2FFT), lwd=1.2) #+
+                } else if (i == 3) {
+                  g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v3FFT), lwd=1.2)
+                } else if (i == 4) {
+                  g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v4FFT), lwd=1.2)
+                }
+                names(cFFT) <- vFFT
+                g <- g + scale_colour_manual (name='', values=cFFT)
+              } else {
+                g <- ggplot (data=data.frame(fdt=fdt, nups=nups), aes(x=fdt, y=nups))
+                if (input$FFTshowU) {
+                  cUS <- sprintf('unsmoothed %s', xvm)
+                  g <- g + geom_path (aes_(colour=cUS), lwd=0.5)
+                }              
+                if (grepl ('edr', input$ffttype, fixed=TRUE)) {
+                  XE <- data.frame(xe=c(edrMin, edrMax), ye=c(edr, edr))
+                  g <- g + geom_path (data=XE, aes_(x=quote(xe), y=quote(ye)), colour='brown', lwd=1.5)
+                }
+                g <- g + geom_path (data=X, aes(x=xc, y=ybar, colour=xvm), lwd=1.2)
+                ## skip for 'edr':
+                if (grepl ('p(f)', input$ffttype, fixed=TRUE) || grepl ('co-var', input$ffttype, fixed=TRUE)) {
+                  epsColor <- 'darkgreen'
+                  for (i in (-8):2) {
+                    if (input$ffttype == 'fp(f)' || grepl ('co-var', input$ffttype, fixed=TRUE)) {
+                      yl <- ae * (10^i * tasAverage / flow)^(2/3)
+                      yh <- ae * (10^i * tasAverage / fhigh)^(2/3)
+                    } else if (input$ffttype == 'p(f)') {
+                      yl <- ae * (10^i * tasAverage / flow)^(2/3) / flow
+                      yh <- ae * (10^i * tasAverage / fhigh)^(2/3) / fhigh
+                    }
+                    if (i == -4) {
+                      g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.6, lty=1)
+                    } else {
+                      g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.3, lty=2)
+                    }
+                  }
+                }
+                
+              }
+              g <- g + coord_cartesian (xlim=c(flow,fhigh), ylim=c(plow,phigh)) +
+                scale_x_continuous(trans='log10', breaks = trans_breaks("log10", (function(x) 10^x), n=nfSpec+1),
+                  labels = trans_format("log10", math_format(10^.x)),
+                  sec.axis=sec_axis(~log10(.^(-1)*tasAverage*0.001), name='wavelength [km]',
+                    breaks=c(0,1,2), labels=c(' 1 ', ' 10 ', ' 100 '))) +
+                scale_y_log10(breaks = trans_breaks("log10", (function(x) 10^x), n=npSpec+1),
+                  labels = trans_format("log10", math_format(10^.x))) +
+                annotation_logticks() +
+                xlab('frequency [Hz]') 
+              if (input$ffttype == 'fp(f)') {
+                g <- g + ylab (bquote(paste(.(v), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
+              } else if (input$ffttype == 'p(f)') {
+                g <- g + ylab (bquote(paste(.(v), ': ', 'P(',nu,')', sep='')))
+              } else if (grepl ('edr', input$ffttype, fixed=TRUE)) {
+                g <- g + ylab (bquote(paste(.(v), ': ', epsilon, '(',nu,')', sep='')))
+              } else if (grepl ('co-var', input$ffttype)) {
+                g <- g + ylab (bquote(paste(.(cv), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
               }
               names(cFFT) <- vFFT
               g <- g + scale_colour_manual (name='', values=cFFT)
-            } else {
-              g <- ggplot (data=data.frame(fdt=fdt, nups=nups), aes(x=fdt, y=nups))
-              if (input$FFTshowU) {
-                cUS <- sprintf('unsmoothed %s', xvm)
-                g <- g + geom_path (aes_(colour=cUS), lwd=0.5)
-              }
-              g <- g + geom_path (data=X, aes(x=xc, y=ybar, colour=xvm), lwd=1.2)
               
-              if (grepl ('p(f)', input$ffttype, fixed=TRUE) || grepl ('co-var', input$ffttype, fixed=TRUE)) {
-                epsColor <- 'darkgreen'
-                for (i in (-8):2) {
-                  if (input$ffttype == 'fp(f)' || grepl ('co-var', input$ffttype, fixed=TRUE)) {
-                    yl <- ae * (10^i * tasAverage / flow)^(2/3)
-                    yh <- ae * (10^i * tasAverage / fhigh)^(2/3)
-                  } else if (input$ffttype == 'p(f)') {
-                    yl <- ae * (10^i * tasAverage / flow)^(2/3) / flow
-                    yh <- ae * (10^i * tasAverage / fhigh)^(2/3) / fhigh
-                  }
-                  if (i == -4) {
-                    g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.6, lty=1)
-                  } else {
-                    g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.3, lty=2)
-                  }
+              Theme <- input$varTheme
+              if (Theme == 'classic') {g <- g + theme_classic()}
+              if (Theme == 'bw')      {g <- g + theme_bw()}
+              if (Theme == 'base')    {g <- g + theme_base()}
+              if (Theme == 'excel')   {g <- g + theme_excel()}
+              if (Theme == 'few')     {g <- g + theme_few()}
+              if (Theme == 'foundation') {g <- g + theme_foundation()}
+              if (Theme == 'igray')   {g <- g + theme_igrey()}
+              if (Theme == 'light')   {g <- g + theme_light()}
+              if (Theme == 'linedraw') {g <- g + theme_linedraw()}
+              if (Theme == 'tufte')   {g <- g + theme_tufte()}
+              if (Theme == 'standard') {}## g <- g + theme_classic()}
+              if (grepl('WAC', Theme))     {
+                g <- g + theme_WAC() + theme (axis.title.x.top=element_text(size=10, hjust=0.5, vjust=2),
+                  axis.text.x.top=element_text(size=10, hjust=0.02, vjust=1))
+                if (Theme == 'WAC2') {
+                  g <- g + theme(rect=element_rect(fill='bisque'))
                 }
+              } else {
+                g <- g + theme (axis.title.x.top=element_text(size=10, hjust=0.5),
+                  axis.text.x.top=element_text(size=10, hjust=0.5, vjust=1))
               }
-              
-            }
-            g <- g + coord_cartesian (xlim=c(flow,fhigh), ylim=c(plow,phigh)) +
-              scale_x_continuous(trans='log10', breaks = trans_breaks("log10", (function(x) 10^x), n=nfSpec+1),
-                labels = trans_format("log10", math_format(10^.x)),
-                sec.axis=sec_axis(~log10(.^(-1)*tasAverage*0.001), name='wavelength [km]',
-                  breaks=c(0,1,2), labels=c(' 1 ', ' 10 ', ' 100 '))) +
-              scale_y_log10(breaks = trans_breaks("log10", (function(x) 10^x), n=npSpec+1),
-                labels = trans_format("log10", math_format(10^.x))) +
-              annotation_logticks() +
-              xlab('frequency [Hz]') 
-            if (input$ffttype == 'fp(f)') {
-              g <- g + ylab (bquote(paste(.(v), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
-            } else if (input$ffttype == 'p(f)') {
-              g <- g + ylab (bquote(paste(.(v), ': ', 'P(',nu,')', sep='')))
-            } else if (grepl ('co-var', input$ffttype)) {
-              g <- g + ylab (bquote(paste(.(cv), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
-            }
-            names(cFFT) <- vFFT
-            g <- g + scale_colour_manual (name='', values=cFFT)
-            
-            Theme <- input$varTheme
-            if (Theme == 'classic') {g <- g + theme_classic()}
-            if (Theme == 'bw')      {g <- g + theme_bw()}
-            if (Theme == 'base')    {g <- g + theme_base()}
-            if (Theme == 'excel')   {g <- g + theme_excel()}
-            if (Theme == 'few')     {g <- g + theme_few()}
-            if (Theme == 'foundation') {g <- g + theme_foundation()}
-            if (Theme == 'igray')   {g <- g + theme_igrey()}
-            if (Theme == 'light')   {g <- g + theme_light()}
-            if (Theme == 'linedraw') {g <- g + theme_linedraw()}
-            if (Theme == 'tufte')   {g <- g + theme_tufte()}
-            if (Theme == 'standard') {}## g <- g + theme_classic()}
-            if (grepl('WAC', Theme))     {
-              g <- g + theme_WAC() + theme (axis.title.x.top=element_text(size=10, hjust=0.5, vjust=2),
-                axis.text.x.top=element_text(size=10, hjust=0.02, vjust=1))
-              if (Theme == 'WAC2') {
-                g <- g + theme(rect=element_rect(fill='bisque'))
+              if (input$FFTcaption) {
+                SE <- getStartEnd (DataR$Time)
+                i <- getIndex (DataR$Time, SE[1])
+                if (grepl ('edr', input$ffttype, fixed=TRUE)) {
+                  cap <- sprintf ('%s %s--%s fft: %d seg (s), %d sm. bins, edr=%.1e +/- %.1e',
+                    strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+                    strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                    strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
+                    segmentLength/Rate, avebin, edr, ebs)
+                } else {
+                  cap <- sprintf ('%s %s--%s FFT: %d seg (s), %d sm. bins, var.=%.1e, edr=%.1e ',
+                    strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+                    strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                    strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
+                    segmentLength/Rate, avebin, variance, edr)
+                }
+                
+                cap <- bquote(paste(.(cap), ' m'^'2','s'^'-3', sep=''))
+                g <- g + labs (caption=cap)
+                # g <- g + labs (caption=sprintf('MEM, %d poles, %d smoothing bins\nresolution %.1e, variance %.1e, edr %.1e m^2/s^3', poles, avebin, resolution, variance, edr))
               }
-            } else {
-              g <- g + theme (axis.title.x.top=element_text(size=10, hjust=0.5),
-                axis.text.x.top=element_text(size=10, hjust=0.5, vjust=1))
-            }
-            if (input$FFTcaption) {
-              SE <- getStartEnd (DataR$Time)
-              i <- getIndex (DataR$Time, SE[1])
-              cap <- sprintf ('%s %s--%s FFT: %d seg (s), %d sm. bins, var.=%.1e, edr=%.1e ',
-                strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
-                strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
-                segmentLength/Rate, avebin, variance, edr)
-              cap <- bquote(paste(.(cap), ' m'^'2','s'^'-3', sep=''))
-              g <- g + labs (caption=cap)
-              # g <- g + labs (caption=sprintf('MEM, %d poles, %d smoothing bins\nresolution %.1e, variance %.1e, edr %.1e m^2/s^3', poles, avebin, resolution, variance, edr))
-            }
-            gFFT <<- g
-            vFFT <<- vFFT
-            cFFT <<- cFFT
-            png(filename=gname, width=600, height=600)
-            print (g)
-            dev.off()
-          }
-        }
-      }
-    }
-    return(list(
-      src = gname,
-      contentType = "image/png",
-      alt = "PSD"
-    ))
-  }, deleteFile = FALSE)
+              gFFT <<- g
+              vFFT <<- vFFT
+              cFFT <<- cFFT
+              png(filename=gname, width=600, height=600)
+              print (g)
+              dev.off()
+            }  ## second p(f)/fp(f) etc test, redundant?
+          }  ## end of types p(f) fp(f) etc
+        }  ## end of not-Xanadu section
+      }  ## end of fft section
+      return(list(
+        src = gname,
+        contentType = "image/png",
+        alt = "PSD"
+      ))
+    }, deleteFile = FALSE)
   
   
   
@@ -3763,7 +3821,7 @@ shinyServer(function(input, output, session) {
         plotScat (input)
       }
       if (grepl ('bin-average', input$whichTab)) {
-          plotBin (input)
+        plotBin (input)
       }
       dev.off ()
     },
@@ -3830,9 +3888,9 @@ shinyServer(function(input, output, session) {
     
     if (Trace) {
       print (sprintf ('track: input$times %s %s', formatTime (input$times[1]),
-                      formatTime (input$times[2])))
+        formatTime (input$times[2])))
       print (sprintf ('track: global plotSpec$Times are %s %s',
-                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
+        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     namesV <- names(Data)
     namesV <- namesV[namesV != "Time"]
@@ -3865,22 +3923,22 @@ shinyServer(function(input, output, session) {
     i <- getIndex (DataR$Time, SE[1])
     if (plotSpec$TypeFlight == 'F') {
       FigFooter=sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
-                        plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
-                        strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                        strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                 format="%H:%M:%S", tz='UTC'))
+        plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+        strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+        strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+          format="%H:%M:%S", tz='UTC'))
     } else {
       FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                      plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
-                      strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                      strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                               format="%H:%M:%S", tz='UTC'))
+        plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+        strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+        strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+          format="%H:%M:%S", tz='UTC'))
     }
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       CallingFunction <- sub ("\\(.*\\)", "", deparse (sys.call (-1)))
       mtext(paste(FigFooter,'generated by Ranadu plotTrack', #CallingFunction,
-                  FigDatestr),1,outer=T,cex=0.75)
+        FigDatestr),1,outer=T,cex=0.75)
     }
     
     par(oma=c(1.1,0,0,0))
@@ -3907,8 +3965,8 @@ shinyServer(function(input, output, session) {
       #         DataT$SSLIP <- SmoothInterp (DataT$SSLIP)
     }
     plotTrack (DataT, 
-               xc=xc, yc=yc, sz=sz,
-               .Spacing=input$track.spacing, .WindFlags=input$track.WF)
+      xc=xc, yc=yc, sz=sz,
+      .Spacing=input$track.spacing, .WindFlags=input$track.WF)
     if (input$footer2) {AddFooter ()}
     
     # }
@@ -3944,9 +4002,9 @@ shinyServer(function(input, output, session) {
       
       if (Trace) {
         print (sprintf ('thight: input$times %s %s', formatTime (input$times[1]),
-                        formatTime (input$times[2])))
+          formatTime (input$times[2])))
         print (sprintf ('thight: global plotSpec$Times are %s %s',
-                        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
+          formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
       namesV <- names(Data)
       namesV <- namesV[namesV != "Time"]
@@ -3970,22 +4028,22 @@ shinyServer(function(input, output, session) {
       i <- getIndex (Data$Time, SE[1])
       if (input$typeFlight == 'F') {
         FigFooter=sprintf("%s rf%02dF %s %s-%s UTC,", Project,
-                          input$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                          strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
-                          strftime(Data$Time[getIndex(Data$Time,SE[2])],
-                                   format="%H:%M:%S", tz='UTC'))        
+          input$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(Data$Time[getIndex(Data$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))        
       } else {
         FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, input$typeFlight,
-                        input$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                        strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
-                        strftime(Data$Time[getIndex(Data$Time,SE[2])],
-                                 format="%H:%M:%S", tz='UTC'))
+          input$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(Data$Time[getIndex(Data$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       }
       FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
       AddFooter <<- function() {
         CallingFunction <- sub ("\\(.*\\)", "", deparse (sys.call (-1)))
         mtext(paste(FigFooter,'generated by ', CallingFunction,
-                    FigDatestr),1,outer=T,cex=0.75)
+          FigDatestr),1,outer=T,cex=0.75)
       }
       
       par(oma=c(1.1,0,0,0))
@@ -4034,9 +4092,9 @@ shinyServer(function(input, output, session) {
       
       if (Trace) {
         isolate (print (sprintf ('skewT: input$times %s %s', formatTime (input$times[1]),
-                        formatTime (input$times[2]))))
+          formatTime (input$times[2]))))
         print (sprintf ('skewT: global plotSpec$Times are %s %s',
-                        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
+          formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
       }
       updateSliderInput (session, 'times', value=plotSpec$Times)
       if ((input$times[1] != plotSpec$Times[1]) || (input$times[2] != plotSpec$Times[2])) {
@@ -4066,22 +4124,22 @@ shinyServer(function(input, output, session) {
       i <- getIndex (Data$Time, SE[1])
       if (plotSpec$TypeFlight == 'F') {
         FigFooter=sprintf("%s rf%02dF %s %s-%s UTC,", Project,
-                          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                          strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
-                          strftime(Data$Time[getIndex(Data$Time,SE[2])],
-                                   format="%H:%M:%S", tz='UTC'))        
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(Data$Time[getIndex(Data$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))        
       } else {
         FigFooter=sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                        plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                        strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
-                        strftime(Data$Time[getIndex(Data$Time,SE[2])],
-                                 format="%H:%M:%S", tz='UTC'))
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(Data$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(Data$Time[getIndex(Data$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       }
       FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
       AddFooter <<- function() {
         CallingFunction <- sub ("\\(.*\\)", "", deparse (sys.call (-1)))
         mtext(paste(FigFooter,'generated by ', CallingFunction,
-                    FigDatestr),1,outer=T,cex=0.75)
+          FigDatestr),1,outer=T,cex=0.75)
       }
       op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1,oma=c(1.1,0,0,0))
       print (ndv)
@@ -4100,9 +4158,15 @@ shinyServer(function(input, output, session) {
         DF$Temperature <- DF$Temperature - 273.15
         DF$DewPoint <- DF$DewPoint - 273.15
       }
-      suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagram.Rdata")
-                        + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
-                                          formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
+      if (grepl ('130', FI$Platform)) {
+      suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagramC130.Rdata")
+        + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
+          formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
+      } else {
+        suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagram.Rdata")
+          + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
+            formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
+      }
       if (input$cape) {
         NSND <- CAPE (Data)
         if (length (names (NSND)) > 3) {
@@ -4116,20 +4180,20 @@ shinyServer(function(input, output, session) {
           SP <- SkewTSounding (data.frame(Pressure=plcl, Temperature=tlcl, DewPoint=-120), ADD=TRUE)
           gg <- gg + geom_point (data=SP, aes(x=AT, y=P), pch=19, colour='darkorange', size=4)
           labelText <<- paste(sprintf('orange dot: LCL %.1f hPa %.2f degC', plcl, tlcl), 
-                              'red line: pseudo-adiabatic ascent', 
-                              'bright green line: wet-adiabatic ascent',
-                              sprintf ('max LWC: %.2f g/m3 at %.1f hPa', maxLWC, pmaxLWC),
-                              sprintf ('cape=%.0f J/kg (adiabatic cape=%.0f)', 
-                                       attr(NSND, 'CAPE'), attr (NSND, 'CAPEW')),
-                              sprintf ('conv. inh. %.0f J/kg, LFC=%.0f hPa', 
-                                       attr(NSND, 'CIN'), attr(NSND, 'LFC')), sep='\n')
+            'red line: pseudo-adiabatic ascent', 
+            'bright green line: wet-adiabatic ascent',
+            sprintf ('max LWC: %.2f g/m3 at %.1f hPa', maxLWC, pmaxLWC),
+            sprintf ('cape=%.0f J/kg (adiabatic cape=%.0f)', 
+              attr(NSND, 'CAPE'), attr (NSND, 'CAPEW')),
+            sprintf ('conv. inh. %.0f J/kg, LFC=%.0f hPa', 
+              attr(NSND, 'CIN'), attr(NSND, 'LFC')), sep='\n')
           if (Trace) {
             print (sprintf ('skewT: labelText is %s', labelText))
           }
           gg <- gg + geom_label (aes(x=0, y=2.85, label=labelText), size=4.5, fill='ivory', hjust='left')
         } else {
           gg <- gg + geom_label (aes (x=0, y=2.85, label='no region of positive buoyancy'), size=5,
-                                 fill='ivory', hjust='left')
+            fill='ivory', hjust='left')
         }
       }
       suppressWarnings (print (gg))
@@ -4170,7 +4234,7 @@ shinyServer(function(input, output, session) {
         q <- q + geom_text (data=DF2, aes (x=WE, y=WN, label=P), size=3, nudge_y=5)
         q <- q + xlab('') + ylab('') + theme_base()
         q <- q + theme(axis.ticks = element_blank(), axis.text.x = element_blank(),
-                       axis.text.y = element_blank())
+          axis.text.y = element_blank())
         vp <- viewport(width = 0.4, height = 0.4, x = 0.75, y = 0.75)
         print (q, vp=vp)
       }
@@ -4246,7 +4310,7 @@ shinyServer(function(input, output, session) {
       ## transformation function
       xygraph <- function (r, s) { ## returns pairs of x,y coordinates to plot
         return (c(calpha * (r-rminBetts)/(rmaxBetts-rminBetts) + salpha * (s-sminBetts)/(smaxBetts-sminBetts),
-                  -salpha * (r-rminBetts)/(rmaxBetts-rminBetts) + calpha * (s-sminBetts)/(smaxBetts-sminBetts)))
+          -salpha * (r-rminBetts)/(rmaxBetts-rminBetts) + calpha * (s-sminBetts)/(smaxBetts-sminBetts)))
       }
       g <- satptDiagram
       R <- SmoothInterp (DataS$R)
@@ -4511,7 +4575,7 @@ shinyServer(function(input, output, session) {
       kount <- kount + 1
       if (kount > 6) {break}
       hist (Ds[ ,nm], freq=FALSE, breaks=50, xlab=nm, 
-            ylab='probability density', main=NA)
+        ylab='probability density', main=NA)
     }
   }, width=780, height=640)
   
@@ -4552,27 +4616,27 @@ shinyServer(function(input, output, session) {
         v <- sprintf ('var1[%d]', i)
         if (input$densityH) {
           b <- sprintf ("aes (x=%s, ..density.., colour='%s', size='%s', fill='%s', lty='%s')", 
-                      vr[i], vr[i], vr[i], vr[i], vr[i])
+            vr[i], vr[i], vr[i], vr[i], vr[i])
         } else {
           b <- sprintf ("aes (x=%s, colour='%s', size='%s', fill='%s', lty='%s')", 
-                        vr[i], vr[i], vr[i], vr[i], vr[i])
+            vr[i], vr[i], vr[i], vr[i], vr[i])
         }
         g <- g + geom_histogram (eval(parse(text=b)),
-                                 bins=plotSpec$Hist[[plt]]$panel[[pnl]]$bins, na.rm=TRUE)          
+          bins=plotSpec$Hist[[plt]]$panel[[pnl]]$bins, na.rm=TRUE)          
         
       }
       if (!is.null (yl)) {
         g <- g + xlim (yl)
       }
       g <- g + scale_colour_manual(name='bar',
-                                   labels = var[[pnl]],
-                                   values = colrs[[pnl]])
+        labels = var[[pnl]],
+        values = colrs[[pnl]])
       g <- g + scale_linetype_manual ("bar", labels=var[[pnl]], 
-                                      values = spec$panel[[pnl]]$lt)
+        values = spec$panel[[pnl]]$lt)
       g <- g + scale_size_manual ('bar', labels=var[[pnl]],
-                                  values=lws[[pnl]])
+        values=lws[[pnl]])
       g <- g + scale_fill_manual ("bar", labels=var[[pnl]], 
-                                  values = fill.colors[1:length(var[[pnl]])])
+        values = fill.colors[1:length(var[[pnl]])])
       g <- g + xlab(vr[1]) + theme_WAC()
       ## add cumulative distribution
       if (input$cdf) {
@@ -4605,7 +4669,7 @@ shinyServer(function(input, output, session) {
         # overlap the panel of 2nd plot on that of 1st plot
         pp <- c(subset(t1$layout, name == "panel", se = t:r))
         g <- gtable_add_grob(t1, t2$grobs[[which(t2$layout$name == "panel")]], pp$t,
-                             pp$r, pp$b, pp$l)
+          pp$r, pp$b, pp$l)
         
         # axis tweaks
         ia <- which(t2$layout$name == "axis-l")
@@ -4656,7 +4720,7 @@ shinyServer(function(input, output, session) {
     if (Trace) {
       print (sprintf ('histogram: newhistogram is %d', reac$newhistogram))
       print (sprintf ('histogram: global plotSpec$Times are %s %s',
-                      formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
+        formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2])))
     }
     Data <- data()
     if (nrow (Data) <= 1) {
@@ -4678,23 +4742,23 @@ shinyServer(function(input, output, session) {
     isolate (
       if (plotSpec$TypeFlight == 'F') {
         FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
-                              plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                              strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                              strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                       format="%H:%M:%S", tz='UTC'))        
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))        
       } else {
         FigFooter <<- sprintf("%s %s%02d %s %s-%s UTC,", Project, plotSpec$TypeFlight,
-                            plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
-                            strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                            strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
-                                     format="%H:%M:%S", tz='UTC'))
+          plotSpec$Flight, strftime(Data$Time[i], format="%Y-%m-%d", tz='UTC'),
+          strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+          strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
+            format="%H:%M:%S", tz='UTC'))
       }
     )
     FigDatestr=strftime(Sys.time(), format="%Y-%m-%d %H:%M:%S %Z")
     AddFooter <<- function() {
       isolate (
         mtext(paste(FigFooter,'generated by Ranadu hist ', input$plot,
-                    FigDatestr),1,outer=T,cex=0.75)
+          FigDatestr),1,outer=T,cex=0.75)
       )
     }
     plotHist (input)    ## isolated in function to be able to save via PDF/PNG
@@ -4740,7 +4804,7 @@ shinyServer(function(input, output, session) {
         DB[(Ds$Z < zmin) | (Ds$Z > zmax), V] <- NA
       }
       boxplot (DB, horizontal=TRUE, outline=TRUE, 
-               xlab=nm, ylab='altitude [km]', names=NULL)
+        xlab=nm, ylab='altitude [km]', names=NULL)
     }
   }, width=780, height=640)
   
@@ -4867,9 +4931,9 @@ shinyServer(function(input, output, session) {
           np <- (np + 1) %% 16
           if (np == 0) {
             title (sprintf ('%d-%02d-%-2d probe %s resolution %d diodes %d %d:%02d:%02d -- %d:%02d:%02d', 
-                            year, month, day, probe, resltion, nDiodes, 
-                            pageStart[1], pageStart[2], pageStart[3], end2d[1], end2d[2], end2d[3]), 
-                   col.main='blue',cex.main=0.8)
+              year, month, day, probe, resltion, nDiodes, 
+              pageStart[1], pageStart[2], pageStart[3], end2d[1], end2d[2], end2d[3]), 
+              col.main='blue',cex.main=0.8)
             break
           }
           # print (c('p', prot.time() - ptm))
@@ -4883,9 +4947,9 @@ shinyServer(function(input, output, session) {
           rasterImage (m[, 1:256], 1, 131, 256, 256)
           rasterImage (m[, 257:512], 1, 1, 256, 126)
           title (sprintf ('%d-%02d-%-2d probe %s resolution %dum diodes %d %d:%02d:%02d -- %d:%02d:%02d', 
-                          year, month, day, probe, resltion, nDiodes, 
-                          start2d[1], start2d[2], start2d[3], end2d[1], end2d[2], end2d[3]), 
-                 col.main='blue',cex.main=0.8)
+            year, month, day, probe, resltion, nDiodes, 
+            start2d[1], start2d[2], start2d[3], end2d[1], end2d[2], end2d[3]), 
+            col.main='blue',cex.main=0.8)
           break
         }
       } else {
@@ -4946,5 +5010,5 @@ shinyServer(function(input, output, session) {
   outputOptions (output, 'statistics', priority=-20)
   outputOptions (output, 'histogram', priority=-20)
   outputOptions (output, 'skewT', priority=-20)
-})
+  })
 

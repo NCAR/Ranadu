@@ -434,13 +434,17 @@ shinyUI(
                                                       selected=plotSpec$Variance[[1]]$Definition$cvar),
                                           tabsetPanel (type='pills',
                                                        tabPanel ('fft',
-                                                         selectInput ('ffttype', label=NULL, choices=c('fp(f)', 'p(f)', 'co-variable fp(f)', 'both fp(f)',
-                                                           'cospec. / quad.', 'coherence / phase', 'data')),
-                                                                 numericInput ('fftpts', 'segment length (s)', plotSpec$Variance[[1]]$Definition$fftpts),
-                                                                 selectInput ('fftwindow', label=NULL, choices=c('Parzen', 'square', 'Welch', 'Hanning')),
-                                                                 numericInput ('fftavg', 'log avg intervals', plotSpec$Variance[[1]]$Definition$fftavg),
-                                                         selectInput ('FFTcolor', 'color', choices=c('blue', 'darkgreen', 'red', 'cyan', 'darkorange', 'brown', 'magenta', 'black')),
-                                                         checkboxInput ('ffterrbar', 'error bars?'),
+                                                         fluidRow (
+                                                           column(6, selectInput ('ffttype', label=NULL, choices=c('fp(f)', 'p(f)', 'co-variable fp(f)', 'both fp(f)',
+                                                           'cospec. / quad.', 'coherence / phase', 'edr-weighted', 'edr-weighted', 'data'))),
+                                                            column(3, numericInput ('fftpts', 'segment length (s)', plotSpec$Variance[[1]]$Definition$fftpts)),
+                                                            column(3, selectInput ('fftwindow', label=NULL, choices=c('Parzen', 'square', 'Welch', 'Hanning')))),
+                                                         fluidRow (
+                                                           column (6, selectInput ('FFTcolor', 'color', choices=c('blue', 'darkgreen', 'red', 'cyan', 'darkorange', 'brown', 'magenta', 'black'))),
+                                                           column(3, numericInput ('fftavg', 'log avg intervals', plotSpec$Variance[[1]]$Definition$fftavg)),
+                                                           column(3, checkboxInput ('ffterrbar', 'error bars?'))),
+                                                         sliderInput("fftedrRange", label='for EDR plot, freq range:', min=0.05, max=12.5,
+                                                           value=c(0.1,8), step=0.01),
                                                          fluidRow(
                                                            column(3, checkboxInput ('FFTadd', 'add to prev. plot', value=FALSE)),
                                                            column(6, checkboxInput ('FFTshowU', 'show unsmoothed spectrum', value=FALSE)),
@@ -452,13 +456,18 @@ shinyUI(
                                                          numericInput ('acvtau', 'smoothing time', plotSpec$Variance[[1]]$Definition$acvtau),
                                                                  numericInput ('acvavg', 'log avg intervals', plotSpec$Variance[[1]]$Definition$acvavg)),
                                                        tabPanel ('MEM',
-                                                                 selectInput ('MEMtype', label=NULL, choices=c('fp(f)', 'p(f)', 'co-variable fp(f)', 'both',
-                                                                                                               'cospec./quadrature', 'coherence/phase', 'data')),
-                                                                 numericInput ('MEMpoles', 'poles', plotSpec$Variance[[1]]$Definition$MEMpoles),
-                                                                 numericInput ('MEMres', 'resoln', plotSpec$Variance[[1]]$Definition$MEMres),
-                                                                 selectInput ('MEMcolor', 'color', choices=c('blue', 'darkgreen', 'red', 'cyan', 'darkorange', 'brown', 'magenta', 'black')),
-                                                                 numericInput ('MEMavg', 'log avg intervals', plotSpec$Variance[[1]]$Definition$MEMavg),
-                                                                 fluidRow(
+                                                         fluidRow (
+                                                                 column(6, selectInput ('MEMtype', label=NULL, choices=c('fp(f)', 'p(f)', 'co-variable fp(f)', 'both',
+                                                                                                               'cospec./quadrature', 'coherence/phase', 
+                                                                                                               'edr-weighted', 'data'))),
+                                                                 column(3, numericInput ('MEMpoles', 'poles', plotSpec$Variance[[1]]$Definition$MEMpoles)),
+                                                                 column(3, numericInput ('MEMres', 'resoln', plotSpec$Variance[[1]]$Definition$MEMres))),
+                                                         fluidRow (
+                                                                 column(6, selectInput ('MEMcolor', 'color', choices=c('blue', 'darkgreen', 'red', 'cyan', 'darkorange', 'brown', 'magenta', 'black'))),
+                                                                 column(6, numericInput ('MEMavg', 'log avg intervals', plotSpec$Variance[[1]]$Definition$MEMavg))),
+                                                         sliderInput("MEMedrRange", label='for EDR plot, freq range:', min=0.05, max=12.5,
+                                                           value=c(0.1,8), step=0.01),
+                                                         fluidRow(
                                                                    column(3, checkboxInput ('MEMadd', 'add to prev. plot', value=FALSE)),
                                                                    column(6, checkboxInput ('MEMshowU', 'show unsmoothed spectrum', value=FALSE)),
                                                                    column(3, checkboxInput ('MEMcaption', 'show caption', value=TRUE)))
