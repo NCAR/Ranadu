@@ -143,7 +143,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       lty <- rep(lty, panels)
       lvl <- levels(dd$VarGroup)
       g <- with(dd, ggplot (dd, aes(Time, value, colour=VarGroup, linetype=VarGroup)))
-      g <- g + geom_line(aes(size=VarGroup))
+      g <- g + geom_path (aes(size=VarGroup))
       g <- g + scale_size_manual ('', labels=lvl, breaks=lvl, values = lwd)
       g <- g + scale_linetype_manual ('', labels=lvl, breaks=lvl, values = lty)
       g <- g + scale_colour_manual('', labels = lvl, breaks=lvl, values = colrs)
@@ -165,7 +165,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       for (j in 1:min(np, 5)) {
         a <- sprintf ("aes (y=%s, colour='%s', size='%s', linetype='%s')", 
                       clr[j], clr[j], clr[j], clr[j])
-        g <- g + geom_line (eval (parse (text=a)))
+        g <- g + geom_path (eval (parse (text=a)))
       }
       g <- g + scale_size_manual ("", labels=clr, breaks=clr, values = lwd)
       g <- g + scale_linetype_manual ("", labels=clr, breaks=clr, values = lty)
