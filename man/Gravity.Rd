@@ -10,8 +10,10 @@ Gravity(latitude, altitude = 0)
 \arguments{
 \item{latitude}{The latitude (or vector of latitudes) in units of degrees N.}
 
-\item{altitude}{The altitude in meters above the WGS-84 geoid. GPS measurements are 
-usually appropriate to use when supplying this altitude.}
+\item{altitude}{The altitude in meters above the WGS-84 geoid. GPS measurements before
+correction to MSL are appropriate to use when supplying this altitude. For detailed accuracy,
+correct a variable like GGALT by adding the height of the geoid above the WGS84 reference
+ellipsoid. In RAF datasets, this may be present as the variable GGOIDHT.}
 }
 \value{
 The acceleration of gravidy in units of m/s^2

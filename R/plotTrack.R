@@ -194,7 +194,7 @@ plotTrack <- function (lon, lat=NULL, Time=NULL, WDC=NULL,
         dlt <- 0.001 * .WindFlags * wfy * sz
         dlg <- 0.001 * .WindFlags * wfx * sz * ap
         lines (c(lon[l], lon[l]+dlg), c(lat[l], lat[l]+dlt), 
-               lty=1, col='green')
+               lty=1, col='forestgreen')
       }
     }
   }

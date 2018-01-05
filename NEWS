@@ -2,6 +2,7 @@ Version 2.5-17-10-12
   Additions:
     mem.R                   -- Functions for MEM spectral analysis.
     shinyApp                -- Many changes incl. HRT spec analysis & w/o Xanadu.
+    GeoPotHeight.R          -- Calculates geopotential height from geometric height.
 Version 2.5-17-07-01
   Additions:
     Sqs.R                   -- Calculates quasi-steady supersaturation in cloud.
