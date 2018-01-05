@@ -41,7 +41,7 @@ shinyUI(
                                    min=1, max=99, step=1, width='80px')),
           column (3, radioButtons ('typeFlight', label=NULL, choices=c('rf', 'tf', 'ff'),
                                    width='70px', inline=FALSE)),
-          column (3, radioButtons ('suffixFlight', label=NULL, choices=c('none', 'HRT', 'F', 'KF'), 
+          column (3, radioButtons ('suffixFlight', label=NULL, choices=c('none', 'HRT', 'Y', 'KF'), 
                                    width='70px', inline=FALSE))))),
       column (1, 
               numericInput (inputId='plot', label='plot', value=1,

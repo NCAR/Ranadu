@@ -1784,8 +1784,8 @@ shinyServer(function(input, output, session) {
           plotSpec$TypeFlight, plotSpec$Flight)
       }    
     } else {
-      if (plotSpec$TypeFlight == 'F') {
-        fname <<- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
+      if (plotSpec$TypeFlight == 'Y') {
+        fname <<- sprintf ('%s%s/%srf%02dY.nc', DataDirectory (), plotSpec$Project,
           plotSpec$Project, plotSpec$Flight)
       } else if (plotSpec$TypeFlight == 'HRT') {
         fname <<- sprintf ('%s%s/%srf%02dHRT.nc', DataDirectory (), plotSpec$Project,
