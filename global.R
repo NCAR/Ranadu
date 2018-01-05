@@ -14,6 +14,7 @@ library(grid)
 library(XML)
 library(tcltk)
 library(scales)
+library(allanvar)
 
 ## temporary
 # source ('makeNetCDF.R')
@@ -35,7 +36,7 @@ load ('InputDF.Rdata')
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
 
-PJ <- c('WECAN-TEST', 'ARISTO2017', 'ECLIPSE', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER', 'NOMADSS',
+PJ <- c('SOCRATES', 'WECAN-TEST', 'ARISTO2017', 'ECLIPSE', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER', 'NOMADSS',
         'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
         'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
         'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')

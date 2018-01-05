@@ -436,7 +436,7 @@ shinyUI(
                                                        tabPanel ('fft',
                                                          fluidRow (
                                                            column(6, selectInput ('ffttype', label=NULL, choices=c('fp(f)', 'p(f)', 'co-variable fp(f)', 'both fp(f)',
-                                                           'cospec. / quad.', 'coherence / phase', 'edr-weighted', 'edr-weighted', 'data'))),
+                                                           'cospec. / quad.', 'coherence / phase', 'edr-weighted', 'AllanVariance', 'data'))),
                                                             column(3, numericInput ('fftpts', 'segment length (s)', plotSpec$Variance[[1]]$Definition$fftpts)),
                                                             column(3, selectInput ('fftwindow', label=NULL, choices=c('Parzen', 'square', 'Welch', 'Hanning')))),
                                                          fluidRow (

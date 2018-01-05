@@ -1329,7 +1329,7 @@ shinyServer(function(input, output, session) {
     plt <- isolate (input$plot)
     plotSpec$Variance[[plt]]$Definition$ffttype <<- input$ffttype
     isolate (reac$newvarp<- reac$newvarp + 1)
-    if (Trace) {print ('FFTtype: reset newvarp')}
+    if (Trace) {print (sprintf ('FFTtype: %s; reset newvarp', input$ffttype))}
   })
   obsFFTtype <- observe (exprFFTtype, quoted=TRUE)
   
@@ -3401,11 +3401,6 @@ shinyServer(function(input, output, session) {
                 log='xy', ylab=sprintf ('%s:  fp(f)', cv))
               pf2 <- pf2[!is.na(pf2$ybar),]
               lines (10^pf2$xc, pf2$ybar, col='red', lwd=2)
-            } else if (grepl ('data', input$ffttype)) {
-              op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
-              plotWAC (DataR[, c('Time', v)])
-              op <- par (mar=c(5,4,1,2)+0.1)
-              plotWAC (DataR[, c('Time', cv)])
             } else {
               df <- data.frame(fxpf=segl*freq*p, V2=log10(freq))
               df2 <- data.frame(fxqf=segl*freq*q, V2=log10(freq))
@@ -3547,6 +3542,27 @@ shinyServer(function(input, output, session) {
             plotWAC (data.frame(DataR$Time, DataR[, v]), ylab=v, col=lineColor)
             op <- par (mar=c(5,4,1,2)+0.1)
             plotWAC (data.frame(DataR$Time, DataR[, cv]), ylab=cv, col=lineColor)
+            dev.off()
+          } else if (grepl('Allan', input$ffttype)) {
+            png(filename=gname, width=600, height=600)
+            layout(matrix(1:1, ncol = 1), widths = c(5), heights = c(6))
+            op <- par (mar=c(5,4,1,2)+0.1)
+            vsmoothed <- SmoothInterp (DataR[, v], .Length=1)
+            wts <- ts(vsmoothed, frequency=Rate)
+            avx <- allanvar::avar(wts, Rate)
+            avx <<- avx
+            wts <<- wts
+            gav <- ggplotWAC(data.frame(avx$time, avx$av), legend.position=NA)+xlab('cluster size [s]')+
+              ylab(expression(paste('Allan variance [unit'^2,']', sep='')))+
+              scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x, n=5),
+                labels = trans_format("log10", math_format(10^.x))) +
+              scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x, n=3),
+                labels = trans_format("log10", math_format(10^.x))) +
+              annotation_logticks(sides='lb') +
+              ggtitle(sprintf ('%s Allan-Variance Analysis', v))
+            print (gav)
+            gav <<- gav
+            # plotWAC(avx$time, avx$av, xlab='cluster size [s]', log='xy')
             dev.off()
           } else if (grepl ('both', input$ffttype)) {
             png(filename=gname, width=600, height=600)

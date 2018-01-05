@@ -15,7 +15,7 @@
 #' function.
 #' @param .poles Number of poles to use in the calculation. A small number produces a smooth spectrum,
 #' which a large number is needed for high-resolution features. A reasonable number (and the default)
-#' is 5% of the length of the .data vector. Values comparable to the length of the .data vector can 
+#' is 5\% of the length of the .data vector. Values comparable to the length of the .data vector can 
 #' take an awkwardly long time.
 #' @return A list with these components:
 #'   [[1]] .poles As used in the calculation
