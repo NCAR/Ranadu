@@ -126,11 +126,12 @@ shinyServer(function(input, output, session) {
   obsTypeFlight <- observe (exprTypeFlight, quoted=TRUE)
   
   exprSuffixFlight <- quote ({
-    if (input$suffixFlight != 'none') {
-      plotSpec$TypeFlight <<- input$suffixFlight
-    } else {
-      plotSpec$TypeFlight <<- input$typeFlight
-    }
+    input$suffixFlight
+    # if (input$suffixFlight != 'none') {
+    #   plotSpec$TypeFlight <<- input$suffixFlight
+    # } else {
+    #   plotSpec$TypeFlight <<- input$typeFlight
+    # }
     plotSpec$fname2d <<- NULL
     if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
     isolate (reac$newdata <- reac$newdata + 1)
@@ -1776,24 +1777,29 @@ shinyServer(function(input, output, session) {
     ## VarList <- c(VarList, "RTH1", "RTH2", "RTF1")
     
     if (grepl ('HIPPO', plotSpec$Project)) {
-      if (plotSpec$TypeFlight == 'F') {
-        fname <<- sprintf ('%sHIPPO/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
-          plotSpec$Flight)
+      if (input$suffixFlight == 'F') {
+        fname <<- sprintf ('%sHIPPO/%s%s%02dF.nc', DataDirectory (), plotSpec$Project,
+          plotSpec$TypeFlight, plotSpec$Flight)
       } else {
         fname <<- sprintf ('%sHIPPO/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
           plotSpec$TypeFlight, plotSpec$Flight)
       }    
     } else {
-      if (plotSpec$TypeFlight == 'Y') {
-        fname <<- sprintf ('%s%s/%srf%02dY.nc', DataDirectory (), plotSpec$Project,
-          plotSpec$Project, plotSpec$Flight)
-      } else if (plotSpec$TypeFlight == 'HRT') {
-        fname <<- sprintf ('%s%s/%srf%02dHRT.nc', DataDirectory (), plotSpec$Project,
-          plotSpec$Project, plotSpec$Flight)
+      if (input$suffixFlight == 'Y') {
+        fname <<- sprintf ('%s%s/%s%s%02dY.nc', DataDirectory (), plotSpec$Project,
+          plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+      } else if (input$suffixFlight == 'HRT') {
+        fname <<- sprintf ('%s%s/%s%s%02dHRT.nc', DataDirectory (), plotSpec$Project,
+          plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+        ## include alternative H suffix
+        if (!file.exists(fname)) {
+          fname <<- sprintf ('%s%s/%s%s%02dH.nc', DataDirectory (), plotSpec$Project,
+            plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+        }
         if (Trace) {print (sprintf ('in data, file name is %s', fname))}
-      } else if (plotSpec$TypeFlight == 'KF') {
-        fname <<- sprintf ('%s%s/%srf%02dKF.nc', DataDirectory (), plotSpec$Project,
-          plotSpec$Project, plotSpec$Flight)
+      } else if (input$suffixFlight == 'KF') {
+        fname <<- sprintf ('%s%s/%s%s%02dKF.nc', DataDirectory (), plotSpec$Project,
+          plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
       } else {
         if (plotSpec$SRC != 'NCAR') {
           fname <<- sprintf ('%s%s/%s/%s%s%02d.nc', DataDirectory (),
@@ -2056,7 +2062,7 @@ shinyServer(function(input, output, session) {
             ylabel <- sub('expr:', '', ylabel)
             ylabel <- parse(text=ylabel)
             print (ylabel)
-          } 
+          }  
           plotWAC (DataR[, c('Time', spec$panel[[pnl]]$var)], log=logY,
             ylab=ylabel,
             col=spec$panel[[pnl]]$col,
@@ -2800,13 +2806,13 @@ shinyServer(function(input, output, session) {
     SE <- getStartEnd (DataR$Time)
     i <- getIndex (DataR$Time, SE[1])
     isolate (
-      if (plotSpec$TypeFlight == 'F') {
+      if (input$suffixFlight == 'F') {
         FigFooter <<- sprintf("%s rf%02dF %s %s-%s UTC,", Project, 
           plotSpec$Flight, strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
           strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
           strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
             format="%H:%M:%S", tz='UTC'))  
-      } else if (plotSpec$TypeFlight == 'HRT') {
+      } else if (input$suffixFlight == 'HRT') {
         print (sprintf ('Project %s flight %02d', Project, plotSpec$Flight))
         FigFooter <<- sprintf("%s rf%02dHRT %s %s-%s UTC,", Project, plotSpec$Flight,
           strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),

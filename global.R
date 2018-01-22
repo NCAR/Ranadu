@@ -21,7 +21,7 @@ library(allanvar)
 
 # source ('R/plotTrack.R')
 # source ('R/PlotWAC.R')
-# source ('R/getNetCDF.R')
+source ('R/getNetCDF.R')
 # source ('R/makeNetCDF.R')
 # source ('R/setVariableList.R')
 # source ('R/CAPE.R')
