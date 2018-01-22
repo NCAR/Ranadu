@@ -247,6 +247,8 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   
   ## Add the requested variables:------------------------------------------------
   SizeDist <- function (V, netCDFfile, X) { ## used for size-distribution variables
+    # print (sprintf ('SizeDist, V=%s', V))
+    # print (str(X))
     CellSizes <- ncatt_get (netCDFfile, V, "CellSizes")
     CellLimits <- CellSizes$value
     Bins <- length(CellLimits)-1
@@ -254,8 +256,35 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     for (j in 1:Bins) {
       BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
     }
-    CC <- X[2:(Bins+1),]
-    XN <- t(CC)
+    ## handle higher-than-1 Rate:
+    DM <- length(dim(X))
+    if (DM == 2) {
+      ## if this is 1-Hz altho HR file (e.g., UHSAS), need to interpolate to HR
+      if (Rate > 1) {
+        inputRate <- 1
+        CC <- vector('numeric', Bins*Rate*dim(X)[2])
+        dim(CC) <- c(Bins, Rate*dim(X)[2])
+        for (j in 2:(Bins+1)) {
+          Y <- IntFilter (X[j, ], inputRate, Rate)
+          CC[j-1,] <- Y
+        }
+        XN <- t(CC)
+      } else {
+        CC <- X[2:(Bins+1),]
+        XN <- t(CC)
+      }
+    } else {
+      ## interpolate to Rate:
+      inputRate <- dim(X)[2]
+      CC <- vector('numeric', Bins*Rate*dim(X)[3])
+      dim(CC) <- c(Bins, Rate*dim(X)[3])
+      dim(X) <- c(Bins+1, dim(X)[2]*dim(X)[3])
+      for (j in 2:(Bins+1)) {
+	      Y <- IntFilter (X[j, ], inputRate, Rate)
+	      CC[j-1,] <- Y
+      }
+      XN <- t(CC)
+    }
     return(list(XN, BinSize, CellLimits))
   }
   for (V in VarList) {
@@ -335,17 +364,21 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
         X <- X[r1]
       }
     } else { ## other rates require flattening and possibly interpolation and filtering
-      DM <- length(dim(X))           
-      if (DM == 2) {    # flatten
-        X <- X[,r1]
-        inputRate <- dim(X)[1]
-        needFilter <- ifelse ((dim(X)[1] != Rate), TRUE, FALSE)
-        dim(X) <- dim(X)[1]*dim(X)[2]
-        ## see if adjustment to max rate is needed
-        if (needFilter) {X <- IntFilter(X, inputRate, Rate)}
-      } else {  ## single-dimension (1 Hz) in high-rate file
-        X <- X[r1]
-        X <- IntFilter (X, 1, Rate)
+      if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
+          grepl('^C1DC_', V) || grepl('CS200_', V)) {
+      } else {
+        DM <- length(dim(X))           
+        if (DM == 2) {    # flatten
+          X <- X[,r1]
+          inputRate <- dim(X)[1]
+          needFilter <- ifelse ((dim(X)[1] != Rate), TRUE, FALSE)
+          dim(X) <- dim(X)[1]*dim(X)[2]
+          ## see if adjustment to max rate is needed
+          if (needFilter) {X <- IntFilter(X, inputRate, Rate)}
+        } else {  ## single-dimension (1 Hz) in high-rate file
+          X <- X[r1]
+          X <- IntFilter (X, 1, Rate)
+        }
       }
     } 
     ## add variable attributes as in netCDF file
@@ -364,6 +397,8 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     # } else if (grepl('CS200', V)) {
       # d$CS200 <- X
     # } else {
+      # print (sprintf ('V=%s, dim=%f', V, dim(X)))
+      # print (str(X))
       d[V] <- X
     # }
   }
