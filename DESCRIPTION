@@ -1,6 +1,6 @@
 Package: Ranadu
 Title: Functions for use with RAF aircraft data files
-Version: 2.5-17-10-12
+Version: 2.5-18-02-27
 Author: William Cooper
 Maintainer: William Cooper <cooperw@ucar.edu>
 Description: This package contains a function for loading a portion of a netCDF
@@ -22,7 +22,8 @@ Description: This package contains a function for loading a portion of a netCDF
     WetEquivalentPotentialTemperature, MixingRatio, VirtualTemperature,
     VirtualPotentialTemperature, and plotWAC and lineWAC (convenience routines
     producing some aspects of plots I use routinely). A skew-T background is
-    provided by SkewT.R. There is also a function providing standard constants
+    provided by SkewT.R. A routine for generating plots of spectral variance is
+    included. There is also a function providing standard constants
     including those defined in ProcessingAlgorithms.pdf. There is a utility
     for making subsets of a netCDF file, and there are other functions also.
     One new function supports starting other programs that read netCDF-format
@@ -31,6 +32,6 @@ License: GPL
 Depends:
     R (>= 3.3), ncdf4, maps, ggplot2, ggthemes, graphics, grid
 Imports:
-    tcltk, nleqslv, zoo, fields, stats, signal, reshape2, plyr
+    tcltk, nleqslv, zoo, fields, stats, signal, reshape2, plyr, scales, bspec
 LazyData: true
 RoxygenNote: 6.0.1
