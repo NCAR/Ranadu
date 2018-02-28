@@ -33,7 +33,7 @@ DemingFit <- function (.x, .y, .sdx=1, .sdy=1) {
 # xybar - xbar * ybar has the same sign as the correlation coefficient
   b <- ifelse ( ( (xybar-xbar*ybar)*theta >= 0), (tan (theta)), (-1/tan(theta)))
   a <- ybar - b * xbar
-  normalizedError <- sqrt (sum (((b * .x + a - .y/ratio) / .sdx)**2) / (length (.x) - 2))
+  normalizedError <- sqrt (sum (((b * .x + a - .y/ratio) / .sdx)**2, na.rm=TRUE) / (length (.x) - 2))
   b <- b * ratio
   a <- ybar * ratio - b * xbar
 # note: std err is in units appropriate to .x or ratio*.y

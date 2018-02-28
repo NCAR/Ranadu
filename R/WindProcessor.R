@@ -126,8 +126,10 @@ WindProcessor <- function (data, AC='GV', CompF=TRUE) {
   Hdot[Hdot > pi] <- Hdot[Hdot > pi] - 2*pi
   Hdot[Hdot < -pi] <- Hdot[Hdot < -pi] + 2*pi
   Hdot <- Hdot * Rate
-  d$V <- TASX * tan (SSLIP) - Hdot * LR
-  d$W <- TASX * tan (ATTACK) - Pdot * LR
+  ## Change from standard ref: pitot tube measures TASX not long. component
+  d$U <- TASX / sqrt(1 + tan (SSLIP)^2 + tan (ATTACK)^2)
+  d$V <- d$U * tan (SSLIP) - Hdot * LR
+  d$W <- d$U * tan (ATTACK) - Pdot * LR
   rw <- as.matrix(d)
   cosphi <- cos (ROLL)
   sinphi <- sin (ROLL)
