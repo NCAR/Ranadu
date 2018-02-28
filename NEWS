@@ -4,6 +4,11 @@ Version 2.5-18-02-27
     removeSpikes.R          -- Function to identify and remove spikes.
   Updates:
     DemingFit.R             -- minor change, excluding missing values from sd calc.
+    WindProcessor.R         -- minor change, handling of TAS
+    getNetCDF.R             -- mods to handle high-rate data from CDP etc.
+    server.R                -- mods for high-rate and suffix-Y files; 
+                               added Allan-variance plot; new AKRD algorithm
+    PressureAltitude.R      -- extended to max 50 km.
 Version 2.5-17-10-12
   Additions:
     mem.R                   -- Functions for MEM spectral analysis.

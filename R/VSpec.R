@@ -20,7 +20,7 @@
 #' @import scales bspec
 #' @importFrom zoo na.approx
 #' @export VSpec
-#' @param .data A data.frame containing at least the variables "Time" and ".Variable" where
+#' @param .data A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
 #' ".Variable" is the second (required) parameter. It should also have an attribute "Rate"
 #' if its rate is different from 1 Hz (the default). Any restrictions on the time range
 #' should be applied to the data.frame before it is supplied to this function. See the
@@ -46,7 +46,9 @@
 #' argument "segLength" to the Welch method, and the
 #' arguments "poles" and "resolution" only to the "MEM" method.
 #' @param method This is the same as "type" and over-rides it if present.
-#' @param ylim A two-element vector specifying the lower and upper limit for the ordinate of the
+#' @param xlim A two-element vector specifying the lower and upper limits for the abscissa of the
+#' plot. The default is c(0.001, 15).
+#' @param ylim A two-element vector specifying the lower and upper limits for the ordinate of the
 #' plot. The default is c(0.0001, 1).
 #' @param spans An odd integer (or forced odd by incrementing upward if even) specifying the 
 #' number of frequencies to span when averaging the spectral variance estimate produced by the R routine
@@ -102,7 +104,9 @@
 #' collision with other possible uses of those names in the global environment.
 #' @examples 
 #' VSpec(RAFdata, 'WSC')
-#' g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1));VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g)
+#' with(RAFdata, VSpec(RAFdata, WSC))
+#' g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1)); 
+#' VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g)
 #' VSpec(RAFdata,'TASX', spans=11, showErrors=1, xlim=c(0.01,1)) + theme_WAC()
 VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=NA, xlim=c(0.001, 15), ylim=c(0.0001,1),
   spans=49, ae=0.2, smoothBins=0, segLength=512, poles=50, resolution=0.0001, showErrors=0, ADD=NA) {
