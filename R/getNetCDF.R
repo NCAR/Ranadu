@@ -235,7 +235,9 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     x <- 0:(length(X)-1)
     A <- stats::approx (x, z, n=length(X)*ratio-ratio+1)
     T <- A$y
-    SGL <- ifelse (ratio %% 2, ratio, ratio+1)
+    SGL <- as.integer(ifelse (ratio %% 2, ratio, ratio+1))
+    if (SGL <= 3) {SGL <- 5}
+    print (sprintf ('SGL=%f', SGL))
     T <- signal::filter(signal::sgolay(3,SGL),T)  # normally 75 pts
     # T <- signal::filter(signal::butter(3, 0.5), T)
     ## now shift to match outRate:
