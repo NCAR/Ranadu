@@ -127,7 +127,7 @@ shinyServer(function(input, output, session) {
   
   exprSuffixFlight <- quote ({
     input$suffixFlight
-    # if (input$suffixFlight != 'none') {
+    # if (input$suffixFlight != 'Pre') {
     #   plotSpec$TypeFlight <<- input$suffixFlight
     # } else {
     #   plotSpec$TypeFlight <<- input$typeFlight
