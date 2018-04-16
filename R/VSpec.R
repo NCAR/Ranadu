@@ -1,6 +1,6 @@
 #' @title VSpec
 #' @description Produces a variance spectrum in a ggplot2 file suitable for printing.
-#' @details For the variable provided, which must be in the supplied data.frame, this 
+#' @details For the variable provided, which must be in the supplied data.frame 
 #' that must also contain the variables "Time" and "TASX' and a "Rate" attribute, this 
 #' function constructs a plot of the spectral variance of that variable. The method can
 #' be the standard "spectrum" function of R (the default), the "Welch" method as provided

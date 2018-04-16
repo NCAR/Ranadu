@@ -165,7 +165,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     if ("sps25" %in% nms) {Rate <- 25}
     if ("sps50" %in% nms) {Rate <- 50}
     ## comment next line when LAMS 100-Hz vector present but no others
-    if ("sps100" %in% nms) {Rate <- 100}
+    # if ("sps100" %in% nms) {Rate <- 100}
   }
   # print (sprintf ("output rate for this data.frame is %d", Rate))
   # Expand Time to be high-rate if necessary
@@ -235,9 +235,18 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     x <- 0:(length(X)-1)
     A <- stats::approx (x, z, n=length(X)*ratio-ratio+1)
     T <- A$y
-    T <- signal::filter(signal::sgolay(3,21),T)  # normally 75 pts
+    SGL <- as.integer(ifelse (ratio %% 2, ratio, ratio+1))
+    if (SGL <= 3) {SGL <- 5}
+    print (sprintf ('SGL=%f', SGL))
+    T <- signal::filter(signal::sgolay(3,SGL),T)  # normally 75 pts
     # T <- signal::filter(signal::butter(3, 0.5), T)
-    ## now shift to match 25-Hz:
+    ## now shift to match outRate:
+    ## The values are the average over the ensuing time period, so
+    ## the interpolated values should be shifted forward 1/2 the
+    ## ratio. This leaves constant values at start and end.
+    ## Special Note re SRT: Variables like TASX end up at 1 Hz
+    ## because ATX is sampled at 1 Hz. The result is that recorded
+    ## values are apparently shifted 1.5 s later in time.
     n <- as.integer (ratio / 2)
     NL = length(T)
     T <- c(rep(T[1],n), T, rep(T[NL],ratio-n-1))  ## OK, even or odd ratio
@@ -367,13 +376,15 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
       if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
           grepl('^C1DC_', V) || grepl('CS200_', V)) {
       } else {
-        DM <- length(dim(X))           
+        DM <- length(dim(X))  
+        print (sprintf ('V=%s DM=%d', V, DM))
         if (DM == 2) {    # flatten
           X <- X[,r1]
           inputRate <- dim(X)[1]
           needFilter <- ifelse ((dim(X)[1] != Rate), TRUE, FALSE)
           dim(X) <- dim(X)[1]*dim(X)[2]
           ## see if adjustment to max rate is needed
+          print (sprintf ('needFilter=%s, inputRate=%d, Rate=%d', needFilter, inputRate, Rate))
           if (needFilter) {X <- IntFilter(X, inputRate, Rate)}
         } else {  ## single-dimension (1 Hz) in high-rate file
           X <- X[r1]

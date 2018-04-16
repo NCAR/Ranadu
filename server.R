@@ -127,7 +127,7 @@ shinyServer(function(input, output, session) {
   
   exprSuffixFlight <- quote ({
     input$suffixFlight
-    # if (input$suffixFlight != 'none') {
+    # if (input$suffixFlight != 'pre') {
     #   plotSpec$TypeFlight <<- input$suffixFlight
     # } else {
     #   plotSpec$TypeFlight <<- input$typeFlight
@@ -1787,6 +1787,9 @@ shinyServer(function(input, output, session) {
     } else {
       if (input$suffixFlight == 'Y') {
         fname <<- sprintf ('%s%s/%s%s%02dY.nc', DataDirectory (), plotSpec$Project,
+          plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+      } else if (input$suffixFlight == 'Prod.') {
+        fname <<- sprintf ('%sProd_Data/%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
           plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
       } else if (input$suffixFlight == 'HRT') {
         fname <<- sprintf ('%s%s/%s%s%02dHRT.nc', DataDirectory (), plotSpec$Project,
