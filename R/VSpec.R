@@ -18,7 +18,7 @@
 #' @aliases vSpec vspec
 #' @author William Cooper
 #' @import scales bspec
-#' @importFrom zoo na.approx
+#' @importFrom zoo na.spline
 #' @export VSpec
 #' @param .data A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
 #' ".Variable" is the second (required) parameter. It should also have an attribute "Rate"

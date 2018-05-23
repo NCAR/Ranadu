@@ -1794,6 +1794,11 @@ shinyServer(function(input, output, session) {
       } else if (input$suffixFlight == 'HRT') {
         fname <<- sprintf ('%s%s/%s%s%02dHRT.nc', DataDirectory (), plotSpec$Project,
           plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+        ## include alternative h suffix
+        if (!file.exists(fname)) {
+          fname <<- sprintf ('%s%s/%s%s%02dh.nc', DataDirectory (), plotSpec$Project,
+            plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+        }
         ## include alternative H suffix
         if (!file.exists(fname)) {
           fname <<- sprintf ('%s%s/%s%s%02dH.nc', DataDirectory (), plotSpec$Project,
