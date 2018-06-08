@@ -70,12 +70,12 @@ makeNetCDF <- function (.data, newNetCDFname) {
   Dimensions[["Time"]] <- ncdim_def ("Time", attr (.d$Time, 'units'),
                                         vals=tt, create_dimvar=TRUE)
   HR <- 0
-  if ("sps25" %in% names (Dimensions)) {
-    HR <- 25
-    Dim <- list(Dimensions[["sps25"]], Dimensions[["Time"]])
-  } else if ("sps50" %in% names (Dimensions)) {
+  if ("sps50" %in% names (Dimensions)) {
     HR <- 50
     Dim <- list(Dimensions[["sps50"]], Dimensions[["Time"]])
+  } else if ("sps25" %in% names (Dimensions)) {
+    HR <- 25
+    Dim <- list(Dimensions[["sps25"]], Dimensions[["Time"]])
   }
   vdef <- list()   # start with empty list, add variables to it
   Vskip <- c("C1DC", "CCDP", "CUHSAS", "CS100", "CS200")
