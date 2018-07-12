@@ -18,7 +18,7 @@
 #' @aliases vSpec vspec
 #' @author William Cooper
 #' @import scales bspec
-#' @importFrom zoo na.approx
+#' @importFrom zoo na.spline
 #' @export VSpec
 #' @param .data A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
 #' ".Variable" is the second (required) parameter. It should also have an attribute "Rate"
@@ -143,7 +143,7 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
       if (!(spans[1] %% 2)) {spans[1] <- spans[1] + 1}
       if (spans[1] <= 5) {spans <- NULL}
     }
-    S <- spectrum (ts(SmoothInterp(v, .Length=0), frequency=Rate), span=spans, plot=FALSE)
+    S <- spectrum (ts(SmoothInterp(v, .maxGap=1000*Rate, .Length=0), frequency=Rate), span=spans, plot=FALSE)
     freq <- S$freq
     fpf <- 2 * S$spec * freq
   } else if (type == 'Welch') {  ## bspec section
