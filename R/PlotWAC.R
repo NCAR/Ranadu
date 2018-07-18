@@ -105,7 +105,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
              rgb(217,095,002,maxColorValue=255),'gray40' )
 
     if (length(x) > 2) {
-      colrs <- c(col, 'darkgreen', 'red', 'skyblue', 'darkorange', 'gray40')
+      # colrs <- c(col, 'darkgreen', 'red', 'skyblue', 'darkorange', 'gray40')
       lwd <- c(lwd, rep(1,5))
       lty <- c(lty, rep(1,5))
       for (j in 3:min(7, length(x))) {
