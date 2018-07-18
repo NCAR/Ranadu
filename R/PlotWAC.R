@@ -41,7 +41,7 @@
 plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]", 
                      ylab="", lwd=2, type="l", lty=1, logxy='', pch=20, cex=1, 
                      legend.position="bottomright", ...) {
-  par(cex.axis=2, cex.lab=2) # This line bumps up font sizes for axes
+  par(cex.axis=2, cex.lab=2) # This line bumps up font sizes for axes and labels
   if (is.data.frame (x)) {
     if (!is.expression(ylab) && (ylab == "")) {
       ylab <- names(x)[2]
