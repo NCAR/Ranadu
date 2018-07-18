@@ -41,7 +41,7 @@
 plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]", 
                      ylab="", lwd=2, type="l", lty=1, logxy='', pch=20, cex=1, 
                      legend.position="bottomright", ...) {
-  par(cex.axis=2, cex.lab=2) # This line bumps up font sizes for axes and labels
+
   if (is.data.frame (x)) {
     if (!is.expression(ylab) && (ylab == "")) {
       ylab <- names(x)[2]
@@ -95,17 +95,8 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
           as.expression(bquote(10^ .(i)))
       )
     }
-   # Color palette must be defined for the legend labeling to work
-     colrs<-c(col, 
-             rgb(027,158,119,maxColorValue=255),
-             rgb(117,112,179,maxColorValue=255),
-             rgb(231,041,138,maxColorValue=255),
-             rgb(102,166,030,maxColorValue=255),
-             rgb(230,171,002,maxColorValue=255),
-             rgb(217,095,002,maxColorValue=255),'gray40' )
-
     if (length(x) > 2) {
-      # colrs <- c(col, 'darkgreen', 'red', 'skyblue', 'darkorange', 'gray40')
+      colrs <- c(col, 'darkgreen', 'red', 'skyblue', 'darkorange', 'gray40')
       lwd <- c(lwd, rep(1,5))
       lty <- c(lty, rep(1,5))
       for (j in 3:min(7, length(x))) {
@@ -115,11 +106,11 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
           points (x[, 1], x[, j], col=colrs[j-1], pch=pch[j-1], cex=cex[j-1], ...)
         }
       }
-    }
-    if (!is.na(legend.position)) {
+      if (!is.na(legend.position)) {
         legend (legend.position, legend=names (x)[2:length(x)], 
-                text.col=colrs[1:(length(x)-1)], lwd=lwd, lty=lty, cex=2, 
+                text.col=colrs[1:(length(x)-1)], lwd=lwd, lty=lty, cex=0.80, 
                 col=colrs[1:(length(x)-1)])
+      }
     }
     if (!is.expression(xlab)) {
       # get data.rate
@@ -220,4 +211,3 @@ lineWAC <- function (x, y, col="blue", lwd=2, type='l', ...) {
   }
   points(x, y, lwd=lwd, type=type, col=col, ...)
 }
-
