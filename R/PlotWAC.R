@@ -142,7 +142,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     }
     axis(4,labels=NA,tck=0.02)
   } else {
-    ## correct for offset if abscissa is Time, because value is centered in interval
+    ## correct for offset if abscissa in Time, because value is centered in interval
     if (grepl ('TIME', xlab) || grepl ('Time', xlab)) {
       data.rate <- 1
       itg <- x[!is.na(x)]  # protect against missing values at start
