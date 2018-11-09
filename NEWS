@@ -1,11 +1,13 @@
 Version 2.5-18-11-02
   Additions:
-    plotSD.R                -- plots of size distributions
+    plotSD.R                -- plots of size distributions, incl LWC distribution
     contourPlot.R           -- colored density plot
   Updates:
-    VSpec.R                 -- added LWC plot
+    VSpec.R                 -- added EDR plot + minor axis changes
     plotWAC.R               -- fixed lineWAC function
     ggplotWAC.R             -- change required by ggplot2 update
+    CohPhase.R              -- minor changes
+    RanaduManual.pdf        -- updated to include the above additions
 Version 2.5-18-03-11       
   Addition:
     CohPhase.R              -- coherence and phase plots for spectra
