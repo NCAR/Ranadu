@@ -60,7 +60,7 @@
 #' @param theme.version The theme version to pass to theme_WAC; default is 0.
 #' @param ... Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt
 #' @examples 
-#' ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])
+#' \dontrun{ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])}
 #' \dontrun{ggplotWAC (data.frame ("Time"=Time, "TASX"=TASX), ylab="TAS")}
 
 ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]", 
@@ -206,7 +206,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       g <- g + theme (plot.margin=unit(c(0.3,0.3,1.1,lmargin),"lines"))
     }
     ## preserve .data in the parent environment for plotting
-    .data <<- .data
+    # .data <<- .data
     if (!is.na(position[1])) {
       print (g, vp=vp)
     } else {

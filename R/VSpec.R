@@ -19,6 +19,7 @@
 #' @author William Cooper
 #' @import scales bspec
 #' @importFrom zoo na.spline
+#' @importFrom stats pchisq pnorm qchisq spec.pgram spectrum ts
 #' @export VSpec
 #' @param .data A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
 #' ".Variable" is the second (required) parameter. It should also have an attribute "Rate"
@@ -87,11 +88,19 @@
 #' a ribbon extending one standard deviation above and below the mean value. The default is
 #' 0, and in that case no ribbon is plotted. The ribbon is plotted using color "gray50" but
 #' "alpha" of 0.5 for partial transparency. 
-#' @param ADD This parameter has the default value NA, which causes the function to plots 
+#' @param ADD This parameter has the default value NA, which causes the function to plot 
 #' only the spectrum for the variable provided. If a spectrum for an other set of variables 
 #' has already been defined by previous calls to VSpec, setting ADD to the plot definition 
 #' returned by that previous call will add this plot to the previous plot. Up to four
 #' variables can be included in the final plot. See the examples.
+#' @param EDR If EDR is set TRUE, the plot will be normalized such that the ordinate  
+#' is constant and has the value of the eddy dissipation rate for an inertial subrange. Otherwise
+#' this is not a true density function of log(frequency) and so is difficult to determine
+#' except for the above specialized use. The variable plotted is (2*pi/V)(C*P(f)*f^(5/3))^(3/2)
+#' where V is the airspeed in m/s and C is a constant equal to 1.5 for lateral spectra like
+#' WIC and 2 for longitudinal spectra like TASX. The resulting units are m^2/s^3 per interval in the
+#' true abscissa coordinate of -1.5C(epsilon)^-(1/3)k^(-2/3), but the plot is labeled by
+#' the appropriate values of frequency instead. 
 #' @return A ggplot2 definition for the plot of spectral density as a function of frequency.
 #' The normalization is one-sided; i.e., the integral of the spectral variance from zero
 #' to infinity is the total variance of the variable. The resulting plot definition
@@ -109,7 +118,8 @@
 #' VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g)
 #' VSpec(RAFdata,'TASX', spans=11, showErrors=1, xlim=c(0.01,1)) + theme_WAC()
 VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=NA, xlim=c(0.001, 15), ylim=c(0.0001,1),
-  spans=49, ae=0.2, smoothBins=0, segLength=512, poles=50, resolution=0.0001, showErrors=0, ADD=NA) {
+  spans=49, ae=0.2, smoothBins=0, segLength=512, poles=50, resolution=0.0001, showErrors=0, ADD=NA, EDR=FALSE) {
+  
   if (is.data.frame(.data)) {
     if (.Variable %in% names(.data)) {
       Z <- capture.output (v <- detrend (.data[, c('Time', .Variable)]))
@@ -188,6 +198,11 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
     fpf <- freq * ps
   }
   
+  tasAverage <- mean(.data$TASX, na.rm=TRUE)
+  if (EDR) {
+    ps <- fpf / freq
+    fpf <- (2*pi/tasAverage)*(1.5*ps)^1.5 * freq^2.5
+  }
   if(smoothBins > 9) {
     bs1 <- binStats(data.frame(fpf, log(freq)), bins=smoothBins)
     bs1 <- rbind (bs1, data.frame(xc=bs1$xc[nrow(bs1)], ybar=bs1$ybar[nrow(bs1)],
@@ -206,8 +221,13 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
     ## first call: redefine VSpecDF
     assign('.VSpecDF1', DF, envir=.GlobalEnv)
     labx <- 'frequency [Hz]'
-    laby <- sprintf('fP(f) for %s', .Variable)
     # xlim <- c(0.001,15)
+    if (EDR) {
+      # laby <- sprintf('eddy dissipation rate for %s', .Variable)
+      laby <- expression(paste("eddy dissipation rate [m"^"2","s"^"-3","]"))
+    } else {
+      laby <- sprintf('variance spectrum fP(f) for %s', .Variable)
+    }
     # ylim <- c(0.001, 1)  ## now an input argument
     g <- ggplot(data=.VSpecDF1)         
     g <- g + geom_path (aes(x=freq, y=fpf, colour=V), na.rm=TRUE) +  
@@ -273,15 +293,26 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
     g <- g + scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x, n=4), #limits = xlim, 
       labels = trans_format("log10", math_format(10^.x))) +           
       scale_y_log10(breaks =            trans_breaks("log10", function(x) 10^x, n=4), #limits = ylim,             
-        labels = trans_format("log10", math_format(10^.x))) +           
+        labels = trans_format("log10", math_format(10^.x))) + 
+      annotation_logticks(sides='trbl') + 
       coord_cartesian(xlim=xlim, ylim=ylim) 
-    tasAverage <- mean(.data$TASX, na.rm=TRUE)
-    for (i in (-8:0)) {
-      a = ae * 10.^(i*(2/3)) * tasAverage^(2/3)
-      lw = ifelse(i == -4, 1.2, 0.5)
-      DFL <- data.frame(x=xlim, y=c(a/xlim[1]^(2/3), a/xlim[2]^(2/3)))
-      # print(DFL)
-      g <- g + geom_path (data=DFL, aes(x=x, y=y), colour='darkorange', lwd=lw, lty=3)
+    # g <- g + theme(panel.grid.minor = element_line(colour = "black"))
+    if (EDR) {  ## add line showing highest-decade average EDR
+      imx <- length(freq)
+      imn <- which (freq > freq[imx]/20)[1]
+      aveEDR <- mean(fpf[imn:imx], na.rm=TRUE)
+      print (sprintf ('EDR=%.2e', aveEDR))
+      DFL <- data.frame(x=c(freq[imn], freq[imx]), y=rep(aveEDR, 2))
+      g <- g + geom_path(data=DFL, aes(x=x, y=y), lwd=1.5, colour='red')
+      # g <- g + ggtitle(sprintf(' mean eddy dissipation rate %.2e m^2/s^3', aveEDR))
+    } else {
+      for (i in (-8:0)) {
+        a = ae * 10.^(i*(2/3)) * tasAverage^(2/3)
+        lw = ifelse(i == -4, 1.2, 0.5)
+        DFL <- data.frame(x=xlim, y=c(a/xlim[1]^(2/3), a/xlim[2]^(2/3)))
+        # print(DFL)
+        g <- g + geom_path (data=DFL, aes(x=x, y=y), colour='darkorange', lwd=lw, lty=3)
+      }
     }
     # g <- g + theme_WAC()
   }

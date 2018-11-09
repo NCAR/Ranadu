@@ -187,6 +187,8 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
 #' @title lineWAC
 #' @description Convenience routine for adding lines to plots
 #' @details Sets some plot defaults and calls points; assumes a plot with axes has already been generated to which to add this line.
+#' The advantage of using this vs. "lines" is that the times are routinely adjusted to plot values at the center of the interval 
+#' between the interval following the listed time, as is the convention for RAF netCDF files.
 #' @aliases lineWAC
 #' @author William Cooper
 #' @importFrom graphics points plot text lines axTicks legend axis.POSIXct axis
@@ -202,13 +204,13 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
 #' \dontrun{lineWAC (Time, PSXC, lty=2)}
 lineWAC <- function (x, y, col="blue", lwd=2, type='l', ...) {
   ## correct for offset if abscissa is Time, because value is centered in interval
-  if (grepl ('TIME', xlab) || grepl ('Time', xlab)) {
+ 
     data.rate <- 1
     itg <- x[!is.na(x)]  # protect against missing values at start
     if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
     if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
     x <- x + 0.5 / data.rate
-  }
-  points(x, y, lwd=lwd, type=type, col=col, ...)
+
+  lines(x, y, lwd=lwd, col=col, ...)
 }
 

@@ -86,7 +86,7 @@ Convenience routine for plots
 Sets some plot defaults and calls ggplot and theme_WAC()
 }
 \examples{
-ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])
+\dontrun{ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])}
 \dontrun{ggplotWAC (data.frame ("Time"=Time, "TASX"=TASX), ylab="TAS")}
 }
 \author{

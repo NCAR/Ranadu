@@ -84,8 +84,8 @@ smoothing is necessary because the confidence intervals are based on the standar
 in the bins.
 }
 \examples{
-CohPhase(RAFdata, 'GGVEW', 'VEW')
-CohPhase(RAFdata, 'ATX', 'DPXC', col='red', spans=15, smoothBins=25, showErrors=1)
+\dontrun{CohPhase(RAFdata, 'GGVEW', 'VEW')}
+\dontrun{CohPhase(RAFdata, 'ATX', 'DPXC', col='red', spans=15, smoothBins=25, showErrors=1)}
 }
 \author{
 William Cooper

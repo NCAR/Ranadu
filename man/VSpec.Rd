@@ -9,7 +9,7 @@
 VSpec(.data, .Variable, VLabel = NA, col = NA, type = "spectrum",
   method = NA, xlim = c(0.001, 15), ylim = c(1e-04, 1), spans = 49,
   ae = 0.2, smoothBins = 0, segLength = 512, poles = 50,
-  resolution = 1e-04, showErrors = 0, ADD = NA)
+  resolution = 1e-04, showErrors = 0, ADD = NA, EDR = FALSE)
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
@@ -94,11 +94,20 @@ a ribbon extending one standard deviation above and below the mean value. The de
 0, and in that case no ribbon is plotted. The ribbon is plotted using color "gray50" but
 "alpha" of 0.5 for partial transparency.}
 
-\item{ADD}{This parameter has the default value NA, which causes the function to plots 
+\item{ADD}{This parameter has the default value NA, which causes the function to plot 
 only the spectrum for the variable provided. If a spectrum for an other set of variables 
 has already been defined by previous calls to VSpec, setting ADD to the plot definition 
 returned by that previous call will add this plot to the previous plot. Up to four
 variables can be included in the final plot. See the examples.}
+
+\item{EDR}{If EDR is set TRUE, the plot will be normalized such that the ordinate
+is constant and has the value of the eddy dissipation rate for an inertial subrange. Otherwise
+this is not a true density function of log(frequency) and so is difficult to determine
+except for the above specialized use. The variable plotted is (2*pi/V)(C*P(f)*f^(5/3))^(3/2)
+where V is the airspeed in m/s and C is a constant equal to 1.5 for lateral spectra like
+WIC and 2 for longitudinal spectra like TASX. The resulting units are m^2/s^3 per interval in the
+true abscissa coordinate of -1.5C(epsilon)^-(1/3)k^(-2/3), but the plot is labeled by
+the appropriate values of frequency instead.}
 }
 \value{
 A ggplot2 definition for the plot of spectral density as a function of frequency.
