@@ -377,14 +377,14 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
           grepl('^C1DC_', V) || grepl('CS200_', V)) {
       } else {
         DM <- length(dim(X))  
-        print (sprintf ('V=%s DM=%d', V, DM))
+        # print (sprintf ('V=%s DM=%d', V, DM))
         if (DM == 2) {    # flatten
           X <- X[,r1]
           inputRate <- dim(X)[1]
           needFilter <- ifelse ((dim(X)[1] != Rate), TRUE, FALSE)
           dim(X) <- dim(X)[1]*dim(X)[2]
           ## see if adjustment to max rate is needed
-          print (sprintf ('needFilter=%s, inputRate=%d, Rate=%d', needFilter, inputRate, Rate))
+          # print (sprintf ('needFilter=%s, inputRate=%d, Rate=%d', needFilter, inputRate, Rate))
           if (needFilter) {X <- IntFilter(X, inputRate, Rate)}
         } else {  ## single-dimension (1 Hz) in high-rate file
           X <- X[r1]
