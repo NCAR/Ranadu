@@ -1,3 +1,7 @@
+  Updates:
+    getNetCDF.R             -- change for high-rate size spectra
+    ggplotWAC.R             -- correction to variable-name in ggplot
+    shinyApp:               -- suppress time reset on change from LR to HR
 Version 2.5-18-11-02
   Additions:
     plotSD.R                -- plots of size distributions, incl LWC distribution

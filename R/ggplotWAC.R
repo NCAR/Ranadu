@@ -61,7 +61,7 @@
 #' @param ... Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt
 #' @examples 
 #' \dontrun{ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])}
-#' \dontrun{ggplotWAC (data.frame ("Time"=Time, "TASX"=TASX), ylab="TAS")}
+#' \dontrun{with(RAFdata, ggplotWAC (data.frame ("Time"=Time, "TASX"=TASX), ylab="TAS"))}
 
 ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]", 
                        ylab="", lwd=1, lty=1, logxy='',
@@ -110,7 +110,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       np <- np / panels
     }
     if (!is.na(ylim[1])) {yrange <- ylim}
-    if (length(col) == 1 && np > 1) {
+    if (length(col) == 1 && np > 1) {g
       colrs <- c(col, 'forestgreen', 'red', 'skyblue', 'darkorange')
       colrs <- colrs[-c((np+1):length(colrs))]
     } else {
@@ -149,7 +149,9 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       g <- g + scale_colour_manual('', labels = lvl, breaks=lvl, values = colrs)
       g <- g + facet_grid (PanelGroup ~ ., scales='free_y', drop=TRUE)
     } else {
-      g <- ggplot (data=.data, aes(x=eval (parse (text=names(.data)[1]))), na.rm=TRUE)
+      a <- sprintf ("aes (x=%s)", names(.data)[1])
+      g <- ggplot (data=.data, eval(parse(text=a)))
+      # g <- ggplot (data=.data, aes(x=eval (parse (text=names(.data)[1]))))
       g <- g + ylim (yrange)
     }
     if (names(.data)[1] == "Time") {

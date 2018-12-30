@@ -140,7 +140,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
 	                     ## (It will be added separately.)
     VarList <- VarList[-which(VarList == 'Time')]
   }
- 
+
   ## check that requested variables are present in netCDF file; fail otherwise
   for (V in VarList) {
     if (is.na(V)) {next}
@@ -267,7 +267,16 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     }
     ## handle higher-than-1 Rate:
     DM <- length(dim(X))
-    if (DM == 2) {
+    if (DM == 3) {
+      inputRate <- dim(X)[2]
+      CC <- vector ('numeric', Bins*Rate*dim(X)[3])
+      dim(CC) <- c(Bins, dim(X)[3] * Rate)
+      for (j in 2:(Bins+1)) {
+        Y <- IntFilter (X[j, , ], inputRate, Rate)
+        CC[j-1,] <- Y
+      }
+      XN <- t(CC)
+    } else if (DM == 2) {
       ## if this is 1-Hz altho HR file (e.g., UHSAS), need to interpolate to HR
       if (Rate > 1) {
         inputRate <- 1
@@ -375,6 +384,12 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     } else { ## other rates require flattening and possibly interpolation and filtering
       if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
           grepl('^C1DC_', V) || grepl('CS200_', V)) {
+        XX <- X
+        Bins <- length(RL[[2]])
+        dim(XX) <- c(Rate, dim(X)[1]/Rate, Bins)
+        XX <- XX[,r1,]
+        dim(XX) <- c(dim(XX)[1]*dim(XX)[2], Bins)
+        X <- XX
       } else {
         DM <- length(dim(X))  
         # print (sprintf ('V=%s DM=%d', V, DM))
