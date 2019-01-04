@@ -5,8 +5,9 @@
 \alias{openInProgram}
 \title{OpenInProgram}
 \usage{
-OpenInProgram(Data, Program = "ncplot", dataDirectory = sprintf("\%s/R",
-  DataDirectory()), netCDFfileName = "RtoXanadu", warnOverwrite = TRUE,
+OpenInProgram(Data, Program = "ncplot",
+  dataDirectory = sprintf("\%s/R", DataDirectory()),
+  netCDFfileName = "RtoXanadu", warnOverwrite = TRUE,
   openProgram = TRUE)
 }
 \arguments{

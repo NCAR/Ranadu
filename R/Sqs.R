@@ -9,7 +9,7 @@
 #' @aliases Sqs
 #' @author William Cooper
 #' @export Sqs
-#' @import plyr
+#' @importFrom plyr adply
 #' @param W The updraft [m/s]
 #' @param Nd A data.frame containing the droplet size distribution with column names "n" and "r" 
 #' for number concentration and radius. Units can be either SI or /cm^3 and micrometers. 

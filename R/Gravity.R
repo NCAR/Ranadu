@@ -8,8 +8,8 @@
 #' @param altitude The altitude in meters above the WGS-84 geoid. GPS measurements before
 #' correction to MSL are appropriate to use when supplying this altitude. For detailed accuracy,
 #' correct a variable like GGALT by adding the height of the geoid above the WGS84 reference
-#' ellipsoid. In RAF datasets, this may be present as the variable GGOIDHT.
-#' @return The acceleration of gravidy in units of m/s^2
+#' ellipsoid. In RAF datasets, this may be present as the variable GGEOIDHT.
+#' @return The acceleration of gravity in units of m/s^2
 #' @examples 
 #' G <- Gravity (RAFdata$GGLAT, RAFdata$GGALT)
 Gravity <- function (latitude, altitude=0.) {

@@ -9,7 +9,8 @@
 VSpec(.data, .Variable, VLabel = NA, col = NA, type = "spectrum",
   method = NA, xlim = c(0.001, 15), ylim = c(1e-04, 1), spans = 49,
   ae = 0.2, smoothBins = 0, segLength = 512, poles = 50,
-  resolution = 1e-04, showErrors = 0, ADD = NA, EDR = FALSE)
+  resolution = 1e-04, showErrors = 0, ADD = NA, add = NA,
+  EDR = FALSE)
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
@@ -99,6 +100,9 @@ only the spectrum for the variable provided. If a spectrum for an other set of v
 has already been defined by previous calls to VSpec, setting ADD to the plot definition 
 returned by that previous call will add this plot to the previous plot. Up to four
 variables can be included in the final plot. See the examples.}
+
+\item{add}{This is only included to make it possible to specify either "ADD" or "add".
+Default is NA, in which case the value of ADD is used.}
 
 \item{EDR}{If EDR is set TRUE, the plot will be normalized such that the ordinate
 is constant and has the value of the eddy dissipation rate for an inertial subrange. Otherwise

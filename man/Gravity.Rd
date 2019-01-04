@@ -13,10 +13,10 @@ Gravity(latitude, altitude = 0)
 \item{altitude}{The altitude in meters above the WGS-84 geoid. GPS measurements before
 correction to MSL are appropriate to use when supplying this altitude. For detailed accuracy,
 correct a variable like GGALT by adding the height of the geoid above the WGS84 reference
-ellipsoid. In RAF datasets, this may be present as the variable GGOIDHT.}
+ellipsoid. In RAF datasets, this may be present as the variable GGEOIDHT.}
 }
 \value{
-The acceleration of gravidy in units of m/s^2
+The acceleration of gravity in units of m/s^2
 }
 \description{
 Provides the acceleration caused by gravity.

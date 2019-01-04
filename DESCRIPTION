@@ -32,6 +32,6 @@ License: GPL
 Depends:
     R (>= 3.3), ncdf4, maps, ggplot2, ggthemes, grid, graphics, utils
 Imports:
-    tcltk, nleqslv, zoo, fields, signal, reshape2, plyr, scales, bspec
+    tcltk, nleqslv, zoo, fields, signal, reshape2, scales, bspec, dplyr, plyr, tibble
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

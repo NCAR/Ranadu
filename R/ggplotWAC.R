@@ -110,7 +110,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       np <- np / panels
     }
     if (!is.na(ylim[1])) {yrange <- ylim}
-    if (length(col) == 1 && np > 1) {g
+    if (length(col) == 1 && np > 1) {
       colrs <- c(col, 'forestgreen', 'red', 'skyblue', 'darkorange')
       colrs <- colrs[-c((np+1):length(colrs))]
     } else {
