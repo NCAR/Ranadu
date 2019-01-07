@@ -1,0 +1,37 @@
+Package: Ranadu
+Title: Functions for use with RAF aircraft data files
+Version: 2.5-18-11-02
+Author: William Cooper
+Maintainer: William Cooper <cooperw@ucar.edu>
+Description: This package contains a function for loading a portion of a netCDF
+    data file into a data.frame, and it contains a number of functions that
+    implement algorithms described in ProcessingAlgorithms.pdf. Two manuals are
+    included, 'RanaduManual.pdf' (which describes the functions and includes a
+    very short introduction to R) and 'RanaduShinyManual.pdf' which describes 
+    the accompanying shiny application that provides a variety of interactive
+    plot capabilities for data analysis using NCAR/RAF data files. The package
+    depends on the ncdf4 and nleqslv packages. Functions included are: GetNetCDF
+    (to load the data.frame), GetIndex to find the index corresponding to a
+    particular time, GetStartEnd to find the time limits of the data,
+    SpecificHeats for the (possibly moisture corrected) specific heats and gas
+    constant for air, MachNumber, RecoveryFactor, TrueAirspeed, AirTemperature,
+    MurphyKoop (for the water vapor pressure), DPfromE (to find the dew point
+    corresponding to a specified water vapor pressure), PressureAltitude,
+    PotentialTemperature, EquivalentPotentialTemperature, Sqs (the quasi-steady
+    supersaturation in cloud given the updraft and droplet size distribution), 
+    WetEquivalentPotentialTemperature, MixingRatio, VirtualTemperature,
+    VirtualPotentialTemperature, and plotWAC and lineWAC (convenience routines
+    producing some aspects of plots I use routinely). A skew-T background is
+    provided by SkewT.R. A routine for generating plots of spectral variance is
+    included. There is also a function providing standard constants
+    including those defined in ProcessingAlgorithms.pdf. There is a utility
+    for making subsets of a netCDF file, and there are other functions also.
+    One new function supports starting other programs that read netCDF-format
+    files and providing such files generated from R data.frames.
+License: GPL
+Depends:
+    R (>= 3.3), ncdf4, maps, ggplot2, ggthemes, grid, graphics, utils
+Imports:
+    tcltk, nleqslv, zoo, fields, signal, reshape2, scales, bspec, dplyr, plyr, tibble
+LazyData: true
+RoxygenNote: 6.1.1
