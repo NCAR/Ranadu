@@ -1,0 +1,112 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Plotting routines</TITLE>
+<META NAME="description" CONTENT="Plotting routines">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node12.html">
+<LINK REL="previous" HREF="node10.html">
+<LINK REL="next" HREF="node12.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node12.html">Computational Algorithms</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node10.html">Getting information about the</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00330000000000000000">
+Plotting routines</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The routines plotWAC() and ggplotWAC() were introduced in the previous
+chapter. The following is a list of other Ranadu routines that produce
+plots. More detail about these routines is included in the next chapter.
+</FONT></FONT></FONT></FONT>
+<OL>
+<LI><SPAN  CLASS="texttt">Ranadu::plotTrack()</SPAN> plots a flight track on a
+background that shows geographic boundaries. In its simplest form
+it is called with a single argument of a data.frame that contains
+at least latitude and longitude in variables named LATC and LONC.
+This routine also has an option to plot the track in a reference frame
+that drifts with the wind. See ?plotTrack for more information on
+options.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::VSpec()</SPAN> constructs a plot of the variance
+spectrum for a specified variable. See also <SPAN  CLASS="texttt">Ranadu::CohPhase()</SPAN><SPAN  CLASS="texttt">
+</SPAN>for plots of the coherence and phase relationship between veriables.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::lineWAC()</SPAN> adds a line to a plot previously
+constructed by plotWAC(), with adjustment of the plotted time to correspond
+to the center of the interval averaged to obtain the measurements.
+Otherwise, like &ldquo;lines()&rdquo; in standard R.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::plotSD()</SPAN> plots the size distribution measured
+by cloud or aerosol particle probes.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::contourPlot()</SPAN> plots a scattergram-like
+display where the density of points is represented by colored areas.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::DemingFit()</SPAN> calculates a Deming fit to
+two variables (in which the distance from the fitted line to the two-dimensional
+locations of the measurements is minimized) and plots the resulting
+fit.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::SkewTSounding()</SPAN> plots a skew-T thermodynamic
+diagram with measurements from a data.frame averaged and superimposed
+on the diagram. Options are available to include a hodograph and the
+denote values of the LCL and CAPE.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node12.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node10.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node12.html">Computational Algorithms</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node10.html">Getting information about the</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

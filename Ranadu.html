@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 5.1.6.2.0 (Linux)"/>
+	<meta name="author" content="Al Cooper"/>
+	<meta name="created" content="2017-07-27T00:23:15.276642320"/>
+	<meta name="changedby" content="Al Cooper"/>
+	<meta name="changed" content="2017-07-27T00:28:03.601251846"/>
+</head>
+<script LANGUAGE="JavaScript">
+<!--HIDE
+function shinyFunction1() {
+   var x = document.getElementById('shinyDIV1');
+   var y = document.getElementById('otherDIV1');
+   if (x.style.display === 'none') {
+       x.style.display = 'block';
+       y.style.display = 'none';
+   } else {
+       x.style.display = 'none';
+       y.style.display = 'block';
+   }
+}
+//STOP HIDING-->
+</script>
+
+<body lang="en-US" dir="ltr">
+	<button onclick="shinyFunction1()">Click To Show or Hide the Ranadu Shiny app below</button>
+<div id="shinyDIV1" style="display:none">
+ <iframe src='http://192.168.1.101:3838/Ranadu' style='border: 5px dotted red; width: 100%; height: 800px'></iframe>
+ </div>
+<div id="otherDIV1" style="display:block">
+<h1>The Ranadu Shiny App</h1>
+Must use the "run external" display method for the Shiny app.
+</div>
+</body>
+</html>
