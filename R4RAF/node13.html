@@ -1,0 +1,139 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Utility Functions</TITLE>
+<META NAME="description" CONTENT="Utility Functions">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="previous" HREF="node12.html">
+<LINK REL="next" HREF="node14.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node14.html">More Details About Plotting</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node12.html">Computational Algorithms</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00350000000000000000">
+Utility Functions</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The following are some of the Ranadu functions that are provided to
+assist in various data-analysis tasks. The &ldquo;getNetCDF()&rdquo;, &ldquo;DataDirectory()&rdquo;
+and &ldquo;standardVariables()&rdquo; functions were already described. Others
+include:
+</FONT></FONT></FONT></FONT>
+<OL>
+<LI><SPAN  CLASS="texttt">binStats( ):</SPAN> A function to calculate average values and standard
+deviations in bins of a specified variable, as might to useful when
+constructing error-bar or box-and-whisker plots.
+</LI>
+<LI><SPAN  CLASS="texttt">detrend( ):</SPAN> Simple removal of the mean and trend from a time-series
+variable. Used in the spectral-analysis routines.
+</LI>
+<LI><SPAN  CLASS="texttt">df2tibble( ):</SPAN> Convert a data.frame to a &ldquo;tibble&rdquo;, a related
+data structure particularly suited to many data-analysis steps. <SPAN  CLASS="texttt">tibble2df(
+)</SPAN> transforms from a tibble back to a data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">LagrangeInterpolate()</SPAN> implements standard Lagrange interpolation.
+</LI>
+<LI><SPAN  CLASS="texttt">makeNetCDF( )</SPAN>: A utility that writes a new netCDF-format
+file from the measurements and attributes contained in a data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">ncsubset( ):</SPAN> Produce a subset netCDF file from an existing
+netCDF file.
+</LI>
+<LI><SPAN  CLASS="texttt">OpenInProgram( ):</SPAN> View the variables in a data.frame in another
+program like ncplot or Xanadu.
+</LI>
+<LI><SPAN  CLASS="texttt">RAFdata:</SPAN> This is a sample data.frame as might be constructed
+by getNetCDF(), containing a short period of measurements from an
+NSF/NCAR GV flight in a project called IDEAS-4.
+The data.frame contains a set of measurements, one row per second,
+and a Time variable. This is provided
+for use in the Ranadu examples.
+</LI>
+<LI><SPAN  CLASS="texttt">removeSpikes( ):</SPAN> Find &ldquo;spikes&rdquo; in a variable and replace
+them with linear-interpolated values. Useful in some studies of spectral
+variance where spikes distort the spectrum.
+</LI>
+<LI><SPAN  CLASS="texttt">RSubset( ):</SPAN> Produce a subset of a data.frame while preserving
+attributes. This is useful because some standard R subsetting actions
+do not preserve attributes.
+</LI>
+<LI><SPAN  CLASS="texttt">selectTimes( ):</SPAN> Produce a new data.frame with a subset of
+the time range included in the original data.frame. (Uses setRange.)
+This is of particular use in pipes.
+</LI>
+<LI><SPAN  CLASS="texttt">setRange( ):</SPAN> Find the data.frame indices corresponding to
+a specified time range in a data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">setVariableList( ):</SPAN> An interactive way of setting a list
+of variables.
+</LI>
+<LI><SPAN  CLASS="texttt">ShiftInTime( ):</SPAN> Move a time-series variable forward or backward
+in time.
+</LI>
+<LI><SPAN  CLASS="texttt">SmoothInterp( ):</SPAN> Fill missing values with linear interpolation
+and optionally smooth the resulting time series.
+</LI>
+<LI><SPAN  CLASS="texttt">theme_WAC( ):</SPAN> An optional theme available for use with &ldquo;ggplot2&rdquo;
+plots.
+</LI>
+<LI><SPAN  CLASS="texttt">XformLA( ):</SPAN> The transformation from the &ldquo;local&rdquo; Earth-relative
+reference frame to the aircraft or body reference frame, or the reverse.
+Used extensively in the Kalman processor and other GPS-updating functions.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node14.html">More Details About Plotting</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node12.html">Computational Algorithms</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

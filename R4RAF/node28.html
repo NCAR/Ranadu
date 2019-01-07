@@ -1,0 +1,223 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Generating plots of variance spectra</TITLE>
+<META NAME="description" CONTENT="Generating plots of variance spectra">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="previous" HREF="node24.html">
+<LINK REL="next" HREF="node29.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node29.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node23.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node27.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node29.html">Miscellaneous</A>
+<B> Up:</B> <A
+ HREF="node23.html">Variance Spectra</A>
+<B> Previous:</B> <A
+ HREF="node27.html">Methods used to estimate</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00520000000000000000">
+Generating plots of variance spectra</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">See &ldquo;?Ranadu::VSpec&rdquo; for details regarding using this function.
+The essential inputs are a data.frame that includes at least the variables
+&ldquo;Time&rdquo;, &ldquo;TASX&rdquo;, and the variable for which the variance spectrum
+is desired. TASX is needed to interpret the scale both in terms of
+frequency and wavelength. An example is shown in Fig.&nbsp;<A HREF="#fig:VS1"><IMG  ALT="[*]" SRC="crossref.png"></A>,
+using the default specifications.
+</FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+<FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2138"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3695"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue3698">(</SPAN><SPAN ID="hue3700">'/Data/SOCRATES/SOCRATESrf08h.nc'</SPAN><SPAN ID="hue3702">,</SPAN> <SPAN ID="hue3704">Start</SPAN><SPAN ID="hue3706">=</SPAN><SPAN ID="hue3708">45600</SPAN><SPAN ID="hue3710">,</SPAN> <SPAN ID="hue3712">End</SPAN><SPAN ID="hue3714">=</SPAN><SPAN ID="hue3716">50100</SPAN><SPAN ID="hue3718">)</SPAN> <SPAN ID="hue3720">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3722"><SPAN &nbsp;CLASS="textbf">VSpec</SPAN></SPAN><SPAN ID="hue3725">(</SPAN><SPAN ID="hue3727">'WIC'</SPAN><SPAN ID="hue3729">)</SPAN> <SPAN ID="hue3731">+</SPAN> <SPAN ID="hue3733"><SPAN &nbsp;CLASS="textbf">theme_WAC</SPAN></SPAN><SPAN ID="hue3736">()</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:VS1"></A><A ID="1323"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+Variance spectrum for measurements of vertical wind during SOCRATES flight 8, 4:56:00 - 5:01:00.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./VS1-1.png"
+ ALT="Image VS1-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<P>
+The following demonstrates how to combine plotted spectra. The three
+lines on this plot were generated using the three methods of spectral
+estimation available in VSpec(), all for the WIC variable:
+
+<P>
+
+<FONT COLOR="#585858"></FONT></TD></TR>
+</TABLE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2147"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3738">D</SPAN> <SPAN ID="hue3740">&lt;-</SPAN> <SPAN ID="hue3742"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue3745">(</SPAN><SPAN ID="hue3747">'/Data/SOCRATES/SOCRATESrf08h.nc'</SPAN><SPAN ID="hue3749">,</SPAN> <SPAN ID="hue3751">Start</SPAN><SPAN ID="hue3753">=</SPAN><SPAN ID="hue3755">45600</SPAN><SPAN ID="hue3757">,</SPAN> <SPAN ID="hue3759">End</SPAN><SPAN ID="hue3761">=</SPAN><SPAN ID="hue3763">50100</SPAN><SPAN ID="hue3765">)</SPAN> <SPAN ID="hue3767">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3769"><SPAN &nbsp;CLASS="textbf">Rmutate</SPAN></SPAN><SPAN ID="hue3772">(</SPAN><SPAN ID="hue3774">WIC2</SPAN><SPAN ID="hue3776">=WIC,</SPAN> <SPAN ID="hue3778">WIC3</SPAN><SPAN ID="hue3780">=WIC)</SPAN> <SPAN ID="hue3782"><SPAN &nbsp;CLASS="textit">## duplicate the variable</SPAN></SPAN>
+<BR><SPAN ID="hue3785">g</SPAN> <SPAN ID="hue3787">&lt;-</SPAN> <SPAN ID="hue3789"><SPAN &nbsp;CLASS="textbf">VSpec</SPAN></SPAN><SPAN ID="hue3792">(D,</SPAN> <SPAN ID="hue3794">'WIC'</SPAN><SPAN ID="hue3796">,</SPAN> <SPAN ID="hue3798">VLabel</SPAN><SPAN ID="hue3800">=</SPAN><SPAN ID="hue3802">'spectrum'</SPAN><SPAN ID="hue3804">)</SPAN>
+<BR><SPAN ID="hue3806">g</SPAN> <SPAN ID="hue3808">&lt;-</SPAN> <SPAN ID="hue3810"><SPAN &nbsp;CLASS="textbf">VSpec</SPAN></SPAN><SPAN ID="hue3813">(D,</SPAN> <SPAN ID="hue3815">'WIC2'</SPAN><SPAN ID="hue3817">,</SPAN> <SPAN ID="hue3819">method</SPAN><SPAN ID="hue3821">=</SPAN><SPAN ID="hue3823">'Welch'</SPAN><SPAN ID="hue3825">,</SPAN> <SPAN ID="hue3827">VLabel</SPAN><SPAN ID="hue3829">=</SPAN><SPAN ID="hue3831">'Welch'</SPAN><SPAN ID="hue3833">,</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3835">segLength</SPAN><SPAN ID="hue3837">=</SPAN><SPAN ID="hue3839">128</SPAN><SPAN ID="hue3841">,</SPAN> <SPAN ID="hue3843">smoothBins</SPAN><SPAN ID="hue3845">=</SPAN><SPAN ID="hue3847">50</SPAN><SPAN ID="hue3849">,</SPAN> <SPAN ID="hue3851">add</SPAN><SPAN ID="hue3853">=g)</SPAN>
+<BR><SPAN ID="hue3855"><SPAN &nbsp;CLASS="textbf">VSpec</SPAN></SPAN><SPAN ID="hue3858">(D,</SPAN> <SPAN ID="hue3860">'WIC3'</SPAN><SPAN ID="hue3862">,</SPAN> <SPAN ID="hue3864">method</SPAN><SPAN ID="hue3866">=</SPAN><SPAN ID="hue3868">'MEM'</SPAN><SPAN ID="hue3870">,</SPAN> <SPAN ID="hue3872">VLabel</SPAN><SPAN ID="hue3874">=</SPAN><SPAN ID="hue3876">'MEM'</SPAN><SPAN ID="hue3878">,</SPAN> <SPAN ID="hue3880">add</SPAN><SPAN ID="hue3882">=g)</SPAN> <SPAN ID="hue3884">+</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3886"><SPAN &nbsp;CLASS="textbf">theme_WAC</SPAN></SPAN><SPAN ID="hue3889">()</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:VS2"></A><A ID="1411"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+Variance spectra for the same data shown in the preceding plot but generated by the three methods indicated in the legend.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./VS2-1.png"
+ ALT="Image VS2-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<P>
+
+
+<P>
+Another option that may be of use, although the result is not a &ldquo;proper&rdquo;
+spectrum in the sense used above, is to plot with weighting by <SPAN CLASS="MATH"><IMG STYLE="height: 2.17ex; vertical-align: -0.13ex; " SRC="img16.png"
+ ALT="$\nu^{5/3}$"></SPAN>
+and additional change of variables so that the resulting ordinate
+matches the eddy dissipation rate in a case where the measurements
+are indeed from an inertial subrange. Figure&nbsp;<A HREF="#fig:VS3"><IMG  ALT="[*]" SRC="crossref.png"></A> illustrates
+this plot. The variable plotted is <!-- MATH
+ $(2\pi/V)(CP(\nu)\nu^{5/3})^{3/2}$
+ -->
+<SPAN CLASS="MATH"><IMG STYLE="height: 2.62ex; vertical-align: -0.65ex; " SRC="img17.png"
+ ALT="$(2\pi/V)(CP(\nu)\nu^{5/3})^{3/2}$"></SPAN>,
+with <SPAN CLASS="MATH"><IMG STYLE="height: 1.51ex; vertical-align: -0.13ex; " SRC="img18.png"
+ ALT="$V$"></SPAN> the airspeed and <SPAN CLASS="MATH"><IMG STYLE="height: 1.62ex; vertical-align: -0.13ex; " SRC="img19.png"
+ ALT="$C=1.5$"></SPAN> for lateral spectra; this quantity
+should equal the eddy dissipation rate in an inertial subrange.
+
+<P>
+
+<FONT COLOR="#585858"></FONT></TD></TR>
+</TABLE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2156"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3891"><SPAN &nbsp;CLASS="textbf">VSpec</SPAN></SPAN><SPAN ID="hue3894">(D,</SPAN> <SPAN ID="hue3896">'WIC'</SPAN><SPAN ID="hue3898">,</SPAN> <SPAN ID="hue3900">EDR</SPAN><SPAN ID="hue3902">=</SPAN><SPAN ID="hue3904">TRUE</SPAN><SPAN ID="hue3906">)</SPAN> <SPAN ID="hue3908">+</SPAN> <SPAN ID="hue3910"><SPAN &nbsp;CLASS="textbf">theme_WAC</SPAN></SPAN><SPAN ID="hue3913">(</SPAN><SPAN ID="hue3915">1</SPAN><SPAN ID="hue3917">)</SPAN> &nbsp;<SPAN ID="hue3919"><SPAN &nbsp;CLASS="textit">## theme_WAC(1) =&gt; smaller title</SPAN></SPAN>
+<BR></SPAN>
+</DIV>
+
+<PRE>
+## [1] "EDR=1.31e-03"
+</PRE>
+<P>
+<DIV class="CENTER"><A ID="fig:VS3"></A><A ID="1447"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+An eddy-dissipation-rate plot for the same data shown in the preceding plot. but generated by the three methods indicated in the legend.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./VS3-1.png"
+ ALT="Image VS3-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+</TD></TR>
+</TABLE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2165"></SPAN>
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3922"><SPAN &nbsp;CLASS="textit">## to suppress the title, add &#34;+ ggtitle(&rdquo;)</SPAN></SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<P>
+</TD></TR>
+</TABLE></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node29.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node23.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node27.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node29.html">Miscellaneous</A>
+<B> Up:</B> <A
+ HREF="node23.html">Variance Spectra</A>
+<B> Previous:</B> <A
+ HREF="node27.html">Methods used to estimate</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

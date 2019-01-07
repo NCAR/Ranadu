@@ -1,0 +1,182 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>DataFileInfo()</TITLE>
+<META NAME="description" CONTENT="DataFileInfo()">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node4.html">
+<LINK REL="previous" HREF="node2.html">
+<LINK REL="next" HREF="node4.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node2.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node4.html">getNetCDF() and the resulting</A>
+<B> Up:</B> <A
+ HREF="node2.html">Getting Started</A>
+<B> Previous:</B> <A
+ HREF="node2.html">Getting Started</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00210000000000000000">
+DataFileInfo()</A>
+</H1>
+A useful first look at a netCDF file is provided by Ranadu::DataFileInfo(),
+which returns characteristics like the project name, flight number,
+date/times, variable names, and the data rate. In addition, this function
+returns a set of &ldquo;measurands&rdquo; (measured properties of the atmosphere
+like air temperature) and the set of variables that provide measurements
+of that measurand. The measurands in a particular file (the one referenced
+above) are shown below:
+<BR>
+<BR>
+ <SPAN ID="cbox1937"></SPAN>
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue2214">Project</SPAN> <SPAN ID="hue2216">&lt;-</SPAN> <SPAN ID="hue2218">'WECAN'</SPAN>
+<BR><SPAN ID="hue2220">FlightNumber</SPAN> <SPAN ID="hue2222">&lt;-</SPAN> <SPAN ID="hue2224">6</SPAN>
+<BR><SPAN ID="hue2226">fname</SPAN> <SPAN ID="hue2228">&lt;-</SPAN> <SPAN ID="hue2230"><SPAN &nbsp;CLASS="textbf">sprintf</SPAN></SPAN> <SPAN ID="hue2233">(</SPAN><SPAN ID="hue2235">'%s%s/%srf%02d.nc'</SPAN><SPAN ID="hue2237">, Ranadu</SPAN><SPAN ID="hue2239">::</SPAN><SPAN ID="hue2241"><SPAN &nbsp;CLASS="textbf">DataDirectory</SPAN></SPAN><SPAN ID="hue2244">(),</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2246">Project, Project, FlightNumber)</SPAN>
+<BR><SPAN ID="hue2248">FI</SPAN> <SPAN ID="hue2250">&lt;-</SPAN> <SPAN ID="hue2252"><SPAN &nbsp;CLASS="textbf">DataFileInfo</SPAN></SPAN><SPAN ID="hue2255">(fname)</SPAN>
+<BR><SPAN ID="hue2257"><SPAN &nbsp;CLASS="textbf">names</SPAN></SPAN> <SPAN ID="hue2260">(FI</SPAN><SPAN ID="hue2262">$</SPAN><SPAN ID="hue2264">Measurands)</SPAN>
+<BR></SPAN>
+</DIV>
+
+<PRE>
+##  [1] ""                                     
+##  [2] "altitude"                             
+##  [3] "air_temperature"                      
+##  [4] "air_pressure"                         
+##  [5] "dew_point_temperature"                
+##  [6] "water_vapor_pressure"                 
+##  [7] "latitude"                             
+##  [8] "longitude"                            
+##  [9] "height"                               
+## [10] "humidity_mixing_ratio"                
+## [11] "barometric_altitude"                  
+## [12] "platform_pitch_angle"                 
+## [13] "atmosphere_cloud_liquid_water_content"
+## [14] "air_pressure_at_sea_level"            
+## [15] "relative_humidity"                    
+## [16] "platform_roll_angle"                  
+## [17] "solar_azimuth_angle"                  
+## [18] "solar_elevation_angle"                
+## [19] "solar_zenith_angle"                   
+## [20] "platform_speed_wrt_air"               
+## [21] "platform_orientation"                 
+## [22] "air_potential_temperature"            
+## [23] "equivelent_potential_temperature"     
+## [24] "platform_course"                      
+## [25] "virtual_temperature"                  
+## [26] "eastward_wind"                        
+## [27] "northward_wind"                       
+## [28] "wind_from_direction"                  
+## [29] "upward_air_velocity"                  
+## [30] "wind_speed"
+</PRE>
+<P>
+The variables that provide redundant measurements of a specific measurand
+are named lists with the measurand name and can be displayed by printing
+the measurand name, as in the following example:
+
+<FONT COLOR="#585858"></FONT></TD></TR>
+</TABLE><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox1946"></SPAN>
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue2266">FI</SPAN><SPAN ID="hue2268">$</SPAN><SPAN ID="hue2270">Measurands</SPAN><SPAN ID="hue2272">$</SPAN><SPAN ID="hue2274">air_temperature</SPAN>
+<BR></SPAN>
+</DIV>
+
+<PRE>
+## [1] "ATF1" "ATH1" "ATH2" "ATX"
+</PRE>
+<P>
+In addition, the &ldquo;long_name&rdquo; describing a variable (e.g., here
+&ldquo;ATX&rdquo;) can be found as follows:
+
+<FONT COLOR="#585858"></FONT></TD></TR>
+</TABLE><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox1955"></SPAN>
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue2276">FI</SPAN><SPAN ID="hue2278">$</SPAN><SPAN ID="hue2280">LongNames[</SPAN><SPAN ID="hue2282"><SPAN &nbsp;CLASS="textbf">which</SPAN></SPAN><SPAN ID="hue2285">(</SPAN><SPAN ID="hue2287">'ATX'</SPAN> <SPAN ID="hue2289">==</SPAN> <SPAN ID="hue2291">FI</SPAN><SPAN ID="hue2293">$</SPAN><SPAN ID="hue2295">Variables)]</SPAN>
+<BR></SPAN>
+</DIV>
+
+<PRE>
+## [1] "Ambient Temperature, Reference"
+</PRE>
+<P>
+To see all the lists of information contained in the DataFileInfo
+list, print the names as follows:
+
+<FONT COLOR="#585858"></FONT></TD></TR>
+</TABLE><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox1964"></SPAN>
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue2297"><SPAN &nbsp;CLASS="textbf">names</SPAN></SPAN><SPAN ID="hue2300">(FI)</SPAN>
+<BR></SPAN>
+</DIV>
+
+<PRE>
+##  [1] "Number"     "Project"    "Platform"   "DataFile"   "Start"     
+##  [6] "End"        "Rate"       "LatMin"     "LatMax"     "LonMin"    
+## [11] "LonMax"     "Variables"  "LongNames"  "Measurands"
+</PRE>
+<P>
+Examining these can help a user understand what is included in a particular
+data file.
+</TD></TR>
+</TABLE></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node4.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node2.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node2.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node4.html">getNetCDF() and the resulting</A>
+<B> Up:</B> <A
+ HREF="node2.html">Getting Started</A>
+<B> Previous:</B> <A
+ HREF="node2.html">Getting Started</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

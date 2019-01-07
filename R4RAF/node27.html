@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Methods used to estimate spectral variance</TITLE>
+<META NAME="description" CONTENT="Methods used to estimate spectral variance">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="previous" HREF="node26.html">
+<LINK REL="next" HREF="node28.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node28.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node24.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node26.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node28.html">Generating plots of variance</A>
+<B> Up:</B> <A
+ HREF="node24.html">Background regarding spectral variance</A>
+<B> Previous:</B> <A
+ HREF="node26.html">Transformations among spectra; &ldquo;proper&rdquo;</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H2><A ID="SECTION00513000000000000000">
+Methods used to estimate spectral variance</A>
+</H2><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The function &ldquo;Ranadu::VSpec()&rdquo; includes three methods that can
+be selected to estimate the spectral variance:
+</FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<OL>
+<LI>The function &ldquo;spectrum()&rdquo; from the &ldquo;stats&rdquo; R package, which
+estimates a periodogram using Fourier-series estimation and then optionally
+smooths the spectrum using modified Daniell smoothers. The amount
+of smoothing can be controlled with the &ldquo;spans&rdquo; parameter in the
+function call.
+</LI>
+<LI>The &ldquo;Welch&rdquo; method as implemented by the R package &ldquo;bspec&rdquo;.
+In this method, the time series is divided into subsets and the spectra
+resulting from the subsets are averaged to reduce the variance in
+the result. The degree of smoothing is controlled by the &ldquo;segLength&rdquo;
+parameter that specifies the length of the segments to use.
+</LI>
+<LI>The &ldquo;maximum entropy&rdquo; method in which the spectrum is represented
+by &ldquo;poles&rdquo; and evaluated from the contributions of those poles
+across the frequency spectrum. A higher number of poles and a smaller
+value of the &ldquo;resolution&rdquo; will lead to more structure in the result.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+In addition, it is possible to smooth the resulting spectrum further
+by specifying a value for the parameter &ldquo;smoothBins&rdquo;, in which
+case the frequency range will be partitioned into the specified number
+of logarithmically spaced bins and the values of the spectral density
+will be averaged in each bin.
+</FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node28.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node24.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node26.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node28.html">Generating plots of variance</A>
+<B> Up:</B> <A
+ HREF="node24.html">Background regarding spectral variance</A>
+<B> Previous:</B> <A
+ HREF="node26.html">Transformations among spectra; &ldquo;proper&rdquo;</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>
