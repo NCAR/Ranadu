@@ -20,7 +20,7 @@
 #' It may be necessary to supply xlim spanning all sizes with the first call because this is not reset. An example of a suitable
 #' data.frame is generated from "D <- getNetCDF('/Data/CSET/CSETrf06.nc', c('CCDP_', 'C1DC_'), 173000, 173500)". Then make individual
 #' calls for each size distribution: "plotSD(D[ , c('Time', 'CCDP_LWOI')], CellLimits=NA)" and "plotSD(D[ , c('Time', 'C1DC_LWOO')], 
-#' CellLimits=NA, ucon=1.e-4, .Add=TRUE)". 
+#' CellLimits=NA, ucon=1.e-4, ADD=TRUE)". 
 #' @param CellLimits A vector containing the bin limits for the data. This is usually obtained from "attr(Data$CCDP_LWOI, 'CellSizes').
 #' It represents the lower limits of the bins, so it should have one more entry than the number of columns in data to represent
 #' the upper limit of the last bin. The deault is a vector of bin limits applicable to the CDP. If the supplied value is NA, the vector 
@@ -52,8 +52,9 @@
 #' distributions and 'topleft' for LWC plots.
 #' @param ... Additional arguments passed to the plot routine to control 
 #' graphics parameters etc. 
-#' @return T -- The result is the plot, but the mean concentration, mean diameter and standard deviation in the
-#' diameter are returned in a three-component vector.
+#' @return T -- The result is the plot, but the mean concentration, mean diameter,
+#' standard deviation in the diameter, and liquid water content (assuming all
+#' particles are liquid) are returned in a four-component vector.
 #' This is for possible plot annotation in, e.g., a plot title. An example of a plot title is:
 #' "title(bquote('concentration' == .(format(T[1], digits=3)) ~ cm^"-3" ~ ' mean diameter' == .(format(T[2], digits=3)) ~ mu*"m"))"
 

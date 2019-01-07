@@ -9,7 +9,7 @@
 #' that routine it transfers data.frame and variable attributes to the
 #' resulting data.frame. This is suitable for use in pipes like
 #' D %>% Rmutate(DPD=ATX-DPXC) $>$ select(Time, ATX) %>% plotWAC()
-#' @aliases RRmutate, rmutate
+#' @aliases Rmutate, rmutate
 #' @author William Cooper
 #' @importFrom dplyr mutate
 #' @export Rmutate

@@ -18,7 +18,7 @@
 #' using the Start and End arguments to that function. Multiple segments can be
 #' bound together using the R function rbind. If the variables 'Pressure',
 #' 'Temperature', and 'DewPoint' are not provided, the routine will search for the
-#' respective substitutes 'PSCX', 'ATX', and 'DPXC' and will use those instead if they
+#' respective substitutes 'PSXC', 'ATX', and 'DPXC' and will use those instead if they
 #' are found. If neither set of veriables is found, the function fails.
 #' @param nbins An integer representing the number of bins into which the sounding
 #' will be partitioned in pressure. The default is 50.
