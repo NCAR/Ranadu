@@ -18,7 +18,7 @@
 #' @aliases vSpec vspec
 #' @author William Cooper
 #' @import scales bspec
-#' @importFrom zoo na.spline
+#' @importFrom zoo na.approx
 #' @importFrom stats pchisq pnorm qchisq spec.pgram spectrum ts
 #' @export VSpec
 #' @param .data A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
@@ -88,6 +88,7 @@
 #' a ribbon extending one standard deviation above and below the mean value. The default is
 #' 0, and in that case no ribbon is plotted. The ribbon is plotted using color "gray50" but
 #' "alpha" of 0.5 for partial transparency. 
+#' @param WavelengthScale If TRUE (the default), include a wavelength scale on the plot.
 #' @param ADD This parameter has the default value NA, which causes the function to plot 
 #' only the spectrum for the variable provided. If a spectrum for an other set of variables 
 #' has already been defined by previous calls to VSpec, setting ADD to the plot definition 
@@ -115,14 +116,16 @@
 #' collision with other possible uses of those names in the global environment.
 #' @examples 
 #' VSpec(RAFdata, 'WSC')
-#' with(RAFdata, VSpec(RAFdata, WSC))
-#' g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1)); 
+#' g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1));
 #' VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g)
 #' VSpec(RAFdata,'TASX', spans=11, showErrors=1, xlim=c(0.01,1)) + theme_WAC()
 VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=NA, xlim=c(0.001, 15), ylim=c(0.0001,1),
-  spans=49, ae=0.2, smoothBins=0, segLength=512, poles=50, resolution=0.0001, showErrors=0, ADD=NA, add=NA, EDR=FALSE) {
-  
-  if (is.data.frame(.data)) {
+  spans=49, ae=0.2, smoothBins=0, segLength=512, poles=50, resolution=0.0001, showErrors=0, 
+  WavelengthScale=TRUE, ADD=NA, add=NA, EDR=FALSE) {
+  if (is.data.frame(.data)) {  ## must be true, or exit. Needs to contain Time and TASX in addition to .Variable
+    if (!is.character(.Variable)) {  ## then try to get name of the vector
+      .Variable <- deparse (substitute (.Variable))
+    }
     if (.Variable %in% names(.data)) {
       Z <- capture.output (v <- detrend (.data[, c('Time', .Variable)]))
       if (!is.na(VLabel)) {    ## use this alternate name in legend
@@ -199,7 +202,6 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
     ps <- 2 * Rate * Mod (psComplex)^2
     fpf <- freq * ps
   }
-  
   tasAverage <- mean(.data$TASX, na.rm=TRUE)
   if (EDR) {
     ps <- fpf / freq
@@ -224,13 +226,13 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
     ## first call: redefine VSpecDF
     assign('.VSpecDF1', DF, envir=.GlobalEnv)
     labx <- 'frequency [Hz]'
-    # xlim <- c(0.001,15)
     if (EDR) {
       # laby <- sprintf('eddy dissipation rate for %s', .Variable)
       laby <- expression(paste("eddy dissipation rate [m"^"2","s"^"-3","]"))
     } else {
       laby <- sprintf('variance spectrum fP(f) for %s', .Variable)
     }
+    # xlim <- c(0.001,15)
     # ylim <- c(0.001, 1)  ## now an input argument
     g <- ggplot(data=.VSpecDF1)         
     g <- g + geom_path (aes(x=freq, y=fpf, colour=V), na.rm=TRUE) +  
@@ -295,7 +297,7 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
   if (is.na(ADD[1])) {
     g <- g + scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x, n=4), #limits = xlim, 
       labels = trans_format("log10", math_format(10^.x))) +           
-      scale_y_log10(breaks =            trans_breaks("log10", function(x) 10^x, n=4), #limits = ylim,             
+      scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x, n=4), #limits = ylim,             
         labels = trans_format("log10", math_format(10^.x))) + 
       annotation_logticks(sides='trbl') + 
       coord_cartesian(xlim=xlim, ylim=ylim) 
@@ -304,9 +306,10 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
       imx <- length(freq)
       imn <- which (freq > freq[imx]/20)[1]
       aveEDR <- mean(fpf[imn:imx], na.rm=TRUE)
-      print (sprintf ('EDR=%.2e', aveEDR))
+      ttl <- sprintf ('EDR=%.2e', aveEDR)
       DFL <- data.frame(x=c(freq[imn], freq[imx]), y=rep(aveEDR, 2))
       g <- g + geom_path(data=DFL, aes(x=x, y=y), lwd=1.5, colour='red')
+      g <- g + ggtitle (bquote(.(ttl) ~ ' m'^2 ~ 's'^-3))
       # g <- g + ggtitle(sprintf(' mean eddy dissipation rate %.2e m^2/s^3', aveEDR))
     } else {
       for (i in (-8:0)) {
@@ -316,6 +319,25 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
         # print(DFL)
         g <- g + geom_path (data=DFL, aes(x=x, y=y), colour='darkorange', lwd=lw, lty=3)
       }
+    }
+    if (WavelengthScale) {
+      yl <- c(ylim[1]*1.4, ylim[1]*2.1)
+      lclr <- 'slategrey'
+      for (j1 in c(10, 100, 1000, 10000, 100000)) {
+        DFL2 <- data.frame(x=rep(tasAverage/j1, 2), y=yl)
+        g <- g + geom_path(data=DFL2, aes(x=x, y=y), colour=lclr, lwd=1.0)
+        if (j1 != 100000) {
+          for (j2 in 2:9) {
+            DFL2 <- data.frame(x=rep(tasAverage/(j1*j2),2), y=yl)
+            g <- g + geom_path(data=DFL2, aes(x=x, y=y), colour=lclr, lwd=0.6)
+          }
+        }
+      }
+      DFL2 <- data.frame (x=tasAverage*c(1/10, 1/100000), y=rep(yl[1], 2))
+      g <- g + geom_path(data=DFL2, aes(x=x, y=y), colour=lclr, lwd=1.0)
+      g <- g + annotate("text", 
+        x = tasAverage*c(1/100000, 1/10000, 1/1000, 1/100, 1/10), 
+        y = rep(yl[2]*1.5,5), label = c("100 km", "10 km", "1 km", "100 m", " "))
     }
     # g <- g + theme_WAC()
   }
