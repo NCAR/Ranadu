@@ -321,7 +321,7 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
       }
     }
     if (WavelengthScale) {
-      yl <- c(ylim[1]*1.4, ylim[1]*2.1)
+      yl <- c(ylim[1]*1.2, ylim[1]*1.5)
       lclr <- 'slategrey'
       for (j1 in c(10, 100, 1000, 10000, 100000)) {
         DFL2 <- data.frame(x=rep(tasAverage/j1, 2), y=yl)
@@ -337,7 +337,8 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
       g <- g + geom_path(data=DFL2, aes(x=x, y=y), colour=lclr, lwd=1.0)
       g <- g + annotate("text", 
         x = tasAverage*c(1/100000, 1/10000, 1/1000, 1/100, 1/10), 
-        y = rep(yl[2]*1.5,5), label = c("100 km", "10 km", "1 km", "100 m", " "))
+        y = rep(yl[2]*1.5,5), label = c("100 km", "10 km", "1 km", "100 m", " "),
+        colour=lclr)
     }
     # g <- g + theme_WAC()
   }
