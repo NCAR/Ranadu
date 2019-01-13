@@ -29,15 +29,19 @@
 #' value from the original data.frame should be added to .data.
 #' @param .Variable The (character) name of a variable that is a column in .data and for which the
 #' variance spectrum will be constructed. If this variable is not in .data an error message 
-#' is generated.
-#' @param VLabel A character string that will be used as the label for this variable in
+#' is generated. If the parameter is not supplied or is set to NA (the default), up
+#' to three variables are selected from the first three (other than TASX or TIME) in
+#' the supplied data.frame.
+#' @param VLabel A character string or a vector of such strings
+#' that will be used as the labels in
 #' the legend. The default is .Variable. The labels should differ if they are to appear
 #' separately in the legend. For example, to plot the spectrum for the same variable using
 #' different methods, include labels that indicate the different methods. See the
 #' examples.
-#' @param col The color to use when plotting this variable. The default is NA, and
+#' @param col The color to use when plotting the spectral variance. The default is NA, and
 #' in this case the following plot colors will be used in order: blue, forestgreen, black, 
-#' brown.
+#' black, darkorange. A vector of color names can be supplied if a multiple-variable plot
+#' is to be generated.
 #' @param type Three choices are avaiable: "spectrum" (the default), which
 #' uses the R routine "spectrum()" from the stats package to estimate the spectral
 #' density; "Welch", which uses the implementation of the Welch method of averaging
@@ -45,12 +49,14 @@
 #' method of spectral estimation as implemented in the Ranadu routines memCoef() and
 #' memEstimate(). The parameter "spans" applies only to the "spectrum" method, the
 #' argument "segLength" to the Welch method, and the
-#' arguments "poles" and "resolution" only to the "MEM" method.
+#' arguments "poles" and "resolution" only to the "MEM" method. The type will
+#' be the same for all plotted variance spectra for a multiple-variable plot.
 #' @param method This is the same as "type" and over-rides it if present.
 #' @param xlim A two-element vector specifying the lower and upper limits for the abscissa of the
-#' plot. The default is c(0.001, 15).
+#' plot. The default is NA, in which case c(0.001, 1) will be used if the Rate is 1
+#' and c(0.001, 15) if the Rate is 25.
 #' @param ylim A two-element vector specifying the lower and upper limits for the ordinate of the
-#' plot. The default is c(0.0001, 1).
+#' plot. The default is NA, in which case c(0.0001, 1) will be used.
 #' @param spans An odd integer (or forced odd by incrementing upward if even) specifying the 
 #' number of frequencies to span when averaging the spectral variance estimate produced by the R routine
 #' "spectrom". The smoothing uses modified Daniell smoothers. This parameter can also be a vector of odd
@@ -102,8 +108,10 @@
 #' except for the above specialized use. The variable plotted is (2*pi/V)(C*P(f)*f^(5/3))^(3/2)
 #' where V is the airspeed in m/s and C is a constant equal to 1.5 for lateral spectra like
 #' WIC and 2 for longitudinal spectra like TASX. The resulting units are m^2/s^3 per interval in the
-#' true abscissa coordinate of -1.5C(epsilon)^-(1/3)k^(-2/3), but the plot is labeled by
-#' the appropriate values of frequency instead. 
+#' true abscissa coordinate of -1.5C(epsilon)^-(1/3)k^(-2/3), but the plot is displayed
+#' with a logarithmic-frequency abscissa. The result can't be interpreted as a variance
+#' spectrum but can show consistency with inertial-subrange expectations and the
+#' approximate magnitude of the eddy dissipation rate when used with wind components. 
 #' @return A ggplot2 definition for the plot of spectral density as a function of frequency.
 #' The normalization is one-sided; i.e., the integral of the spectral variance from zero
 #' to infinity is the total variance of the variable. The resulting plot definition
@@ -119,25 +127,25 @@
 #' g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1));
 #' VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g)
 #' VSpec(RAFdata,'TASX', spans=11, showErrors=1, xlim=c(0.01,1)) + theme_WAC()
-VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=NA, xlim=c(0.001, 15), ylim=c(0.0001,1),
+VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum', 
+  method=NA, xlim=NA, ylim=NA, # c(0.001, 15), ylim=c(0.0001,1),
   spans=49, ae=0.2, smoothBins=0, segLength=512, poles=50, resolution=0.0001, showErrors=0, 
   WavelengthScale=TRUE, ADD=NA, add=NA, EDR=FALSE) {
   if (is.data.frame(.data)) {  ## must be true, or exit. Needs to contain Time and TASX in addition to .Variable
-    if (!is.character(.Variable)) {  ## then try to get name of the vector
-      .Variable <- deparse (substitute (.Variable))
-    }
-    if (.Variable %in% names(.data)) {
-      Z <- capture.output (v <- detrend (.data[, c('Time', .Variable)]))
-      if (!is.na(VLabel)) {    ## use this alternate name in legend
-        V <- VLabel
-      } else {
-        V <- .Variable
+    nm <- names(.data)
+    if (is.na(.Variable[1])) {
+      nm <- nm[-which('Time' == nm)]
+      nm <- nm[-which('TASX' == nm)]
+      .Variable <- nm
+      if (length(.Variable) > 3) {
+        .Variable <- .Variable[1:3]
       }
-    } else {
-      print(sprintf('VSpec ERROR: Variable %s is not in the supplied data.frame', .Variable))
-      return (NA)
+    } else if (!is.character(.Variable)) {  ## then try to get name of the vector
+      ## .Variable <- deparse (substitute (.Variable))
+      print ('VSpec ERROR: supply 2nd argument as character name')
+      return(NULL)
     }
-  } else {
+  } else { 
     print('VSpec ERROR: first argument is not a data.frame.')
     return (NA)
   }
@@ -147,126 +155,174 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
   } else {
     Rate <- attr(.data, 'Rate')
   }
+  if (is.na(xlim[1])) {
+    if (Rate == 1) {
+      xlim <- c(0.001, 1)
+    } else {
+      xlim <- c(0.001, 15)
+    }
+  }
+  if (is.na(ylim[1])) {ylim <- c(1.e-4, 1.)}
   if (!is.na(method)) {type <- method}  ## method over-rides if present
-  if (type != 'spectrum' && type != 'Welch' && type != 'MEM' && type != 'mem') {
-    print (sprintf ('type %s is unavailable; using type=spectrum', type))
-    type <- 'spectrum'
-  }
-  siglim <- 1  ## 1-sigma error limits
-  if (type == 'spectrum') {
-    if (!is.null(spans[1])) {
-      if (!(spans[1] %% 2)) {spans[1] <- spans[1] + 1}
-      if (spans[1] <= 5) {spans <- NULL}
+  for (.V in .Variable) {
+    if (.V %in% names(.data)) {
+      NV <- which(.V == .Variable)
+      Z <- capture.output (v <- detrend (.data[, c('Time', .V)]))
+      if (!is.na(VLabel[1]) && length(VLabel) >= NV) {    ## use this alternate name in legend
+        V <- VLabel[NV]
+      } else {
+        V <- .V
+      }
+    } else {
+      print(sprintf('VSpec ERROR: Variable %s is not in the supplied data.frame', .V))
+      return (NA)
     }
-    S <- spectrum (ts(SmoothInterp(v, .maxGap=1000*Rate, .Length=0), frequency=Rate), span=spans, plot=FALSE)
-    freq <- S$freq
-    fpf <- 2 * S$spec * freq
-  } else if (type == 'Welch') {  ## bspec section
-    ## force segLength to a power of 2
-    segl <- segLength
-    rsl <- log(segl) / log(2)
-    ns <- round (rsl)
-    if (2^ns != segl) {
-      if (2^ns > segl) {segl <- 2^(ns-1)}
-      else {segl <- 2^(ns+1)}
-      segLength <- segl
-      print (sprintf ('reset segLength to %d', segLength))
+    if (type != 'spectrum' && type != 'Welch' && type != 'MEM' && type != 'mem') {
+      print (sprintf ('type %s is unavailable; using type=spectrum', type))
+      type <- 'spectrum'
     }
-    S2 <- bspec::welchPSD (ts(SmoothInterp(v, .Length=0), frequency=Rate), seglength=segLength,
-      windowfun=bspec::hammingwindow)
-    # ci <- quantile.bspec(BSP, probs = c(0.025, 0.975),
-    #   two.sided = FALSE)
-    coverage <- 0.683
-    tail <- 1 - coverage
-    df <- 2 * 9 * S2$segments / 11 ##1.768849
-    upper.quantile <- 1 - tail * pchisq(df, df, lower.tail = FALSE)
-    lower.quantile <- tail * pchisq(df, df)
-    ci <- 1/(qchisq(c(upper.quantile, lower.quantile), df)/df)
-    df <- 1.46 * (S2$segments + 1)
-    lower.limit <- qchisq (pnorm(-siglim), df) / df
-    upper.limit <- qchisq (pnorm(siglim), df) / df
-    # ci <- 0.5 + (ci-0.5) / sqrt(9 * S2$segments / 11)
-    # print (sprintf ('ci2=%.3f -- %.3f segments %d', ci[1], ci[2], S2$segments))
-    freq <- S2$frequency[-1]
-    fpf <- S2$power[-1] * freq
-  } else if (type == 'MEM' || type == 'mem') {  ## MEM section
-    A <- memCoef (v, poles)
-    ld <- nrow(.data)
-    fmin <- log (Rate / ld)
-    fmax <- log (0.5*Rate)
-    bins <- as.integer (1/resolution)
-    df <- (fmax-fmin) / bins
-    fdtl <- fmin + df * (0:bins)
-    freq <- exp (fdtl)
-    psComplex <- memEstimate (freq / Rate, A) / Rate
-    ps <- 2 * Rate * Mod (psComplex)^2
-    fpf <- freq * ps
-  }
-  tasAverage <- mean(.data$TASX, na.rm=TRUE)
-  if (EDR) {
-    ps <- fpf / freq
-    fpf <- (2*pi/tasAverage)*(1.5*ps)^1.5 * freq^2.5
-  }
-  if(smoothBins > 9) {
-    bs1 <- binStats(data.frame(fpf, log(freq)), bins=smoothBins)
-    bs1 <- rbind (bs1, data.frame(xc=bs1$xc[nrow(bs1)], ybar=bs1$ybar[nrow(bs1)],
-      sigma=bs1$sigma[nrow(bs1)], nb=1))
-    bs1 <- bs1[!is.na(bs1$ybar),]
-    freq <- exp(bs1$xc)
-    fpf <- bs1$ybar
-    bs1$sigma <- ifelse (bs1$nb > 2, bs1$sigma/sqrt(bs1$nb), NA)
-    rna <- is.na(bs1$sigma)
-    bs1$sigma[rna] <- bs1$ybar[rna] / 2
-    # bs1 <<- bs1
+    siglim <- 1  ## 1-sigma error limits
+    if (type == 'spectrum') {
+      if (!is.null(spans[1])) {
+        if (!(spans[1] %% 2)) {spans[1] <- spans[1] + 1}
+        if (spans[1] <= 5) {spans <- NULL}
+      }
+      S <- spectrum (ts(SmoothInterp(v, .maxGap=1000*Rate, .Length=0), frequency=Rate), span=spans, plot=FALSE)
+      freq <- S$freq
+      fpf <- 2 * S$spec * freq
+    } else if (type == 'Welch') {  ## bspec section
+      ## force segLength to a power of 2
+      segl <- segLength
+      rsl <- log(segl) / log(2)
+      ns <- round (rsl)
+      if (2^ns != segl) {
+        if (2^ns > segl) {segl <- 2^(ns-1)}
+        else {segl <- 2^(ns+1)}
+        segLength <- segl
+        print (sprintf ('reset segLength to %d', segLength))
+      }
+      S2 <- bspec::welchPSD (ts(SmoothInterp(v, .Length=0), frequency=Rate), seglength=segLength,
+        windowfun=bspec::hammingwindow)
+      # ci <- quantile.bspec(BSP, probs = c(0.025, 0.975),
+      #   two.sided = FALSE)
+      coverage <- 0.683
+      tail <- 1 - coverage
+      df <- 2 * 9 * S2$segments / 11 ##1.768849
+      upper.quantile <- 1 - tail * pchisq(df, df, lower.tail = FALSE)
+      lower.quantile <- tail * pchisq(df, df)
+      ci <- 1/(qchisq(c(upper.quantile, lower.quantile), df)/df)
+      df <- 1.46 * (S2$segments + 1)
+      lower.limit <- qchisq (pnorm(-siglim), df) / df
+      upper.limit <- qchisq (pnorm(siglim), df) / df
+      # ci <- 0.5 + (ci-0.5) / sqrt(9 * S2$segments / 11)
+      # print (sprintf ('ci2=%.3f -- %.3f segments %d', ci[1], ci[2], S2$segments))
+      freq <- S2$frequency[-1]
+      fpf <- S2$power[-1] * freq
+    } else if (type == 'MEM' || type == 'mem') {  ## MEM section
+      A <- memCoef (v, poles)
+      ld <- nrow(.data)
+      fmin <- log (Rate / ld)
+      fmax <- log (0.5*Rate)
+      bins <- as.integer (1/resolution)
+      df <- (fmax-fmin) / bins
+      fdtl <- fmin + df * (0:bins)
+      freq <- exp (fdtl)
+      psComplex <- memEstimate (freq / Rate, A) / Rate
+      ps <- 2 * Rate * Mod (psComplex)^2
+      fpf <- freq * ps
+    }
+    tasAverage <- mean(.data$TASX, na.rm=TRUE)
+    if (EDR) {
+      ps <- fpf / freq
+      fpf <- (2*pi/tasAverage)*(1.5*ps)^1.5 * freq^2.5
+    }
+    if(smoothBins > 9) {
+      bs1 <- binStats(data.frame(fpf, log(freq)), bins=smoothBins)
+      bs1 <- rbind (bs1, data.frame(xc=bs1$xc[nrow(bs1)], ybar=bs1$ybar[nrow(bs1)],
+        sigma=bs1$sigma[nrow(bs1)], nb=1))
+      bs1 <- bs1[!is.na(bs1$ybar),]
+      freq <- exp(bs1$xc)
+      fpf <- bs1$ybar
+      bs1$sigma <- ifelse (bs1$nb > 2, bs1$sigma/sqrt(bs1$nb), NA)
+      rna <- is.na(bs1$sigma)
+      bs1$sigma[rna] <- bs1$ybar[rna] / 2
+      # bs1 <<- bs1
+    }
+    if (.V == .Variable[1]) {
+      DF <- data.frame(freq, fpf)
+    } else if (.V == .Variable[2]) {
+      DF$fpf2 <- fpf
+    } else if (.V == .Variable[3]) {
+      DF$fpf3 <- fpf
+    }
   }
   
-  DF <- data.frame(freq, fpf)
+  VL <- .Variable
+  if (!is.na(VLabel[1])) {
+    VL <- VLabel
+  }
+  if (is.na(col[1])) {
+    col=c("blue", "forestgreen", "black", "darkorange")
+  }
   if (!is.na(add[1])) {ADD <- add}
-  if (is.na(ADD[1])) {
-    ## first call: redefine VSpecDF
-    assign('.VSpecDF1', DF, envir=.GlobalEnv)
-    labx <- 'frequency [Hz]'
-    if (EDR) {
-      # laby <- sprintf('eddy dissipation rate for %s', .Variable)
-      laby <- expression(paste("eddy dissipation rate [m"^"2","s"^"-3","]"))
+  for (.V in .Variable) {
+    NV <- which(.V == .Variable)
+    if (is.na(ADD[1])) {
+      ## first call: redefine VSpecDF
+      .Variable <<- .Variable
+      if (NV == 1) {
+        assign('.VSpecDF1', DF, envir=.GlobalEnv)
+        labx <- 'frequency [Hz]'
+        if (EDR) {
+          # laby <- sprintf('eddy dissipation rate for %s', .V)
+          laby <- expression(paste("eddy dissipation rate [m"^"2","s"^"-3","]"))
+        } else {
+          laby <- sprintf('variance spectrum fP(f) for %s', .V)
+        }
+        g <- ggplot(data = DF)         
+        g <- g + geom_path (aes(x=freq, y=fpf, colour=VL[1]), data=DF, na.rm=TRUE) +  
+          xlab(labx) + ylab (laby) 
+        .clinesVSpec <- col[1]
+        names(.clinesVSpec) <- VL[1]
+        .clinesVSpec <<- .clinesVSpec 
+      }
+      if (NV == 2) {
+        g <- g + geom_path (aes(x=freq, y=fpf2, colour=VL[2]), data=DF, na.rm=TRUE)
+        cl2 <- ifelse (length(col) >= 2, col[2], 'forestgreen')
+        names(cl2) <- VL[2]
+        .clinesVSpec <- c(.clinesVSpec, cl2)
+        .clinesVSpec <<- .clinesVSpec 
+      } else if (NV == 3) {
+        g <- g + geom_path (aes(x=freq, y=fpf3, colour=VL[3]), data=DF, na.rm=TRUE)
+        cl3 <- ifelse (length(col) >= 3, col[3], 'black')
+        names(cl3) <- VL[3]
+        .clinesVSpec <- c(.clinesVSpec, cl3)
+        .clinesVSpec <<- .clinesVSpec 
+      }
     } else {
-      laby <- sprintf('variance spectrum fP(f) for %s', .Variable)
-    }
-    # xlim <- c(0.001,15)
-    # ylim <- c(0.001, 1)  ## now an input argument
-    g <- ggplot(data=.VSpecDF1)         
-    g <- g + geom_path (aes(x=freq, y=fpf, colour=V), na.rm=TRUE) +  
-      xlab(labx) + ylab (laby) 
-    if (is.na(col)) {col <- 'blue'}
-    .clinesVSpec <- col
-    names(.clinesVSpec) <- V
-    .clinesVSpec <<- .clinesVSpec    
-  } else {
-    ## assign name based on elements in clinesVSpec
-    N <- length(.clinesVSpec) + 1
-    if (is.na(col)) {
-      if (N == 2) {col <- 'forestgreen'}
-      if (N == 3) {col <- 'black'}
-      if (N == 4) {col <- 'brown'}
-    }
-    nc <- names(.clinesVSpec)
-    .clinesVSpec <- c(.clinesVSpec, col)
-    names(.clinesVSpec) <- c(nc, V)
-    .clinesVSpec <<- .clinesVSpec
-    VName <- sprintf('.VSpecDF%d', N)
-    assign(VName, DF, pos=.GlobalEnv)
-    if (N == 2) {
-      .VSpecVar2 <<- V
-      g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar2), data=get(VName), na.rm=TRUE)
-    } else if (N == 3) {
-      .VSpecVar3 <<- V
-      g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar3), data=get(VName), na.rm=TRUE)
-    } else if (N == 4) {
-      .VSpecVar4 <<- V
-      g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar4), data=get(VName), na.rm=TRUE)  
+      ## assign name based on elements in clinesVSpec
+      N <- length(.clinesVSpec) + 1
+      nc <- names(.clinesVSpec)
+      .clinesVSpec <- c(.clinesVSpec, col[N])
+      names(.clinesVSpec) <- c(nc, V)
+      .clinesVSpec <<- .clinesVSpec
+      VName <- sprintf('.VSpecDF%d', N)
+      assign(VName, DF, pos=.GlobalEnv)
+      if (N == 2) {
+        .VSpecVar2 <<- V
+        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar2), data=get(VName), na.rm=TRUE)
+      } else if (N == 3) {
+        .VSpecVar3 <<- V
+        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar3), data=get(VName), na.rm=TRUE)
+      } else if (N == 4) {
+        .VSpecVar4 <<- V
+        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar4), data=get(VName), na.rm=TRUE)  
+      }
     }
   }
+  
   g <- suppressMessages(g + scale_colour_manual (name='', values=.clinesVSpec))
+  # print (.clinesVSpec)
   if (showErrors > 0) {
     if (smoothBins > 9) {
       bse <- data.frame(x=exp(bs1$xc), ymin=bs1$ybar-showErrors*bs1$sigma, ymax=bs1$ybar+showErrors*bs1$sigma)
@@ -337,7 +393,7 @@ VSpec <- function (.data, .Variable, VLabel=NA, col=NA, type='spectrum', method=
       g <- g + geom_path(data=DFL2, aes(x=x, y=y), colour=lclr, lwd=1.0)
       g <- g + annotate("text", 
         x = tasAverage*c(1/100000, 1/10000, 1/1000, 1/100, 1/10), 
-        y = rep(yl[2]*1.5,5), label = c("100 km", "10 km", "1 km", "100 m", " "),
+        y = rep(yl[2]*1.5,5), label = c("100 km", "10 km", "1 km", "0.1 km", " "),
         colour=lclr)
     }
     # g <- g + theme_WAC()
