@@ -141,8 +141,8 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       axis(1,tck=0.02)
       axis(3,labels=NA,tck=0.02)
     }
-    if ('y' %in% logxy) {
-      axis(2,at=aty,labels=labs)
+    if (grepl('y', logxy)) {
+      axis(2,at=aty,labels=labs, tck=0.02, las=1)
     } else {
       axis(2,tck=0.02)
     }
