@@ -45,9 +45,24 @@ OpenInProgram <- function(Data, Program="ncplot", dataDirectory=sprintf("%s/R", 
     }
     unlink (nF)
   }
+  if (Program == 'Excel') {
+    nF <- sprintf('%sEXCEL/RtoCSV.csv', DataDirectory())
+    if (file.exists (nF)) {
+      if (warnOverwrite) {
+        x <- readline ("file exists: OK to overwrite? (Y/n): ")
+        if (x[1] != 'Y' && x[1] != 'y') {
+          return("no action, rejected overwriting data file")
+        }
+      }
+      unlink (nF)
+    }
+    write.csv(Data, file = nF)
+    system (sprintf ("libreoffice %s", nF), wait=FALSE)
+    return()
+  }
   Z <- makeNetCDF (Data, nF)
   if ((Program == 'ncplot') && openProgram) {
-    system (sprintf ("ncplot %s", nF), wait=FALSE)
+    system (sprintf ("/home/cooperw/bin/ncplot %s", nF), wait=FALSE)
   } else {
   ## edit the .def files for the Xanadu call
   WD <- getwd()

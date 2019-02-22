@@ -494,8 +494,7 @@ shinyUI(
       navbarMenu ('utilities',
         tabPanel ('run other programs',
           selectInput ('otherprogram', label=NULL, 
-            actionButton ('xfrVariables', 'select variables'),
-            choices=c('ncplot', 'Xanadu', 'python', 
+            choices=c('ncplot', 'Xanadu', 'Excel', 'python', 
               'NCL', 'IDL', 'IDV')),
           
           checkboxInput ('limits10','apply restrictions'), 
