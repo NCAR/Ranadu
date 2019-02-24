@@ -1700,11 +1700,11 @@ shinyServer(function(input, output, session) {
   observeEvent (input$xfrVariables, {
     chooseXfrVar (fname, inp=input)
     ## check if any requested variables not present in Data:
-    if (any (!(xVarList %in% VarList))) {
-      VarList <<- unique (c(VarList, xVarList))
-      # print (c(VarList, xVarList))
-      isolate (reac$newdata <- reac$newdata + 1)
-    }
+    # if (any (!(xVarList %in% VarList))) {
+    #   xVarList <<- unique (c(VarList, xVarList))
+    #   # print (c(VarList, xVarList))
+    #   # isolate (reac$newdata <- reac$newdata + 1)
+    # }
   })
   observeEvent (input$lfit, {
     TX <- input$fformula
@@ -1733,7 +1733,14 @@ shinyServer(function(input, output, session) {
     print (anova (fitm))
     isolate (reac$updatefit <- reac$updatefit + 1)
   })
-  observeEvent (input$ncplot, OpenInProgram (data(), Program=input$otherprogram, warnOverwrite=FALSE))
+  observeEvent (input$ncplot, {
+    DOIP <- getNetCDF(fname.last, xVarList, format2Time(plotSpec$Times[1]),
+      format2Time(plotSpec$Times[2]))
+    if (grepl('Excel', input$otherprogram)) { 
+      DOIP$Time <- sub('.* ', '', sprintf('%s', DOIP$Time))
+    }
+    OpenInProgram (DOIP, Program=input$otherprogram, warnOverwrite=FALSE)
+    })
   observeEvent (input$Xanadu, OpenInProgram (data(), 'Xanadu', warnOverwrite=FALSE))
   observeEvent (input$maneuvers, SeekManeuvers (data ()))
   observeEvent (input$manual, seeManual ())

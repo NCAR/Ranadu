@@ -5,6 +5,8 @@ rm(list=ls(all=TRUE))
 suppressMessages (
   library(shiny, quietly=TRUE, warn.conflicts=FALSE)
 )
+
+library(magrittr)
 library(shinyBS, quietly=TRUE, warn.conflicts=FALSE)
 suppressMessages (suppressWarnings (
   library(Ranadu, quietly=TRUE, warn.conflicts=FALSE))
@@ -32,6 +34,7 @@ source ('R/getNetCDF.R')
 Trace <- FALSE
 Trace <- TRUE
 load ('InputDF.Rdata')
+xVarList <- standardVariables()
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
@@ -281,12 +284,12 @@ hline <<- function(y, col='black', lwd=1, lty=2) {
 }
 
 formatTime <- function (time) {
-  t <- as.POSIXlt (time, tz='UTC')
+  t <- as.POSIXlt (time, tz='GMT')
   tt <- sprintf ("%d:%02d:%02d", t$hour, t$min, as.integer(t$sec))
   return (tt)
 }
 format2Time <- function (time) {
-  t <- as.POSIXlt (time, tz='UTC')
+  t <- as.POSIXlt (time, tz='GMT')
   tt <- sprintf ("%d%02d%02d", t$hour, t$min, as.integer(t$sec))
   return (as.integer(tt))
 }
@@ -636,7 +639,7 @@ chooseQVar <- function (fname, inp) {
   quickPlotVar <<- setVariableList (fname, single=TRUE)
 }
 chooseXfrVar <- function (fname, inp) {
-  xVarList <<- setVariableList (fname, VarList)
+  xVarList <<- setVariableList (fname, xVarList, single=FALSE)
 }
 
 addedVariables <- c('PITCH', 'THETA', 'THETAP')
