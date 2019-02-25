@@ -5,7 +5,7 @@
 \title{binStats}
 \usage{
 binStats(.d, bins = 20, xlow = min(.d[, 2], na.rm = TRUE),
-  xhigh = max(.d[, 2], na.rm = TRUE))
+  xhigh = max(.d[, 2], na.rm = TRUE), addBin = FALSE)
 }
 \arguments{
 \item{.d}{A data-frame containing at least two columns, the first holding
@@ -21,13 +21,19 @@ second variable.}
 
 \item{xhigh}{The upper limit for bins. The default is the maximum of the
 second variable.}
+
+\item{addBin}{If true, the return will be a list where the original data.frame
+is returned as the second component with values of "BIN" added to the
+data.frame. This is useful from grouping when plotting with ggplot.}
 }
 \value{
-A dataframe of dimension c(bins, 4) that contains, for each bin,
+If addBIN == FALSE, dataframe of dimension c(bins, 4) that contains, for each bin,
 'xc' = the center coordinate of the bin (2nd column), 'ybar' = the mean value for the bin
 (or NA if there are no members of the group), 'sigma' = the standard
 deviation for the bin, or NA for no members of the group, and 'nb' = 
-the number of values in the bin.
+the number of values in the bin. If addBin == TRUE, a replication of the
+input data.frame with a variable "BIN" added that denotes the classification
+of the first variable in bins of the second.
 }
 \description{
 bin and calculate mean and st.dev. for each bin

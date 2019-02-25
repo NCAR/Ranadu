@@ -39,16 +39,19 @@ batch mode.}
 None
 }
 \description{
-Transfers a data.frame to ncplot or Xanadu for analysis
+Transfers a data.frame to ncplot or Xanadu or a Excel/libreoffice 
+spreadsheet for analysis.
 }
 \details{
 ncplot is a widely used plotting program supported by NCAR/EOL. 
 Xanadu is a legacy package for data analysis. This function writes
-a specified data.frame to a netCDF file and opens either ncplot or Xanadu with 
+a specified data.frame to a netCDF file (for ncplot or Xanadu) or a CSV-format
+file (for Excel/libreoffice) and opens the appropriate program with 
 that file. This is a mechanism to use some of the ncplot capabilities for plots or
 the Xanadu special capabilities like those for spectral analysis, for constructing 
 vertical sections and sounding plots, and for producing plots using python routines 
-with python code that can be tailored for special needs.
+with python code that can be tailored for special needs. It also supports production
+of CSV-format files that include all the variables in the supplied data.frame.
 }
 \examples{
 \dontrun{OpenInProgram (RAFdata, "ncplot", ".", "RAFdata4Xanadu")}

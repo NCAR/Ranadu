@@ -2,7 +2,7 @@
 % Please edit documentation in R/Rmutate.R
 \name{Rmutate}
 \alias{Rmutate}
-\alias{RRmutate,}
+\alias{Rmutate,}
 \alias{rmutate}
 \title{Rmutate}
 \usage{
