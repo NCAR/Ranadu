@@ -183,6 +183,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
+  if (i1 < 0) {i1 <- 1}
   i2 <- ifelse ((End != 0), getIndex (Time, End) + Rate - 1, length (Time))
   if (i2 < 1) {i2 <- length(Time)}
   # if (End != 0) {

@@ -2607,192 +2607,211 @@ shinyServer(function(input, output, session) {
     times <- input$times    ## make sensitive to time changes, project, etc.
     input$Project
     input$Flight
+    input$addcdf
     DT <- data ()
     Data <- DT[DT$Time > times[1] & DT$Time < times[2], ]
     Data <- transferAttributes (Data, DT)
     print (c('in Data:', sort(names(Data))))
-    nm1 <- nm2 <- nm3 <- nm4 <- nm5 <- character(0)
     nms <- names (Data)
     op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
     
-    if ('CDP' %in% input$probe) {
-      nm1 <- nms [grepl('CCDP_', nms)]
-      if (length (nm1) > 0) {
-        CellLimitsD <- attr(Data[, nm1[1]], 'CellSizes')
-      }
+    # if ('CDP' %in% input$probe) {
+    #   nm1 <- nms [grepl('CCDP_', nms)]
+    #   if (length (nm1) > 0) {
+    #     CellLimitsD <- attr(Data[, nm1[1]], 'CellSizes')
+    #   }
+    # }
+    # if ('FSSP' %in% input$probe) {
+    #   nm2 <- nms [grepl('CS100_', nms)]
+    #   if (length (nm2) > 0) {
+    #     CellLimitsF <- attr(Data[, nm2[1]], 'CellSizes')
+    #   }
+    # }
+    # if ('UHSAS' %in% input$probe) {
+    #   nm3 <- nms [grepl('CUHSAS_', nms)]
+    #   if (length (nm3) > 0) {
+    #     CellLimitsU <- attr(Data[, nm3[1]], 'CellSizes')
+    #   }
+    # }
+    # if ('2DC' %in% input$probe) {
+    #   nm4 <- nms [grepl('^C1DC_', nms)]
+    #   if (length (nm4) > 0) {
+    #     CellLimits2 <- attr(Data[, nm4[1]], 'CellSizes')
+    #   }
+    # }
+    # if ('PCASP' %in% input$probe) {
+    #   nm5 <- nms [grepl('CS200_', nms)]
+    #   if (length (nm5) > 0) {
+    #     CellLimitsP <- attr(Data[, nm5[1]], 'CellSizes')
+    #   }
+    # }
+    nmsel <- input$probe
+    nmsel[nmsel == '2DC'] <- '1DC'
+    nmsel[nmsel == 'PCASP'] <- 'S200'
+    for (nm in nmsel) {
+      nmsel [which (nm == nmsel)] <- nms [grepl(sprintf('C%s_', nm), nms)]
     }
-    if ('FSSP' %in% input$probe) {
-      nm2 <- nms [grepl('CS100_', nms)]
-      if (length (nm2) > 0) {
-        CellLimitsF <- attr(Data[, nm2[1]], 'CellSizes')
-      }
+    xlow <- 1
+    xhigh <- 10
+    for (nm in nmsel) {
+      CL <- attr(Data[, nm], 'CellSizes')
+      if (CL[1] < xlow) {xlow <- CL[1]}
+      if (CL[length(CL)] > xhigh) {xhigh <- CL[length(CL)]}
     }
-    if ('UHSAS' %in% input$probe) {
-      nm3 <- nms [grepl('CUHSAS_', nms)]
-      if (length (nm3) > 0) {
-        CellLimitsU <- attr(Data[, nm3[1]], 'CellSizes')
-      }
-    }
-    if ('2DC' %in% input$probe) {
-      nm4 <- nms [grepl('^C1DC_', nms)]
-      if (length (nm4) > 0) {
-        CellLimits2 <- attr(Data[, nm4[1]], 'CellSizes')
-      }
-    }
-    if ('PCASP' %in% input$probe) {
-      nm5 <- nms [grepl('CS200_', nms)]
-      if (length (nm5) > 0) {
-        CellLimitsP <- attr(Data[, nm5[1]], 'CellSizes')
-      }
-    }
-    
-    ## normalize all:
-    if (length(nm1 > 0)) {
-      for (nm in nm1) {
-        CDP <- colMeans(Data[, nm, ], na.rm=TRUE)
-        CDPtot <- sum(CDP, na.rm=TRUE)
-        CDP <- CDP / diff (CellLimitsD)
-        CDP[CDP <= 0] <- 1.e-6
-      }
-    }
-    if (length(nm2 > 0)) {
-      for (nm in nm2) {
-        FSSP <- colMeans(Data[, nm, ], na.rm=TRUE)
-        FSSPtot <- sum(FSSP, na.rm=TRUE)
-        FSSP <- FSSP / diff (CellLimitsF)
-        FSSP[FSSP <= 0] <- 1.e-6
-      }
-    }
-    if (length(nm3 > 0)) {
-      for (nm in nm3) {
-        UHSAS <- colMeans(Data[, nm, ], na.rm=TRUE)
-        UHSAStot <- sum(UHSAS, na.rm=TRUE)
-        UHSAS <- UHSAS / diff (CellLimitsU)
-        UHSAS[UHSAS <= 0] <- 1.e-6
-      }
-    }
-    if (length(nm4 > 0)) {
-      for (nm in nm4) {
-        TWOD <- colMeans(Data[, nm, ], na.rm=TRUE)
-        TWODtot <- sum(TWOD, na.rm=TRUE)
-        TWOD <- TWOD * 1.e-3 / diff (CellLimits2)
-        TWOD[TWOD <= 0] <- 1.e-9
-      }
-    }
-    if (length(nm5 > 0)) {
-      for (nm in nm5) {
-        PCASP <- colMeans(Data[, nm, ], na.rm=TRUE)
-        PCASPtot <- sum (PCASP, na.rm=TRUE)
-        PCASP <- PCASP / diff (CellLimitsP)
-        PCASP[PCASP <= 0] <- 1.e-6
-      }
-    }
-    ## now have size distributions; construct plots
-    dmin <- 1e10
-    dmax <- 0
-    cmin=1e10
-    cmax=0
-    if ('CDP' %in% input$probe && (length(nm1) > 0)) {
-      dmin <- min (c(dmin, CellLimitsD[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimitsD[length(CellLimitsD)]), na.rm=TRUE)
-      cmin <- min (c(cmin, CDP), na.rm=TRUE)
-      cmax <- max (c(cmax, CDP), na.rm=TRUE)
-    }
-    if ('FSSP' %in% input$probe && (length(nm2) > 0)) {
-      dmin <- min (c(dmin, CellLimitsF[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimitsF[length(CellLimitsF)]), na.rm=TRUE)
-      cmin <- min (c(cmin, FSSP), na.rm=TRUE)
-      cmax <- max (c(cmax, FSSP), na.rm=TRUE)
-    }
-    if ('UHSAS' %in% input$probe && (length(nm3) > 0)) {
-      dmin <- min (c(dmin, CellLimitsU[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimitsU[length(CellLimitsU)]), na.rm=TRUE)
-      cmin <- min (c(cmin, UHSAS), na.rm=TRUE)
-      cmax <- max (c(cmax, UHSAS), na.rm=TRUE)
-    }
-    if ('2DC' %in% input$probe && (length(nm4) > 0)) {
-      dmin <- min (c(dmin, CellLimits2[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimits2[length(CellLimits2)]), na.rm=TRUE)
-      cmin <- min (c(cmin, TWOD), na.rm=TRUE)
-      cmax <- max (c(cmax, TWOD), na.rm=TRUE)
-    }
-    if ('PCASP' %in% input$probe && (length(nm5) > 0)) {
-      dmin <- min (c(dmin, CellLimitsP[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimitsP[length(CellLimitsP)]), na.rm=TRUE)
-      cmin <- min (c(cmin, PCASP), na.rm=TRUE)
-      cmax <- max (c(cmax, PCASP), na.rm=TRUE)
-    }
-    if (length (input$probe) > 0) {
-      xp <- c(dmin, dmax)
-      yp <- c(cmin, cmax)
-      logT <- ''
-      if (grepl ('log-x', input$sdtype)) {logT <- paste (logT, 'x', sep='')}
-      if (grepl ('log-y', input$sdtype)) {logT <- paste (logT, 'y', sep='')}
-      if (grepl ('both log', input$sdtype)) {logT <- 'xy'}
-      ## this call just sets appropriate axes:
-      yl <- expression (paste("concentration [cm"^"-3", mu, 'm'^'-1', ']'), sep='')
-      plot (xp, yp, type='p', log=logT,
-        xlab=expression (paste('diameter [',mu,'m]', sep='')),
-        ylab=yl, col='white', cex.lab=2, cex.axis=1.4)
-    }
+    cdf <- input$addcdf
+    print (sprintf ('cdf is %s', cdf))
+    logxy <- ''
+    if (grepl('x', input$sdtype)) {logxy <- 'x'}
+    if (grepl('y', input$sdtype)) {logxy <- 'y'}
+    if (grepl('both', input$sdtype)) {logxy <- 'xy'}
+    plotSD(Data[, c('Time', nmsel)], CDF=cdf, logAxis=logxy, LWC=input$LWC, xlim=c(xlow, xhigh))
+    # ## normalize all:
+    # if (length(nm1 > 0)) {
+    #   for (nm in nm1) {
+    #     CDP <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     CDPtot <- sum(CDP, na.rm=TRUE)
+    #     CDP <- CDP / diff (CellLimitsD)
+    #     CDP[CDP <= 0] <- 1.e-6
+    #   }
+    # }
+    # if (length(nm2 > 0)) {
+    #   for (nm in nm2) {
+    #     FSSP <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     FSSPtot <- sum(FSSP, na.rm=TRUE)
+    #     FSSP <- FSSP / diff (CellLimitsF)
+    #     FSSP[FSSP <= 0] <- 1.e-6
+    #   }
+    # }
+    # if (length(nm3 > 0)) {
+    #   for (nm in nm3) {
+    #     UHSAS <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     UHSAStot <- sum(UHSAS, na.rm=TRUE)
+    #     UHSAS <- UHSAS / diff (CellLimitsU)
+    #     UHSAS[UHSAS <= 0] <- 1.e-6
+    #   }
+    # }
+    # if (length(nm4 > 0)) {
+    #   for (nm in nm4) {
+    #     TWOD <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     TWODtot <- sum(TWOD, na.rm=TRUE)
+    #     TWOD <- TWOD * 1.e-3 / diff (CellLimits2)
+    #     TWOD[TWOD <= 0] <- 1.e-9
+    #   }
+    # }
+    # if (length(nm5 > 0)) {
+    #   for (nm in nm5) {
+    #     PCASP <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     PCASPtot <- sum (PCASP, na.rm=TRUE)
+    #     PCASP <- PCASP / diff (CellLimitsP)
+    #     PCASP[PCASP <= 0] <- 1.e-6
+    #   }
+    # }
+    # ## now have size distributions; construct plots
+    # dmin <- 1e10
+    # dmax <- 0
+    # cmin=1e10
+    # cmax=0
+    # if ('CDP' %in% input$probe && (length(nm1) > 0)) {
+    #   dmin <- min (c(dmin, CellLimitsD[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimitsD[length(CellLimitsD)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, CDP), na.rm=TRUE)
+    #   cmax <- max (c(cmax, CDP), na.rm=TRUE)
+    # }
+    # if ('FSSP' %in% input$probe && (length(nm2) > 0)) {
+    #   dmin <- min (c(dmin, CellLimitsF[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimitsF[length(CellLimitsF)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, FSSP), na.rm=TRUE)
+    #   cmax <- max (c(cmax, FSSP), na.rm=TRUE)
+    # }
+    # if ('UHSAS' %in% input$probe && (length(nm3) > 0)) {
+    #   dmin <- min (c(dmin, CellLimitsU[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimitsU[length(CellLimitsU)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, UHSAS), na.rm=TRUE)
+    #   cmax <- max (c(cmax, UHSAS), na.rm=TRUE)
+    # }
+    # if ('2DC' %in% input$probe && (length(nm4) > 0)) {
+    #   dmin <- min (c(dmin, CellLimits2[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimits2[length(CellLimits2)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, TWOD), na.rm=TRUE)
+    #   cmax <- max (c(cmax, TWOD), na.rm=TRUE)
+    # }
+    # if ('PCASP' %in% input$probe && (length(nm5) > 0)) {
+    #   dmin <- min (c(dmin, CellLimitsP[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimitsP[length(CellLimitsP)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, PCASP), na.rm=TRUE)
+    #   cmax <- max (c(cmax, PCASP), na.rm=TRUE)
+    # }
+    # if (length (input$probe) > 0) {
+    #   xp <- c(dmin, dmax)
+    #   yp <- c(cmin, cmax)
+    #   logT <- ''
+    #   if (grepl ('log-x', input$sdtype)) {logT <- paste (logT, 'x', sep='')}
+    #   if (grepl ('log-y', input$sdtype)) {logT <- paste (logT, 'y', sep='')}
+    #   if (grepl ('both log', input$sdtype)) {logT <- 'xy'}
+    #   ## this call just sets appropriate axes:
+    #   yl <- expression (paste("concentration [cm"^"-3", mu, 'm'^'-1', ']'), sep='')
+    #   plot (xp, yp, type='p', log=logT,
+    #     xlab=expression (paste('diameter [',mu,'m]', sep='')),
+    #     ylab=yl, col='white', cex.lab=2, cex.axis=1.4)
+    # }
     ttl <- sprintf ("Time=%s--%s ", strftime (Data$Time[1], format="%H:%M:%S", tz='UTC'), 
       strftime (Data$Time[nrow(Data)], format="%H:%M:%S", tz='UTC'))
-    legend.names <- vector()
-    legend.colors <- vector()
-    if ('UHSAS' %in% input$probe && (length (nm3) > 0)) {
-      points (CellLimitsU, c(1.e-6, UHSAS), type='S', 
-        col='darkgreen', lwd=2)
-      legend.names <- c(legend.names, 'UHSAS')
-      legend.colors <- c(legend.colors, 'darkgreen')
-      if (!is.na(UHSAStot)) {
-        ttl <- paste0 (ttl, sprintf(" CONCU=%.2f", UHSAStot))
-      }
-    }
-    if (('PCASP' %in% input$probe) && (length (nm5) > 0) && (!is.na(PCASPtot))) {
-      points (CellLimitsP, c(1.e-6, PCASP), type='S', 
-        col='darkorange', lwd=2)
-      legend.names <- c(legend.names, 'PCASP')
-      legend.colors <- c(legend.colors, 'darkorange')
-      if (!is.na(PCASPtot)) {
-        ttl <- paste0 (ttl, sprintf(" CONCP=%.2f", PCASPtot))
-      }
-    }
-    if ('CDP' %in% input$probe && (length (nm1) > 0)) {
-      points (CellLimitsD, c(1.e-6, CDP), type='S', 
-        col='blue', lwd=2)
-      legend.names <- c(legend.names, 'CDP')
-      legend.colors <- c(legend.colors, 'blue')
-      if (!is.na(CDPtot)) {
-        ttl <- paste0 (ttl, sprintf(" CONCD=%.2f", CDPtot))
-      }
-    }
-    if ('FSSP' %in% input$probe && (length (nm2) > 0)) {
-      points (CellLimitsF, c(1.e-6, FSSP), type='S', 
-        col='violet', lwd=2)
-      legend.names <- c(legend.names, 'FSSP')
-      legend.colors <- c(legend.colors, 'violet')
-      if (!is.na(FSSPtot)) {
-        ttl <- paste0 (ttl, sprintf(" CONCF=%.2f", FSSPtot))
-      }
-    }
-    if ('2DC' %in% input$probe && (length (nm4) > 0)) {
-      points (CellLimits2, c(1.e-9, TWOD), type='S', 
-        col='red', lwd=2)
-      legend.names <- c(legend.names, '2DC')
-      legend.colors <- c(legend.colors, 'red')
-      if (!is.na(TWODtot)) {
-        ttl <- paste0 (ttl, sprintf(" CONC1DC=%.4f", TWODtot))
-      }
-    }
-    
-    if (length (input$probe) > 0) {
-      title (ttl)
-      print(c('title', ttl))
-      print (legend.names)
-      print (legend.colors)
-      legend ("topright", legend=legend.names, col=legend.colors,
-        lwd=c(2,1), cex=0.75)
-    }
+    # legend.names <- vector()
+    # legend.colors <- vector()
+    # if ('UHSAS' %in% input$probe && (length (nm3) > 0)) {
+    #   points (CellLimitsU, c(1.e-6, UHSAS), type='S', 
+    #     col='darkgreen', lwd=2)
+    #   legend.names <- c(legend.names, 'UHSAS')
+    #   legend.colors <- c(legend.colors, 'darkgreen')
+    #   if (!is.na(UHSAStot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONCU=%.2f", UHSAStot))
+    #   }
+    # }
+    # if (('PCASP' %in% input$probe) && (length (nm5) > 0) && (!is.na(PCASPtot))) {
+    #   points (CellLimitsP, c(1.e-6, PCASP), type='S', 
+    #     col='darkorange', lwd=2)
+    #   legend.names <- c(legend.names, 'PCASP')
+    #   legend.colors <- c(legend.colors, 'darkorange')
+    #   if (!is.na(PCASPtot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONCP=%.2f", PCASPtot))
+    #   }
+    # }
+    # if ('CDP' %in% input$probe && (length (nm1) > 0)) {
+    #   points (CellLimitsD, c(1.e-6, CDP), type='S', 
+    #     col='blue', lwd=2)
+    #   legend.names <- c(legend.names, 'CDP')
+    #   legend.colors <- c(legend.colors, 'blue')
+    #   if (!is.na(CDPtot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONCD=%.2f", CDPtot))
+    #   }
+    # }
+    # if ('FSSP' %in% input$probe && (length (nm2) > 0)) {
+    #   points (CellLimitsF, c(1.e-6, FSSP), type='S', 
+    #     col='violet', lwd=2)
+    #   legend.names <- c(legend.names, 'FSSP')
+    #   legend.colors <- c(legend.colors, 'violet')
+    #   if (!is.na(FSSPtot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONCF=%.2f", FSSPtot))
+    #   }
+    # }
+    # if ('2DC' %in% input$probe && (length (nm4) > 0)) {
+    #   points (CellLimits2, c(1.e-9, TWOD), type='S', 
+    #     col='red', lwd=2)
+    #   legend.names <- c(legend.names, '2DC')
+    #   legend.colors <- c(legend.colors, 'red')
+    #   if (!is.na(TWODtot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONC1DC=%.4f", TWODtot))
+    #   }
+    # }
+    # 
+    # if (length (input$probe) > 0) {
+    #   title (ttl)
+    #   print(c('title', ttl))
+    #   print (legend.names)
+    #   print (legend.colors)
+    #   legend ("topright", legend=legend.names, col=legend.colors,
+    #     lwd=c(2,1), cex=0.75)
+    # }
   }, width=800, height=640)
   
   output$varplot <- renderImage ({  ## varplot
