@@ -26,7 +26,7 @@
 
 ## This routine calculates the Burg-algorithm coefficients:
 memCoef <- function (.data, .poles=NA) {
-  .data <- as.numeric (.data)  ## ensure int is numeric and strip attributes
+  .data <- as.numeric (.data)  ## ensure argument is numeric and strip attributes
   if (is.na(.poles)) {.poles <- as.integer(length (.data) / 20)} ## default value
   cf <- vector ('numeric', .poles)
   ln <- length (.data)
