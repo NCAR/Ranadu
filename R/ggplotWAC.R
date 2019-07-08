@@ -137,7 +137,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       }
       VarGroup <- rep (gl (lines_per_panel, DL, labels=labelL), panels)
       PanelGroup <- gl (panels, lines_per_panel*DL, labels=labelP)
-      dd <- data.frame(reshape2::melt(.data, 1), VarGroup, PanelGroup)
+      dd <- data.frame(reshape2::melt(.data, 1, factorsAsStrings=TRUE), VarGroup, PanelGroup)
       colrs <- rep(colrs, panels)
       lwd <- rep(lwd, panels)
       lty <- rep(lty, panels)

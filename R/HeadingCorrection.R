@@ -24,7 +24,10 @@
 #' true north), and the latitude and altitude (LAT and GGALT), the latter two for
 #' finding the local acceleration of gravity. If variables named PITCHC, ROLLC, and
 #' LATC are present those will be used instead. The first two might be produced by
-#' prior use of the CorrectPitch() function.
+#' prior use of the CorrectPitch() function. The data.frame variables must retain
+#' the original attributes from the netCDF file so that, if arbitrary "CalibrationCoefficients"
+#' have been applied these can be removed. The reason is that this routine needs the
+#' original unmodified value from the IRU for variables like THDG.
 #' @param .span The number of points (default 21) used for estimating the accelerations
 #' by differentiation and for smoothing the results. 
 #' @param .default The default value to use if the routine does not find enough
@@ -36,12 +39,13 @@
 #' (where flaps might be deployed) or cases of rapid climbs, for example. The default
 #' is NULL, in which case the test will be skipped.
 #' @param .plotfile The name of a plot to generate (e.g., "./Plot1.pdf") that shows
-#' the results from the algorithm.
+#' the results from the algorithm. The default is 'inLine', in which case the
+#' plot is generated and displayed normally. Suppress the plot with a NULL argument.
 #' @return A vector of the same length as the supplied data.frame that gives an
 #' estimate of the error in heading, the negative of the correction needed.
 #' @examples 
 #' HeadingCorrection <- CorrectHeading (RAFdata)
-CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotfile=NULL) {
+CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotfile='inLine') {
   ## note: before calling, should apply timing corrections and pitch/roll corrections
   ##       if desired.
   GeneratePlot <- !is.null (.plotfile) 
@@ -68,9 +72,11 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
     C[,3] <- M31*.V[,1]+M32*.V[,2]
     return (C)
   }
+
+  
   ## check for required variables:
   Required <- c("BLATA", "BLONGA", "BNORMA", "GGVNS", "GGVEW", "GGALT",
-                "THDG", "PITCH", "ROLL")
+                "THDG", "PITCH", "ROLL", "VEW", "VNS", "VSPD")
   .names <- names(.data)
   for (.R in Required) {
     if (.R %in% .names) {next}
@@ -93,33 +99,63 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
   } else {
     D1 <- D
   }
+  D1 <- transferAttributes(.data, D1)
   
   ## substitute corrected values if present
   if ("PITCHC" %in% names (D1)) {D1$PITCH <- D1$PITCHC}
   if ("ROLLC" %in% names (D1)) {D1$ROLL <- D1$ROLLC}
   if ("LATC" %in% names (D1)) {D1$LAT <- D1$LATC}
   
+  # Remove "calibrations" if they have been applied:
+  CC <- attr(D1$THDG, 'CalibrationCoefficients')
+  if (!is.null(CC[1]) && CC[1] != 0) {
+    D1$THDG <- (D1$THDG - CC[1] - 0.05) / CC[2]  ## Temporary small offset seems to help
+    # print (sprintf('heading offset of %.2f removed', CC[1]))
+  }
+  ## The timing of the heading measurement is critical because, if there is a lag,
+  ## it will cause a shift dependent on turn direction. Try some shifts to see which
+  ## minimizes the difference between right and left turns:
+  ## (However, if GGVEW/GGVNS are already shifted, skip this):
+  if (is.null (attr(D1$GGVEW, 'TimeLag'))) {
+    D1$THDG <- ShiftInTime(D1$THDG, 1, 90, .mod=360)
+  }
+  ## It is not necessary to record the changes in modified attributes because the
+  ## changes are applied to a copy of the original. The conventional time shifts
+  ## should be retained in the original, however, for this to work; if they are
+  ## removed or changes, e.g., in the KalmanFilter.R script, the original version
+  ## of the data file should be used.
+  CC <- attr(D1$PITCH, 'CalibrationCoefficients')
+  if (!is.null(CC[1])) {
+    D1$PITCH <- (D1$PITCH - CC[1]) / CC[2]
+  }
+  CC <- attr(D1$ROLL, 'CalibrationCoefficients')
+  if (!is.null(CC[1])) {
+    D1$ROLL <- (D1$ROLL - CC[1]) / CC[2]
+  }
+  
   #interpolate if necessary:
   MaxGap <- 1000
-  ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE)
-  ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE)
-  D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE)
-  D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE)
-  D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE)
-  D1$GGALT <- zoo::na.approx (as.vector (D1$GGALT), maxgap=MaxGap, na.rm=FALSE)
-  D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE)
-  D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE)
-  D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE)
-  D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE)
-  vndot <- signal::sgolayfilt (ggvns, 3, .span, m=1)  # m=1 for first deriv.
-  vedot <- signal::sgolayfilt (ggvew, 3, .span, m=1)
+  D1$ggvns <- zoo::na.approx (as.vector(D1$GGVNS), maxgap=MaxGap, na.rm = FALSE, rule=2)
+  D1$ggvew <- zoo::na.approx (as.vector(D1$GGVEW), maxgap=MaxGap, na.rm = FALSE, rule=2)
+  D1$BLONGA <- zoo::na.approx (as.vector (D1$BLONGA), maxgap=MaxGap, na.rm=FALSE, rule=2)
+  D1$BLATA <- zoo::na.approx (as.vector (D1$BLATA), maxgap=MaxGap, na.rm=FALSE, rule=2)
+  D1$BNORMA <- zoo::na.approx (as.vector (D1$BNORMA), maxgap=MaxGap, na.rm=FALSE, rule=2)
+  D1$GGALT <- zoo::na.approx (as.vector (D1$GGALT), maxgap=MaxGap, na.rm=FALSE, rule=2)
+  D1$PITCH <- zoo::na.approx (as.vector (D1$PITCH), maxgap=MaxGap, na.rm=FALSE, rule=2)
+  D1$ROLL <- zoo::na.approx (as.vector (D1$ROLL), maxgap=MaxGap, na.rm=FALSE, rule=2)
+  D1$THDG <- zoo::na.approx (as.vector (D1$THDG), maxgap=MaxGap, na.rm=FALSE, rule=2)
+  D1$LAT <- zoo::na.approx (as.vector (D1$LAT), maxgap=MaxGap, na.rm=FALSE, rule=2)
+  D1$vndot <- signal::sgolayfilt (D1$ggvns, 3, .span, m=1)  # m=1 for first deriv.
+  D1$vedot <- signal::sgolayfilt (D1$ggvew, 3, .span, m=1)
   G <- Gravity (D1$LAT, D1$GGALT)
   AB <- matrix(c(D1$BLONGA, D1$BLATA, D1$BNORMA+G), ncol=3) #aircraft-frame
   VL <- matrix(c(D1$VEW, D1$VNS, D1$VSPD), ncol=3) 
   AL <- XformLA (D1, AB)                                    #l-frame
+  ALD1 <- AL  # temporary
   ## now corrected for angular effects
   ## See Noureldin et al, 2013, Eq. (5.55)
   AL <- AL - RotationCorrection (D1, VL)
+  ALD1c <- AL  # temporary
   
   ## the resulting l-frame accelerations
   D1$LACCX <- AL[, 1]
@@ -132,13 +168,13 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
   D1$LACCZ <- signal::sgolayfilt (D1$LACCZ, 3, .span, m=0)
   
   ## magnitude of horizontal acceleration
-  A2 <- D1$LACCX^2 + D1$LACCY^2
-  A <- sqrt(A2)
-  D1$herr <- (-D1$LACCY*(vedot-D1$LACCX)+D1$LACCX*(vndot-D1$LACCY)) / (Cradeg*A2)
+  D1$A2 <- D1$LACCX^2 + D1$LACCY^2
+  D1$A <- sqrt(D1$A2)
+  D1$herr <- (-D1$LACCY*(D1$vedot-D1$LACCX)+D1$LACCX*(D1$vndot-D1$LACCY)) / (Cradeg*D1$A2)
   
   ## a working data.frame, to avoid changing D1
   DT <- D1
-  v <- (A > 1) & (abs (DT$herr) < 0.3)
+  v <- (DT$A > 1) & (abs (DT$herr) < 0.3)
   if (!is.null (.Valid)) {
     v <- v & .Valid
   }
@@ -227,7 +263,7 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
   if (GeneratePlot) {
     p <- with (EH, ggplot(data=EH, aes(x=tbar), na.rm=TRUE))
     p <- p + geom_errorbar(aes(ymin=hmeanR-hsdR, ymax=hmeanR+hsdR, colour="right"),
-                           width=600, size=1.5, na.rm=TRUE) + ylim (-0.25,0.15)
+                           width=600, size=1.5, na.rm=TRUE) + ylim (-0.5, 0.5)
     p <- p + geom_point (aes(y = hmeanR, colour="right"),size=3.5, na.rm=TRUE)
     p <- p + geom_errorbar(aes(ymin=hmeanL-hsdL, ymax=hmeanL+hsdL, colour="left"),
                            width=600, size=1.5, na.rm=TRUE)
@@ -250,12 +286,17 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
     p <- p + scale_colour_manual("turn direction:", values=cols)
     p <- p + guides(color=guide_legend(override.aes=list(shape=c(16,16,NA), 
                                                          linetype=c(0,0,1))))
-    p <- p + ggtitle (sprintf ("%d turns, wtd mean and std %.2f %.3f", length (tbarL), whmean, whsd))
+    p <- p + ggtitle (sprintf ("%d turns, wtd mean and std %.2f +/- %.3f", length (tbarL), whmean, whsd))
     p <- p + theme_WAC()
-    suppressMessages(ggsave (.plotfile, p))
+    if (.plotfile == 'inLine') {
+      print (p)
+    } else {
+      suppressMessages(ggsave (.plotfile, p))
+    }
   }
   
   ## construct the input-rate heading correction HC
   HC <- predict(SS, as.numeric(D$Time))$y
   return (HC)
 }
+

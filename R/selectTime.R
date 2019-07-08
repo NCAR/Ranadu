@@ -17,28 +17,44 @@
 #' time range. Limits are inclusive.
 #' @example DS <- selectTime(RAFdata, 201100, 201200)
 selectTime <- function (.d, StartTime, EndTime) {
-  transferAttributes <- function (d, dsub) {  
-    ds <- dsub
-    ## ds and dsub are the new variables; d is the original
-    for (nm in names (ds)) {
-      var <- sprintf ("d$%s", nm)
-      A <- attributes (eval (parse (text=var)))
-      if (!grepl ('Time', nm)) {
-        A$dim[1] <- nrow(ds)
-        A$class <- NULL
-      } else {
-        A$dim <- nrow (ds)
-      }
-      attributes (ds[,nm]) <- A
-    }
-    A <- attributes (d)
-    A$Dimensions$Time$len <- nrow (ds)
-    A$row.names <- 1:nrow (ds)
-    A$names <- names (ds)
-    attributes (ds) <- A
-    return(ds)
-  }
-  
   dt <- .d[setRange(.d, StartTime, EndTime),]
   return(transferAttributes(.d, dt))
+}
+
+#' @title transferAttributes
+#' @description Preserves data.frame attributes.
+#' @details Given a RANADU-convention reference data.frame or tibble 
+#' and a second (usually subset) data.frame, this function transfers the 
+#' attributes ro variables in the second from the same variables in the
+#' first.  This avoids the loss of attributes that often occurs when 
+#' subset data.frames are constructed.
+#' @aliases TransferAttributes, transferAttributes
+#' @author William Cooper
+#' @export transferAttributes
+#' @param d A data.frame or tibble that follows RANADU conventions. 
+#' @param dsub A second data.frame or tibble, often a subset of the first,
+#' with variables that all appear in the first.
+#' @return A modified tibble or data.frame with attributes added to match those
+#' in the original data.frame. 
+transferAttributes <- function (d, dsub) {  
+  ds <- dsub
+  ## ds and dsub contain the new variables or the subset data.frame; 
+  ## d is the original, which is not modified.
+  for (nm in names (ds)) {
+    var <- sprintf ("d$%s", nm)
+    A <- attributes (eval (parse (text=var)))
+    if (!grepl ('Time', nm)) {
+      A$dim[1] <- nrow(ds)
+      A$class <- NULL
+    } else {
+      A$dim <- nrow (ds)
+    }
+    attributes (ds[,nm]) <- A
+  }
+  A <- attributes (d)
+  A$Dimensions$Time$len <- nrow (ds)
+  A$row.names <- 1:nrow (ds)
+  A$names <- names (ds)
+  attributes (ds) <- A
+  return(ds)
 }
