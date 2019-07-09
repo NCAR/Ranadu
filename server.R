@@ -1700,11 +1700,11 @@ shinyServer(function(input, output, session) {
   observeEvent (input$xfrVariables, {
     chooseXfrVar (fname, inp=input)
     ## check if any requested variables not present in Data:
-    if (any (!(xVarList %in% VarList))) {
-      VarList <<- unique (c(VarList, xVarList))
-      # print (c(VarList, xVarList))
-      isolate (reac$newdata <- reac$newdata + 1)
-    }
+    # if (any (!(xVarList %in% VarList))) {
+    #   xVarList <<- unique (c(VarList, xVarList))
+    #   # print (c(VarList, xVarList))
+    #   # isolate (reac$newdata <- reac$newdata + 1)
+    # }
   })
   observeEvent (input$lfit, {
     TX <- input$fformula
@@ -1733,7 +1733,14 @@ shinyServer(function(input, output, session) {
     print (anova (fitm))
     isolate (reac$updatefit <- reac$updatefit + 1)
   })
-  observeEvent (input$ncplot, OpenInProgram (data(), Program=input$otherprogram, warnOverwrite=FALSE))
+  observeEvent (input$ncplot, {
+    DOIP <- getNetCDF(fname.last, xVarList, format2Time(plotSpec$Times[1]),
+      format2Time(plotSpec$Times[2]))
+    if (grepl('Excel', input$otherprogram)) { 
+      DOIP$Time <- sub('.* ', '', sprintf('%s', DOIP$Time))
+    }
+    OpenInProgram (DOIP, Program=input$otherprogram, warnOverwrite=FALSE)
+    })
   observeEvent (input$Xanadu, OpenInProgram (data(), 'Xanadu', warnOverwrite=FALSE))
   observeEvent (input$maneuvers, SeekManeuvers (data ()))
   observeEvent (input$manual, seeManual ())
@@ -1791,12 +1798,12 @@ shinyServer(function(input, output, session) {
       } else if (input$suffixFlight == 'Prod.') {
         fname <<- sprintf ('%sProd_Data/%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project,
           plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
-      } else if (input$suffixFlight == 'HRT') {
-        fname <<- sprintf ('%s%s/%s%s%02dHRT.nc', DataDirectory (), plotSpec$Project,
+      } else if (input$suffixFlight == 'h') {
+        fname <<- sprintf ('%s%s/%s%s%02dh.nc', DataDirectory (), plotSpec$Project,
           plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
-        ## include alternative h suffix
+        ## include alternative HRT suffix
         if (!file.exists(fname)) {
-          fname <<- sprintf ('%s%s/%s%s%02dh.nc', DataDirectory (), plotSpec$Project,
+          fname <<- sprintf ('%s%s/%s%s%02dHRT.nc', DataDirectory (), plotSpec$Project,
             plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
         }
         ## include alternative H suffix
@@ -1868,7 +1875,15 @@ shinyServer(function(input, output, session) {
       # if (exists ('specialData')) {rm (specialData, pos=1)} 
       if ((fname != fname.last) || (any(!(VarList %in% VarListLast)))) {
         if (Trace) {print (c(sprintf ('reading data from %s; VarList is:', fname), VarList))}
-        D <- getNetCDF (fname, VarList)
+        if (input$suffixFlight %in%  c('h', 'H', 'HRT')) {
+          print (sprintf ('time limits are %d -- %d',  format2Time(plotSpec$Times[1]), format2Time(plotSpec$Times[2])))
+          D <- getNetCDF (fname, VarList, format2Time(plotSpec$Times[1]), format2Time(plotSpec$Times[2]))
+          print(names(D))
+          AAA <- getStartEnd(D)
+          print(sprintf('rows %d start %.2f end %.2f', nrow(D), AAA[1], AAA[2]))
+        } else {
+          D <- getNetCDF (fname, VarList)
+        }
         if ('GGVSPDB' %in% VarList) {
           D$GGVSPD <- D$GGVSPDB
         } else if ('VSPD_A' %in% VarList) {
@@ -1887,23 +1902,28 @@ shinyServer(function(input, output, session) {
           rm (DS)
         }
         if (fname != fname.last) {
-          # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
-          step <- 60
-          minT <- D$Time[1]
-          minT <<- minT <- minT - as.integer (minT) %% step + step
-          maxT <- D$Time[nrow(D)]
-          maxT <<- maxT <- maxT - as.integer (maxT) %% step
-          # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
-          plotSpec$Times <<- c(minT, maxT)
-          if (Trace) {print (sprintf ('data: setting plotSpec$Times to %s %s', 
-            formatTime (minT), formatTime (maxT)))}
-          updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
-          updateNumericInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
-          updateNumericInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
-          updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
-          updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
-          updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
-          updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
+          if (input$suffixFlight %in% c('h', 'H', 'HRT')) {
+            Data <- D
+            return(Data)
+          } else {
+            # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
+            step <- 60
+            minT <- D$Time[1]
+            minT <<- minT <- minT - as.integer (minT) %% step + step
+            maxT <- D$Time[nrow(D)]
+            maxT <<- maxT <- maxT - as.integer (maxT) %% step
+            # plotSpec$Times <<- c(D$Time[1], D$Time[nrow(D)])
+            plotSpec$Times <<- c(minT, maxT)
+            if (Trace) {print (sprintf ('data: setting plotSpec$Times to %s %s', 
+              formatTime (minT), formatTime (maxT)))}
+            updateSliderInput (session, 'times', value=plotSpec$Times, min=minT, max=maxT)
+            updateNumericInput (session, 'tstart', value=formatTime (plotSpec$Times[1]))
+            updateNumericInput (session, 'tend', value=formatTime (plotSpec$Times[2]))
+            updateTextInput (session, 'paluchStart', value=formatTime (plotSpec$PaluchTimes[1]))
+            updateTextInput (session, 'paluchEnd', value=formatTime (plotSpec$PaluchTimes[2]))
+            updateTextInput (session, 'paluchCStart', value=formatTime (plotSpec$PaluchCTimes[1]))
+            updateTextInput (session, 'paluchCEnd', value=formatTime (plotSpec$PaluchCTimes[2]))
+          }
         }
         if (Trace) {print (sprintf ('data: loaded data.frame from %s', fname))}
       } else {  ## fname is the same, so reuse Data
@@ -2587,192 +2607,211 @@ shinyServer(function(input, output, session) {
     times <- input$times    ## make sensitive to time changes, project, etc.
     input$Project
     input$Flight
+    input$addcdf
     DT <- data ()
     Data <- DT[DT$Time > times[1] & DT$Time < times[2], ]
     Data <- transferAttributes (Data, DT)
     print (c('in Data:', sort(names(Data))))
-    nm1 <- nm2 <- nm3 <- nm4 <- nm5 <- character(0)
     nms <- names (Data)
     op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
     
-    if ('CDP' %in% input$probe) {
-      nm1 <- nms [grepl('CCDP_', nms)]
-      if (length (nm1) > 0) {
-        CellLimitsD <- attr(Data[, nm1[1]], 'CellSizes')
-      }
+    # if ('CDP' %in% input$probe) {
+    #   nm1 <- nms [grepl('CCDP_', nms)]
+    #   if (length (nm1) > 0) {
+    #     CellLimitsD <- attr(Data[, nm1[1]], 'CellSizes')
+    #   }
+    # }
+    # if ('FSSP' %in% input$probe) {
+    #   nm2 <- nms [grepl('CS100_', nms)]
+    #   if (length (nm2) > 0) {
+    #     CellLimitsF <- attr(Data[, nm2[1]], 'CellSizes')
+    #   }
+    # }
+    # if ('UHSAS' %in% input$probe) {
+    #   nm3 <- nms [grepl('CUHSAS_', nms)]
+    #   if (length (nm3) > 0) {
+    #     CellLimitsU <- attr(Data[, nm3[1]], 'CellSizes')
+    #   }
+    # }
+    # if ('2DC' %in% input$probe) {
+    #   nm4 <- nms [grepl('^C1DC_', nms)]
+    #   if (length (nm4) > 0) {
+    #     CellLimits2 <- attr(Data[, nm4[1]], 'CellSizes')
+    #   }
+    # }
+    # if ('PCASP' %in% input$probe) {
+    #   nm5 <- nms [grepl('CS200_', nms)]
+    #   if (length (nm5) > 0) {
+    #     CellLimitsP <- attr(Data[, nm5[1]], 'CellSizes')
+    #   }
+    # }
+    nmsel <- input$probe
+    nmsel[nmsel == '2DC'] <- '1DC'
+    nmsel[nmsel == 'PCASP'] <- 'S200'
+    for (nm in nmsel) {
+      nmsel [which (nm == nmsel)] <- nms [grepl(sprintf('C%s_', nm), nms)]
     }
-    if ('FSSP' %in% input$probe) {
-      nm2 <- nms [grepl('CS100_', nms)]
-      if (length (nm2) > 0) {
-        CellLimitsF <- attr(Data[, nm2[1]], 'CellSizes')
-      }
+    xlow <- 1
+    xhigh <- 10
+    for (nm in nmsel) {
+      CL <- attr(Data[, nm], 'CellSizes')
+      if (CL[1] < xlow) {xlow <- CL[1]}
+      if (CL[length(CL)] > xhigh) {xhigh <- CL[length(CL)]}
     }
-    if ('UHSAS' %in% input$probe) {
-      nm3 <- nms [grepl('CUHSAS_', nms)]
-      if (length (nm3) > 0) {
-        CellLimitsU <- attr(Data[, nm3[1]], 'CellSizes')
-      }
-    }
-    if ('2DC' %in% input$probe) {
-      nm4 <- nms [grepl('^C1DC_', nms)]
-      if (length (nm4) > 0) {
-        CellLimits2 <- attr(Data[, nm4[1]], 'CellSizes')
-      }
-    }
-    if ('PCASP' %in% input$probe) {
-      nm5 <- nms [grepl('CS200_', nms)]
-      if (length (nm5) > 0) {
-        CellLimitsP <- attr(Data[, nm5[1]], 'CellSizes')
-      }
-    }
-    
-    ## normalize all:
-    if (length(nm1 > 0)) {
-      for (nm in nm1) {
-        CDP <- colMeans(Data[, nm, ], na.rm=TRUE)
-        CDPtot <- sum(CDP, na.rm=TRUE)
-        CDP <- CDP / diff (CellLimitsD)
-        CDP[CDP <= 0] <- 1.e-6
-      }
-    }
-    if (length(nm2 > 0)) {
-      for (nm in nm2) {
-        FSSP <- colMeans(Data[, nm, ], na.rm=TRUE)
-        FSSPtot <- sum(FSSP, na.rm=TRUE)
-        FSSP <- FSSP / diff (CellLimitsF)
-        FSSP[FSSP <= 0] <- 1.e-6
-      }
-    }
-    if (length(nm3 > 0)) {
-      for (nm in nm3) {
-        UHSAS <- colMeans(Data[, nm, ], na.rm=TRUE)
-        UHSAStot <- sum(UHSAS, na.rm=TRUE)
-        UHSAS <- UHSAS / diff (CellLimitsU)
-        UHSAS[UHSAS <= 0] <- 1.e-6
-      }
-    }
-    if (length(nm4 > 0)) {
-      for (nm in nm4) {
-        TWOD <- colMeans(Data[, nm, ], na.rm=TRUE)
-        TWODtot <- sum(TWOD, na.rm=TRUE)
-        TWOD <- TWOD * 1.e-3 / diff (CellLimits2)
-        TWOD[TWOD <= 0] <- 1.e-9
-      }
-    }
-    if (length(nm5 > 0)) {
-      for (nm in nm5) {
-        PCASP <- colMeans(Data[, nm, ], na.rm=TRUE)
-        PCASPtot <- sum (PCASP, na.rm=TRUE)
-        PCASP <- PCASP / diff (CellLimitsP)
-        PCASP[PCASP <= 0] <- 1.e-6
-      }
-    }
-    ## now have size distributions; construct plots
-    dmin <- 1e10
-    dmax <- 0
-    cmin=1e10
-    cmax=0
-    if ('CDP' %in% input$probe && (length(nm1) > 0)) {
-      dmin <- min (c(dmin, CellLimitsD[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimitsD[length(CellLimitsD)]), na.rm=TRUE)
-      cmin <- min (c(cmin, CDP), na.rm=TRUE)
-      cmax <- max (c(cmax, CDP), na.rm=TRUE)
-    }
-    if ('FSSP' %in% input$probe && (length(nm2) > 0)) {
-      dmin <- min (c(dmin, CellLimitsF[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimitsF[length(CellLimitsF)]), na.rm=TRUE)
-      cmin <- min (c(cmin, FSSP), na.rm=TRUE)
-      cmax <- max (c(cmax, FSSP), na.rm=TRUE)
-    }
-    if ('UHSAS' %in% input$probe && (length(nm3) > 0)) {
-      dmin <- min (c(dmin, CellLimitsU[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimitsU[length(CellLimitsU)]), na.rm=TRUE)
-      cmin <- min (c(cmin, UHSAS), na.rm=TRUE)
-      cmax <- max (c(cmax, UHSAS), na.rm=TRUE)
-    }
-    if ('2DC' %in% input$probe && (length(nm4) > 0)) {
-      dmin <- min (c(dmin, CellLimits2[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimits2[length(CellLimits2)]), na.rm=TRUE)
-      cmin <- min (c(cmin, TWOD), na.rm=TRUE)
-      cmax <- max (c(cmax, TWOD), na.rm=TRUE)
-    }
-    if ('PCASP' %in% input$probe && (length(nm5) > 0)) {
-      dmin <- min (c(dmin, CellLimitsP[1]), na.rm=TRUE)
-      dmax <- max (c(dmax, CellLimitsP[length(CellLimitsP)]), na.rm=TRUE)
-      cmin <- min (c(cmin, PCASP), na.rm=TRUE)
-      cmax <- max (c(cmax, PCASP), na.rm=TRUE)
-    }
-    if (length (input$probe) > 0) {
-      xp <- c(dmin, dmax)
-      yp <- c(cmin, cmax)
-      logT <- ''
-      if (grepl ('log-x', input$sdtype)) {logT <- paste (logT, 'x', sep='')}
-      if (grepl ('log-y', input$sdtype)) {logT <- paste (logT, 'y', sep='')}
-      if (grepl ('both log', input$sdtype)) {logT <- 'xy'}
-      ## this call just sets appropriate axes:
-      yl <- expression (paste("concentration [cm"^"-3", mu, 'm'^'-1', ']'), sep='')
-      plot (xp, yp, type='p', log=logT,
-        xlab=expression (paste('diameter [',mu,'m]', sep='')),
-        ylab=yl, col='white', cex.lab=2, cex.axis=1.4)
-    }
+    cdf <- input$addcdf
+    print (sprintf ('cdf is %s', cdf))
+    logxy <- ''
+    if (grepl('x', input$sdtype)) {logxy <- 'x'}
+    if (grepl('y', input$sdtype)) {logxy <- 'y'}
+    if (grepl('both', input$sdtype)) {logxy <- 'xy'}
+    plotSD(Data[, c('Time', nmsel)], CDF=cdf, logAxis=logxy, LWC=input$LWC, xlim=c(xlow, xhigh))
+    # ## normalize all:
+    # if (length(nm1 > 0)) {
+    #   for (nm in nm1) {
+    #     CDP <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     CDPtot <- sum(CDP, na.rm=TRUE)
+    #     CDP <- CDP / diff (CellLimitsD)
+    #     CDP[CDP <= 0] <- 1.e-6
+    #   }
+    # }
+    # if (length(nm2 > 0)) {
+    #   for (nm in nm2) {
+    #     FSSP <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     FSSPtot <- sum(FSSP, na.rm=TRUE)
+    #     FSSP <- FSSP / diff (CellLimitsF)
+    #     FSSP[FSSP <= 0] <- 1.e-6
+    #   }
+    # }
+    # if (length(nm3 > 0)) {
+    #   for (nm in nm3) {
+    #     UHSAS <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     UHSAStot <- sum(UHSAS, na.rm=TRUE)
+    #     UHSAS <- UHSAS / diff (CellLimitsU)
+    #     UHSAS[UHSAS <= 0] <- 1.e-6
+    #   }
+    # }
+    # if (length(nm4 > 0)) {
+    #   for (nm in nm4) {
+    #     TWOD <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     TWODtot <- sum(TWOD, na.rm=TRUE)
+    #     TWOD <- TWOD * 1.e-3 / diff (CellLimits2)
+    #     TWOD[TWOD <= 0] <- 1.e-9
+    #   }
+    # }
+    # if (length(nm5 > 0)) {
+    #   for (nm in nm5) {
+    #     PCASP <- colMeans(Data[, nm, ], na.rm=TRUE)
+    #     PCASPtot <- sum (PCASP, na.rm=TRUE)
+    #     PCASP <- PCASP / diff (CellLimitsP)
+    #     PCASP[PCASP <= 0] <- 1.e-6
+    #   }
+    # }
+    # ## now have size distributions; construct plots
+    # dmin <- 1e10
+    # dmax <- 0
+    # cmin=1e10
+    # cmax=0
+    # if ('CDP' %in% input$probe && (length(nm1) > 0)) {
+    #   dmin <- min (c(dmin, CellLimitsD[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimitsD[length(CellLimitsD)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, CDP), na.rm=TRUE)
+    #   cmax <- max (c(cmax, CDP), na.rm=TRUE)
+    # }
+    # if ('FSSP' %in% input$probe && (length(nm2) > 0)) {
+    #   dmin <- min (c(dmin, CellLimitsF[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimitsF[length(CellLimitsF)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, FSSP), na.rm=TRUE)
+    #   cmax <- max (c(cmax, FSSP), na.rm=TRUE)
+    # }
+    # if ('UHSAS' %in% input$probe && (length(nm3) > 0)) {
+    #   dmin <- min (c(dmin, CellLimitsU[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimitsU[length(CellLimitsU)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, UHSAS), na.rm=TRUE)
+    #   cmax <- max (c(cmax, UHSAS), na.rm=TRUE)
+    # }
+    # if ('2DC' %in% input$probe && (length(nm4) > 0)) {
+    #   dmin <- min (c(dmin, CellLimits2[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimits2[length(CellLimits2)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, TWOD), na.rm=TRUE)
+    #   cmax <- max (c(cmax, TWOD), na.rm=TRUE)
+    # }
+    # if ('PCASP' %in% input$probe && (length(nm5) > 0)) {
+    #   dmin <- min (c(dmin, CellLimitsP[1]), na.rm=TRUE)
+    #   dmax <- max (c(dmax, CellLimitsP[length(CellLimitsP)]), na.rm=TRUE)
+    #   cmin <- min (c(cmin, PCASP), na.rm=TRUE)
+    #   cmax <- max (c(cmax, PCASP), na.rm=TRUE)
+    # }
+    # if (length (input$probe) > 0) {
+    #   xp <- c(dmin, dmax)
+    #   yp <- c(cmin, cmax)
+    #   logT <- ''
+    #   if (grepl ('log-x', input$sdtype)) {logT <- paste (logT, 'x', sep='')}
+    #   if (grepl ('log-y', input$sdtype)) {logT <- paste (logT, 'y', sep='')}
+    #   if (grepl ('both log', input$sdtype)) {logT <- 'xy'}
+    #   ## this call just sets appropriate axes:
+    #   yl <- expression (paste("concentration [cm"^"-3", mu, 'm'^'-1', ']'), sep='')
+    #   plot (xp, yp, type='p', log=logT,
+    #     xlab=expression (paste('diameter [',mu,'m]', sep='')),
+    #     ylab=yl, col='white', cex.lab=2, cex.axis=1.4)
+    # }
     ttl <- sprintf ("Time=%s--%s ", strftime (Data$Time[1], format="%H:%M:%S", tz='UTC'), 
       strftime (Data$Time[nrow(Data)], format="%H:%M:%S", tz='UTC'))
-    legend.names <- vector()
-    legend.colors <- vector()
-    if ('UHSAS' %in% input$probe && (length (nm3) > 0)) {
-      points (CellLimitsU, c(1.e-6, UHSAS), type='S', 
-        col='darkgreen', lwd=2)
-      legend.names <- c(legend.names, 'UHSAS')
-      legend.colors <- c(legend.colors, 'darkgreen')
-      if (!is.na(UHSAStot)) {
-        ttl <- paste0 (ttl, sprintf(" CONCU=%.2f", UHSAStot))
-      }
-    }
-    if (('PCASP' %in% input$probe) && (length (nm5) > 0) && (!is.na(PCASPtot))) {
-      points (CellLimitsP, c(1.e-6, PCASP), type='S', 
-        col='darkorange', lwd=2)
-      legend.names <- c(legend.names, 'PCASP')
-      legend.colors <- c(legend.colors, 'darkorange')
-      if (!is.na(PCASPtot)) {
-        ttl <- paste0 (ttl, sprintf(" CONCP=%.2f", PCASPtot))
-      }
-    }
-    if ('CDP' %in% input$probe && (length (nm1) > 0)) {
-      points (CellLimitsD, c(1.e-6, CDP), type='S', 
-        col='blue', lwd=2)
-      legend.names <- c(legend.names, 'CDP')
-      legend.colors <- c(legend.colors, 'blue')
-      if (!is.na(CDPtot)) {
-        ttl <- paste0 (ttl, sprintf(" CONCD=%.2f", CDPtot))
-      }
-    }
-    if ('FSSP' %in% input$probe && (length (nm2) > 0)) {
-      points (CellLimitsF, c(1.e-6, FSSP), type='S', 
-        col='violet', lwd=2)
-      legend.names <- c(legend.names, 'FSSP')
-      legend.colors <- c(legend.colors, 'violet')
-      if (!is.na(FSSPtot)) {
-        ttl <- paste0 (ttl, sprintf(" CONCF=%.2f", FSSPtot))
-      }
-    }
-    if ('2DC' %in% input$probe && (length (nm4) > 0)) {
-      points (CellLimits2, c(1.e-9, TWOD), type='S', 
-        col='red', lwd=2)
-      legend.names <- c(legend.names, '2DC')
-      legend.colors <- c(legend.colors, 'red')
-      if (!is.na(TWODtot)) {
-        ttl <- paste0 (ttl, sprintf(" CONC1DC=%.4f", TWODtot))
-      }
-    }
-    
-    if (length (input$probe) > 0) {
-      title (ttl)
-      print(c('title', ttl))
-      print (legend.names)
-      print (legend.colors)
-      legend ("topright", legend=legend.names, col=legend.colors,
-        lwd=c(2,1), cex=0.75)
-    }
+    # legend.names <- vector()
+    # legend.colors <- vector()
+    # if ('UHSAS' %in% input$probe && (length (nm3) > 0)) {
+    #   points (CellLimitsU, c(1.e-6, UHSAS), type='S', 
+    #     col='darkgreen', lwd=2)
+    #   legend.names <- c(legend.names, 'UHSAS')
+    #   legend.colors <- c(legend.colors, 'darkgreen')
+    #   if (!is.na(UHSAStot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONCU=%.2f", UHSAStot))
+    #   }
+    # }
+    # if (('PCASP' %in% input$probe) && (length (nm5) > 0) && (!is.na(PCASPtot))) {
+    #   points (CellLimitsP, c(1.e-6, PCASP), type='S', 
+    #     col='darkorange', lwd=2)
+    #   legend.names <- c(legend.names, 'PCASP')
+    #   legend.colors <- c(legend.colors, 'darkorange')
+    #   if (!is.na(PCASPtot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONCP=%.2f", PCASPtot))
+    #   }
+    # }
+    # if ('CDP' %in% input$probe && (length (nm1) > 0)) {
+    #   points (CellLimitsD, c(1.e-6, CDP), type='S', 
+    #     col='blue', lwd=2)
+    #   legend.names <- c(legend.names, 'CDP')
+    #   legend.colors <- c(legend.colors, 'blue')
+    #   if (!is.na(CDPtot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONCD=%.2f", CDPtot))
+    #   }
+    # }
+    # if ('FSSP' %in% input$probe && (length (nm2) > 0)) {
+    #   points (CellLimitsF, c(1.e-6, FSSP), type='S', 
+    #     col='violet', lwd=2)
+    #   legend.names <- c(legend.names, 'FSSP')
+    #   legend.colors <- c(legend.colors, 'violet')
+    #   if (!is.na(FSSPtot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONCF=%.2f", FSSPtot))
+    #   }
+    # }
+    # if ('2DC' %in% input$probe && (length (nm4) > 0)) {
+    #   points (CellLimits2, c(1.e-9, TWOD), type='S', 
+    #     col='red', lwd=2)
+    #   legend.names <- c(legend.names, '2DC')
+    #   legend.colors <- c(legend.colors, 'red')
+    #   if (!is.na(TWODtot)) {
+    #     ttl <- paste0 (ttl, sprintf(" CONC1DC=%.4f", TWODtot))
+    #   }
+    # }
+    # 
+    # if (length (input$probe) > 0) {
+    #   title (ttl)
+    #   print(c('title', ttl))
+    #   print (legend.names)
+    #   print (legend.colors)
+    #   legend ("topright", legend=legend.names, col=legend.colors,
+    #     lwd=c(2,1), cex=0.75)
+    # }
   }, width=800, height=640)
   
   output$varplot <- renderImage ({  ## varplot
@@ -2820,9 +2859,9 @@ shinyServer(function(input, output, session) {
           strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
           strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
             format="%H:%M:%S", tz='UTC'))  
-      } else if (input$suffixFlight == 'HRT') {
+      } else if (input$suffixFlight == 'h') {
         print (sprintf ('Project %s flight %02d', Project, plotSpec$Flight))
-        FigFooter <<- sprintf("%s rf%02dHRT %s %s-%s UTC,", Project, plotSpec$Flight,
+        FigFooter <<- sprintf("%s rf%02dh %s %s-%s UTC,", Project, plotSpec$Flight,
           strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
           strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
           strftime(DataR$Time[getIndex(DataR$Time,SE[2])],
@@ -2860,7 +2899,7 @@ shinyServer(function(input, output, session) {
     if (input$spectype == 'MEM' && exists('MEMPlot.png')) {
       unlink ("MEMPlot.png")
     }
-    if (input$spectype == 'fft' && exists ('FFTPlot.png')) {
+    if (grepl('fft', input$spectype) && exists ('FFTPlot.png')) {
       unlink ("FFTPlot.png")
     }
     if (input$spectype == 'acv') {
@@ -3015,9 +3054,8 @@ shinyServer(function(input, output, session) {
       isolate (plt <- input$plot)
       v <- plotSpec$Variance[[plt]]$Definition$var
       cv <- plotSpec$Variance[[plt]]$Definition$cvar
-
-      setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype, isolate(input$MEMadd), 
-        isolate(input$MEMcolor))
+      # setXanadu (fnew, ts, te, v, cv, wlow, whigh, input$spectype, isolate(input$MEMadd), 
+      #   isolate(input$MEMcolor))
       # if (input$varXanadu) {
       #   if (Trace) {print ('calling Xanadu otto')}
       #   XanaduOut <<- system2 ("Xanadu", args="otto", stdout=TRUE)
@@ -3364,7 +3402,53 @@ shinyServer(function(input, output, session) {
           }  ## end of similar test -- redundant?
         }    ## end of sections ising ggplot2 (fp(f) etc.)
       }      ## end of the MEM section
-      if (input$spectype == 'fft') {
+      if (grepl('fft-W', input$spectype)) {  # fft using VSpec, Welch method:
+        segmentLength <- input$fftpts * FI$Rate
+        ld <- nrow (DataR)
+        while (segmentLength > ld) {
+          segmentLength <- segmentLength / 2
+        }
+        if (segmentLength < input$fftpts * Rate) {
+          print (sprintf ('Reset segment length to %d to match data', segmentLength / Rate))
+        }
+        if (input$ffttype == 'fp(f)') {
+          ##  VSpec needs the variables Time, TASX, and the spec variable in a data.frame:
+          print (sprintf (' segmentLength, col, avg=%d %s %d', segmentLength, input$fftcolor1, input$fftavg1))
+          if (FI$Rate == 1) {
+            g <- VSpec(DataR, v, type='Welch', segLength=segmentLength, col=input$FFTcolor1, xlim=c(0.001, 1), smoothBins=input$fftavg1)
+          } else {
+            g <- VSpec(DataR, v, type='Welch', segLength=segmentLength, col=input$FFTcolor1, smoothBins=input$fftavg1)
+          }
+          Theme <- input$varTheme
+          if (Theme == 'classic') {g <- g + theme_classic()}
+          if (Theme == 'bw')      {g <- g + theme_bw()}
+          if (Theme == 'base')    {g <- g + theme_base()}
+          if (Theme == 'excel')   {g <- g + theme_excel()}
+          if (Theme == 'few')     {g <- g + theme_few()}
+          if (Theme == 'foundation') {g <- g + theme_foundation()}
+          if (Theme == 'igray')   {g <- g + theme_igrey()}
+          if (Theme == 'light')   {g <- g + theme_light()}
+          if (Theme == 'linedraw') {g <- g + theme_linedraw()}
+          if (Theme == 'tufte')   {g <- g + theme_tufte()}
+          if (Theme == 'standard') {}## g <- g + theme_classic()}
+          if (grepl('WAC', Theme))     {
+            g <- g + theme_WAC() + theme (axis.title.x.top=element_text(size=10, hjust=0.5, vjust=2),
+              axis.text.x.top=element_text(size=10, hjust=0.02, vjust=1))
+            if (Theme == 'WAC2') {
+              g <- g + theme(rect=element_rect(fill='bisque'))
+            }
+          } else {
+            g <- g + theme (axis.title.x.top=element_text(size=10, hjust=0.5),
+              axis.text.x.top=element_text(size=10, hjust=0.5, vjust=1))
+          }
+        } 
+        gname <- 'SpecialGraphics/PSDFFT2.png'
+        if (file.exists(gname)) {unlink(gname)}
+        png(filename=gname, width=600, height=600)
+        print (g)
+        dev.off()
+      }
+      if (grepl('fft-X', input$spectype)) {  ## this is skipped...
         # if (input$varXanadu) {
         if (0) {    ## used to save this code, altho suppressed in std version
           if ((input$ffttype == 'fp(f)' || input$ffttype == 'p(f)')) {
@@ -3706,132 +3790,167 @@ shinyServer(function(input, output, session) {
             }              
             # if (grepl ('p(f)', input$ffttype, fixed=TRUE) || grepl ('co-var', input$ffttype, fixed=TRUE) ||
             #     grepl ('edr', input$ffttype, fixed=TRUE)) {
-              
-              if (isolate(input$FFTadd) && exists ('gFFT')) {
-                dd <- reshape2::melt(X, id="xc", measure="ybar")
-                i <-  2
-                while (exists (vnFFT <- sprintf('v%dFFT', i), '.GlobalEnv')) {i <- i + 1}
-                assign(vnFFT, v, '.GlobalEnv')
-                if (i == 2) {
-                  g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v2FFT), lwd=1.2) #+
-                } else if (i == 3) {
-                  g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v3FFT), lwd=1.2)
-                } else if (i == 4) {
-                  g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v4FFT), lwd=1.2)
-                }
-                names(cFFT) <- vFFT
-                g <- g + scale_colour_manual (name='', values=cFFT)
-              } else {
-                g <- ggplot (data=data.frame(fdt=fdt, nups=nups), aes(x=fdt, y=nups))
-                if (input$FFTshowU) {
-                  cUS <- sprintf('unsmoothed %s', xvm)
-                  g <- g + geom_path (aes_(colour=cUS), lwd=0.5)
-                }              
-                if (grepl ('edr', input$ffttype, fixed=TRUE)) {
-                  XE <- data.frame(xe=c(edrMin, edrMax), ye=c(edr, edr))
-                  g <- g + geom_path (data=XE, aes_(x=quote(xe), y=quote(ye)), colour='brown', lwd=1.5)
-                }
-                g <- g + geom_path (data=X, aes(x=xc, y=ybar, colour=xvm), lwd=1.2)
-                ## skip for 'edr':
-                if (grepl ('p(f)', input$ffttype, fixed=TRUE) || grepl ('co-var', input$ffttype, fixed=TRUE)) {
-                  epsColor <- 'darkgreen'
-                  for (i in (-8):2) {
-                    if (input$ffttype == 'fp(f)' || grepl ('co-var', input$ffttype, fixed=TRUE)) {
-                      yl <- ae * (10^i * tasAverage / flow)^(2/3)
-                      yh <- ae * (10^i * tasAverage / fhigh)^(2/3)
-                    } else if (input$ffttype == 'p(f)') {
-                      yl <- ae * (10^i * tasAverage / flow)^(2/3) / flow
-                      yh <- ae * (10^i * tasAverage / fhigh)^(2/3) / fhigh
-                    }
-                    if (i == -4) {
-                      g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.6, lty=1)
-                    } else {
-                      g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.3, lty=2)
-                    }
-                  }
-                }
-                
-              }
-              g <- g + coord_cartesian (xlim=c(flow,fhigh), ylim=c(plow,phigh)) +
-                scale_x_continuous(trans='log10', breaks = trans_breaks("log10", (function(x) 10^x), n=nfSpec+1),
-                  labels = trans_format("log10", math_format(10^.x)),
-                  sec.axis=sec_axis(~log10(.^(-1)*tasAverage*0.001), name='wavelength [km]',
-                    breaks=c(0,1,2), labels=c(' 1 ', ' 10 ', ' 100 '))) +
-                scale_y_log10(breaks = trans_breaks("log10", (function(x) 10^x), n=npSpec+1),
-                  labels = trans_format("log10", math_format(10^.x))) +
-                annotation_logticks() +
-                xlab('frequency [Hz]') 
-              if (input$ffttype == 'fp(f)') {
-                g <- g + ylab (bquote(paste(.(v), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
-              } else if (input$ffttype == 'p(f)') {
-                g <- g + ylab (bquote(paste(.(v), ': ', 'P(',nu,')', sep='')))
-              } else if (grepl ('edr', input$ffttype, fixed=TRUE)) {
-                g <- g + ylab (bquote(paste(.(v), ': ', epsilon, '(',nu,')', sep='')))
-              } else if (grepl ('co-var', input$ffttype)) {
-                g <- g + ylab (bquote(paste(.(cv), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
+            
+            if (isolate(input$FFTadd) && exists ('gFFT')) {
+              dd <- reshape2::melt(X, id="xc", measure="ybar")
+              i <-  2
+              while (exists (vnFFT <- sprintf('v%dFFT', i), '.GlobalEnv')) {i <- i + 1}
+              assign(vnFFT, v, '.GlobalEnv')
+              if (i == 2) {
+                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v2FFT), lwd=1.2) #+
+              } else if (i == 3) {
+                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v3FFT), lwd=1.2)
+              } else if (i == 4) {
+                g <- gFFT + geom_path (data=dd, aes(x=xc, y=value, colour=v4FFT), lwd=1.2)
               }
               names(cFFT) <- vFFT
               g <- g + scale_colour_manual (name='', values=cFFT)
+            } else {
+              g <- ggplot (data=data.frame(fdt=fdt, nups=nups), aes(x=fdt, y=nups))
+              if (input$FFTshowU) {
+                cUS <- sprintf('unsmoothed %s', xvm)
+                g <- g + geom_path (aes_(colour=cUS), lwd=0.5)
+              }              
+              if (grepl ('edr', input$ffttype, fixed=TRUE)) {
+                XE <- data.frame(xe=c(edrMin, edrMax), ye=c(edr, edr))
+                g <- g + geom_path (data=XE, aes_(x=quote(xe), y=quote(ye)), colour='brown', lwd=1.5)
+              }
+              g <- g + geom_path (data=X, aes(x=xc, y=ybar, colour=xvm), lwd=1.2)
+              ## skip for 'edr':
+              if (grepl ('p(f)', input$ffttype, fixed=TRUE) || grepl ('co-var', input$ffttype, fixed=TRUE)) {
+                epsColor <- 'darkgreen'
+                for (i in (-8):2) {
+                  if (input$ffttype == 'fp(f)' || grepl ('co-var', input$ffttype, fixed=TRUE)) {
+                    yl <- ae * (10^i * tasAverage / flow)^(2/3)
+                    yh <- ae * (10^i * tasAverage / fhigh)^(2/3)
+                  } else if (input$ffttype == 'p(f)') {
+                    yl <- ae * (10^i * tasAverage / flow)^(2/3) / flow
+                    yh <- ae * (10^i * tasAverage / fhigh)^(2/3) / fhigh
+                  }
+                  if (i == -4) {
+                    g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.6, lty=1)
+                  } else {
+                    g <- g + geom_line (data=data.frame (x=c(flow,fhigh), y=c(yl,yh)), aes(x=x, y=y), colour=epsColor, lwd=0.3, lty=2)
+                  }
+                }
+              }
               
-              Theme <- input$varTheme
-              if (Theme == 'classic') {g <- g + theme_classic()}
-              if (Theme == 'bw')      {g <- g + theme_bw()}
-              if (Theme == 'base')    {g <- g + theme_base()}
-              if (Theme == 'excel')   {g <- g + theme_excel()}
-              if (Theme == 'few')     {g <- g + theme_few()}
-              if (Theme == 'foundation') {g <- g + theme_foundation()}
-              if (Theme == 'igray')   {g <- g + theme_igrey()}
-              if (Theme == 'light')   {g <- g + theme_light()}
-              if (Theme == 'linedraw') {g <- g + theme_linedraw()}
-              if (Theme == 'tufte')   {g <- g + theme_tufte()}
-              if (Theme == 'standard') {}## g <- g + theme_classic()}
-              if (grepl('WAC', Theme))     {
-                g <- g + theme_WAC() + theme (axis.title.x.top=element_text(size=10, hjust=0.5, vjust=2),
-                  axis.text.x.top=element_text(size=10, hjust=0.02, vjust=1))
-                if (Theme == 'WAC2') {
-                  g <- g + theme(rect=element_rect(fill='bisque'))
-                }
+            }
+            g <- g + coord_cartesian (xlim=c(flow,fhigh), ylim=c(plow,phigh)) +
+              scale_x_continuous(trans='log10', breaks = trans_breaks("log10", (function(x) 10^x), n=nfSpec+1),
+                labels = trans_format("log10", math_format(10^.x)),
+                sec.axis=sec_axis(~log10(.^(-1)*tasAverage*0.001), name='wavelength [km]',
+                  breaks=c(0,1,2), labels=c(' 1 ', ' 10 ', ' 100 '))) +
+              scale_y_log10(breaks = trans_breaks("log10", (function(x) 10^x), n=npSpec+1),
+                labels = trans_format("log10", math_format(10^.x))) +
+              annotation_logticks() +
+              xlab('frequency [Hz]') 
+            if (input$ffttype == 'fp(f)') {
+              g <- g + ylab (bquote(paste(.(v), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
+            } else if (input$ffttype == 'p(f)') {
+              g <- g + ylab (bquote(paste(.(v), ': ', 'P(',nu,')', sep='')))
+            } else if (grepl ('edr', input$ffttype, fixed=TRUE)) {
+              g <- g + ylab (bquote(paste(.(v), ': ', epsilon, '(',nu,')', sep='')))
+            } else if (grepl ('co-var', input$ffttype)) {
+              g <- g + ylab (bquote(paste(.(cv), ': ', nu, ' P(',nu,') = ',lambda,' P\'(',lambda,')', sep='')))
+            }
+            names(cFFT) <- vFFT
+            g <- g + scale_colour_manual (name='', values=cFFT)
+            
+            Theme <- input$varTheme
+            if (Theme == 'classic') {g <- g + theme_classic()}
+            if (Theme == 'bw')      {g <- g + theme_bw()}
+            if (Theme == 'base')    {g <- g + theme_base()}
+            if (Theme == 'excel')   {g <- g + theme_excel()}
+            if (Theme == 'few')     {g <- g + theme_few()}
+            if (Theme == 'foundation') {g <- g + theme_foundation()}
+            if (Theme == 'igray')   {g <- g + theme_igrey()}
+            if (Theme == 'light')   {g <- g + theme_light()}
+            if (Theme == 'linedraw') {g <- g + theme_linedraw()}
+            if (Theme == 'tufte')   {g <- g + theme_tufte()}
+            if (Theme == 'standard') {}## g <- g + theme_classic()}
+            if (grepl('WAC', Theme))     {
+              g <- g + theme_WAC() + theme (axis.title.x.top=element_text(size=10, hjust=0.5, vjust=2),
+                axis.text.x.top=element_text(size=10, hjust=0.02, vjust=1))
+              if (Theme == 'WAC2') {
+                g <- g + theme(rect=element_rect(fill='bisque'))
+              }
+            } else {
+              g <- g + theme (axis.title.x.top=element_text(size=10, hjust=0.5),
+                axis.text.x.top=element_text(size=10, hjust=0.5, vjust=1))
+            }
+            if (input$FFTcaption) {
+              SE <- getStartEnd (DataR$Time)
+              i <- getIndex (DataR$Time, SE[1])
+              if (grepl ('edr', input$ffttype, fixed=TRUE)) {
+                cap <- sprintf ('%s %s--%s fft: %d seg (s), %d sm. bins, edr=%.1e +/- %.1e',
+                  strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+                  strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                  strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
+                  segmentLength/Rate, avebin, edr, ebs)
               } else {
-                g <- g + theme (axis.title.x.top=element_text(size=10, hjust=0.5),
-                  axis.text.x.top=element_text(size=10, hjust=0.5, vjust=1))
+                cap <- sprintf ('%s %s--%s FFT: %d seg (s), %d sm. bins, var.=%.1e, edr=%.1e ',
+                  strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
+                  strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
+                  strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
+                  segmentLength/Rate, avebin, variance, edr)
               }
-              if (input$FFTcaption) {
-                SE <- getStartEnd (DataR$Time)
-                i <- getIndex (DataR$Time, SE[1])
-                if (grepl ('edr', input$ffttype, fixed=TRUE)) {
-                  cap <- sprintf ('%s %s--%s fft: %d seg (s), %d sm. bins, edr=%.1e +/- %.1e',
-                    strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
-                    strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                    strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
-                    segmentLength/Rate, avebin, edr, ebs)
-                } else {
-                  cap <- sprintf ('%s %s--%s FFT: %d seg (s), %d sm. bins, var.=%.1e, edr=%.1e ',
-                    strftime(DataR$Time[i], format="%Y-%m-%d", tz='UTC'),
-                    strftime(DataR$Time[i], format="%H:%M:%S", tz='UTC'),
-                    strftime(DataR$Time[getIndex (DataR$Time, SE[2])], format="%H:%M:%S", tz='UTC'),
-                    segmentLength/Rate, avebin, variance, edr)
-                }
-                
-                cap <- bquote(paste(.(cap), ' m'^'2','s'^'-3', sep=''))
-                g <- g + labs (caption=cap)
-                # g <- g + labs (caption=sprintf('MEM, %d poles, %d smoothing bins\nresolution %.1e, variance %.1e, edr %.1e m^2/s^3', poles, avebin, resolution, variance, edr))
-              }
-              gFFT <<- g
-              vFFT <<- vFFT
-              cFFT <<- cFFT
-              png(filename=gname, width=600, height=600)
-              print (g)
-              dev.off()
-            }  ## second p(f)/fp(f) etc test, redundant?
-          }  ## end of types p(f) fp(f) etc
-        }  ## end of not-Xanadu section
-      }  ## end of fft section
-      return(list(
-        src = gname,
-        contentType = "image/png",
-        alt = "PSD"
-      ))
-    }, deleteFile = FALSE)
+              
+              cap <- bquote(paste(.(cap), ' m'^'2','s'^'-3', sep=''))
+              g <- g + labs (caption=cap)
+              # g <- g + labs (caption=sprintf('MEM, %d poles, %d smoothing bins\nresolution %.1e, variance %.1e, edr %.1e m^2/s^3', poles, avebin, resolution, variance, edr))
+            }
+            gFFT <<- g
+            vFFT <<- vFFT
+            cFFT <<- cFFT
+            png(filename=gname, width=600, height=600)
+            print (g)
+            dev.off()
+          }  ## second p(f)/fp(f) etc test, redundant?
+        }  ## end of types p(f) fp(f) etc
+      }  ## end of not-Xanadu section
+      if (grepl('fft-s', input$spectype)) {  # fft using VSpec, spectrum method:
+        ##  VSpec needs the variables Time, TASX, and the spec variable in a data.frame:
+        if (FI$Rate == 1) {
+          g <- VSpec(DataR, v, spans=input$spans, col=input$FFTcolor1, xlim=c(0.001, 1), smoothBins=input$fftavg1)
+        } else {
+          g <- VSpec(DataR, v, spans=input$spans, col=input$FFTcolor1, smoothBins=input$fftavg1)
+        }
+        Theme <- input$varTheme
+        if (Theme == 'classic') {g <- g + theme_classic()}
+        if (Theme == 'bw')      {g <- g + theme_bw()}
+        if (Theme == 'base')    {g <- g + theme_base()}
+        if (Theme == 'excel')   {g <- g + theme_excel()}
+        if (Theme == 'few')     {g <- g + theme_few()}
+        if (Theme == 'foundation') {g <- g + theme_foundation()}
+        if (Theme == 'igray')   {g <- g + theme_igrey()}
+        if (Theme == 'light')   {g <- g + theme_light()}
+        if (Theme == 'linedraw') {g <- g + theme_linedraw()}
+        if (Theme == 'tufte')   {g <- g + theme_tufte()}
+        if (Theme == 'standard') {}## g <- g + theme_classic()}
+        if (grepl('WAC', Theme))     {
+          g <- g + theme_WAC() + theme (axis.title.x.top=element_text(size=10, hjust=0.5, vjust=2),
+            axis.text.x.top=element_text(size=10, hjust=0.02, vjust=1))
+          if (Theme == 'WAC2') {
+            g <- g + theme(rect=element_rect(fill='bisque'))
+          }
+        } else {
+          g <- g + theme (axis.title.x.top=element_text(size=10, hjust=0.5),
+            axis.text.x.top=element_text(size=10, hjust=0.5, vjust=1))
+        }
+        gname <- 'SpecialGraphics/PSDFFT3.png'
+        if (file.exists(gname)) {unlink(gname)}
+        png(filename=gname, width=600, height=600)
+        print (g)
+        dev.off()
+      }
+    }  ## end of not-acv section
+    return(list(
+      src = gname,
+      contentType = "image/png",
+      alt = "PSD"
+    ))
+  }, deleteFile = FALSE)
   
   
   
@@ -4189,9 +4308,9 @@ shinyServer(function(input, output, session) {
         DF$DewPoint <- DF$DewPoint - 273.15
       }
       if (grepl ('130', FI$Platform)) {
-      suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagramC130.Rdata")
-        + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
-          formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
+        suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagramC130.Rdata")
+          + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
+            formatTime (plotSpec$Times[1]), formatTime (plotSpec$Times[2]))))
       } else {
         suppressWarnings (gg <- SkewTSounding (DF, AverageInterval=5, BackgroundSpecs="skewTDiagram.Rdata")
           + ggtitle(sprintf("%s Flight %s  %s -- %s", plotSpec$Project, plotSpec$Flight, 
@@ -5040,5 +5159,5 @@ shinyServer(function(input, output, session) {
   outputOptions (output, 'statistics', priority=-20)
   outputOptions (output, 'histogram', priority=-20)
   outputOptions (output, 'skewT', priority=-20)
-  })
+})
 

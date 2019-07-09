@@ -60,8 +60,8 @@
 #' @param theme.version The theme version to pass to theme_WAC; default is 0.
 #' @param ... Additional arguments to pass to plot(), but don't include col, xlab, ylab, lwd, type, xaxt or yaxt
 #' @examples 
-#' ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])
-#' \dontrun{ggplotWAC (data.frame ("Time"=Time, "TASX"=TASX), ylab="TAS")}
+#' \dontrun{ggplotWAC(RAFdata[, c("Time", "ATX", "DPXC")])}
+#' \dontrun{with(RAFdata, ggplotWAC (data.frame ("Time"=Time, "TASX"=TASX), ylab="TAS"))}
 
 ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]", 
                        ylab="", lwd=1, lty=1, logxy='',
@@ -137,7 +137,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       }
       VarGroup <- rep (gl (lines_per_panel, DL, labels=labelL), panels)
       PanelGroup <- gl (panels, lines_per_panel*DL, labels=labelP)
-      dd <- data.frame(reshape2::melt(.data, 1), VarGroup, PanelGroup)
+      dd <- data.frame(reshape2::melt(.data, 1, factorsAsStrings=TRUE), VarGroup, PanelGroup)
       colrs <- rep(colrs, panels)
       lwd <- rep(lwd, panels)
       lty <- rep(lty, panels)
@@ -149,7 +149,9 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       g <- g + scale_colour_manual('', labels = lvl, breaks=lvl, values = colrs)
       g <- g + facet_grid (PanelGroup ~ ., scales='free_y', drop=TRUE)
     } else {
-      g <- ggplot (data=.data, aes(x=eval (parse (text=names(.data)[1]))), na.rm=TRUE)
+      a <- sprintf ("aes (x=%s)", names(.data)[1])
+      g <- ggplot (data=.data, eval(parse(text=a)))
+      # g <- ggplot (data=.data, aes(x=eval (parse (text=names(.data)[1]))))
       g <- g + ylim (yrange)
     }
     if (names(.data)[1] == "Time") {
@@ -206,7 +208,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       g <- g + theme (plot.margin=unit(c(0.3,0.3,1.1,lmargin),"lines"))
     }
     ## preserve .data in the parent environment for plotting
-    .data <<- .data
+    # .data <<- .data
     if (!is.na(position[1])) {
       print (g, vp=vp)
     } else {

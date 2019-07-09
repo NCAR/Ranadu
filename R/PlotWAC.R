@@ -4,6 +4,7 @@
 #' argument, sets plot limits to cover range of all variables in the data.frame.
 #' @aliases plotRAF
 #' @author William Cooper
+#' @importFrom dplyr pull
 #' @export plotWAC
 #' @param x Usually, Time from a data.frame; a vector of abscissa values. Optionally,
 #' a data.frame containing multiple variables to plot and superceding parameter y.
@@ -32,16 +33,16 @@
 #' @examples 
 #' plotWAC (RAFdata[, c("Time", "ATX", "DPXC")], legend.position="right")
 #' plotWAC (subset (RAFdata,, c(Time, TASX, GGVNS)), legend.position='topright')
-#' \dontrun{plotWAC (Time, TASX, ylab="TAS")}
-#' \dontrun{plotWAC (Time, PSXC, lty=2)}
-#' \dontrun{plotWAC (Data[, c("Time", "PSXC")])}
-#' \dontrun{plotWAC (subset (Data,,c(Time,ATX,DPXC)))}
-#' \dontrun{plotWAC (subset (Data,,c(ATX,DPXC)))}
+#' \dontrun{with(RAFdata, plotWAC (Time, TASX, ylab="TAS"))}
+#' \dontrun{with(RAFdata, plotWAC (Time, PSXC, lty=2, ylab='ambient pressure [hPa]'))}
+#' \dontrun{plotWAC (RAFdata[, c("Time", "PSXC")])}
+#' \dontrun{plotWAC (subset (RAFdata, ATX > -35, c(Time,ATX,DPXC)))}
+#' \dontrun{plotWAC (Rsubset (RAFdata, Var=c('ATX', 'DPXC')))}
 
 plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]", 
-                     ylab="", lwd=2, type="l", lty=1, logxy='', pch=20, cex=1, 
-                     legend.position="bottomright", ...) {
-
+  ylab="", lwd=2, type="l", lty=1, logxy='', pch=20, cex=1, 
+  legend.position="bottomright", ...) {
+  
   if (is.data.frame (x)) {
     if (!is.expression(ylab) && (ylab == "")) {
       ylab <- names(x)[2]
@@ -67,19 +68,21 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     ## correct for offset if abscissa is Time, because value is centered in interval
     if (grepl ('TIME', xlab) || grepl ('Time', xlab)) {
       data.rate <- 1
-      itg <- x[!is.na(x), 1]  # protect against missing values at start
+      itg <- dplyr::pull(x, Time)
+      itg <- itg[!is.na(itg)]
+      # itg <- x[!is.na(x[,1]), 1]  # protect against missing values at start
       if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
       if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
-      x[, 1] <- x[, 1] + 0.5 / data.rate
+      x[, 1] <- x[, 1] + 0.5 / data.rate 
     }
     if (!("ylim" %in% names(list(...))) && (yrange[1] != yrange[2])) {
-      plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
-            lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
-            log=logxy, ylim=c(yrange[1], yrange[2]), pch=pch[1], cex=cex[1], ...)
+      plot (dplyr::pull(x,1), dplyr::pull(x, 2), xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
+        lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
+        log=logxy, ylim=c(yrange[1], yrange[2]), pch=pch[1], cex=cex[1], ...)
     } else {
       plot (x[ ,1], x[ ,2], xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, 
-            lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
-            log=logxy, pch=pch[1], cex=cex[1], ...)
+        lwd=lwd, lty=lty, type=type, col=col[1], xaxs="r", yaxs="r", 
+        log=logxy, pch=pch[1], cex=cex[1], ...)
     }
     if (grepl ('x', logxy)) {
       atx <- axTicks(1)
@@ -101,32 +104,35 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       lty <- c(lty, rep(1,5))
       for (j in 3:min(7, length(x))) {
         if (type == 'l') {
-          lines(x[ ,1], x[ ,j], lwd=lwd[j-1], lty=lty[j-1], col=colrs[j-1], ...)
+          lines(dplyr::pull(x, 1), dplyr::pull(x, j), lwd=lwd[j-1], lty=lty[j-1], col=colrs[j-1], ...)
         } else {
-          points (x[, 1], x[, j], col=colrs[j-1], pch=pch[j-1], cex=cex[j-1], ...)
+          points (dplyr::pull(x, 1), dplyr::pull(x, j), col=colrs[j-1], pch=pch[j-1], cex=cex[j-1], ...)
         }
       }
       if (!is.na(legend.position)) {
         legend (legend.position, legend=names (x)[2:length(x)], 
-                text.col=colrs[1:(length(x)-1)], lwd=lwd, lty=lty, cex=0.80, 
-                col=colrs[1:(length(x)-1)])
+          text.col=colrs[1:(length(x)-1)], lwd=lwd, lty=lty, cex=0.80, 
+          col=colrs[1:(length(x)-1)])
       }
     }
     if (!is.expression(xlab)) {
       # get data.rate
       data.rate <- 1
-      itg <- x[!is.na(x[,1]), 1]  # protect against missing values at start
-      if ((itg[2]-itg[1]) <= 0.04) {data.rate <- 25}
-      if ((itg[2]-itg[1]) <= 0.02) {data.rate <- 50}
-      
+      if ('Time' %in% names (x)) {
+        itg <- dplyr::pull(x, Time)
+        itg <- itg[!is.na(itg)]
+        # itg <- x[!is.na(x[,1]), 1]  # protect against missing values at start
+        if ((itg[2]-itg[1]) <= 0.04) {data.rate <- 25}
+        if ((itg[2]-itg[1]) <= 0.02) {data.rate <- 50}
+      }
       # print (sprintf (" data.rate is %d", data.rate))
       if (xlab == "TIME [UTC]") {
         if (length(x[, 1]) < 180*data.rate+2) {          # needs revision for high-rate data
-          axis.POSIXct(1, x[, 1], format='%H:%M:%S', tck=0.02)
+          axis.POSIXct(1, dplyr::pull(x, Time), format='%H:%M:%S', tck=0.02)
         } else {
-          axis.POSIXct(1,x[, 1], format='%H:%M', tck=0.02)
+          axis.POSIXct(1, dplyr::pull(x, Time), format='%H:%M', tck=0.02)
         }
-        axis.POSIXct(3,x[, 1], labels=NA, tck=0.02)
+        axis.POSIXct(3, dplyr::pull(x, Time), labels=NA, tck=0.02)
       } else {
         axis(1,tck=0.02)
         axis(3,labels=NA,tck=0.02)
@@ -135,14 +141,14 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       axis(1,tck=0.02)
       axis(3,labels=NA,tck=0.02)
     }
-    if ('y' %in% logxy) {
-      axis(2,at=aty,labels=labs)
+    if (grepl('y', logxy)) {
+      axis(2,at=aty,labels=labs, tck=0.02, las=1)
     } else {
       axis(2,tck=0.02)
     }
     axis(4,labels=NA,tck=0.02)
   } else {
-    ## correct for offset if abscissa is Time, because value is centered in interval
+    ## correct for offset if abscissa in Time, because value is centered in interval
     if (grepl ('TIME', xlab) || grepl ('Time', xlab)) {
       data.rate <- 1
       itg <- x[!is.na(x)]  # protect against missing values at start
@@ -151,7 +157,7 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
       x <- x + 0.5 / data.rate
     }
     plot(x, y, xaxt='n', yaxt='n', xlab=xlab, ylab=ylab, lwd=lwd, 
-         type=type, col=col, xaxs="r", yaxs="r", log=logxy, ...)
+      type=type, col=col, xaxs="r", yaxs="r", log=logxy, ...)
     
     if (!is.expression(xlab)) {
       if (xlab == "TIME [UTC]") {
@@ -187,6 +193,8 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
 #' @title lineWAC
 #' @description Convenience routine for adding lines to plots
 #' @details Sets some plot defaults and calls points; assumes a plot with axes has already been generated to which to add this line.
+#' The advantage of using this vs. "lines" is that the times are routinely adjusted to plot values at the center of the interval 
+#' between the interval following the listed time, as is the convention for RAF netCDF files.
 #' @aliases lineWAC
 #' @author William Cooper
 #' @importFrom graphics points plot text lines axTicks legend axis.POSIXct axis
@@ -202,13 +210,13 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
 #' \dontrun{lineWAC (Time, PSXC, lty=2)}
 lineWAC <- function (x, y, col="blue", lwd=2, type='l', ...) {
   ## correct for offset if abscissa is Time, because value is centered in interval
-  if (grepl ('TIME', xlab) || grepl ('Time', xlab)) {
-    data.rate <- 1
-    itg <- x[!is.na(x)]  # protect against missing values at start
-    if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
-    if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
-    x <- x + 0.5 / data.rate
-  }
-  points(x, y, lwd=lwd, type=type, col=col, ...)
+  
+  data.rate <- 1
+  itg <- x[!is.na(x)]  # protect against missing values at start
+  if ((itg[2]-itg[1]) <= 0.045) {data.rate <- 25}
+  if ((itg[2]-itg[1]) <= 0.025) {data.rate <- 50}
+  x <- x + 0.5 / data.rate
+  
+  lines(x, y, lwd=lwd, col=col, ...)
 }
 

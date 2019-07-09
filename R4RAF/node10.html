@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Getting information about the data</TITLE>
+<META NAME="description" CONTENT="Getting information about the data">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node11.html">
+<LINK REL="previous" HREF="node9.html">
+<LINK REL="next" HREF="node11.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node11.html">Plotting routines</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node9.html">More about constructing data.frames</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00320000000000000000">
+Getting information about the data</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">Some Ranadu functions provide information about the data set. A good
+starting point is DataFileInfo(), discussed in the previous chapter.
+In addition, these functions may be helpful:
+</FONT></FONT></FONT></FONT>
+<OL>
+<LI><SPAN  CLASS="texttt">Ranadu::getAttributes():</SPAN> The data.frames produced
+by getNetCDF() have assigned attributes that match those in the original
+netCDF file, and these can be retrieved via getAttributes(), where
+the argument can be either the data.frame (for which the returned
+attributes are those associated with the data file) or a variable
+name (for which the attributes are those associated with the variable).<A ID="tex2html5"
+  HREF="footnode.html#foot393"><SUP><SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> The result of the function call is a printed listing of attributes
+and creation of a list (here in Z) that contains the attributes, so
+it is usually preferable to assign the returned value to something
+to avoid the double listing that would be produced otherwise.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::TellAbout()</SPAN> provides some information
+about the characteristics of a data.frame or a variable in the data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::getStartEnd()</SPAN><SPAN  CLASS="texttt"> </SPAN>returns the start
+and end times of a data frame.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::ValueOf() and Ranadu::ValueOfAll()</SPAN><SPAN  CLASS="texttt">
+</SPAN>for a specified time return the value of a specified variable or
+of all variables, respectively.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+The standard R routines &ldquo;dim()&rdquo;, &ldquo;names()&rdquo; and &ldquo;str()&rdquo;
+will also provide information about a data.frame or a variable.
+</FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node11.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node9.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node11.html">Plotting routines</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node9.html">More about constructing data.frames</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

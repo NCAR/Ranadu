@@ -7,8 +7,8 @@
 \alias{cohphase}
 \title{CohPhase}
 \usage{
-CohPhase(.data, .Var1, .Var2, col = "blue", spans = 25, smoothBins = 50,
-  plotType = "ggplot", showErrors = 0)
+CohPhase(.data, .Var1, .Var2, col = "blue", spans = 25,
+  smoothBins = 50, plotType = "ggplot", showErrors = 0)
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", ".Var1" and ".Var2".
@@ -84,8 +84,8 @@ smoothing is necessary because the confidence intervals are based on the standar
 in the bins.
 }
 \examples{
-CohPhase(RAFdata, 'GGVEW', 'VEW')
-CohPhase(RAFdata, 'ATX', 'DPXC', col='red', spans=15, smoothBins=25, showErrors=1)
+\dontrun{CohPhase(RAFdata, 'GGVEW', 'VEW')}
+\dontrun{CohPhase(RAFdata, 'ATX', 'DPXC', col='red', spans=15, smoothBins=25, showErrors=1)}
 }
 \author{
 William Cooper

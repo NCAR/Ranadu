@@ -1,0 +1,187 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>getNetCDF() and the resulting data.frame</TITLE>
+<META NAME="description" CONTENT="getNetCDF() and the resulting data.frame">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node5.html">
+<LINK REL="previous" HREF="node3.html">
+<LINK REL="next" HREF="node5.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node2.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node5.html">Using the data.frame</A>
+<B> Up:</B> <A
+ HREF="node2.html">Getting Started</A>
+<B> Previous:</B> <A
+ HREF="node3.html">DataFileInfo()</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00220000000000000000">
+getNetCDF() and the resulting data.frame</A>
+</H1><FONT COLOR="#585858">
+A central component of the Ranadu structure is the Ranadu data.frame,
+produced by reading the netCDF data file. It has a structure similar
+to that of a spreadsheet, with rows corresponding to measurement times
+and columns corresponding to measurements. The data.frame has these
+features:
+</FONT>
+<OL>
+<LI>Each row corresponds to a unique time, and times are sequential (possibly
+with gaps). For data rates higher than 1&nbsp;Hz, rows are produced for
+each time interval; i.e., 25 rows per second for 25-Hz files. When
+variables are present in the netCDF file at a slower rate, interpolation
+is used to produce the higher rate.
+</LI>
+<LI>Each measurement corresponds to a single column. When there are multiple
+measurements of a given measurand (e.g., temperature), each individual
+measurement has its own column. There is a significant exception:
+For instruments producing size-distribution arrays, the entire array
+occupies one column of the data.frame. 
+</LI>
+<LI>Attributes describing the data.frame and the variables are carried
+with the data.frame. For example, variables often have &ldquo;short_name&rdquo;
+and &ldquo;long_name&rdquo; attributes, and these can be examined by looking
+at the variable attributes. 
+</LI>
+</OL><FONT COLOR="#585858">
+The data.frame is constructed by Ranadu::getNetCDF(fname, variables),
+which uses the ncdf4 package of routines to read the netCDF file.
+An example of a subset of the data.frame is shown here:
+
+
+<FONT COLOR="#585858"></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox1973"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue2302">Project</SPAN> <SPAN ID="hue2304">&lt;-</SPAN> <SPAN ID="hue2306">'WECAN'</SPAN>
+<BR><SPAN ID="hue2308">FlightNumber</SPAN> <SPAN ID="hue2310">&lt;-</SPAN> <SPAN ID="hue2312">6</SPAN>
+<BR><SPAN ID="hue2314">fname</SPAN> <SPAN ID="hue2316">&lt;-</SPAN> <SPAN ID="hue2318"><SPAN &nbsp;CLASS="textbf">sprintf</SPAN></SPAN> <SPAN ID="hue2321">(</SPAN><SPAN ID="hue2323">'%s%s/%srf%02d.nc'</SPAN><SPAN ID="hue2325">, Ranadu</SPAN><SPAN ID="hue2327">::</SPAN><SPAN ID="hue2329"><SPAN &nbsp;CLASS="textbf">DataDirectory</SPAN></SPAN><SPAN ID="hue2332">(),</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2334">Project, Project, FlightNumber)</SPAN>
+<BR><SPAN ID="hue2336">Variables</SPAN> <SPAN ID="hue2338">&lt;-</SPAN> <SPAN ID="hue2340">Ranadu</SPAN><SPAN ID="hue2342">::</SPAN><SPAN ID="hue2344"><SPAN &nbsp;CLASS="textbf">standardVariables</SPAN></SPAN><SPAN ID="hue2347">(</SPAN><SPAN ID="hue2349"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue2352">(</SPAN><SPAN ID="hue2354">'UXC'</SPAN><SPAN ID="hue2356">,</SPAN> <SPAN ID="hue2358">'VYC'</SPAN><SPAN ID="hue2360">))</SPAN>
+<BR><SPAN ID="hue2362">Data</SPAN> <SPAN ID="hue2364">&lt;-</SPAN> <SPAN ID="hue2366">Ranadu</SPAN><SPAN ID="hue2368">::</SPAN><SPAN ID="hue2370"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue2373">(fname, Variables)</SPAN>
+<BR><SPAN ID="hue2375"><SPAN &nbsp;CLASS="textbf">print</SPAN></SPAN> <SPAN ID="hue2378">(</SPAN><SPAN ID="hue2380"><SPAN &nbsp;CLASS="textbf">sprintf</SPAN></SPAN> <SPAN ID="hue2383">(</SPAN><SPAN ID="hue2385">'Data from data file %s'</SPAN><SPAN ID="hue2387">, fname))</SPAN>
+<BR></SPAN>
+</DIV>
+
+<PRE>
+## [1] "Data from data file /Data/WECAN/WECANrf06.nc"
+</PRE>
+
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue2389"><SPAN &nbsp;CLASS="textbf">print</SPAN></SPAN> <SPAN ID="hue2392">(tibble</SPAN><SPAN ID="hue2394">::</SPAN><SPAN ID="hue2396"><SPAN &nbsp;CLASS="textbf">as.tibble</SPAN></SPAN><SPAN ID="hue2399">(Data))</SPAN> &nbsp;<SPAN ID="hue2401"><SPAN &nbsp;CLASS="textit"># or print(head(Data))</SPAN></SPAN>
+<BR></SPAN>
+</DIV>
+
+<PRE>
+## # A tibble: 23,701 x 18
+##    Time                  ATX  DPXC   EWX GGALT  LATC  LONC   MACHX    MR
+##    &lt;dttm&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+##  1 2018-08-03 19:55:00  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+##  2 2018-08-03 19:55:01  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+##  3 2018-08-03 19:55:02  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+##  4 2018-08-03 19:55:03  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+##  5 2018-08-03 19:55:04  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+##  6 2018-08-03 19:55:05  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+##  7 2018-08-03 19:55:06  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+##  8 2018-08-03 19:55:07  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+##  9 2018-08-03 19:55:08  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+## 10 2018-08-03 19:55:09  29.9    NA    NA  865.  43.6 -116. 0.00125    NA
+## # ... with 23,691 more rows, and 9 more variables: PALT &lt;dbl&gt;, PSXC &lt;dbl&gt;,
+## #   QCXC &lt;dbl&gt;, TASX &lt;dbl&gt;, WDC &lt;dbl&gt;, WSC &lt;dbl&gt;, WIC &lt;dbl&gt;, UXC &lt;dbl&gt;,
+## #   VYC &lt;dbl&gt;
+</PRE>
+<P>
+<P>
+Here is an explanation of some aspects of loading this data.frame:
+
+<OL>
+<LI>Ranadu::DataDirectory() returns the location of the data directory
+on various systems, to avoid the necessity of changing this when moving
+among systems. It may return '/scr/raf_data/' or '/Data/' or '~/Data/'
+depending on the file system.
+</LI>
+<LI>The function Ranadu::standardVariables() returns a set of commonly
+used variable names. Additional variables provided to the routine
+(here, 'UXC' and 'VYC') are added to the variable list.
+</LI>
+<LI>Ranadu::getNetCDF() produces the data.frame. The special case where
+Variables &lt;- 'ALL' will return all available variables.<A ID="tex2html1"
+  HREF="#footmp285"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A> Two additional optional arguments to getNetCDF() are &ldquo;Start&rdquo;
+and &ldquo;End&rdquo;; if set, the range of time values in the data.frame
+will be restricted to be between those two times. See &ldquo;?Ranadu::getNetCDF&rdquo;
+for complete information on this function.
+</LI>
+<LI>The last statement, where the data.frame is converted to a tibble,
+is used here because the print function for tibbles produces a more
+concise and clearer format than that for a data.frame. &ldquo;print (head
+(Data))&rdquo; could have been used also. More information on tibbles
+is included later in this document. The resulting data.frame has 23,701
+rows and 18 columns.
+</LI>
+</OL>
+
+<P>
+</TD></TR>
+<TR CLASS="LEFT">
+<TD><DL>
+<DD><A ID="footmp285"><SUP><SPAN CLASS="arabic">1</SPAN></SUP></A> But use this cautiously because size-distribution variables are special
+and sometimes cause problems when manipulating the resulting data.frame.
+This is discussed later in association with &ldquo;tibbles.&rdquo;
+</DD>
+</DL></TD></TR>
+</TABLE></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node5.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node2.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node3.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node5.html">Using the data.frame</A>
+<B> Up:</B> <A
+ HREF="node2.html">Getting Started</A>
+<B> Previous:</B> <A
+ HREF="node3.html">DataFileInfo()</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

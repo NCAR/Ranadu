@@ -14,7 +14,8 @@
 #' in the bins. 
 #' @aliases CohPhase, cohPhase, cohphase
 #' @author William Cooper
-#' @import scales
+#' @import utils
+#' @import scales graphics
 #' @importFrom zoo na.approx
 #' @export CohPhase
 #' @param .data A data.frame containing at least the variables "Time", ".Var1" and ".Var2".
@@ -64,8 +65,8 @@
 #' with the Ranadu theme "theme_WAC()", but that can be changed by adding another theme to the
 #' plot definition before plotting.
 #' @examples 
-#' CohPhase(RAFdata, 'GGVEW', 'VEW')
-#' CohPhase(RAFdata, 'ATX', 'DPXC', col='red', spans=15, smoothBins=25, showErrors=1)
+#' \dontrun{CohPhase(RAFdata, 'GGVEW', 'VEW')}
+#' \dontrun{CohPhase(RAFdata, 'ATX', 'DPXC', col='red', spans=15, smoothBins=25, showErrors=1)}
 
 CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, plotType='ggplot', showErrors=0) {
   if (is.data.frame(.data)) {
@@ -106,10 +107,10 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
   if (plotType != 'ggplot') {
     layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,7))
     op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
-    plotWAC (exp(pf1$xc)*Rate, pf1$ybar, xlab='frequency [Hz]', col=col, log='x', ylab='coherence')
+    plotWAC (exp(pf1$xc)*Rate, pf1$ybar, xlab='frequency [Hz]', col=col, logxy='x', ylab='coherence')
     title (sprintf('%s x %s', .Var1, .Var2))
     op <- par (mar=c(5,4,1,2)+0.1)
-    plotWAC (exp(pf2$xc)*Rate, pf2$ybar * 180 / pi, xlab='frequency [Hz]', col=col, log='x', ylab='phase [degrees]')
+    plotWAC (exp(pf2$xc)*Rate, pf2$ybar * 180 / pi, xlab='frequency [Hz]', col=col, logxy='x', ylab='phase [degrees]')
     abline(h=0, col='gray', lty=3)
     layout(matrix(1:1, ncol = 1), widths = c(5), heights = c(5))
     op <- par (mar=c(5,4,1,2)+0.1, oma=c(1.1,0,0,0))

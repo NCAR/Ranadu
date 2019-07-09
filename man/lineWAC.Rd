@@ -24,6 +24,8 @@ Convenience routine for adding lines to plots
 }
 \details{
 Sets some plot defaults and calls points; assumes a plot with axes has already been generated to which to add this line.
+The advantage of using this vs. "lines" is that the times are routinely adjusted to plot values at the center of the interval 
+between the interval following the listed time, as is the convention for RAF netCDF files.
 }
 \examples{
 \dontrun{lineWAC (Time, TASX, col='darkgreen')}

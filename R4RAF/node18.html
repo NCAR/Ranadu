@@ -1,0 +1,193 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Panels and Facets in ggplotWAC( ):</TITLE>
+<META NAME="description" CONTENT="Panels and Facets in ggplotWAC( ):">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="previous" HREF="node17.html">
+<LINK REL="next" HREF="node19.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node19.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node16.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node17.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node19.html">Plotting the density of</A>
+<B> Up:</B> <A
+ HREF="node16.html">Multi-Frame Plots</A>
+<B> Previous:</B> <A
+ HREF="node17.html">Multiple plotWAC( ) plots:</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H2><A ID="SECTION00422000000000000000">
+Panels and Facets in ggplotWAC( ):</A>
+</H2><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The function <SPAN  CLASS="texttt">Ranadu::ggplotWAC( )</SPAN> is based on the ggplot2
+package for R, which provides extensive plotting capabilities and
+is highly recommended. What is provided via ggplotWAC( ) is a very
+simplified and restricted approach, but it might be useful in preliminary
+applications. See <a href="http://had.co.nz/ggplot2/">this URL</a> for
+information on ggplot2. The Ranadu routine provides two approaches
+to multiple plots:
+</FONT></FONT></FONT></FONT></FONT></FONT>
+<UL>
+<LI>&ldquo;facets&rdquo;: If the argument &ldquo;panels&rdquo; is supplied
+(e.g., panels=N), ggplotWAC( ) will construct N vertically aligned
+panels. All will contain time-series plots. The first-argument to
+ggplotWAC(), the data.frame, should contain the variable &ldquo;Time&rdquo;
+and N*M variables, where the first M variables will be plotted in
+the first panel, the next M in the second panel, etc. A set of M character-mode
+labels should be supplied via labelN.
+</LI>
+<LI>&ldquo;viewports&rdquo;: An optional argument &ldquo;position=c(i,
+j)&rdquo; can be used to place a plot in the ith of j vertically aligned
+viewports.
+</LI>
+</UL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+Examples are shown in Figs.&nbsp;<A HREF="#fig:gg-facets"><IMG  ALT="[*]" SRC="crossref.png"></A> and <A HREF="#fig:gg-viewports"><IMG  ALT="[*]" SRC="crossref.png"></A>.
+An advantage of the faceted plot is that vertical alignment of the
+plots is ensured; this can be a problem with other plots if the axis
+labels are of different size in the different plots.<A ID="tex2html10"
+  HREF="footnode.html#foot746"><SUP><SPAN CLASS="arabic">4</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> In the second case, the viewports are positioned so that the abscissa
+labels and title are obscured for the top plot. The intent is that
+this should be used for identical time scales for each plot, so that
+it is not necessary to duplicate the axis labels and title.
+</FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+<FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2048"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue2887">Project</SPAN> <SPAN ID="hue2889">&lt;-</SPAN> <SPAN ID="hue2891">'WECAN'</SPAN> &nbsp;&nbsp;&nbsp;<SPAN ID="hue2893"><SPAN &nbsp;CLASS="textit">## faceted plot with ggplotWAC()</SPAN></SPAN>
+<BR><SPAN ID="hue2896">Flight</SPAN> <SPAN ID="hue2898">&lt;-</SPAN> <SPAN ID="hue2900">5</SPAN>
+<BR><SPAN ID="hue2902">V</SPAN> <SPAN ID="hue2904">&lt;-</SPAN> <SPAN ID="hue2906"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue2909">(</SPAN><SPAN ID="hue2911">'ATH1'</SPAN><SPAN ID="hue2913">,</SPAN> <SPAN ID="hue2915">'ATH2'</SPAN><SPAN ID="hue2917">,</SPAN> <SPAN ID="hue2919">'ATF1'</SPAN><SPAN ID="hue2921">,</SPAN> <SPAN ID="hue2923">'RTH1'</SPAN><SPAN ID="hue2925">,</SPAN> <SPAN ID="hue2927">'RTH2'</SPAN><SPAN ID="hue2929">,</SPAN> <SPAN ID="hue2931">'RTF1'</SPAN><SPAN ID="hue2933">)</SPAN>
+<BR><SPAN ID="hue2935">fname</SPAN> <SPAN ID="hue2937">&lt;-</SPAN> <SPAN ID="hue2939"><SPAN &nbsp;CLASS="textbf">sprintf</SPAN></SPAN><SPAN ID="hue2942">(</SPAN><SPAN ID="hue2944">'%s%s/%srf%02d.nc'</SPAN><SPAN ID="hue2946">,</SPAN> <SPAN ID="hue2948"><SPAN &nbsp;CLASS="textbf">DataDirectory</SPAN></SPAN><SPAN ID="hue2951">(), Project, Project,</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2953">Flight)</SPAN>
+<BR><SPAN ID="hue2955"><SPAN &nbsp;CLASS="textbf">suppressWarnings</SPAN></SPAN> <SPAN ID="hue2958">(</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2960"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue2963">(fname, V,</SPAN> <SPAN ID="hue2965">200000</SPAN><SPAN ID="hue2967">,</SPAN> <SPAN ID="hue2969">201500</SPAN><SPAN ID="hue2971">)</SPAN> <SPAN ID="hue2973">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2975"><SPAN &nbsp;CLASS="textbf">ggplotWAC</SPAN></SPAN><SPAN ID="hue2978">(</SPAN><SPAN ID="hue2980">panels</SPAN><SPAN ID="hue2982">=</SPAN><SPAN ID="hue2984">2</SPAN><SPAN ID="hue2986">,</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2988">col</SPAN><SPAN ID="hue2990">=</SPAN><SPAN ID="hue2992"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue2995">(</SPAN><SPAN ID="hue2997">'blue'</SPAN><SPAN ID="hue2999">,</SPAN> <SPAN ID="hue3001">'darkorange'</SPAN><SPAN ID="hue3003">,</SPAN> <SPAN ID="hue3005">'forestgreen'</SPAN><SPAN ID="hue3007">),</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3009">ylab</SPAN><SPAN ID="hue3011">=</SPAN><SPAN ID="hue3013"><SPAN &nbsp;CLASS="textbf">expression</SPAN></SPAN><SPAN ID="hue3016">(</SPAN><SPAN ID="hue3018"><SPAN &nbsp;CLASS="textbf">paste</SPAN></SPAN><SPAN ID="hue3021">(</SPAN><SPAN ID="hue3023">'temperature ['</SPAN><SPAN ID="hue3025">, degree,</SPAN><SPAN ID="hue3027">'C]'</SPAN><SPAN ID="hue3029">)),</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3031">lwd</SPAN><SPAN ID="hue3033">=</SPAN><SPAN ID="hue3035"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3038">(</SPAN><SPAN ID="hue3040">1.5</SPAN><SPAN ID="hue3042">,</SPAN> <SPAN ID="hue3044">0.8</SPAN><SPAN ID="hue3046">,</SPAN> <SPAN ID="hue3048">1</SPAN><SPAN ID="hue3050">),</SPAN> <SPAN ID="hue3052">lty</SPAN><SPAN ID="hue3054">=</SPAN><SPAN ID="hue3056"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3059">(</SPAN><SPAN ID="hue3061">1</SPAN><SPAN ID="hue3063">,</SPAN><SPAN ID="hue3065">2</SPAN><SPAN ID="hue3067">,</SPAN><SPAN ID="hue3069">1</SPAN><SPAN ID="hue3071">),</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3073">labelP</SPAN><SPAN ID="hue3075">=</SPAN><SPAN ID="hue3077"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3080">(</SPAN><SPAN ID="hue3082">' &nbsp;&nbsp;air temperature'</SPAN><SPAN ID="hue3084">,</SPAN> <SPAN ID="hue3086">' recovery temperature'</SPAN><SPAN ID="hue3088">),</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3090">labelL</SPAN><SPAN ID="hue3092">=</SPAN><SPAN ID="hue3094"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3097">(</SPAN><SPAN ID="hue3099">'H1'</SPAN><SPAN ID="hue3101">,</SPAN> <SPAN ID="hue3103">'H2'</SPAN><SPAN ID="hue3105">,</SPAN> <SPAN ID="hue3107">'F1'</SPAN><SPAN ID="hue3109">),</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3111">legend.position</SPAN><SPAN ID="hue3113">=</SPAN><SPAN ID="hue3115"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3118">(</SPAN><SPAN ID="hue3120">0.5</SPAN><SPAN ID="hue3122">,</SPAN><SPAN ID="hue3124">0.95</SPAN><SPAN ID="hue3126">)</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3128">)</SPAN>
+<BR><SPAN ID="hue3130">)</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:gg-facets"></A><A ID="873"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+Example of a faceted ggplotWAC plot. Three temperature measurements are shown from probes identified as H1, H2, and F2. The top panel shows the air temperature, and the bottom panel the directly measured recovery temperature before correction for dynamic heating.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./gg-facets-1.png"
+ ALT="Image gg-facets-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<P>
+
+
+<P>
+
+<FONT COLOR="#585858"></FONT></TD></TR>
+</TABLE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2057"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3132"><SPAN &nbsp;CLASS="textit">## viewport-plot with ggplotWAC()</SPAN></SPAN>
+<BR><SPAN ID="hue3135">DG</SPAN> <SPAN ID="hue3137">&lt;-</SPAN> <SPAN ID="hue3139"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue3142">(fname, V,</SPAN> <SPAN ID="hue3144">200000</SPAN><SPAN ID="hue3146">,</SPAN> <SPAN ID="hue3148">201500</SPAN><SPAN ID="hue3150">)</SPAN>
+<BR><SPAN ID="hue3152"><SPAN &nbsp;CLASS="textbf">with</SPAN></SPAN><SPAN ID="hue3155">(DG,</SPAN> <SPAN ID="hue3157"><SPAN &nbsp;CLASS="textbf">ggplotWAC</SPAN></SPAN><SPAN ID="hue3160">(</SPAN><SPAN ID="hue3162"><SPAN &nbsp;CLASS="textbf">data.frame</SPAN></SPAN><SPAN ID="hue3165">(Time, ATH1),</SPAN> <SPAN ID="hue3167">position</SPAN><SPAN ID="hue3169">=</SPAN><SPAN ID="hue3171"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3174">(</SPAN><SPAN ID="hue3176">1</SPAN><SPAN ID="hue3178">,</SPAN><SPAN ID="hue3180">2</SPAN><SPAN ID="hue3182">)))</SPAN>
+<BR><SPAN ID="hue3184"><SPAN &nbsp;CLASS="textbf">with</SPAN></SPAN><SPAN ID="hue3187">(DG,</SPAN> <SPAN ID="hue3189"><SPAN &nbsp;CLASS="textbf">ggplotWAC</SPAN></SPAN><SPAN ID="hue3192">(</SPAN><SPAN ID="hue3194"><SPAN &nbsp;CLASS="textbf">data.frame</SPAN></SPAN><SPAN ID="hue3197">(Time, ATF1),</SPAN> <SPAN ID="hue3199">position</SPAN><SPAN ID="hue3201">=</SPAN><SPAN ID="hue3203"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3206">(</SPAN><SPAN ID="hue3208">2</SPAN><SPAN ID="hue3210">,</SPAN><SPAN ID="hue3212">2</SPAN><SPAN ID="hue3214">)))</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:gg-viewports"></A><A ID="926"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+An example of selecting the figure position using viewports and the "position" argument to ggplotWAC().</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./gg-viewports-1.png"
+ ALT="Image gg-viewports-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<P>
+
+
+<P>
+</TD></TR>
+</TABLE></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node19.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node16.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node17.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node19.html">Plotting the density of</A>
+<B> Up:</B> <A
+ HREF="node16.html">Multi-Frame Plots</A>
+<B> Previous:</B> <A
+ HREF="node17.html">Multiple plotWAC( ) plots:</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

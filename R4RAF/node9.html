@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>More about constructing data.frames</TITLE>
+<META NAME="description" CONTENT="More about constructing data.frames">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node10.html">
+<LINK REL="previous" HREF="node8.html">
+<LINK REL="next" HREF="node10.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node10.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node10.html">Getting information about the</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00310000000000000000">
+More about constructing data.frames</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">These Ranadu functions can be of use when constructing and modifying
+data.frames:
+</FONT></FONT></FONT></FONT>
+<UL>
+<LI><SPAN  CLASS="texttt">getNetCDF ( )</SPAN>: loads a data.frame with requested variables
+</LI>
+<LI><SPAN  CLASS="texttt">standardVariables ( ):</SPAN> defines a common set of variables
+for input to getNetCDF(). This list is the default if no variables
+are specified in the call to getNetCDF. The optional argument is a
+list of character names that specify additional variables to include.
+</LI>
+<LI><SPAN  CLASS="texttt">DataDirectory ( ): </SPAN>This is system dependent and is intended
+to aid in portability by providing the usual location of the netCDF
+data files. It tries a set of likely names, but may need redefinition
+for some file systems.
+</LI>
+<LI><SPAN  CLASS="texttt">getIndex ( )</SPAN>: finds the index for a specified time
+</LI>
+<LI><SPAN  CLASS="texttt">setRange ( )</SPAN>: sets a range of indices covering a specified
+time interval.
+</LI>
+<LI><SPAN  CLASS="texttt">selectTimes ( ):</SPAN> produces a new data.frame with a limited
+time range.
+</LI>
+</UL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+In addition, some functions provided by the package &ldquo;dplyr&rdquo; can
+be very useful when working with data.frames. These actions can be
+implemented by normal R subsetting also (e.g., using &ldquo;[[...]]&rdquo;
+notation), but using these dplyr functions serves to clarify what
+the steps in the code are doing:
+</FONT></FONT></FONT></FONT>
+<UL>
+<LI><SPAN  CLASS="texttt">dplyr::select ( ):</SPAN> produces a new data.frame with only the
+variables listed as arguments in the call to the function.
+</LI>
+<LI><SPAN  CLASS="texttt">dplyr::filter ( ):</SPAN> produces a subset data.frame where the
+argument is a logical test applied to the data.frame rows that must
+be met for the row to be included in the returned data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">dplyr::mutate ( ):</SPAN> adds new variables to the data.frame.
+</LI>
+</UL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node10.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node10.html">Getting information about the</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Aerosol- and hydrometeor-size distributions</TITLE>
+<META NAME="description" CONTENT="Aerosol- and hydrometeor-size distributions">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="previous" HREF="node21.html">
+<LINK REL="next" HREF="node23.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node23.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node14.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node21.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node23.html">Variance Spectra</A>
+<B> Up:</B> <A
+ HREF="node14.html">More Details About Plotting</A>
+<B> Previous:</B> <A
+ HREF="node21.html">The skew-T thermodynamic diagram</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00460000000000000000">
+Aerosol- and hydrometeor-size distributions</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The Ranadu function &ldquo;plotSD()&rdquo; displays the size distribution
+measured by various probes that produce arrays of measurements. The
+data.frame containing these measurements is special in that the column
+corresponding to a variable name like &ldquo;CCDP_RPC&rdquo; is a two-dimensional
+vector. This makes the data.frame inconsistent with the &ldquo;tidy&rdquo;
+structure and with the structure required for a &ldquo;tibble&rdquo;, so some
+special considerations are required if an analyst wants to use only
+tidy data. In this section, those considerations are not discussed
+further because the &ldquo;plotSD()&rdquo; function assumes Ranadu-style data.frame
+conventions.
+</FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">&ldquo;Ranadu::getNetCDF()&rdquo; accepts variable names like &ldquo;CCDP_&rdquo;,
+in which case it searches for the first variable starting with that
+name. This avoids the need to know the location of the CDP probe in
+various projects. However, if there are multiple probes with the same
+prefix name, they need to be specified in the variable list used to
+construct the data.frame.
+</FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">An example, Fig.&nbsp;<A HREF="#fig:SD1"><IMG  ALT="[*]" SRC="crossref.png"></A>, shows code that will construct a
+plot of the size distribution from several probes. The &ldquo;exceedance&rdquo;
+is added when the argument &ldquo;CDF=TRUE&rdquo; is used; it is the complement
+to a cumulative distribution and shows the fraction of particles that
+exceed the plotted size. The four numbers returned from the function
+are the mean concentration, mean diameter, standard deviation in the
+diameter, and liquid water content under the assumption that all particles
+are liquid. It is also possible to construct a plot of the distribution
+in liquid water content, as shown in Fig.&nbsp;<A HREF="#fig:SD2"><IMG  ALT="[*]" SRC="crossref.png"></A>. See &ldquo;?Ranadu::plotSD&rdquo;
+for more options including alternate specification of the size limits,
+bins to include, and log vs linear axes.
+</FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+<FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2102"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3543"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue3546">(</SPAN><SPAN ID="hue3548">'/Data/CSET/CSETrf06.nc'</SPAN><SPAN ID="hue3550">,</SPAN> <SPAN ID="hue3552"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3555">(</SPAN><SPAN ID="hue3557">'CCDP_'</SPAN><SPAN ID="hue3559">,</SPAN> <SPAN ID="hue3561">'C1DC_'</SPAN><SPAN ID="hue3563">,</SPAN> <SPAN ID="hue3565">'CUHSAS_'</SPAN><SPAN ID="hue3567">))</SPAN> <SPAN ID="hue3569">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3571"><SPAN &nbsp;CLASS="textbf">selectTime</SPAN></SPAN><SPAN ID="hue3574">(</SPAN><SPAN ID="hue3576">173000</SPAN><SPAN ID="hue3578">,</SPAN> <SPAN ID="hue3580">173500</SPAN><SPAN ID="hue3582">)</SPAN> <SPAN ID="hue3584">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3586"><SPAN &nbsp;CLASS="textbf">plotSD</SPAN></SPAN><SPAN ID="hue3589">(</SPAN><SPAN ID="hue3591">CellLimits</SPAN><SPAN ID="hue3593">=</SPAN><SPAN ID="hue3595">NA</SPAN><SPAN ID="hue3597">,</SPAN> <SPAN ID="hue3599">logAxis</SPAN><SPAN ID="hue3601">=</SPAN><SPAN ID="hue3603">'xy'</SPAN><SPAN ID="hue3605">,</SPAN> <SPAN ID="hue3607">CDF</SPAN><SPAN ID="hue3609">=</SPAN><SPAN ID="hue3611">TRUE</SPAN><SPAN ID="hue3613">)</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:SD1"></A><A ID="1200"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+Example of a size distribution.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./SD1-1.png"
+ ALT="Image SD1-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+</TD></TR>
+</TABLE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2111"></SPAN>
+## [1] 700.6157510   2.0525220   7.2263178   0.4802542
+</PRE>
+<P>
+<P>
+
+
+<P>
+
+<FONT COLOR="#585858"></FONT></TD></TR>
+</TABLE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2120"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3615"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue3618">(</SPAN><SPAN ID="hue3620">'/Data/CSET/CSETrf06.nc'</SPAN><SPAN ID="hue3622">,</SPAN> <SPAN ID="hue3624"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue3627">(</SPAN><SPAN ID="hue3629">'CCDP_'</SPAN><SPAN ID="hue3631">,</SPAN> <SPAN ID="hue3633">'C1DC_'</SPAN><SPAN ID="hue3635">,</SPAN> <SPAN ID="hue3637">'CUHSAS_'</SPAN><SPAN ID="hue3639">))</SPAN> <SPAN ID="hue3641">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3643"><SPAN &nbsp;CLASS="textbf">selectTime</SPAN></SPAN><SPAN ID="hue3646">(</SPAN><SPAN ID="hue3648">173000</SPAN><SPAN ID="hue3650">,</SPAN> <SPAN ID="hue3652">173500</SPAN><SPAN ID="hue3654">)</SPAN> <SPAN ID="hue3656">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3658"><SPAN &nbsp;CLASS="textbf">plotSD</SPAN></SPAN><SPAN ID="hue3661">(</SPAN><SPAN ID="hue3663">CellLimits</SPAN><SPAN ID="hue3665">=</SPAN><SPAN ID="hue3667">NA</SPAN><SPAN ID="hue3669">,</SPAN> <SPAN ID="hue3671">logAxis</SPAN><SPAN ID="hue3673">=</SPAN><SPAN ID="hue3675">'xy'</SPAN><SPAN ID="hue3677">,</SPAN> <SPAN ID="hue3679">LWC</SPAN><SPAN ID="hue3681">=</SPAN><SPAN ID="hue3683">TRUE</SPAN><SPAN ID="hue3685">,</SPAN> <SPAN ID="hue3687">CDF</SPAN><SPAN ID="hue3689">=</SPAN><SPAN ID="hue3691">TRUE</SPAN><SPAN ID="hue3693">)</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:SD2"></A><A ID="1258"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+Example of a distribution in liquid water content.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./SD2-1.png"
+ ALT="Image SD2-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+</TD></TR>
+</TABLE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2129"></SPAN>
+## [1] 700.6157510   2.0525220   7.2263178   0.4802542
+</PRE>
+<P>
+<P>
+</TD></TR>
+</TABLE></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node23.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node14.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node21.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node23.html">Variance Spectra</A>
+<B> Up:</B> <A
+ HREF="node14.html">More Details About Plotting</A>
+<B> Previous:</B> <A
+ HREF="node21.html">The skew-T thermodynamic diagram</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

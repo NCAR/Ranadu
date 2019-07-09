@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Multiple plotWAC( ) plots:</TITLE>
+<META NAME="description" CONTENT="Multiple plotWAC( ) plots:">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node18.html">
+<LINK REL="previous" HREF="node16.html">
+<LINK REL="next" HREF="node18.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node18.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node16.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node16.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node18.html">Panels and Facets in</A>
+<B> Up:</B> <A
+ HREF="node16.html">Multi-Frame Plots</A>
+<B> Previous:</B> <A
+ HREF="node16.html">Multi-Frame Plots</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H2><A ID="SECTION00421000000000000000">
+Multiple plotWAC( ) plots:</A>
+</H2><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The &ldquo;layout()&rdquo; function in base-R can be used. Here is an example.
+The matrix layout can also be used to display plots in multiple columns
+or in multiple rows and columns.
+</FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+<FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2039"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue2642"><SPAN &nbsp;CLASS="textbf">layout</SPAN></SPAN><SPAN ID="hue2645">(</SPAN><SPAN ID="hue2647"><SPAN &nbsp;CLASS="textbf">matrix</SPAN></SPAN><SPAN ID="hue2650">(</SPAN><SPAN ID="hue2652">1</SPAN><SPAN ID="hue2654">:</SPAN><SPAN ID="hue2656">2</SPAN><SPAN ID="hue2658">,</SPAN> <SPAN ID="hue2660">ncol</SPAN><SPAN ID="hue2662">=</SPAN><SPAN ID="hue2664">1</SPAN><SPAN ID="hue2666">),</SPAN> <SPAN ID="hue2668">widths</SPAN><SPAN ID="hue2670">=</SPAN><SPAN ID="hue2672"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue2675">(</SPAN><SPAN ID="hue2677">8</SPAN><SPAN ID="hue2679">,</SPAN><SPAN ID="hue2681">8</SPAN><SPAN ID="hue2683">),</SPAN> <SPAN ID="hue2685">heights</SPAN><SPAN ID="hue2687">=</SPAN><SPAN ID="hue2689"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue2692">(</SPAN><SPAN ID="hue2694">5.5</SPAN><SPAN ID="hue2696">,</SPAN><SPAN ID="hue2698">8</SPAN><SPAN ID="hue2700">))</SPAN>
+<BR><SPAN ID="hue2702">op</SPAN> <SPAN ID="hue2704">&lt;-</SPAN> <SPAN ID="hue2706"><SPAN &nbsp;CLASS="textbf">par</SPAN></SPAN> <SPAN ID="hue2709">(</SPAN><SPAN ID="hue2711">mar</SPAN><SPAN ID="hue2713">=</SPAN><SPAN ID="hue2715"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue2718">(</SPAN><SPAN ID="hue2720">2</SPAN><SPAN ID="hue2722">,</SPAN><SPAN ID="hue2724">4</SPAN><SPAN ID="hue2726">,</SPAN><SPAN ID="hue2728">1</SPAN><SPAN ID="hue2730">,</SPAN><SPAN ID="hue2732">1</SPAN><SPAN ID="hue2734">)</SPAN><SPAN ID="hue2736">+</SPAN><SPAN ID="hue2738">0.1</SPAN><SPAN ID="hue2740">,</SPAN> <SPAN ID="hue2742">oma</SPAN><SPAN ID="hue2744">=</SPAN><SPAN ID="hue2746"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue2749">(</SPAN><SPAN ID="hue2751">1.1</SPAN><SPAN ID="hue2753">,</SPAN><SPAN ID="hue2755">0</SPAN><SPAN ID="hue2757">,</SPAN><SPAN ID="hue2759">0</SPAN><SPAN ID="hue2761">,</SPAN><SPAN ID="hue2763">0</SPAN><SPAN ID="hue2765">))</SPAN>
+<BR><SPAN ID="hue2767">Data</SPAN> <SPAN ID="hue2769">%&gt;%</SPAN> <SPAN ID="hue2771">dplyr</SPAN><SPAN ID="hue2773">::</SPAN><SPAN ID="hue2775"><SPAN &nbsp;CLASS="textbf">select</SPAN></SPAN><SPAN ID="hue2778">(Time, ATX)</SPAN> <SPAN ID="hue2780">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2782"><SPAN &nbsp;CLASS="textbf">plotWAC</SPAN></SPAN><SPAN ID="hue2785">(</SPAN><SPAN ID="hue2787">ylab</SPAN><SPAN ID="hue2789">=</SPAN><SPAN ID="hue2791"><SPAN &nbsp;CLASS="textbf">expression</SPAN></SPAN><SPAN ID="hue2794">(</SPAN><SPAN ID="hue2796"><SPAN &nbsp;CLASS="textbf">paste</SPAN></SPAN><SPAN ID="hue2799">(</SPAN><SPAN ID="hue2801">&#34;T [&#34;</SPAN><SPAN ID="hue2803">, degree,</SPAN> <SPAN ID="hue2805">&#34;C]&#34;</SPAN><SPAN ID="hue2807">)))</SPAN>
+<BR><SPAN ID="hue2809">op</SPAN> <SPAN ID="hue2811">&lt;-</SPAN> <SPAN ID="hue2813"><SPAN &nbsp;CLASS="textbf">par</SPAN></SPAN> <SPAN ID="hue2816">(</SPAN><SPAN ID="hue2818">mar</SPAN><SPAN ID="hue2820">=</SPAN><SPAN ID="hue2822"><SPAN &nbsp;CLASS="textbf">c</SPAN></SPAN><SPAN ID="hue2825">(</SPAN><SPAN ID="hue2827">5</SPAN><SPAN ID="hue2829">,</SPAN><SPAN ID="hue2831">4</SPAN><SPAN ID="hue2833">,</SPAN><SPAN ID="hue2835">1</SPAN><SPAN ID="hue2837">,</SPAN><SPAN ID="hue2839">1</SPAN><SPAN ID="hue2841">)</SPAN><SPAN ID="hue2843">+</SPAN><SPAN ID="hue2845">0.1</SPAN><SPAN ID="hue2847">)</SPAN>
+<BR><SPAN ID="hue2849">Data</SPAN> <SPAN ID="hue2851">%&gt;%</SPAN> <SPAN ID="hue2853">dplyr</SPAN><SPAN ID="hue2855">::</SPAN><SPAN ID="hue2857"><SPAN &nbsp;CLASS="textbf">select</SPAN></SPAN><SPAN ID="hue2860">(Time, WIC)</SPAN> <SPAN ID="hue2862">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2864"><SPAN &nbsp;CLASS="textbf">plotWAC</SPAN></SPAN><SPAN ID="hue2867">(</SPAN><SPAN ID="hue2869">ylab</SPAN><SPAN ID="hue2871">=</SPAN><SPAN ID="hue2873"><SPAN &nbsp;CLASS="textbf">expression</SPAN></SPAN><SPAN ID="hue2876">(</SPAN><SPAN ID="hue2878"><SPAN &nbsp;CLASS="textbf">paste</SPAN></SPAN><SPAN ID="hue2881">(</SPAN><SPAN ID="hue2883">'W [m/s]'</SPAN><SPAN ID="hue2885">)))</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:layout-example"></A><A ID="731"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+Two-panel figure.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./layout-example-1.png"
+ ALT="Image layout-example-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<P>
+</TD></TR>
+</TABLE></FONT></FONT></FONT></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node18.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node16.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node16.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node18.html">Panels and Facets in</A>
+<B> Up:</B> <A
+ HREF="node16.html">Multi-Frame Plots</A>
+<B> Previous:</B> <A
+ HREF="node16.html">Multi-Frame Plots</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>
