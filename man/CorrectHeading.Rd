@@ -14,7 +14,10 @@ angles in units of degrees (PITCH, ROLL, THDG, the latter the heading relative t
 true north), and the latitude and altitude (LAT and GGALT), the latter two for
 finding the local acceleration of gravity. If variables named PITCHC, ROLLC, and
 LATC are present those will be used instead. The first two might be produced by
-prior use of the CorrectPitch() function.}
+prior use of the CorrectPitch() function. The data.frame variables must retain
+the original attributes from the netCDF file so that, if arbitrary "CalibrationCoefficients"
+have been applied these can be removed. The reason is that this routine needs the
+original unmodified value from the IRU for variables like THDG.}
 
 \item{.span}{The number of points (default 21) used for estimating the accelerations
 by differentiation and for smoothing the results.}

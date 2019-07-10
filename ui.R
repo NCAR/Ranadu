@@ -355,7 +355,11 @@ shinyUI(
         tabPanel ('size distributions',
           sidebarLayout(
             sidebarPanel(h4('define size distributions'), 
-              checkboxInput ('limits7','apply restrictions'), 
+              fluidRow(
+                column(6, checkboxInput ('limits7','restrictions?')),
+                column(3, checkboxInput ('LWC', 'LWC?')),
+                column(3, checkboxInput ('addcdf', 'CDF?'))
+                ),
               selectInput ('sdtype', 'type of axes',
                 choices=c('linear', 'log-y', 'log-x', 'both log'),
                 selected='both log'),

@@ -21,15 +21,26 @@ PCorFunction <- function (p, q=100., akrd=2.5, AC="GV", Sensors = "STD") {
   Mach <- MachNumber(p, q)   # calculated from raw measurements
   if ((AC == "C130") | (AC == "C-130")) { 
     if (Sensors == "R") {  ## for PSFRD
-      b0 = -0.00754
-      b1 <- 0.000497
-      b2 <- 0.0368
+      # b0 = -0.00754
+      # b1 <- 0.000497
+      # b2 <- 0.0368
+      b0 <- 0.007372
+      b1 <- 0.12774
+      b2 <- -6.8776e-4
+      b3 <- -0.02994
+      b4 <- 0.001630
     } else {               ## for PSFD
-      b0 <- -0.00637  
-      b1 <- 0.001366
-      b2 <- 0.0149
+      # b0 <- -0.00637  
+      # b1 <- 0.001366
+      # b2 <- 0.0149
+      b0 <- -4.389e-3
+      b1 <- -2.966e-2
+      b2 <- 6.831e-5
+      b3 <- 2.672e-2
+      b4<- 2.4466e-3
     }  
-    dp <- b0 + b1*akrd + b2*Mach
+    # dp <- b0 + b1*akrd + b2*Mach
+    dp <- b0 + (q/p) * (b1 + b4 * akrd^2) + b2 * akrd + b3 * Mach
   } else {             # GV:
     #bp <- c(4.604, 18.67, 6.49)             # old AKRD coefficients for PREDICT
     #b <-  c(4.34685, 20.10448, 1.36492)     # AKRD coefficients for CONTRAST
