@@ -83,6 +83,8 @@ CorrectPitch <- function (D, .span=1013) {
   vndot <- signal::sgolayfilt (.vns-.ggvns, 3, NAV, m=1)  # m=1 for first deriv.
   vedot <- signal::sgolayfilt (.vew-.ggvew, 3, NAV, m=1)
   .G <- Ranadu::Gravity (.latc, D$GGALT)
+  gmean <- mean(Ranadu::Gravity (.latc, D$GGALT), na.rm=TRUE)
+  .G[is.na(.G)] <- gmean
   deltaPitchL <- -vndot/.G
   deltaRollL  <- vedot/.G
   .hdg <- D$THDG*Cradeg

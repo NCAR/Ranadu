@@ -38,7 +38,7 @@ blankNA <- function (.d, .Restr=rep(TRUE, nrow(.d)), .names=names(.d)[-1]) {
   }
   dt <- .d
   for (v in .names) {
-    .d[!r, v] <- NA
+    .d[r, v] <- NA
   }
   return (transferAttributes(dt, .d))
 }
