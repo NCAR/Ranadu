@@ -17,10 +17,10 @@
 
 LagrangeInterpolate <- function (.x, .n, .D) {
   if (.n < 2 || .n > 10) {return(NA)}
-  .D <- .D[order(.D[,1]), ] # require increasing order
+  .D <- .D[do.call(order, as.list(.D)), ] # require increasing order
   .D <- .D[!is.na(.D[, 1]), ]
   # find starting point in array
-  L <- length (.D[, 1])
+  L <- nrow (.D)
   y <- rep(NA, length(.x))
   # note: returning end points for calls outside limits
   y[.x < .D[1,1]] <- .D[1,2]

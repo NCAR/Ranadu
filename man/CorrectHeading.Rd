@@ -5,7 +5,7 @@
 \title{CorrectHeading}
 \usage{
 CorrectHeading(.data, .span = 21, .default = -0.08, .Valid = NULL,
-  .plotfile = NULL)
+  .plotfile = "inLine")
 }
 \arguments{
 \item{.data}{A data.frame containing measurements of body accelerations (called
@@ -33,7 +33,8 @@ exclude from the calculation. This can be used to exclude low-airspeed cases
 is NULL, in which case the test will be skipped.}
 
 \item{.plotfile}{The name of a plot to generate (e.g., "./Plot1.pdf") that shows
-the results from the algorithm.}
+the results from the algorithm. The default is 'inLine', in which case the
+plot is generated and displayed normally. Suppress the plot with a NULL argument.}
 }
 \value{
 A vector of the same length as the supplied data.frame that gives an

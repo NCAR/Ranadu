@@ -36,6 +36,10 @@ Rmutate <- function (.d, ...) {
       attributes (ds[,nm]) <- A
     }
     A <- attributes (d)
+    ## If there is a 'dim' attribute, change it as appropriate:
+    if ('dim' %in% names(A)) {
+      A$dim <- nrow(ds)
+    }
     A$Dimensions$Time$len <- nrow (ds)
     A$row.names <- 1:nrow (ds)
     A$names <- names (ds)
