@@ -24,18 +24,19 @@
 blankNA <- function (.d, .Restr=rep(TRUE, nrow(.d)), .names=names(.d)[-1]) {
   qRestr <- enquo (.Restr)
   mCase <- environmentName(attr(qRestr, '.Environment')) == environmentName(globalenv())
-  print (parent.frame())
+  # print (parent.frame())
   if (mCase) {
     r <- .Restr
-    print ('case A')
+    # print ('case A')
   } else {
-    print ('case B')
+    # print ('case B')
   #   r <- .Restr
   #   print (summary (r))
   # } else {
     ## Get the restriction logical vector:
     r <- dplyr::select(.d, !! qRestr)
   }
+  r[is.na(r)] <- TRUE  # Consider missing indices as times to blank
   dt <- .d
   for (v in .names) {
     .d[r, v] <- NA
