@@ -45,7 +45,10 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' netCDF file is closed before returning the data.frame to the calling program.
 #' The global attributes in the netCDF file are loaded as attributes of the returned 
 #' data.frame, and attributes of each requested variable are also assigned to that column 
-#' in the data.frame from the variable attributes in the netCDF file.
+#' in the data.frame from the variable attributes in the netCDF file. A 'label' attribute
+#' is added where possible, constructed from the 'standard_name' and 'units' attributes,
+#' and the label also contains the variable name. Some translations are applied to the
+#' conventional standard_names and units; see "transl" below.
 #' When working with attributes, it is a feature of R data.frames that subsetting loses 
 #' all the assigned variable attributes. To preserve them, copy them via 
 #' A <- attributes (Data$VAR), remove A$dim (e.g., A$dim <- NULL),
@@ -381,7 +384,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
         X <- X[r1, ]
       } else {
         X <- X[r1]
-      }
+      }      
     } else { ## other rates require flattening and possibly interpolation and filtering
       if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
           grepl('^C1DC_', V) || grepl('CS200_', V)) {
@@ -434,5 +437,6 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     d["RF"] <- RF
   }
   nc_close (netCDFfile)
+  d <- addLabels(d)
   return (d)
 }

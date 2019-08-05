@@ -71,7 +71,7 @@ SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA,
   ## A function for translation between the P-T coordinates and the skew-T plot coordinates:
   ##    (note, expects tTop etc in calling environment, so not explicitly passed.)
   XYplot <- function (.T, .p) { 
-    return (data.frame(
+    return (tibble::tibble(
       X=(.T-tBot) / (tTop-tBot) - log10(.p/pBot) / log10(pBot/pTop), 
       Y=log10(.p)))
   }
@@ -122,7 +122,7 @@ SkewTSounding <- function (Pressure=NA, Temperature=NA, DewPoint=NA,
     DewPoint <- AVDP$stats["mean", ]
   }
 
-DSKT <- data.frame ("P"=Pressure, "AT"=Temperature, "DP"=DewPoint)
+DSKT <- tibble::tibble ("P"=Pressure, "AT"=Temperature, "DP"=DewPoint)
   
   ## convert to plot coordinates:
   DSKT$AT  <- XYplot (Temperature, Pressure)$X
