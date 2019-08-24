@@ -1,6 +1,7 @@
 
 #' @title CohPhase
-#' @description Plots the coherence and phase for a cross-spectrum.
+#' @description Plots the coherence and phase for a cross-spectrum. Optionally,
+#' the cospectrum in a (frequency, covariance) data.frame.
 #' @details For the variables provided, which must be in the supplied data.frame 
 #' that must also contain the variables "Time" and a "Rate" attribute, this 
 #' function constructs a plot of the squared coherence and phase for the cross-spectrum
@@ -58,17 +59,22 @@
 #' "alpha" of 0.15 for partial transparency. The "showErrors" parameter has no effect unless
 #' the (default) plotType='ggplot' is used. The uncertainty band is not plotted where there are
 #' fewer than two values to average in a bin. 
-#' @return A ggplot2 definition for the plot of ((squared) coherence and phase as a function of frequency.
-#' The resulting plot definition
+#' @param returnCospectrum Default is FALSE. If set TRUE, the cospectrum is returned instead of 
+#' a plot definition, in the form of a data.frame with columns "freq" and "CV'.
+#' @return A ggplot2 definition for the plot of ((squared) coherence and phase as a function 
+#' of frequency, if plotType == 'ggplot'. The resulting plot definition
 #' can be plotted (via, e.g., 'print (CohPhase(...))) or
 #' saved for later addition of more variables or for later plotting. The plot is returned
 #' with the Ranadu theme "theme_WAC()", but that can be changed by adding another theme to the
-#' plot definition before plotting.
+#' plot definition before plotting. if plotType is not 'ggplot', the plots are generated 
+#' using standard R plots and a data.frame is returned that contains the frequency, coherence, 
+#' and phase. That can be used to plot separately and perhaps combine with other plots.
 #' @examples 
 #' \dontrun{CohPhase(RAFdata, 'GGVEW', 'VEW')}
 #' \dontrun{CohPhase(RAFdata, 'ATX', 'DPXC', col='red', spans=15, smoothBins=25, showErrors=1)}
 
-CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, plotType='ggplot', showErrors=0) {
+CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, plotType='ggplot', 
+  showErrors=0, returnCospectrum=FALSE) {
   if (is.data.frame(.data)) {
     if (.Var1 %in% names(.data)) {
       Z <- capture.output (Vr <- SmoothInterp(detrend (.data[, c('Time', .Var1)]), .Length=0))
@@ -92,7 +98,7 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
   } else {
     Rate <- attr(.data, 'Rate')
   }
-  vcv <- cbind(Vr, VrC)
+  vcv <- cbind(ts(Vr, frequency=Rate), ts(VrC, frequency=Rate))
   P <- spec.pgram(vcv, detrend=FALSE, fast=TRUE, plot=FALSE, spans=spans)
   df1 <- data.frame(P$coh, log(P$freq))
   df2 <- data.frame (P$phase, log(P$freq))
@@ -107,16 +113,17 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
   if (plotType != 'ggplot') {
     layout(matrix(1:2, ncol = 1), widths = c(5,5), heights = c(5,7))
     op <- par (mar=c(2,4,1,2)+0.1, oma=c(1.1,0,0,0))
-    plotWAC (exp(pf1$xc)*Rate, pf1$ybar, xlab='frequency [Hz]', col=col, logxy='x', ylab='coherence')
+    plotWAC (exp(pf1$xc), pf1$ybar, xlab='frequency [Hz]', col=col, logxy='x', ylab='coherence')
     title (sprintf('%s x %s', .Var1, .Var2))
     op <- par (mar=c(5,4,1,2)+0.1)
-    plotWAC (exp(pf2$xc)*Rate, pf2$ybar * 180 / pi, xlab='frequency [Hz]', col=col, logxy='x', ylab='phase [degrees]')
+    plotWAC (exp(pf2$xc), pf2$ybar * 180 / pi, xlab='frequency [Hz]', col=col, logxy='x', ylab='phase [degrees]')
     abline(h=0, col='gray', lty=3)
     layout(matrix(1:1, ncol = 1), widths = c(5), heights = c(5))
     op <- par (mar=c(5,4,1,2)+0.1, oma=c(1.1,0,0,0))
+    return (data.frame(freq = exp(pf1$xc), coherence=pf1$ybar, phase=pf2$ybar * 180 / pi))
   } else {
     
-    d2 <- data.frame(Time=exp(pf1$xc)*Rate, coherence=pf1$ybar, phase=pf2$ybar*180/pi, 
+    d2 <- data.frame(Time=exp(pf1$xc), coherence=pf1$ybar, phase=pf2$ybar*180/pi, 
       clo=(pf1$ybar-showErrors*pf1$sigma), chi=pf1$ybar+showErrors*pf1$sigma, 
       plo=(pf2$ybar-showErrors*pf2$sigma)*180/pi, phi=(pf2$ybar+showErrors*pf2$sigma)*180/pi)
     d2$clo[!is.na(d2$clo) & (d2$clo < 0)] <- 0
@@ -137,7 +144,23 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
       g <- g + geom_ribbon(data=d, aes(x=Time, ymin=ymin, ymax=ymax), colour='grey', alpha=0.15, inherit.aes=FALSE)
     }
     g <- g + theme_WAC(1)+theme(legend.position='none')
-    return(g)
+    if (returnCospectrum) {
+      CS <- sqrt(P$coh[,1] * P$spec[, 1] * P$spec[, 2] / (1 + tan(P$phase[,1])^2))
+      v1 <- SmoothInterp(.data[, .Var1], .Length=0)
+      v2 <- SmoothInterp(.data[, .Var2], .Length=0)
+      v1 <- detrend(data.frame(Time=.data$Time, v1))
+      v2 <- detrend(data.frame(Time=.data$Time, v2))
+      ff1 <- fft(v1)
+      ff2 <- fft(v2)
+      G <- Re(ff1 * Conj(ff2))/nrow(.data)
+      N <- nrow(.data) %/% 2 
+      G <- G[2:(N+1)]
+      frq <- c(1:N) * Rate / nrow(.data)
+      spec <- 2 * G / Rate
+      return(data.frame(freq=frq, cospec=spec))
+    } else {
+      return(g)
+    }
   }
 }
 

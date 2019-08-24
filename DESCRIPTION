@@ -28,7 +28,7 @@ Description: This package contains a function for loading a portion of a netCDF
     for making subsets of a netCDF file, and there are other functions also.
     One new function supports starting other programs that read netCDF-format
     files and providing such files generated from R data.frames.
-License: GPL
+License: BSD 3-Clause
 Depends:
     R (>= 3.3), ncdf4, maps, ggplot2, ggthemes, grid, graphics, utils
 Imports:
