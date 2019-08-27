@@ -24,7 +24,7 @@ second variable.}
 
 \item{addBin}{If true, the return will be a list where the original data.frame
 is returned as the second component with values of "BIN" added to the
-data.frame. This is useful from grouping when plotting with ggplot.}
+data.frame. This is useful for grouping when plotting with ggplot.}
 }
 \value{
 If addBIN == FALSE, dataframe of dimension c(bins, 4) that contains, for each bin,

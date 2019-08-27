@@ -89,7 +89,7 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
       return (NA)
     }
   } else {
-    print('VSpec ERROR: first argument is not a data.frame.')
+    print('CohPhase ERROR: first argument is not a data.frame.')
     return (NA)
   }
   if (is.null(attr(.data, 'Rate'))) {

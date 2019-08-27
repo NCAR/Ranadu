@@ -17,6 +17,10 @@
 #' @param list An optional list of variable names to add to the standard list
 #' @param SRC An indicator of which institution's list should be used. Default
 #' is 'NCAR'; other choices are 'UWYO' and 'FAAM'.
+#' @return A character vector containing a standard set of variable names,
+#' with additions as specified in "list". For NCAR the standard set is
+#' ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCXC, TASX,
+#' WDC, WSC, WIC.
 #' @examples 
 #' standardVariables (c("VEW", "PLWCC"))
 standardVariables <- function (list=NULL, SRC='NCAR') {

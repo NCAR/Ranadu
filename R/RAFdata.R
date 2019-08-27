@@ -4,7 +4,7 @@
 #' flight in a project called "IDEAS-4". The data.frame contains
 #' a set of measurements, one row per second, and a "Time"
 #' variable. 
-#' @format The data.frame contains 301 rows and 28 variables:
+#' @format The data.frame contains 301 rows and 29 variables:
 #' \describe{
 #'   \item{Time}{A POSIX time, units: seconds since 2013-10-01 00:00:00 +0000, time zone UTC}
 #'   \item{ATTACK}{angle of attack, degrees}
@@ -34,6 +34,7 @@
 #'   \item{CONCD}{droplet concentration from a CDP, per cubic cm}
 #'   \item{WDC}{wind direction, GPS-corrected, degrees from north}
 #'   \item{WSC}{wind speed, GPS-corrected, m/s}
+#'   \item{WIC}{vertical wind speed, m/s}
 #' }
 #' @source \url{http://data.eol.ucar.edu/master_list/?project=IDEAS-4_GV}
 "RAFdata"
