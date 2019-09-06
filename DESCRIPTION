@@ -28,10 +28,11 @@ Description: This package contains a function for loading a portion of a netCDF
     for making subsets of a netCDF file, and there are other functions also.
     One new function supports starting other programs that read netCDF-format
     files and providing such files generated from R data.frames.
-License: BSD 3-Clause
+License: BSD_3_clause + file LICENSE
+Encoding: UTF-8
 Depends:
-    R (>= 3.3), ncdf4, maps, ggplot2, ggthemes, grid, graphics, utils, scales
+    R (>= 3.5), ncdf4, maps, ggplot2, grid, graphics, utils, scales
 Imports:
-    tcltk, nleqslv, zoo, fields, signal, reshape2, bspec, dplyr, plyr, tibble, stats
+    ggthemes, tcltk, nleqslv, zoo, fields, signal, reshape2, bspec, dplyr, plyr, tibble, stats
 LazyData: true
 RoxygenNote: 6.1.1

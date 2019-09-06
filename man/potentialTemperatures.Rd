@@ -4,9 +4,9 @@
 \name{potentialTemperatures}
 \alias{potentialTemperatures}
 \title{potentialTemperatures}
-\format{An object of class \code{list} of length 7.}
+\format{An object of class \code{list} of length 6.}
 \usage{
-potentialTemperatures
+potentialTemperatures(DF)  # use $name to get desired function, before (DF)
 }
 \arguments{
 \item{DF}{A data.frame containing PSXC, ATX, EWX, and optionally PLWCD. If the latter
@@ -23,7 +23,7 @@ List of available potential temperature functions
 \details{
 Contains PotentialTemperature, EquivalentPotentialTemperature,
 BoltonEquivalentPotentialTemperature, RossbyEquivalentPotentialTemperature,
-VirtualPotentialTemperature, VirtualTemperature, and WetEquivalentPotentialTemperature
+VirtualPotentialTemperature, and WetEquivalentPotentialTemperature
 in a list that can be used with lapply(potentialTemperatures, function(f) f(DF)) with DF a 
 data.frame containing PSXC, ATX, EWX, and optionally PLWCD (for WetEquivalentPotentialTemperature).
 To use individual functions: potentialTemperatures$EquivalentPotentialTemperature(DF)

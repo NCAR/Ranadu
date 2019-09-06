@@ -18,6 +18,7 @@
 #' @import utils
 #' @import scales graphics
 #' @importFrom zoo na.approx
+#' @importFrom stats fft
 #' @export CohPhase
 #' @param .data A data.frame containing at least the variables "Time", ".Var1" and ".Var2".
 #' It should also have an attribute "Rate"
@@ -132,7 +133,7 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
       col=col, lwd=c(1.0), lty=c(1), xlab='freq') 
     g <- g + xlab('frequency [Hz]') + ylab (sprintf ('%s x %s', .Var1, .Var2)) 
     g <- g + scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x, n=4),
-      labels = trans_format("log10", math_format(10^.x))) + xlab('frequency [Hz]') 
+      labels = trans_format("log10", math_format(expr = 10^.x))) + xlab('frequency [Hz]') 
     if (showErrors > 0 && smoothBins > 5) {
       da <- data.frame(d2[, c(1,4,5)])
       db <- data.frame(d2[, c(1,6,7)])
@@ -141,7 +142,8 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
       da$PanelGroup <- labelP[1]
       db$PanelGroup <- labelP[2]
       d <- rbind(db,da)
-      g <- g + geom_ribbon(data=d, aes(x=Time, ymin=ymin, ymax=ymax), colour='grey', alpha=0.15, inherit.aes=FALSE)
+      g <- g + geom_ribbon(data=d, aes(x=Time, ymin=ymin, ymax=ymax), colour='grey', 
+        alpha=0.15, inherit.aes=FALSE)
     }
     g <- g + theme_WAC(1)+theme(legend.position='none')
     if (returnCospectrum) {

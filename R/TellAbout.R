@@ -20,10 +20,11 @@ TellAbout <- function (V) {
 }
 
 #' @title WACf
+#' @usage WACf(V)  # use [[n]] to select nth function or $name to select function name.
 #' @description List of statistical functions
 #' @details Contains mean, sd, sdMean, median, kount, length with NAs removed, in a list
 #' that can be used with lapply(WACf, function(f) f(V)) with V a vector. To use individual
-#' functions: WACf$sdMean(V)
+#' functions: WACf$sdMean(V). kount is the number of non-missing values in the parameter.
 #' @aliases WACf
 #' @author William Cooper
 #' @importFrom stats sd median

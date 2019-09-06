@@ -188,10 +188,11 @@ WetEquivalentPotentialTemperature <- function (P, AT, E=0, w=0) {
 }
 
 #' @title potentialTemperatures
+#' @usage potentialTemperatures(DF)  # use $name to get desired function, before (DF)
 #' @description List of available potential temperature functions
 #' @details Contains PotentialTemperature, EquivalentPotentialTemperature,
 #' BoltonEquivalentPotentialTemperature, RossbyEquivalentPotentialTemperature,
-#' VirtualPotentialTemperature, VirtualTemperature, and WetEquivalentPotentialTemperature
+#' VirtualPotentialTemperature, and WetEquivalentPotentialTemperature
 #' in a list that can be used with lapply(potentialTemperatures, function(f) f(DF)) with DF a 
 #' data.frame containing PSXC, ATX, EWX, and optionally PLWCD (for WetEquivalentPotentialTemperature).
 #' To use individual functions: potentialTemperatures$EquivalentPotentialTemperature(DF)
@@ -219,9 +220,9 @@ potentialTemperatures <- list(
     VirtualPotentialTemperature(VirtualTemperature(
       Data$ATX, 0.622 * Data$EWX / 
         (Data$PSXC - Data$EWX)), Data$PSXC, Data$EWX)),
-  VirtualTemperature = function(Data) as.vector(
-    VirtualTemperature(Data$ATX, 
-      0.622 * Data$EWX / (Data$PSXC - Data$EWX))),
+  # VirtualTemperature = function(Data) as.vector(
+  #   VirtualTemperature(Data$ATX, 
+  #     0.622 * Data$EWX / (Data$PSXC - Data$EWX))),
   WetEquivalentPotentialTemperature = function(Data) as.vector(
     WetEquivalentPotentialTemperature(Data$PSXC, Data$ATX, Data$EWX, 
       ifelse('PLWCD' %in% names(Data), Data$PLWCD, 0))

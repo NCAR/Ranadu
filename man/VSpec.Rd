@@ -10,11 +10,12 @@ VSpec(.data, .Variable = NA, VLabel = NA, col = NA,
   type = "spectrum", method = NA, xlim = NA, ylim = NA,
   spans = 49, ae = 0.2, smoothBins = 0, segLength = 512,
   poles = 50, resolution = 1e-04, showErrors = 0,
-  WavelengthScale = TRUE, ADD = NA, add = NA, EDR = FALSE)
+  WavelengthScale = TRUE, ADD = NA, add = NA, EDR = FALSE,
+  WACtheme = NA)
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
-".Variable" is the second (required) parameter. It should also have an attribute "Rate"
+".Variable" is the second (required) parameter. The data.frame should have an attribute "Rate"
 if its rate is different from 1 Hz (the default). Any restrictions on the time range
 should be applied to the data.frame before it is supplied to this function. See the
 examples below. If subsetting removes the "Rate" attributes from the data.frame, the
@@ -104,9 +105,9 @@ a ribbon extending one standard deviation above and below the mean value. The de
 \item{WavelengthScale}{If TRUE (the default), include a wavelength scale on the plot.}
 
 \item{ADD}{This parameter has the default value NA, which causes the function to plot 
-only the spectrum for the variable provided. If a spectrum for an other set of variables 
-has already been defined by previous calls to VSpec, setting ADD to the plot definition 
-returned by that previous call will add this plot to the previous plot. Up to four
+only the spectrum for the variable(s) provided by this call. If a spectrum for another 
+set of variables has already been defined by previous calls to VSpec and the result saved
+in, e.g., g, setting ADD = g will add this plot to the previous plot. Up to four
 variables can be included in the final plot. See the examples.}
 
 \item{add}{This is only included to make it possible to specify either "ADD" or "add".
@@ -122,6 +123,9 @@ true abscissa coordinate of -1.5C(epsilon)^-(1/3)k^(-2/3), but the plot is displ
 with a logarithmic-frequency abscissa. The result can't be interpreted as a variance
 spectrum but can show consistency with inertial-subrange expectations and the
 approximate magnitude of the eddy dissipation rate when used with wind components.}
+
+\item{WACtheme}{Default is NA, in which case no special theme is added. Any other value
+adds "theme_WAC()" to the plot definition.}
 }
 \value{
 A ggplot2 definition for the plot of spectral density as a function of frequency.
@@ -130,10 +134,11 @@ to infinity is the total variance of the variable. The resulting plot definition
 can be plotted (via, e.g., 'print (VarSpec(...))) or
 saved for later addition of more variables or for later plotting. The plot is returned
 with the standard ggplot theme; to use the Ranadu theme "theme_WAC()", add it to the
-plot definition that is returned before plotting. In addition, to make it possible to 
-superimpose future plots, the following variables are saved in the global environment: 
-.clinesVSpec and .VSpecDF{1,2,3}, .VSpecVar{2,3}. The function does not check for 
-collision with other possible uses of those names in the global environment.
+plot definition that is returned before plottingvor set the WACtheme parameter. In addition, 
+to make it possible to superimpose future plots, the following variables are saved in the 
+'VSpecEnv' environment: clinesVSpec and VSpecDF{1,2,3}, VSpecVar{2,3}. The defined
+environment is used to preserve these variables between calls. The VSpecEnv environment
+is removed whenever a call is made with both "ADD" and "add" parameters NA.
 }
 \description{
 Produces a variance spectrum in a ggplot2 file suitable for printing.
@@ -158,7 +163,7 @@ rate with the larger-dot line representing 1e-4 m^2/s^3.
 \examples{
 VSpec(RAFdata, 'WSC')
 g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1));
-VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g)
+VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g, WACtheme=1)
 VSpec(RAFdata,'TASX', spans=11, showErrors=1, xlim=c(0.01,1)) + theme_WAC()
 }
 \author{

@@ -22,7 +22,7 @@
 #' @importFrom stats pchisq pnorm qchisq spec.pgram spectrum ts
 #' @export VSpec
 #' @param .data A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
-#' ".Variable" is the second (required) parameter. It should also have an attribute "Rate"
+#' ".Variable" is the second (required) parameter. The data.frame should have an attribute "Rate"
 #' if its rate is different from 1 Hz (the default). Any restrictions on the time range
 #' should be applied to the data.frame before it is supplied to this function. See the
 #' examples below. If subsetting removes the "Rate" attributes from the data.frame, the
@@ -96,9 +96,9 @@
 #' "alpha" of 0.5 for partial transparency. 
 #' @param WavelengthScale If TRUE (the default), include a wavelength scale on the plot.
 #' @param ADD This parameter has the default value NA, which causes the function to plot 
-#' only the spectrum for the variable provided. If a spectrum for an other set of variables 
-#' has already been defined by previous calls to VSpec, setting ADD to the plot definition 
-#' returned by that previous call will add this plot to the previous plot. Up to four
+#' only the spectrum for the variable(s) provided by this call. If a spectrum for another 
+#' set of variables has already been defined by previous calls to VSpec and the result saved
+#' in, e.g., g, setting ADD = g will add this plot to the previous plot. Up to four
 #' variables can be included in the final plot. See the examples.
 #' @param add This is only included to make it possible to specify either "ADD" or "add".
 #' Default is NA, in which case the value of ADD is used.
@@ -112,25 +112,29 @@
 #' with a logarithmic-frequency abscissa. The result can't be interpreted as a variance
 #' spectrum but can show consistency with inertial-subrange expectations and the
 #' approximate magnitude of the eddy dissipation rate when used with wind components. 
+#' @param WACtheme Default is NA, in which case no special theme is added. Any other value
+#' adds "theme_WAC()" to the plot definition.
 #' @return A ggplot2 definition for the plot of spectral density as a function of frequency.
 #' The normalization is one-sided; i.e., the integral of the spectral variance from zero
 #' to infinity is the total variance of the variable. The resulting plot definition
 #' can be plotted (via, e.g., 'print (VarSpec(...))) or
 #' saved for later addition of more variables or for later plotting. The plot is returned
 #' with the standard ggplot theme; to use the Ranadu theme "theme_WAC()", add it to the
-#' plot definition that is returned before plotting. In addition, to make it possible to 
-#' superimpose future plots, the following variables are saved in the global environment: 
-#' .clinesVSpec and .VSpecDF{1,2,3}, .VSpecVar{2,3}. The function does not check for 
-#' collision with other possible uses of those names in the global environment.
+#' plot definition that is returned before plottingvor set the WACtheme parameter. In addition, 
+#' to make it possible to superimpose future plots, the following variables are saved in the 
+#' 'VSpecEnv' environment: clinesVSpec and VSpecDF{1,2,3}, VSpecVar{2,3}. The defined
+#' environment is used to preserve these variables between calls. The VSpecEnv environment
+#' is removed whenever a call is made with both "ADD" and "add" parameters NA.
 #' @examples 
 #' VSpec(RAFdata, 'WSC')
 #' g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1));
-#' VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g)
+#' VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g, WACtheme=1)
 #' VSpec(RAFdata,'TASX', spans=11, showErrors=1, xlim=c(0.01,1)) + theme_WAC()
+
 VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum', 
   method=NA, xlim=NA, ylim=NA, # c(0.001, 15), ylim=c(0.0001,1),
   spans=49, ae=0.2, smoothBins=0, segLength=512, poles=50, resolution=0.0001, showErrors=0, 
-  WavelengthScale=TRUE, ADD=NA, add=NA, EDR=FALSE) {
+  WavelengthScale=TRUE, ADD=NA, add=NA, EDR=FALSE, WACtheme=NA) {
   if (is.data.frame(.data)) {  ## must be true, or exit. Needs to contain Time and TASX in addition to .Variable
     nm <- names(.data)
     if (is.na(.Variable[1])) {
@@ -269,9 +273,10 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
     NV <- which(.V == .Variable)
     if (is.na(ADD[1])) {
       ## first call: redefine VSpecDF
-      .Variable <<- .Variable
+      rm(list=names(VSpecEnv), envir=VSpecEnv)
+      VSpecEnv$Variable <- .Variable
       if (NV == 1) {
-        assign('.VSpecDF1', DF, envir=.GlobalEnv)
+        assign('VSpecDF1', DF, envir=VSpecEnv)
         labx <- 'frequency [Hz]'
         if (EDR) {
           # laby <- sprintf('eddy dissipation rate for %s', .V)
@@ -284,39 +289,39 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
           xlab(labx) + ylab (laby) 
         .clinesVSpec <- col[1]
         names(.clinesVSpec) <- VL[1]
-        .clinesVSpec <<- .clinesVSpec 
+        VSpecEnv$clinesVSpec <- .clinesVSpec 
       }
       if (NV == 2) {
         g <- g + geom_path (aes(x=freq, y=fpf2, colour=VL[2]), data=DF, na.rm=TRUE)
         cl2 <- ifelse (length(col) >= 2, col[2], 'forestgreen')
         names(cl2) <- VL[2]
-        .clinesVSpec <- c(.clinesVSpec, cl2)
-        .clinesVSpec <<- .clinesVSpec 
+        .clinesVSpec <- c(VSpecEnv$clinesVSpec, cl2)
+        VSpecEnv$clinesVSpec <- .clinesVSpec 
       } else if (NV == 3) {
         g <- g + geom_path (aes(x=freq, y=fpf3, colour=VL[3]), data=DF, na.rm=TRUE)
         cl3 <- ifelse (length(col) >= 3, col[3], 'black')
         names(cl3) <- VL[3]
-        .clinesVSpec <- c(.clinesVSpec, cl3)
-        .clinesVSpec <<- .clinesVSpec 
+        .clinesVSpec <- c(VSpecEnv$clinesVSpec, cl3)
+        VSpecEnv$clinesVSpec <- .clinesVSpec 
       }
     } else {
       ## assign name based on elements in clinesVSpec
-      N <- length(.clinesVSpec) + 1
-      nc <- names(.clinesVSpec)
-      .clinesVSpec <- c(.clinesVSpec, col[N])
+      N <- length(VSpecEnv$clinesVSpec) + 1
+      nc <- names(VSpecEnv$clinesVSpec)
+      .clinesVSpec <- c(VSpecEnv$clinesVSpec, col[N])
       names(.clinesVSpec) <- c(nc, V)
-      .clinesVSpec <<- .clinesVSpec
-      VName <- sprintf('.VSpecDF%d', N)
-      assign(VName, DF, pos=.GlobalEnv)
+      VSpecEnv$clinesVSpec <- .clinesVSpec
+      VName <- sprintf('VSpecDF%d', N)
+      assign(VName, DF, pos=VSpecEnv)
       if (N == 2) {
-        .VSpecVar2 <<- V
-        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar2), data=get(VName), na.rm=TRUE)
+        VSpecEnv$VSpecVar2 <- V
+        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=VSpecEnv$VSpecVar2), data=get(VName, envir = VSpecEnv), na.rm=TRUE)
       } else if (N == 3) {
-        .VSpecVar3 <<- V
-        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar3), data=get(VName), na.rm=TRUE)
+        VSpecEnv$VSpecVar3 <- V
+        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=VSpecEnv$VSpecVar3), data=get(VName, envir = VSpecEnv), na.rm=TRUE)
       } else if (N == 4) {
-        .VSpecVar4 <<- V
-        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=.VSpecVar4), data=get(VName), na.rm=TRUE)  
+        VSpecEnv$VSpecVar4 <- V
+        g <- ADD + geom_path (aes(x=freq, y=fpf, colour=VSpecEnv$VSpecVar4), data=get(VName, envir = VSpecEnv), na.rm=TRUE)  
       }
     }
   }
@@ -397,6 +402,9 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
         colour=lclr)
     }
     # g <- g + theme_WAC()
+  }
+  if (!is.na(WACtheme)) {
+    g <- g + theme_WAC()
   }
   
   return(g)
