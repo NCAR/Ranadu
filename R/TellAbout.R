@@ -19,6 +19,34 @@ TellAbout <- function (V) {
   print (summary(V))
 }
 
+#' @title WACf
+#' @description List of statistical functions
+#' @details Contains mean, sd, sdMean, median, kount, length with NAs removed, in a list
+#' that can be used with lapply(WACf, function(f) f(V)) with V a vector. To use individual
+#' functions: WACf$sdMean(V)
+#' @aliases WACf
+#' @author William Cooper
+#' @importFrom stats sd median
+#' @export WACf
+#' @param V A variable that may be scalar, vector, or data.frame column.
+#' @return The function value: mean, sd, sdMean, median, kount, or length. kount is
+#' the number of non-missing values in a vector. Values from individual functions
+#' are returned invisibly; i.e., they must be assigned to something as in the examples 
+#' or they will not print. The result of lapply() will still print if not assigned.
+#' More concise output is obtained from STAT <- lapply(); str(STAT). Consider also,
+#' for concise display: dplyr::as_tibble(lapply(WACf, function(f) f(V)))
+#' @examples 
+#' STAT <- lapply(WACf, function(f) f(RAFdata$TASX))
+#' sdATX <- WACf$sd(RAFdata$ATX)
+WACf <- list(
+  mean = function(x, ...) invisible(mean(as.vector(x), ..., na.rm = TRUE)),
+  sd   = function(x, ...) invisible(sd  (as.vector(x), ..., na.rm = TRUE)),
+  sdMean = function(x, ...) invisible(sd (as.vector(x), ..., na.rm = TRUE) / sqrt(length(x[!is.na(x)]))),
+  median = function(x, ...) invisible(median (as.vector(x), ..., na.rm = TRUE)),
+  length = function(x, ...) invisible(length(x)), 
+  kount = function(x, ...) invisible(length(x[!is.na(x)]))
+)
+
 #' @title ValueOf
 #' @description Returns value of a variable at a specified time
 #' @details In a dataframe, finds the index corresponding to
