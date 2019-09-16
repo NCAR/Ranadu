@@ -14,30 +14,36 @@
 #' through the "smoothBins" parameter. The plot includes background lines showing the
 #' -5/3 slope expected for homogeneous isotropic turbulence, and for wind variables
 #' the magnitude of these lines represent factor-of-10 changes in the eddy dissipation
-#' rate with the larger-dot line representing 1e-4 m^2/s^3. 
+#' rate with the larger-dot line representing 1e-4 m^2/s^3. A recommended usage is as follows:
+#' library(magrittr) ## for the pipes that follow
+#' Data %>% dplyr::select(Time, TASX, WIC, WSC) %>% VSpec()
 #' @aliases vSpec vspec
 #' @author William Cooper
 #' @import scales bspec
 #' @importFrom zoo na.approx
+#' @importFrom plyr as.quoted
 #' @importFrom stats pchisq pnorm qchisq spec.pgram spectrum ts
+#' @include zzz.R
 #' @export VSpec
 #' @param .data A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
-#' ".Variable" is the second (required) parameter. The data.frame should have an attribute "Rate"
+#' ".Variable" is the second parameter. If the second parameter is omitted, up to three
+#' variables in the data.frame (excluding Time and TASX) will be used. 
+#' The data.frame should have an attribute "Rate"
 #' if its rate is different from 1 Hz (the default). Any restrictions on the time range
 #' should be applied to the data.frame before it is supplied to this function. See the
 #' examples below. If subsetting removes the "Rate" attributes from the data.frame, the
 #' value from the original data.frame should be added to .data.
-#' @param .Variable The (character) name of a variable that is a column in .data and for which the
-#' variance spectrum will be constructed. If this variable is not in .data an error message 
-#' is generated. If the parameter is not supplied or is set to NA (the default), up
-#' to three variables are selected from the first three (other than TASX or TIME) in
-#' the supplied data.frame.
+#' @param .Variable The name of a variable (character or variable name) that is a column in 
+#' .data and for which the variance spectrum will be constructed. If this variable is not 
+#' in .data an error message is generated. If the parameter is not supplied or is set to NA 
+#' (the default), up to three variables are selected from the first three (other than 
+#' TASX or TIME) in the supplied data.frame. .Variable can be a vector with dimension
+#' up to 3.
 #' @param VLabel A character string or a vector of such strings
-#' that will be used as the labels in
-#' the legend. The default is .Variable. The labels should differ if they are to appear
-#' separately in the legend. For example, to plot the spectrum for the same variable using
-#' different methods, include labels that indicate the different methods. See the
-#' examples.
+#' that will be used as the labels in the legend. The default is .Variable. The labels 
+#' should differ if they are to appear separately in the legend. For example, to plot 
+#' the spectrum for the same variable using different methods, include labels that indicate 
+#' the different methods. See the examples.
 #' @param col The color to use when plotting the spectral variance. The default is NA, and
 #' in this case the following plot colors will be used in order: blue, forestgreen, black, 
 #' black, darkorange. A vector of color names can be supplied if a multiple-variable plot
@@ -124,7 +130,7 @@
 #' to make it possible to superimpose future plots, the following variables are saved in the 
 #' 'VSpecEnv' environment: clinesVSpec and VSpecDF{1,2,3}, VSpecVar{2,3}. The defined
 #' environment is used to preserve these variables between calls. The VSpecEnv environment
-#' is removed whenever a call is made with both "ADD" and "add" parameters NA.
+#' variables are removed whenever a call is made with both "ADD" and "add" parameters NA.
 #' @examples 
 #' VSpec(RAFdata, 'WSC')
 #' g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1));
@@ -135,8 +141,60 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
   method=NA, xlim=NA, ylim=NA, # c(0.001, 15), ylim=c(0.0001,1),
   spans=49, ae=0.2, smoothBins=0, segLength=512, poles=50, resolution=0.0001, showErrors=0, 
   WavelengthScale=TRUE, ADD=NA, add=NA, EDR=FALSE, WACtheme=NA) {
-  if (is.data.frame(.data)) {  ## must be true, or exit. Needs to contain Time and TASX in addition to .Variable
+  
+  if (!is.data.frame(.data)) {
+    # See if the first argument can be split into a data.frame and a variable:
+    X <- substitute(.data)
+    if (is.call(X)) {
+      V <- try(eval(X), silent=TRUE)
+      if(grepl('Error', V[[1]])) {
+        V <- eval(plyr::as.quoted(X))  # eval(X) for names()
+      }
+      if (is.character(V[1])) {
+      } else {
+        V <- plyr::as.quoted(X)
+        if(is.symbol(V[[1]])) {
+          V <- vapply(V, deparse, 'character')
+        } 
+      }
+    } else {
+      V <- plyr::as.quoted(X)
+      if(is.symbol(V[[1]])) {
+        V <- vapply(V, deparse, 'character')
+      } 
+    }
+    # print (c('first argument evaluates to', V))
+    # Extract data.frame:
+    .data <- get(V[[1]])
+    .Variable <- V[[2]]
+  }
+  # print(str(.data))
+  if (is.data.frame(.data)) {  ## must be true, or exit. Needs to contain Time and TASX 
+    ## in addition to .Variable
     nm <- names(.data)
+    V <- try(is.na(.Variable), silent = TRUE)
+    if (grepl('Error', V[[1]])) {  
+      X <- substitute(.Variable)
+      if (is.call(X)) {
+        V <- try(eval(X), silent=TRUE)
+        if(grepl('Error', V[[1]])) {
+          V <- eval(plyr::as.quoted(X))  # eval(X) for names()
+        }
+        if (is.character(V[1])) {
+        } else {
+          V <- plyr::as.quoted(X)
+          if(is.symbol(V[[1]])) {
+            V <- vapply(V, deparse, 'character')
+          } 
+        }
+      } else {
+        V <- plyr::as.quoted(X)
+        if(is.symbol(V[[1]])) {
+          V <- vapply(V, deparse, 'character')
+        } 
+      }
+      .Variable <- V
+    }
     if (is.na(.Variable[1])) {
       nm <- nm[-which('Time' == nm)]
       nm <- nm[-which('TASX' == nm)]
@@ -144,11 +202,7 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
       if (length(.Variable) > 3) {
         .Variable <- .Variable[1:3]
       }
-    } else if (!is.character(.Variable)) {  ## then try to get name of the vector
-      ## .Variable <- deparse (substitute (.Variable))
-      print ('VSpec ERROR: supply 2nd argument as character name')
-      return(NULL)
-    }
+    } 
   } else { 
     print('VSpec ERROR: first argument is not a data.frame.')
     return (NA)
@@ -272,10 +326,10 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
   for (.V in .Variable) {
     NV <- which(.V == .Variable)
     if (is.na(ADD[1])) {
-      ## first call: redefine VSpecDF
-      rm(list=names(VSpecEnv), envir=VSpecEnv)
-      VSpecEnv$Variable <- .Variable
       if (NV == 1) {
+        ## first call: redefine VSpecDF
+        try(rm(list=names(VSpecEnv), envir=VSpecEnv), silent = TRUE)
+        VSpecEnv$Variable <- .Variable
         assign('VSpecDF1', DF, envir=VSpecEnv)
         labx <- 'frequency [Hz]'
         if (EDR) {
@@ -296,7 +350,7 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
         cl2 <- ifelse (length(col) >= 2, col[2], 'forestgreen')
         names(cl2) <- VL[2]
         .clinesVSpec <- c(VSpecEnv$clinesVSpec, cl2)
-        VSpecEnv$clinesVSpec <- .clinesVSpec 
+        VSpecEnv$clinesVSpec <- .clinesVSpec   
       } else if (NV == 3) {
         g <- g + geom_path (aes(x=freq, y=fpf3, colour=VL[3]), data=DF, na.rm=TRUE)
         cl3 <- ifelse (length(col) >= 3, col[3], 'black')
@@ -356,7 +410,7 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
     # bs1$xc <- exp(bs1$xc)
   }
   if (is.na(ADD[1])) {
-    g <- g + scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x, n=4), #limits = xlim, 
+        g <- g + scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x, n=4), #limits = xlim, 
       labels = trans_format("log10", math_format(10^.x))) +           
       scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x, n=4), #limits = ylim,             
         labels = trans_format("log10", math_format(10^.x))) + 

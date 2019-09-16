@@ -15,24 +15,26 @@ VSpec(.data, .Variable = NA, VLabel = NA, col = NA,
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
-".Variable" is the second (required) parameter. The data.frame should have an attribute "Rate"
+".Variable" is the second parameter. If the second parameter is omitted, up to three
+variables in the data.frame (excluding Time and TASX) will be used. 
+The data.frame should have an attribute "Rate"
 if its rate is different from 1 Hz (the default). Any restrictions on the time range
 should be applied to the data.frame before it is supplied to this function. See the
 examples below. If subsetting removes the "Rate" attributes from the data.frame, the
 value from the original data.frame should be added to .data.}
 
-\item{.Variable}{The (character) name of a variable that is a column in .data and for which the
-variance spectrum will be constructed. If this variable is not in .data an error message 
-is generated. If the parameter is not supplied or is set to NA (the default), up
-to three variables are selected from the first three (other than TASX or TIME) in
-the supplied data.frame.}
+\item{.Variable}{The name of a variable (character or variable name) that is a column in 
+.data and for which the variance spectrum will be constructed. If this variable is not 
+in .data an error message is generated. If the parameter is not supplied or is set to NA 
+(the default), up to three variables are selected from the first three (other than 
+TASX or TIME) in the supplied data.frame. .Variable can be a vector with dimension
+up to 3.}
 
 \item{VLabel}{A character string or a vector of such strings
-that will be used as the labels in
-the legend. The default is .Variable. The labels should differ if they are to appear
-separately in the legend. For example, to plot the spectrum for the same variable using
-different methods, include labels that indicate the different methods. See the
-examples.}
+that will be used as the labels in the legend. The default is .Variable. The labels 
+should differ if they are to appear separately in the legend. For example, to plot 
+the spectrum for the same variable using different methods, include labels that indicate 
+the different methods. See the examples.}
 
 \item{col}{The color to use when plotting the spectral variance. The default is NA, and
 in this case the following plot colors will be used in order: blue, forestgreen, black, 
@@ -138,7 +140,7 @@ plot definition that is returned before plottingvor set the WACtheme parameter. 
 to make it possible to superimpose future plots, the following variables are saved in the 
 'VSpecEnv' environment: clinesVSpec and VSpecDF{1,2,3}, VSpecVar{2,3}. The defined
 environment is used to preserve these variables between calls. The VSpecEnv environment
-is removed whenever a call is made with both "ADD" and "add" parameters NA.
+variables are removed whenever a call is made with both "ADD" and "add" parameters NA.
 }
 \description{
 Produces a variance spectrum in a ggplot2 file suitable for printing.
@@ -158,7 +160,9 @@ Optional additional smoothing in logarithmic intervals in frequency is available
 through the "smoothBins" parameter. The plot includes background lines showing the
 -5/3 slope expected for homogeneous isotropic turbulence, and for wind variables
 the magnitude of these lines represent factor-of-10 changes in the eddy dissipation
-rate with the larger-dot line representing 1e-4 m^2/s^3.
+rate with the larger-dot line representing 1e-4 m^2/s^3. A recommended usage is as follows:
+library(magrittr) ## for the pipes that follow
+Data %>% dplyr::select(Time, TASX, WIC, WSC) %>% VSpec()
 }
 \examples{
 VSpec(RAFdata, 'WSC')

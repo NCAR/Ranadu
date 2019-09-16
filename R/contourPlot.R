@@ -11,6 +11,7 @@
 #' @aliases contourPlot, ContourPlot
 #' @author William Cooper
 #' @export contourPlot
+#' @importFrom graphics lines
 #' @param D A data.frame with at least two columns, with the first two containing
 #' the two veriables to be used as the abscissa and ordinate coordinates for the plot. 
 #' These two variables should have names, and those names will be used in axis labels.
