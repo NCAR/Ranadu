@@ -1,7 +1,7 @@
 
 #' @title CohPhase
 #' @description Plots the coherence and phase for a cross-spectrum. Optionally,
-#' the cospectrum in a (frequency, covariance) data.frame.
+#' returns the cospectrum in a (frequency, covariance) data.frame.
 #' @details For the variables provided, which must be in the supplied data.frame 
 #' that must also contain the variables "Time" and a "Rate" attribute, this 
 #' function constructs a plot of the squared coherence and phase for the cross-spectrum
@@ -60,8 +60,10 @@
 #' "alpha" of 0.15 for partial transparency. The "showErrors" parameter has no effect unless
 #' the (default) plotType='ggplot' is used. The uncertainty band is not plotted where there are
 #' fewer than two values to average in a bin. 
-#' @param returnCospectrum Default is FALSE. If set TRUE, the cospectrum is returned instead of 
-#' a plot definition, in the form of a data.frame with columns "freq" and "CV'.
+#' @param returnCospectrum Default is FALSE. If set TRUE, instead of a plot definition, 
+#' the cospectrum and quadrature are returned in the form of a data.frame with columns "freq",
+#' "cospec' and 'quad'. These are not smoothed and probably need smoothing when they are used.
+#' The two variance spectra are also returned, as "spec1" and "spec2".
 #' @return A ggplot2 definition for the plot of ((squared) coherence and phase as a function 
 #' of frequency, if plotType == 'ggplot'. The resulting plot definition
 #' can be plotted (via, e.g., 'print (CohPhase(...))) or
@@ -121,7 +123,8 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
     abline(h=0, col='gray', lty=3)
     layout(matrix(1:1, ncol = 1), widths = c(5), heights = c(5))
     op <- par (mar=c(5,4,1,2)+0.1, oma=c(1.1,0,0,0))
-    return (data.frame(freq = exp(pf1$xc), coherence=pf1$ybar, phase=pf2$ybar * 180 / pi))
+    return (data.frame(freq = exp(pf1$xc), coherence=pf1$ybar, phase=pf2$ybar * 180 / pi,
+            sigma1=pf1$sigma, sigma2=pf2$sigma * 180 / pi, nb1=pf1$nb, nb2=pf2$nb))
   } else {
     
     d2 <- data.frame(Time=exp(pf1$xc), coherence=pf1$ybar, phase=pf2$ybar*180/pi, 
@@ -155,11 +158,22 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
       ff1 <- fft(v1)
       ff2 <- fft(v2)
       G <- Re(ff1 * Conj(ff2))/nrow(.data)
+      GQ <- Im(ff1 * Conj(ff2))/nrow(.data)
       N <- nrow(.data) %/% 2 
+      S1 <- Re(ff1 * Conj(ff1) / nrow(.data))
+      S2 <- Re(ff2 * Conj(ff2) / nrow(.data))
       G <- G[2:(N+1)]
+      GQ <- GQ[2:(N+1)]
+      S1 <- S1[2:(N+1)]
+      S2 <- S2[2:(N+1)]
       frq <- c(1:N) * Rate / nrow(.data)
-      spec <- 2 * G / Rate
-      return(data.frame(freq=frq, cospec=spec))
+      spec1 <- 2 * S1 / Rate
+      spec2 <- 2 * S2 / Rate
+      cospec <- 2 * G / Rate
+      quad <- 2 * GQ / Rate
+      # cospectrum - i * quadrature = (gain spectrum) * exp(i*(phase spectrum))
+      # sqrt(cospectrum^2 + quadrature^2) is the amplitude or gain spectrum
+      return(data.frame(freq=frq, cospec=cospec, quad=quad, spec1=spec1, spec2=spec2))
     } else {
       return(g)
     }

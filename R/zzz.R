@@ -6,5 +6,9 @@
   if (!exists('VSpecEnv', envir=emptyenv())) {
     assign('VSpecEnv', new.env(parent = emptyenv()), envir = globalenv())  # define if absent
   }
+  # new environment for RKCK.integrate:
+  if (!exists('RKCKEnv', envir=emptyenv())) {
+    assign('RKCKEnv', new.env(parent = emptyenv()), envir = globalenv())  # define if absent
+  }
   invisible()
 }

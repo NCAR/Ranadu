@@ -41,17 +41,26 @@
 #' @param printTitle Should the title be printed containing flux values? Default is TRUE. 
 #' @param wavelengthLimit The largest wavelength to include in the "FluxL" calculation.
 #' The default is 2000 [meters].
+#' @param Par Optional time-response characteristics of the variable .A to use to
+#' correct for the time response. If provided, this should be a data.frame with variables
+#' a, tau1, and tau2. The argument a represents the fraction of a two-time-constant
+#' response caused by the direct measurement (e.g., by exposure to the temperature of
+#' the airstream) and tau1 is the characteristic time constant for that response. If
+#' a is not 1, tau2 should represent a second time constant, e.g., the response
+#' characteristic of the wire support in the case of a temperature sensor.
 #' @param ... Additional arguments to pass to plot().
-#' @return A data.frame containing the frequency, the smoothed cospectrum, and
-#' the exceedance values. The data.frame also has attributes "Flux" and "FluxL"
+#' @return A data.frame containing the frequency, the smoothed cospectrum (not weighted by
+#' frequency), and the exceedance values. The data.frame also has attributes "Flux" and "FluxL"
 #' representing the total flux and the flux from wavelengths smaller than
 #' the wavelength wavelengthLimit. The wavelengthLimit is also included as an attribute.
+#' If smoothBins > 5, the bin-averaged values are also returned as a data.frame named
+#' "smoothed data.frame".
 #' @examples 
 #' #' X <- flux(RAFdata, 'ATX', scaleFactor=RAFdata$PSXC*100/((RAFdata$ATX+273.15)*287)*1005)
 
 flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins = 0,
                  legend.position = 'bottomleft', .plot = TRUE, plotRibbon = TRUE,
-                 printTitle = TRUE, wavelengthLimit = 2000, ...) {
+                 printTitle = TRUE, wavelengthLimit = 2000, Par = NA, ...) {
   WP <- .data$WIC - mean(.data$WIC, na.rm=TRUE)
   # Cp <- SpecificHeats(D$EWX / D$PSXC)[, 1]
   # Rho <- 100 * D$PSXC / ((D[, .A] + 273.15) * 
@@ -65,20 +74,71 @@ flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins 
   DCP$WP <- WP
   DCP$TP <- TP
   attr(DCP, 'Rate') <- attr(.data, 'Rate')
-  CS <- CohPhase(DCP, 'WP', 'TP', returnCospectrum = TRUE)
-  CSogive <- cumsum(CS$cospec * CS$freq[1])
+  CS <- CohPhase(DCP, 'TP', 'WP', returnCospectrum = TRUE)
+  CS$csUncorrected <- CS$cospec
+  if (is.na(Par[1])) {
+    ylab <- bquote("f x flux cospectrum ["*.(Units)*"]")    
+  } else {
+    ylab <- bquote("f x flux cospectrum (corrected) ["*.(Units)*"]")
+    ## Correct for the time response of the sensor:
+    a <- Par$a
+    tau1 <- Par$tau1
+    tau2 <- Par$tau2
+    frq <- CS$freq
+    zeta <- -atan(2*pi*frq*tau2)
+    b <- cos(zeta)
+    ## Use the Laplace-transform solution
+    C1 <- 1 / (1 + 4 * pi^2 * frq^2 * tau1^2) * 
+      (-(a + (1 - a) * b * cos(zeta)) * 2 * pi * frq * tau1 +
+         (1 - a) * b * sin(zeta)) 
+    C2 <- 1 / (1 + 4 * pi^2 * frq^2 * tau1^2) * 
+      ((a + (1 - a) * b * cos(zeta)) + 
+         (1 - a) * b * sin(zeta) * 2 * pi * frq * tau1)
+    cTC <- sqrt(C1^2 + C2^2)
+    phiTC <- atan2(C1, C2)
+    CS$cospec <- CS$cospec / (cTC * cos(phiTC))
+    CS$quad <- CS$quad / (cTC)
+  }
+  CSogive <- cumsum(CS$cospec) * CS$freq[1]
   CSogive <- CSogive[length(CSogive)]-CSogive
   CS$ogive <- CSogive
-  CS$cospec <- SmoothInterp(CS$cospec, .Length=spans)
+  CSUCogive <- cumsum(CS$csUncorrected) * CS$freq[1]
+  CSUCogive <- CSUCogive[length(CSUCogive)]-CSUCogive
+  CS$UCogive <- CSUCogive
+  # CS$cospec <- SmoothInterp(CS$cospec, .Length=spans)
+  CSogiveQ<- cumsum(CS$quad) * CS$freq[1]
+  CSogiveQ <- CSogiveQ[length(CSogiveQ)]-CSogiveQ
+  CS$ogiveQ <- CSogiveQ
+  # CS$cospec <- SmoothInterp(CS$cospec, .Length=spans)
+  # CS$quad <- SmoothInterp(CS$quad, .Length=spans)
+  CS$cospec <- SmoothInterp(CS$cospec, .Length=0)  # treat NAs
+  s25 <- spans %/% 25; s10 <- spans %/% 10; s3 <- spans %/% 3
+  s25 <- s25 + (s25 + 1) %% 2
+  s10 <- s10 + (s10 + 1) %% 2
+  s3 <- s3 + (s3 + 1) %% 2
+  CS$cospec <- zoo::rollapply(CS$cospec, FUN = mean, fill='extend', width = s25)
+  CS$cospec[CS$freq > 0.01] <- zoo::rollapply(CS$cospec, FUN = mean, fill='extend', width = s10)[CS$freq > 0.01]
+  CS$cospec[CS$freq > 0.1] <- zoo::rollapply(CS$cospec, FUN = mean, fill='extend', width = s3)[CS$freq > 0.1]
+  CS$cospec[CS$freq > 1] <- zoo::rollapply(CS$cospec, FUN = mean, fill='extend', width = spans)[CS$freq > 1]
+  CS$quad <- SmoothInterp(CS$quad, .Length=0)  # treat NAs
+  CS$quad <- zoo::rollapply(CS$quad, FUN = mean, fill='extend', width = s25)
+  CS$quad[CS$freq > 0.01] <- zoo::rollapply(CS$quad, FUN = mean, fill='extend', width = s10)[CS$freq > 0.01]
+  CS$quad[CS$freq > 0.1] <- zoo::rollapply(CS$quad, FUN = mean, fill='extend', width = s3)[CS$freq > 0.1]
+  CS$quad[CS$freq > 1] <- zoo::rollapply(CS$quad, FUN = mean, fill='extend', width = spans)[CS$freq > 1]
   FluxL <- CSogive[which(CS$freq > fL)[1]]
   Flux <- mean(WP * TP, na.rm=TRUE)
+  Flux <- CSogive[which(CS$freq > 0.01)[1]]
   attr(CS, 'Flux') <- Flux
   attr(CS, 'FluxL') <- FluxL
   attr(CS, 'wavelengthLimit') <- wavelengthLimit
   ## Construct the plot:
-  #ylab <- expression(paste("flux cospectrum x f [W ",m^-2,"]"))
-  ylab <- bquote("flux cospectrum x f ["*.(Units)*"]")
   CS$ncospec <- -1 * CS$cospec
+  CS$nquad <- -1 * CS$quad
+  ## Weight by frequency for log-abscissa plot:
+  CS$cospec <- CS$cospec * CS$freq
+  CS$ncospec <- CS$ncospec * CS$freq
+  CS$quad <- CS$quad * CS$freq
+  CS$nquad <- CS$nquad * CS$freq
   # plotWAC(CS, xlab='frequency [Hz]', ylab=ylab, log='xy',
   #     col = c('skyblue', 'forestgreen', 'red'), lwd = c(2, 2, 2), 
   #     lty = c(1, 2, 1),
@@ -90,8 +150,20 @@ flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins 
     BS$ybar[BS$ybar < 0] <- NA
     BS$nybar[BS$nybar < 0] <- NA
     BS$xc <- exp(BS$xc)
+    # lines(exp(BS$xc), BS$nybar, lwd=2, col='magenta')
+    BSQ <- binStats(data.frame(CS$quad, log(CS$freq)), bins = smoothBins)
+    # lines(exp(BS$xc), BS$ybar, lwd=2, col='brown')
+    BSQ$nybar <- -1 * BSQ$ybar
+    BSQ$ybar[BSQ$ybar < 0] <- NA
+    BSQ$nybar[BSQ$nybar < 0] <- NA
+    BSQ$xc <- exp(BSQ$xc)
+    BS$ybarQ <- BSQ$ybar
+    BS$sigmaQ <- BSQ$sigma
+    BS$nbQ <- BSQ$nb  # Is this needed? Always same as BS$nb?
+    BS$nybarQ <- BSQ$nybar
     attr(CS, 'smoothed data.frame') <- BS
-    bse <- data.frame(x = BS$xc, ymin = BS$ybar - BS$sigma, ymax = BS$ybar + BS$sigma)
+    bse <- data.frame(x = BS$xc, ymin = BS$ybar - BS$sigma, ymax = BS$ybar + BS$sigma,
+                      yminN = BS$nybar - BS$sigma, ymaxN = BS$nybar + BS$sigma)
     # lines(exp(BS$xc), BS$nybar, lwd=2, col='magenta')
   }
   xlim=c(0.01, 15)
@@ -104,15 +176,29 @@ flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins 
     ix <- which ('ylim' == names(list(...)))
     ylim <- list(...)[[ix]]
   }
+  bse$ymin[bse$ymin < ylim[1]] <- ylim[1]
+  bse$yminN[bse$yminN < ylim[1]] <- ylim[1]
   g <- ggplot(data = CS, aes(x=freq))
   g <- g + geom_path(aes(y = cospec, colour='cospectrum', linetype='cospectrum'))
   g <- g + geom_path(aes(y = ncospec, colour='-cospectrum', linetype='-cospectrum'))
-  g <- g + geom_path(aes(y = ogive, colour='exceedance', linetype='exceedance'))
+  g <- g + geom_path(aes(y = ogive, colour='exceedance', linetype='exceedance'), lwd=1.2)
+  if (!is.na(Par[1])) {
+    g <- g + geom_path(aes(y = UCogive, colour='exceedance'), lty=2, lwd=1.2)
+  }
   if (smoothBins > 5) {
-    g <- g + geom_path(data = BS, aes(x=xc, y=ybar), colour='brown')
+    # g <- g + geom_path(data = BS, aes(x=xc, y=ybar), colour='blue', lwd=1.2)
+    # g <- g + geom_path(data = BS, aes(x=xc, y=nybar), colour='deeppink3', lwd=1.2)
+    g <- g + geom_point(data = BS, aes(x=xc, y=ybar), colour='black', pch=19)
+    g <- g + geom_point(data = BS, aes(x=xc, y=nybar), colour='darkred', pch=19)
     if (plotRibbon) {
+      # GeomRibbon$handle_na <- function(data, params) {  data }
       g <- g + geom_ribbon(data=bse, aes(x=x, ymin=ymin, ymax=ymax),
-        fill='gray50', alpha=0.5, show.legend=FALSE, inherit.aes=FALSE, na.rm=TRUE)
+        fill='blue', alpha=0.2, show.legend=FALSE, inherit.aes=FALSE, na.rm=FALSE)
+      g <- g + geom_ribbon(data=bse, aes(x=x, ymin=yminN, ymax=ymaxN),
+                fill='red', alpha=0.2, show.legend=FALSE, inherit.aes=FALSE, na.rm=FALSE)
+      
+      # g <- g + geom_path(data=bse, aes(x=x, y=ymin), lty=1, lwd=0.5, col='magenta') +
+      #          geom_path(data=bse, aes(x=x, y=ymax), lty=1, lwd=0.5, col='magenta')
     }
   }
   g <- g + geom_path(data=data.frame(x=rep(fL, 2), y=ylim), aes(x=x, y=y), linetype=2)
@@ -124,14 +210,15 @@ flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins 
     coord_cartesian(xlim=xlim, ylim=ylim)
   g <- g + xlab('frequency [Hz]') + ylab(ylab)
   g <- suppressWarnings(g + scale_colour_manual (name='', 
-    values=c('cospectrum'='skyblue', '-cospectrum'='red', 'exceedance'='darkorange')))
-  g <- g + scale_linetype_manual (name='', values=c('cospectrum'=1, '-cospectrum'=1, 'exceedance'=2))
+    values=c('cospectrum'='blue', '-cospectrum'='red', 'exceedance'='brown')))
+  g <- g + scale_linetype_manual (name='', values=c('cospectrum'=1, '-cospectrum'=1, 'exceedance'=1))
   g <- g + guides(col=guide_legend(reverse = TRUE), linetype=guide_legend(reverse = TRUE))
   ttl <- bquote('Total flux '~.(format(Flux, digits=3))~.(Units)*'; partial <'*.(format((wavelengthLimit/1000), digits=2))~'km:'~.(format(FluxL, digits=3))~.(Units))
   if (printTitle) {
     g <- g + labs(title=ttl)
   }
-  suppressWarnings(print(g + theme_WAC() + theme(plot.title = element_text(size=12))))
+  suppressWarnings(print(g + theme_WAC(1) + theme(plot.title = element_text(size=12)) +
+                             theme(legend.position=c(0.65, 0.91))))
   # par(bg = 'gray95')
   # plotWAC(data.frame(exp(BSF1$xc), BSF1$ybar, BSF1$nybar), 
   #   col = c('blue', 'red'), ylab = ylab,

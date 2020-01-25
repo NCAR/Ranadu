@@ -60,8 +60,10 @@ a ribbon extending one standard deviation above and below the mean value. The de
 the (default) plotType='ggplot' is used. The uncertainty band is not plotted where there are
 fewer than two values to average in a bin.}
 
-\item{returnCospectrum}{Default is FALSE. If set TRUE, the cospectrum is returned instead of 
-a plot definition, in the form of a data.frame with columns "freq" and "CV'.}
+\item{returnCospectrum}{Default is FALSE. If set TRUE, instead of a plot definition, 
+the cospectrum and quadrature are returned in the form of a data.frame with columns "freq",
+"cospec' and 'quad'. These are not smoothed and probably need smoothing when they are used.
+The two variance spectra are also returned, as "spec1" and "spec2".}
 }
 \value{
 A ggplot2 definition for the plot of ((squared) coherence and phase as a function 
