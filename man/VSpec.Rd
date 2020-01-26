@@ -6,12 +6,28 @@
 \alias{vspec}
 \title{VSpec}
 \usage{
-VSpec(.data, .Variable = NA, VLabel = NA, col = NA,
-  type = "spectrum", method = NA, xlim = NA, ylim = NA,
-  spans = 49, ae = 0.2, smoothBins = 0, segLength = 512,
-  poles = 50, resolution = 1e-04, showErrors = 0,
-  WavelengthScale = TRUE, ADD = NA, add = NA, EDR = FALSE,
-  WACtheme = NA)
+VSpec(
+  .data,
+  .Variable = NA,
+  VLabel = NA,
+  col = NA,
+  type = "spectrum",
+  method = NA,
+  xlim = NA,
+  ylim = NA,
+  spans = 49,
+  ae = 0.2,
+  smoothBins = 0,
+  segLength = 512,
+  poles = 50,
+  resolution = 1e-04,
+  showErrors = 0,
+  WavelengthScale = TRUE,
+  ADD = NA,
+  add = NA,
+  EDR = FALSE,
+  WACtheme = NA
+)
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", "TASX" and ".Variable" where

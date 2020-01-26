@@ -35,7 +35,7 @@ Depends:
 Imports:
     ggthemes, tcltk, nleqslv, zoo, fields, signal, reshape2, bspec, dplyr, plyr, tibble, stats
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Collate: 
     'AOAfromRadome.R'
     'AdiabaticTandLWC.R'

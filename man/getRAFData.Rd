@@ -5,8 +5,16 @@
 \alias{getRAFdata}
 \title{getRAFData}
 \usage{
-getRAFData(.Rdata = "Temp", .Directory = NA, .Project, .Flight,
-  .Start = 0, .End = 0, .VarList = NA, .F = 0)
+getRAFData(
+  .Rdata = "Temp",
+  .Directory = NA,
+  .Project,
+  .Flight,
+  .Start = 0,
+  .End = 0,
+  .VarList = NA,
+  .F = 0
+)
 }
 \arguments{
 \item{.Rdata}{The name to be given to the data file placed on $FTP. Example: "Temp" 

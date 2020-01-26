@@ -6,8 +6,7 @@
 \alias{GetNetCDF}
 \title{getNetCDF}
 \usage{
-getNetCDF(fname, VarList = standardVariables(), Start = 0, End = 0,
-  F = 0)
+getNetCDF(fname, VarList = standardVariables(), Start = 0, End = 0, F = 0)
 }
 \arguments{
 \item{fname}{string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"}

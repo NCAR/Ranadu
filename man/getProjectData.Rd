@@ -4,9 +4,15 @@
 \alias{getProjectData}
 \title{getProjectData}
 \usage{
-getProjectData(.Project, .Variables = standardVariables(),
-  DataDir = DataDirectory(), Flights = NA, .Test = FALSE,
-  .Ferry = FALSE, maxMemory = 1e+09)
+getProjectData(
+  .Project,
+  .Variables = standardVariables(),
+  DataDir = DataDirectory(),
+  Flights = NA,
+  .Test = FALSE,
+  .Ferry = FALSE,
+  maxMemory = 1e+09
+)
 }
 \arguments{
 \item{.Project}{The name of the project, for which data files are assumed

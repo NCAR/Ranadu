@@ -4,9 +4,21 @@
 \alias{flux}
 \title{flux}
 \usage{
-flux(.data, .A, Units = "", scaleFactor = 1, spans = 49,
-  smoothBins = 0, legend.position = "bottomleft", .plot = TRUE,
-  plotRibbon = TRUE, printTitle = TRUE, wavelengthLimit = 2000, ...)
+flux(
+  .data,
+  .A,
+  Units = "",
+  scaleFactor = 1,
+  spans = 49,
+  smoothBins = 0,
+  legend.position = "bottomleft",
+  .plot = TRUE,
+  plotRibbon = TRUE,
+  printTitle = TRUE,
+  wavelengthLimit = 2000,
+  Par = NA,
+  ...
+)
 }
 \arguments{
 \item{.data}{A Ranadu-convention data.frame containing at least the variables
@@ -50,13 +62,23 @@ smoothBins.}
 \item{wavelengthLimit}{The largest wavelength to include in the "FluxL" calculation.
 The default is 2000 [meters].}
 
+\item{Par}{Optional time-response characteristics of the variable .A to use to
+correct for the time response. If provided, this should be a data.frame with variables
+a, tau1, and tau2. The argument a represents the fraction of a two-time-constant
+response caused by the direct measurement (e.g., by exposure to the temperature of
+the airstream) and tau1 is the characteristic time constant for that response. If
+a is not 1, tau2 should represent a second time constant, e.g., the response
+characteristic of the wire support in the case of a temperature sensor.}
+
 \item{...}{Additional arguments to pass to plot().}
 }
 \value{
-A data.frame containing the frequency, the smoothed cospectrum, and
-the exceedance values. The data.frame also has attributes "Flux" and "FluxL"
+A data.frame containing the frequency, the smoothed cospectrum (not weighted by
+frequency), and the exceedance values. The data.frame also has attributes "Flux" and "FluxL"
 representing the total flux and the flux from wavelengths smaller than
 the wavelength wavelengthLimit. The wavelengthLimit is also included as an attribute.
+If smoothBins > 5, the bin-averaged values are also returned as a data.frame named
+"smoothed data.frame".
 }
 \description{
 Plot cospectrum for flux and calculate flux.

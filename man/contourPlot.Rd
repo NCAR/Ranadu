@@ -6,9 +6,18 @@
 \alias{ContourPlot}
 \title{contourPlot}
 \usage{
-contourPlot(D, Ndelta = c(50, 50), logCounts = TRUE, colors = NA,
-  xlim = NA, ylim = NA, xlab = NA, ylab = NA, title = NA,
-  addLine = NA)
+contourPlot(
+  D,
+  Ndelta = c(50, 50),
+  logCounts = TRUE,
+  colors = NA,
+  xlim = NA,
+  ylim = NA,
+  xlab = NA,
+  ylab = NA,
+  title = NA,
+  addLine = NA
+)
 }
 \arguments{
 \item{D}{A data.frame with at least two columns, with the first two containing

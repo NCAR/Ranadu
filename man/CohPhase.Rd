@@ -7,9 +7,17 @@
 \alias{cohphase}
 \title{CohPhase}
 \usage{
-CohPhase(.data, .Var1, .Var2, col = "blue", spans = 25,
-  smoothBins = 50, plotType = "ggplot", showErrors = 0,
-  returnCospectrum = FALSE)
+CohPhase(
+  .data,
+  .Var1,
+  .Var2,
+  col = "blue",
+  spans = 25,
+  smoothBins = 50,
+  plotType = "ggplot",
+  showErrors = 0,
+  returnCospectrum = FALSE
+)
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", ".Var1" and ".Var2".
@@ -77,7 +85,7 @@ and phase. That can be used to plot separately and perhaps combine with other pl
 }
 \description{
 Plots the coherence and phase for a cross-spectrum. Optionally,
-the cospectrum in a (frequency, covariance) data.frame.
+returns the cospectrum in a (frequency, covariance) data.frame.
 }
 \details{
 For the variables provided, which must be in the supplied data.frame 

@@ -5,9 +5,21 @@
 \alias{plotRAF}
 \title{plotWAC}
 \usage{
-plotWAC(x, y = NA, col = "blue", xlab = "TIME [UTC]", ylab = "",
-  lwd = 2, type = "l", lty = 1, logxy = "", pch = 20, cex = 1,
-  legend.position = "bottomright", ...)
+plotWAC(
+  x,
+  y = NA,
+  col = "blue",
+  xlab = "TIME [UTC]",
+  ylab = "",
+  lwd = 2,
+  type = "l",
+  lty = 1,
+  logxy = "",
+  pch = 20,
+  cex = 1,
+  legend.position = "bottomright",
+  ...
+)
 }
 \arguments{
 \item{x}{Usually, Time from a data.frame; a vector of abscissa values. Optionally,

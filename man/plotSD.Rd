@@ -4,10 +4,24 @@
 \alias{plotSD}
 \title{plotSD}
 \usage{
-plotSD(data, CellLimits = NA, logAxis = "", ucon = rep(NA, 5),
-  col = "blue", FirstCell = rep(1, 5), title = NA, lwd = rep(2, 5),
-  xlim = NA, ylim = NA, CDF = FALSE, LWC = FALSE, addBar = FALSE,
-  ADD = FALSE, legend.position = NA, ...)
+plotSD(
+  data,
+  CellLimits = NA,
+  logAxis = "",
+  ucon = rep(NA, 5),
+  col = "blue",
+  FirstCell = rep(1, 5),
+  title = NA,
+  lwd = rep(2, 5),
+  xlim = NA,
+  ylim = NA,
+  CDF = FALSE,
+  LWC = FALSE,
+  addBar = FALSE,
+  ADD = FALSE,
+  legend.position = NA,
+  ...
+)
 }
 \arguments{
 \item{data}{A data.frame containing "Time" and one size-distribution variable to be plotted, as the second column after "Time". 

@@ -4,8 +4,13 @@
 \alias{binStats}
 \title{binStats}
 \usage{
-binStats(.d, bins = 20, xlow = min(.d[, 2], na.rm = TRUE),
-  xhigh = max(.d[, 2], na.rm = TRUE), addBin = FALSE)
+binStats(
+  .d,
+  bins = 20,
+  xlow = min(.d[, 2], na.rm = TRUE),
+  xhigh = max(.d[, 2], na.rm = TRUE),
+  addBin = FALSE
+)
 }
 \arguments{
 \item{.d}{A data-frame containing at least two columns, the first holding

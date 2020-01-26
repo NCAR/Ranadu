@@ -5,10 +5,14 @@
 \alias{openInProgram}
 \title{OpenInProgram}
 \usage{
-OpenInProgram(Data, Program = "ncplot",
+OpenInProgram(
+  Data,
+  Program = "ncplot",
   dataDirectory = sprintf("\%s/R", DataDirectory()),
-  netCDFfileName = "RtoXanadu", warnOverwrite = TRUE,
-  openProgram = TRUE)
+  netCDFfileName = "RtoXanadu",
+  warnOverwrite = TRUE,
+  openProgram = TRUE
+)
 }
 \arguments{
 \item{Data}{The data.frame containing the variables that will be transferred for
