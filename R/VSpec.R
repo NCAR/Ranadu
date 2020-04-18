@@ -337,6 +337,7 @@ VSpec <- function (.data, .Variable=NA, VLabel=NA, col=NA, type='spectrum',
           laby <- expression(paste("eddy dissipation rate [m"^"2","s"^"-3","]"))
         } else {
           laby <- sprintf('variance spectrum fP(f) for %s', .V)
+          laby <- bquote('spectral variance ' ~ nu * 'P(' * nu * ') for ' ~ .(.V))
         }
         g <- ggplot(data = DF)         
         g <- g + geom_path (aes(x=freq, y=fpf, colour=VL[1]), data=DF, na.rm=TRUE) +  

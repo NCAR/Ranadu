@@ -168,7 +168,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       g <- g + scale_size_manual ('', labels=lvl, breaks=lvl, values = lwd)
       g <- g + scale_linetype_manual ('', labels=lvl, breaks=lvl, values = lty)
       g <- g + scale_colour_manual('', labels = lvl, breaks=lvl, values = colrs)
-      g <- g + facet_grid (PanelGroup ~ ., scales='free_y', drop=TRUE)
+      g <- g + facet_grid (PanelGroup ~ ., scales='free_y', drop=TRUE, labeller = label_parsed)
     } else {
       a <- sprintf ("aes (x=%s)", names(.data)[1])
       g <- ggplot (data=.data, eval(parse(text=a)))

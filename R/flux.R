@@ -15,11 +15,18 @@
 #' Time, TASX, WIC, and the scalar to use for the flux calculation. 
 #' @param .A The name of a variable in .data to use as the scalar in the flux
 #' calculation.
+#' @param Acorrection A vector of length matching the rows in .data that
+#' specifies a correction to be applied to .A. This is provided to enable
+#' correction of the temperature for dynamic heating, in case the "Par" option
+#' below is used to correct the measurements, because the recovery temperature
+#' should be corrected before the dynamic-heating correction is subtracted.
+#' The sign of this parameter should be negative in that case and will be
+#' alphaR*TASX^2/Cp where alphaR is the recovery factor. The default is 0.
 #' @param Units A character string or bquote expression for the units. For
 #' math expressions this is best provided as a bquote term; e.g., for heat flux,
 #' Units = bquote("W"~m^-2). The default is '' giving no units.
 #' @param scaleFactor A vector of length equal to the rows in .data that specifies
-#' a weight factor that will be multiplied with the cospectrum to obtain the
+#' a weight factor multiplying the cospectrum to obtain the
 #' flux cospectrum. Default: 1. For sensible heat flux, for example, this should
 #' be the product of air density and specific heat at constant pressure.
 #' @param spans The length of the Daniell-smoother sequence to use smoothing the cospectrum.
@@ -47,7 +54,14 @@
 #' response caused by the direct measurement (e.g., by exposure to the temperature of
 #' the airstream) and tau1 is the characteristic time constant for that response. If
 #' a is not 1, tau2 should represent a second time constant, e.g., the response
-#' characteristic of the wire support in the case of a temperature sensor.
+#' characteristic of the wire support in the case of a temperature sensor. The
+#' variables tau1 and tau2 can be vectors with length matching the number of rows in
+#' the ".data" data-frame, to permits variations dependent on Mach number and air
+#' density.
+#' @param CSprevious An optional data.frame returned from a previous call to "flux()".
+#' The corresponding exceedance function will be plotted on the new copectrum
+#' as a dashed brown line. This option is provided to enable comparison to
+#' the previous results.
 #' @param ... Additional arguments to pass to plot().
 #' @return A data.frame containing the frequency, the smoothed cospectrum (not weighted by
 #' frequency), and the exceedance values. The data.frame also has attributes "Flux" and "FluxL"
@@ -58,15 +72,15 @@
 #' @examples 
 #' #' X <- flux(RAFdata, 'ATX', scaleFactor=RAFdata$PSXC*100/((RAFdata$ATX+273.15)*287)*1005)
 
-flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins = 0,
+flux <- function(.data, .A, Acorrection = 0, Units = '', scaleFactor = 1, spans = 49, smoothBins = 0,
                  legend.position = 'bottomleft', .plot = TRUE, plotRibbon = TRUE,
-                 printTitle = TRUE, wavelengthLimit = 2000, Par = NA, ...) {
+                 printTitle = TRUE, wavelengthLimit = 2000, Par = NA, CSprevious = NA, ...) {
   WP <- .data$WIC - mean(.data$WIC, na.rm=TRUE)
   # Cp <- SpecificHeats(D$EWX / D$PSXC)[, 1]
   # Rho <- 100 * D$PSXC / ((D[, .A] + 273.15) * 
   #     SpecificHeats(D$EWX / D$PSXC)[, 3])
   # scaleFactor <- Cp * Rho
-  TP <- .data[, .A] * scaleFactor
+  TP <- .data[, .A] + Acorrection
   TP <- TP - mean(TP, na.rm=TRUE)
   Tasm <- mean(.data$TASX, na.rm=TRUE)
   fL <- Tasm / wavelengthLimit
@@ -75,6 +89,7 @@ flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins 
   DCP$TP <- TP
   attr(DCP, 'Rate') <- attr(.data, 'Rate')
   CS <- CohPhase(DCP, 'TP', 'WP', returnCospectrum = TRUE)
+  CS$cospec <- CS$cospec * scaleFactor
   CS$csUncorrected <- CS$cospec
   if (is.na(Par[1])) {
     ylab <- bquote("f x flux cospectrum ["*.(Units)*"]")    
@@ -96,7 +111,15 @@ flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins 
          (1 - a) * b * sin(zeta) * 2 * pi * frq * tau1)
     cTC <- sqrt(C1^2 + C2^2)
     phiTC <- atan2(C1, C2)
-    CS$cospec <- CS$cospec / (cTC * cos(phiTC))
+    H <- complex(modulus=cTC, argument=phiTC)
+    if (Acorrection[1] != 0) {
+      vc <- SmoothInterp(Acorrection, .Length=0)
+      vc <- detrend(data.frame(Time=.data$Time, vc))
+      ffc <- fft(vc)
+    } else {
+      ffc <- 0
+    }
+    CS$cospec <- Re(CS$cospec / H - ffc * scaleFactor)
     CS$quad <- CS$quad / (cTC)
   }
   CSogive <- cumsum(CS$cospec) * CS$freq[1]
@@ -176,8 +199,10 @@ flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins 
     ix <- which ('ylim' == names(list(...)))
     ylim <- list(...)[[ix]]
   }
-  bse$ymin[bse$ymin < ylim[1]] <- ylim[1]
-  bse$yminN[bse$yminN < ylim[1]] <- ylim[1]
+  if (smoothBins > 5) {
+    bse$ymin[bse$ymin < ylim[1]] <- ylim[1]
+    bse$yminN[bse$yminN < ylim[1]] <- ylim[1]
+  }
   g <- ggplot(data = CS, aes(x=freq))
   g <- g + geom_path(aes(y = cospec, colour='cospectrum', linetype='cospectrum'))
   g <- g + geom_path(aes(y = ncospec, colour='-cospectrum', linetype='-cospectrum'))
@@ -217,8 +242,10 @@ flux <- function(.data, .A, Units = '', scaleFactor = 1, spans = 49, smoothBins 
   if (printTitle) {
     g <- g + labs(title=ttl)
   }
-  suppressWarnings(print(g + theme_WAC(1) + theme(plot.title = element_text(size=12)) +
+  if(.plot) {
+    suppressWarnings(print(g + theme_WAC(1) + theme(plot.title = element_text(size=12)) +
                              theme(legend.position=c(0.65, 0.91))))
+  }
   # par(bg = 'gray95')
   # plotWAC(data.frame(exp(BSF1$xc), BSF1$ybar, BSF1$nybar), 
   #   col = c('blue', 'red'), ylab = ylab,

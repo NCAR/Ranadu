@@ -33,7 +33,7 @@ source ('R/getNetCDF.R')
 ## of interactions when window entries are changed.
 Trace <- FALSE
 Trace <- TRUE
-load ('InputDF.Rdata')
+load ('inst/InputDF.Rdata')
 xVarList <- standardVariables()
 
 ## assemble a list of projects for which an appropriately named rf01

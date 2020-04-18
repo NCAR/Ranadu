@@ -7,6 +7,7 @@
 flux(
   .data,
   .A,
+  Acorrection = 0,
   Units = "",
   scaleFactor = 1,
   spans = 49,
@@ -17,6 +18,7 @@ flux(
   printTitle = TRUE,
   wavelengthLimit = 2000,
   Par = NA,
+  CSprevious = NA,
   ...
 )
 }
@@ -27,12 +29,20 @@ Time, TASX, WIC, and the scalar to use for the flux calculation.}
 \item{.A}{The name of a variable in .data to use as the scalar in the flux
 calculation.}
 
+\item{Acorrection}{A vector of length matching the rows in .data that
+specifies a correction to be applied to .A. This is provided to enable
+correction of the temperature for dynamic heating, in case the "Par" option
+below is used to correct the measurements, because the recovery temperature
+should be corrected before the dynamic-heating correction is subtracted.
+The sign of this parameter should be negative in that case and will be
+alphaR*TASX^2/Cp where alphaR is the recovery factor. The default is 0.}
+
 \item{Units}{A character string or bquote expression for the units. For
 math expressions this is best provided as a bquote term; e.g., for heat flux,
 Units = bquote("W"~m^-2). The default is '' giving no units.}
 
 \item{scaleFactor}{A vector of length equal to the rows in .data that specifies
-a weight factor that will be multiplied with the cospectrum to obtain the
+a weight factor multiplying the cospectrum to obtain the
 flux cospectrum. Default: 1. For sensible heat flux, for example, this should
 be the product of air density and specific heat at constant pressure.}
 
@@ -68,7 +78,15 @@ a, tau1, and tau2. The argument a represents the fraction of a two-time-constant
 response caused by the direct measurement (e.g., by exposure to the temperature of
 the airstream) and tau1 is the characteristic time constant for that response. If
 a is not 1, tau2 should represent a second time constant, e.g., the response
-characteristic of the wire support in the case of a temperature sensor.}
+characteristic of the wire support in the case of a temperature sensor. The
+variables tau1 and tau2 can be vectors with length matching the number of rows in
+the ".data" data-frame, to permits variations dependent on Mach number and air
+density.}
+
+\item{CSprevious}{An optional data.frame returned from a previous call to "flux()".
+The corresponding exceedance function will be plotted on the new copectrum
+as a dashed brown line. This option is provided to enable comparison to
+the previous results.}
 
 \item{...}{Additional arguments to pass to plot().}
 }
