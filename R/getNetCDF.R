@@ -72,6 +72,7 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' @import ncdf4
 #' @importFrom signal filter sgolay
 #' @importFrom stats approx
+#' @suggests magrittr
 #' @export getNetCDF
 #' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
 #' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load 

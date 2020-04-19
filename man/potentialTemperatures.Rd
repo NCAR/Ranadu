@@ -4,7 +4,9 @@
 \name{potentialTemperatures}
 \alias{potentialTemperatures}
 \title{potentialTemperatures}
-\format{An object of class \code{list} of length 6.}
+\format{
+An object of class \code{list} of length 6.
+}
 \usage{
 potentialTemperatures(DF)  # use $name to get desired function, before (DF)
 }

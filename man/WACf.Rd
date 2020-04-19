@@ -4,7 +4,9 @@
 \name{WACf}
 \alias{WACf}
 \title{WACf}
-\format{An object of class \code{list} of length 6.}
+\format{
+An object of class \code{list} of length 6.
+}
 \usage{
 WACf(V)  # use [[n]] to select nth function or $name to select function name.
 }
