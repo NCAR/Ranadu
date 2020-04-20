@@ -20,7 +20,7 @@
 #' @examples 
 #' FI <-DataFileInfo (sprintf ("%s/extdata/RAFdata.nc", path.package ("Ranadu")))
 
-DataFileInfo <- function (fileLocation, LLrange=TRUE) {
+DataFileInfo <- function (fileLocation = setFileName(), LLrange=TRUE) {
   # get information about a netCDF data file or saved data.frame, Rdata format
   if (!(grepl ('Rdata$', fileLocation))) {
     netCDFfile <- nc_open (fileLocation)
