@@ -89,7 +89,7 @@ flux <- function(.data, .A, Acorrection = 0, Units = '', scaleFactor = 1, spans 
   DCP$TP <- TP
   attr(DCP, 'Rate') <- attr(.data, 'Rate')
   CS <- CohPhase(DCP, 'TP', 'WP', returnCospectrum = TRUE)
-  CS$cospec <- CS$cospec * scaleFactor
+  CS$cospec <- CS$cospec * mean(scaleFactor, na.rm=TRUE)
   CS$csUncorrected <- CS$cospec
   if (is.na(Par[1])) {
     ylab <- bquote("f x flux cospectrum ["*.(Units)*"]")    

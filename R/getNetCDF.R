@@ -74,7 +74,10 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' @importFrom stats approx
 #' @suggests magrittr
 #' @export getNetCDF
-#' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
+#' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc".
+#' Also accepted are an OPENDAP URL. If used interactively, the default is to call the
+#' function "setFileName()" to select the data file. When not interactive, the default
+#' produces an error so "fname" must be supplied.
 #' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load 
 #' everything except vector variables like the size distributions. (This option may produce 
 #' quite large data.frames.) The default is the list given by standardVariables (). 
@@ -95,7 +98,7 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' @examples 
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2"), 133000, 143000, 5)}
-getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) {
+getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0, End=0, F=0) {
   # This function reads the netCDF file 'fname' and extracts 
   # the variables specified in 'VarList', returning the
   # results in a data.frame. It includes the flight number F

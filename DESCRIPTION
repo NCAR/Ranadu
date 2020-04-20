@@ -102,5 +102,6 @@ Collate:
     'removeSpikes.R'
     'rk4.integrate.R'
     'selectTime.R'
+    'setFileName.R'
     'setVariableList.R'
     'theme_WAC.R'
