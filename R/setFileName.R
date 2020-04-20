@@ -101,11 +101,11 @@ setFileName <- function (Project=NA, Flight=NA) {
     tkwait.window(guiVar)
     Project <- PRJS[vnSel]  ## have the project
   }
-  print (sprintf ('Project is %s', Project))
+  # print (sprintf ('Project is %s', Project))
   ## now get the desired file
   if (is.na(Flight)) {
     FL <- sort(list.files(file.path(DataDirectory(), Project), pattern = '*.nc'))
-    print(FL)
+    # print(FL)
     ## Choose the file:
     vnSel <- vector('logical', length(FL))
     varClick <- function(v) {
@@ -159,7 +159,7 @@ setFileName <- function (Project=NA, Flight=NA) {
     tkfocus(guiVar)
     tkwait.window(guiVar)
     Flight <- FLS[vnSel]  ## have the file name
-    print (sprintf ('Project %s File %s', Project, Flight))
+    # print (sprintf ('Project %s File %s', Project, Flight))
   } else {
     if (!grepl('.nc$', Flight)) {Flight <- paste0(Flight, '.nc')}
     if (!grepl(Project, Flight)) {Flight <- paste0(Project, Flight)}
@@ -176,4 +176,5 @@ setFileName <- function (Project=NA, Flight=NA) {
 # fname = sprintf ("%s%s/%s%s.nc", DataDirectory(), Project, Project, Flight)
 # vnames <- setVariableList (fname, VarList)
 # ## cat (vnames)
+
 
