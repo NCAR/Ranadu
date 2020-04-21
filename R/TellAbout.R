@@ -101,7 +101,7 @@ ValueOfAll <- function (DataFrame, HHMMSS) {
 
 #' @title getAttributes
 #' @description List the netCDF attributes for a specified variable or data.frame
-#' @details Prints the netCDF attributes and their values, and returns
+#' @details Prints the netCDF attributes and their values, and (invisibly) returns
 #' a text vector with the names of the attributes, for a specified
 #' data.frame. For variable attributes, the name of the variable should be
 #' specified as a string. For global attributes, omit the 'vname' parameter.
@@ -145,7 +145,7 @@ getAttributes <- function (dname, vname=NULL, .print=TRUE) {
         print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
       }
     }
-    return (atts)
+    invisible(atts)
   }
   ## avoid having is.null fail for variable argument rather than text (vname)
   if (typeof (substitute (vname)) == "symbol") {
@@ -166,7 +166,7 @@ getAttributes <- function (dname, vname=NULL, .print=TRUE) {
         print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
       }
     }
-    return (atts)
+    invisible(atts)
   } else {    # variable attributes
     vname <- substitute (vname)
     if (typeof (vname) != "character") {
@@ -185,7 +185,7 @@ getAttributes <- function (dname, vname=NULL, .print=TRUE) {
         print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
       }
     }
-    return (atts)
+    invisible(atts)
   }
 }
   
