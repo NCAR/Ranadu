@@ -135,7 +135,9 @@ getAttributes <- function (dname, vname=NULL, .print=TRUE) {
     }
     ATT <- attributes (dname)
     if (.print) {
-      print (sprintf ("attributes for variable"))
+      a <- attr(dname, 'label')
+      a <- sub('\\).*', '', sub('^.*\\(', '', a))
+      print (sprintf ("attributes for variable %s:", a))
     }
     for (i in 1:length(ATT)) {
       if (names(ATT[i]) == "Dimensions") {next}
@@ -146,46 +148,48 @@ getAttributes <- function (dname, vname=NULL, .print=TRUE) {
       }
     }
     invisible(atts)
-  }
-  ## avoid having is.null fail for variable argument rather than text (vname)
-  if (typeof (substitute (vname)) == "symbol") {
-    vname <- deparse (substitute (vname))
-  }
-  if (is.null(vname)) {
-    ATT <- attributes (dname)
-    if (.print) {
-      print ("attributes of data.frame:")
-    }
-    for (i in 1:length(ATT)) {
-      if (names(ATT[i]) == "row.names") {next}
-      if (names(ATT[i]) == "names") {next}
-      if (names(ATT[i]) == "Dimensions") {next}
-      if (names(ATT[i]) == "class") {next}
-      atts[[length(atts)+1]]  <- ATT[i]
-      if (.print) {
-        print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
-      }
-    }
-    invisible(atts)
-  } else {    # variable attributes
-    vname <- substitute (vname)
-    if (typeof (vname) != "character") {
+  } else {
+    ## avoid having is.null fail for variable argument rather than text (vname)
+    if (typeof (substitute (vname)) == "symbol") {
       vname <- deparse (substitute (vname))
     }
-    ATT <- attributes (eval(parse(text=sprintf("dname$%s", vname))))
-    if (.print) {
-      print (sprintf ("attributes for variable %s", vname))
-    }
-    for (i in 1:length(ATT)) {
-      if (names (ATT[i]) == "Dimensions") {next}
-      if (names (ATT[i]) == "dim") {next}
-      if (names (ATT[i]) == "class") {next}
-      atts[[length(atts)+1]]  <- ATT[i]
+    if (is.null(vname)) {
+      ATT <- attributes (dname)
       if (.print) {
-        print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
+        print ("attributes of data.frame:")
       }
+      for (i in 1:length(ATT)) {
+        if (names(ATT[i]) == "row.names") {next}
+        if (names(ATT[i]) == "names") {next}
+        if (names(ATT[i]) == "Dimensions") {next}
+        if (names(ATT[i]) == "class") {next}
+        atts[[length(atts)+1]]  <- ATT[i]
+        if (.print) {
+          print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
+        }
+      }
+      invisible(atts)
+    } else {    # variable attributes
+      vname <- substitute (vname)
+      if (typeof (vname) != "character") {
+        vname <- deparse (substitute (vname))
+      }
+      ATT <- attributes (eval(parse(text=sprintf("dname$%s", vname))))
+      if (.print) {
+        print (sprintf ("attributes for variable %s", vname))
+      }
+      for (i in 1:length(ATT)) {
+        if (names (ATT[i]) == "Dimensions") {next}
+        if (names (ATT[i]) == "dim") {next}
+        if (names (ATT[i]) == "class") {next}
+        atts[[length(atts)+1]]  <- ATT[i]
+        if (.print) {
+          print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
+        }
+      }
+      invisible(atts)
     }
-    invisible(atts)
   }
 }
+  
   
