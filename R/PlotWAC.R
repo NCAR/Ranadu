@@ -74,6 +74,8 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     }
     yrange <- c(min(x[ ,2], na.rm=TRUE), max(x[ ,2], na.rm=TRUE))
     if (length(x) > 2) {
+      if (length(pch) == 1) {pch <- rep(pch, length(x)-1)}
+      if (length(cex) == 1) {cex <- rep(cex, length(x)-1)}
       for (j in 3:min(7, length(x))) {
         if (any (!is.na(x[ ,j]))) {
           yl <- min(x[ ,j], na.rm=TRUE)

@@ -80,7 +80,9 @@ getProjectData <- function (.Project, .Variables = standardVariables(),
     } else {
       .Var <- .Variables[.Variables %in% FI$Variables]  ## Request only those present
     }
-    print (sprintf ('loading netCDF file %s', fname))
+    if (interactive()) {
+      print (sprintf ('loading netCDF file %s', fname))
+    }
     D <- getNetCDF (fname, .Var, F=fno)
     ## Now add all-missing vectors for requested variables not present:
     .V <- .Variables [!(.Variables %in% .Var)]

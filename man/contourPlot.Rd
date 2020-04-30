@@ -10,13 +10,14 @@ contourPlot(
   D,
   Ndelta = c(50, 50),
   logCounts = TRUE,
-  colors = NA,
+  cols = NA,
   xlim = NA,
   ylim = NA,
   xlab = NA,
   ylab = NA,
   title = NA,
-  addLine = NA
+  addLine = NA,
+  cf = c(0, 1)
 )
 }
 \arguments{
@@ -31,7 +32,7 @@ default is c(50,50).}
 \item{logCounts}{If TRUE (the default), logarithmic intervals are used when
 specifying and labeling the contours.}
 
-\item{colors}{A list of colors to use. The default is c("gray", "skyblue",
+\item{cols}{A list of colors to use. The default is c("gray", "skyblue",
 "forestgreen", "darkorange", "black"). The number of colors supplied determines
 the number of separate contours that are shown.}
 
@@ -56,6 +57,9 @@ example:
      cf <- coef(lm(D[,2] ~ D[,1]))
      aL <- function(cf, xl) {return(cf[1]+cf[2]*xl)}
      contourPlot(..., addLine=aL)}
+
+\item{cf}{The set of coefficients to be used with function addLine() if provided. Default
+is c(0,1).}
 }
 \description{
 A frequency-plot display of two variables, with frequency denoted by colors.

@@ -11,4 +11,7 @@
     assign('RKCKEnv', new.env(parent = emptyenv()), envir = globalenv())  # define if absent
   }
   invisible()
+  ## make dplyr, magrittr and tibble available:
+  pkgs <- c('dplyr', 'magrittr', 'tibble')
+  for (pkg in pkgs) {library(pkg, character.only=TRUE)}
 }

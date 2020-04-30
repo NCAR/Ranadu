@@ -20,7 +20,7 @@
 #' default is c(50,50).
 #' @param logCounts If TRUE (the default), logarithmic intervals are used when
 #' specifying and labeling the contours.
-#' @param colors A list of colors to use. The default is c("gray", "skyblue",
+#' @param cols A list of colors to use. The default is c("gray", "skyblue",
 #' "forestgreen", "darkorange", "black"). The number of colors supplied determines
 #' the number of separate contours that are shown.
 #' @param xlim A two-component numeric vector specifying the abscissa limits. 
@@ -39,13 +39,16 @@
 #'      cf <- coef(lm(D[,2] ~ D[,1]))
 #'      aL <- function(cf, xl) {return(cf[1]+cf[2]*xl)}
 #'      contourPlot(..., addLine=aL)
+#'@param cf The set of coefficients to be used with function addLine() if provided. Default
+#'is c(0,1).
 #' @examples 
 #' contourPlot(RAFdata[,c('RTH1', 'RTH2')])
 #' contourPlot(RAFdata[,c('RTH1', 'RTH2')], Ndelta=c(20,20), logCount=FALSE, 
 #' title='Comparison of Two Temperature Measurements', 
 #' addLine=function(cf,xl){return(xl)})
 
-contourPlot <- function(D, Ndelta=c(50, 50), logCounts=TRUE, colors=NA, xlim=NA, ylim=NA, xlab=NA, ylab=NA, title=NA, addLine=NA) {
+contourPlot <- function(D, Ndelta=c(50, 50), logCounts=TRUE, cols=NA, 
+                        xlim=NA, ylim=NA, xlab=NA, ylab=NA, title=NA, addLine=NA, cf=c(0,1)) {
   if (!is.data.frame(D) || ncol(D) < 2) {
     print ("error in contourPlot call, first argument must be a data,frame of at least two columns")
     return()
@@ -57,8 +60,8 @@ contourPlot <- function(D, Ndelta=c(50, 50), logCounts=TRUE, colors=NA, xlim=NA,
   if (!is.expression(ylab)) {
     if(is.na(ylab[1])) {ylab <- nm[2]}
   } 
-  if (is.na(colors[1])) {
-    colors <- c('gray', 'skyblue', 'forestgreen', 'darkorange', 'black')
+  if (is.na(cols[1])) {
+  cols <- c('gray', 'skyblue', 'forestgreen', 'darkorange', 'black')
   }
   D <- D[!is.na(D[,1]) & !is.na(D[,2]),]
   if (is.na(xlim[1])) {
@@ -97,15 +100,15 @@ contourPlot <- function(D, Ndelta=c(50, 50), logCounts=TRUE, colors=NA, xlim=NA,
   # iyy <- which(yl > -0.5)[1] - 1
   # A[ixx,iyy] <- A[ixx,iyy] + 300
   # A[ixx-1,iyy-1] <- A[ixx=1,iyy-1] + 300
-  lbls <- rep('', length(colors)+1)
+  lbls <- rep('', length(cols)+1)
   if (logCounts) {
     A[A <= 0] <- 0.1
     A <- log10(A)
     ## get the range in A, and scale
     Amax <- max(A, na.rm=TRUE)
-    lv <- rep(1, length(colors)+1)
+    lv <- rep(1, length(cols)+1)
     lvMax <- ceiling(Amax)
-    for (i in (length(colors)+1):1) {
+    for (i in (length(cols)+1):1) {
       lv[i] <- 10^lvMax
       lbls[i] <- sprintf('%.0f', lv[i])
       lvMax <- ifelse (lvMax %% 1, floor(lvMax-0.1), lvMax+log10(.3))
@@ -119,23 +122,23 @@ contourPlot <- function(D, Ndelta=c(50, 50), logCounts=TRUE, colors=NA, xlim=NA,
     Amax <- max(A, na.rm=TRUE)
     ## find reasonable upper limit:
     Amax <- signif(Amax*1.1, 1)
-    lvl <- Amax * seq(0, 1, by=1/(length(colors))) 
+    lvl <- Amax * seq(0, 1, by=1/(length(cols))) 
     lbls <- sprintf('%.0f', lvl)
   }
   mpar <- par()
   par(mgp=c(2.8,1,0), mar=c(5,4,3,0)+0.1, oma=c(0,0.5,0,0.5))
   # filled.contour(xlim, ylim, A,
-  #   levels=lv, col=colors)
+  #   levels=lv, col=cols)
   ## find y as a function of x:
   if (!is.function(addLine)) {
-    filled.contour(xlm, ylm, A, levels=lvl, col=colors, key.title=title(main='#/bin', cex.main=0.8),
+    filled.contour(xlm, ylm, A, levels=lvl, col=cols, key.title=title(main='#/bin', cex.main=0.8),
                    plot.title=title(main=title, xlab=xlab, ylab=ylab), 
                    plot.axes={axis(1, tck=0.02); axis(2, tck=0.02); axis(3, labels=NA, tck=0.02);
                      axis(4, labels=NA, tck=0.02)}, 
                    key.axes=axis(4, at=lvl, labels=lbls, tck=0.01, cex.axis=0.8))
   } else {
     FN <- match.fun(addLine)
-    filled.contour(xlm, ylm, A, levels=lvl, col=colors, key.title=title(main='#/bin', cex.main=0.8),
+    filled.contour(xlm, ylm, A, levels=lvl, col=cols, key.title=title(main='#/bin', cex.main=0.8),
                    plot.title=title(main=title, xlab=xlab, ylab=ylab),
                    plot.axes={axis(1, tck=0.02); axis(2, tck=0.02); axis(3, labels=NA, tck=0.02);
                      axis(4, labels=NA, tck=0.02);
