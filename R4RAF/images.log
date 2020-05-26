@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.11.30)  7 JAN 2019 11:32
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.11.30)  16 SEP 2019 15:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -486,7 +486,7 @@ Package: luatex85 2016/06/15 v1.4 pdftex aliases for luatex
 \lthtmlCropMarkHeight=\dimen122
 \lthtmlCropMarkDepth=\dimen123
 ! Too many }'s.
-l.131 ...review}\copy\lthtmlPageBox\end{preview}}}
+l.132 ...review}\copy\lthtmlPageBox\end{preview}}}
                                                   %
 You've closed more groups than you opened.
 Such booboos are generally harmless, so keep going.
@@ -494,30 +494,30 @@ Such booboos are generally harmless, so keep going.
 (./images.aux)
 \openout1 = `images.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 162.
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 162.
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 162.
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 162.
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 162.
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 162.
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 162.
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 162.
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 162.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 162.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 163.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 163.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 163.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 163.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 163.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 163.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 163.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 163.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 163.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 163.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 162.
-LaTeX Font Info:    Try loading font information for T1+ptm on input line 162.
+LaTeX Font Info:    ... okay on input line 163.
+LaTeX Font Info:    Try loading font information for T1+ptm on input line 163.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 ) (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
@@ -584,7 +584,7 @@ e
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 \AtBeginShipoutBox=\box33
-Package hyperref Info: Link coloring OFF on input line 162.
+Package hyperref Info: Link coloring OFF on input line 163.
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
 (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
@@ -592,9 +592,9 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count112
 )
-LaTeX Info: Redefining \ref on input line 162.
-LaTeX Info: Redefining \pageref on input line 162.
-LaTeX Info: Redefining \nameref on input line 162.
+LaTeX Info: Redefining \ref on input line 163.
+LaTeX Info: Redefining \pageref on input line 163.
+LaTeX Info: Redefining \nameref on input line 163.
 (./images.out) (./images.out)
 \@outlinefile=\write4
 \openout4 = `images.out'.
@@ -625,56 +625,56 @@ latex2htmlLength oddsidemargin=-0.00018pt
 latex2htmlLength evensidemargin=-0.00018pt
 
 LaTeX Font Info:    Try loading font information for OT1+ztmcm on input line 21
-2.
+3.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd
 File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
 )
 LaTeX Font Info:    Try loading font information for OML+ztmcm on input line 21
-2.
+3.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlztmcm.fd
 File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
 )
 LaTeX Font Info:    Try loading font information for OMS+ztmcm on input line 21
-2.
+3.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsztmcm.fd
 File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
 )
 LaTeX Font Info:    Try loading font information for OMX+ztmcm on input line 21
-2.
+3.
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd
 File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
 )
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 212.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 213.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 212.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 213.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 212.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 213.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 212.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 213.
 
-:tex2html_wrap_inline4652:lthtmlCropMarkHeight:=16.3768pt
+:tex2html_wrap_inline4386:lthtmlCropMarkHeight:=16.3768pt
 
-:tex2html_wrap_inline4652:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
+:tex2html_wrap_inline4386:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
 Preview: Tightpage -32891 -32891 32891 32891
 [1{/usr/share/texlive/texmf-dist/fonts/map/pdftex/updmap/pdftex.map}]
 
-:tex2html_wrap_inline4654:lthtmlCropMarkHeight:=15.0pt
+:tex2html_wrap_inline4388:lthtmlCropMarkHeight:=15.0pt
 
-:tex2html_wrap_inline4654:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
+:tex2html_wrap_inline4388:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
 [2]
 
-:tex2html_wrap_inline4656:lthtmlCropMarkHeight:=12.08986pt
+:tex2html_wrap_inline4390:lthtmlCropMarkHeight:=12.08986pt
 
-:tex2html_wrap_inline4656:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
+:tex2html_wrap_inline4390:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
 [3]
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.233 \lthtmldisplayZ
+l.234 \lthtmldisplayZ
                      
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
@@ -682,7 +682,7 @@ you left one out. Proceed, with fingers crossed.
 ! Extra }, or forgotten $.
 <argument> ... {dC(\nu )}{d\nu }\,\,\,\,. \egroup 
                                                   \end {displaymath}
-l.233 \lthtmldisplayZ
+l.234 \lthtmldisplayZ
                      
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -697,7 +697,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.233 \lthtmldisplayZ
+l.234 \lthtmldisplayZ
                      
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
@@ -706,7 +706,7 @@ or  <return>  to continue without it.
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.233 \lthtmldisplayZ
+l.234 \lthtmldisplayZ
                      
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -717,7 +717,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.233 \lthtmldisplayZ
+l.234 \lthtmldisplayZ
                      
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -726,29 +726,29 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 
-:displaymath4648:lthtmlCropMarkHeight:=18.71982pt
+:displaymath4382:lthtmlCropMarkHeight:=18.71982pt
 
-:displaymath4648:lthtmlCropMarkDepth:=4.29286pt:1ex:=5.4pt
+:displaymath4382:lthtmlCropMarkDepth:=4.29286pt:1ex:=5.4pt
 [4]
 
-:tex2html_wrap_inline4658:lthtmlCropMarkHeight:=15.0pt
+:tex2html_wrap_inline4392:lthtmlCropMarkHeight:=15.0pt
 
-:tex2html_wrap_inline4658:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
+:tex2html_wrap_inline4392:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
 [5]
 
-:tex2html_wrap_inline4660:lthtmlCropMarkHeight:=14.19586pt
+:tex2html_wrap_inline4394:lthtmlCropMarkHeight:=14.19586pt
 
-:tex2html_wrap_inline4660:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
+:tex2html_wrap_inline4394:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
 [6]
 
-:tex2html_wrap_inline4662:lthtmlCropMarkHeight:=15.0pt
+:tex2html_wrap_inline4396:lthtmlCropMarkHeight:=15.0pt
 
-:tex2html_wrap_inline4662:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
+:tex2html_wrap_inline4396:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
 [7]
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.259 \lthtmldisplayZ
+l.260 \lthtmldisplayZ
                      
 I've inserted a begin-math/end-math symbol since I think
 you left one out. Proceed, with fingers crossed.
@@ -756,7 +756,7 @@ you left one out. Proceed, with fingers crossed.
 ! Extra }, or forgotten $.
 \frac #1#2->{\begingroup #1\endgroup \over #2}
                                               
-l.259 \lthtmldisplayZ
+l.260 \lthtmldisplayZ
                      
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -767,7 +767,7 @@ deleted material, e.g., by typing `I$}'.
 ! Extra }, or forgotten $.
 <argument> ...rac {d\nu }{dx}=\nu P(\nu ) \egroup 
                                                   \end {displaymath}
-l.259 \lthtmldisplayZ
+l.260 \lthtmldisplayZ
                      
 I've deleted a group-closing symbol because it seems to be
 spurious, as in `$x}$'. But perhaps the } is legitimate and
@@ -782,7 +782,7 @@ See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.259 \lthtmldisplayZ
+l.260 \lthtmldisplayZ
                      
 Your command was ignored.
 Type  I <command> <return>  to replace it with another command,
@@ -791,7 +791,7 @@ or  <return>  to continue without it.
 ! Missing $ inserted.
 <inserted text> 
                 $
-l.259 \lthtmldisplayZ
+l.260 \lthtmldisplayZ
                      
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -802,7 +802,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.259 \lthtmldisplayZ
+l.260 \lthtmldisplayZ
                      
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -813,7 +813,7 @@ my insertion and my current dilemma will both disappear.
 ! Missing } inserted.
 <inserted text> 
                 }
-l.259 \lthtmldisplayZ
+l.260 \lthtmldisplayZ
                      
 I've inserted something that you may have forgotten.
 (See the <inserted text> above.)
@@ -822,89 +822,89 @@ really didn't forget anything, try typing `2' now; then
 my insertion and my current dilemma will both disappear.
 
 
-:displaymath4649:lthtmlCropMarkHeight:=14.13588pt
+:displaymath4383:lthtmlCropMarkHeight:=14.13588pt
 
-:displaymath4649:lthtmlCropMarkDepth:=10.73795pt:1ex:=5.4pt
+:displaymath4383:lthtmlCropMarkDepth:=10.73795pt:1ex:=5.4pt
 [8]
 
-:tex2html_wrap_inline4664:lthtmlCropMarkHeight:=15.0pt
+:tex2html_wrap_inline4398:lthtmlCropMarkHeight:=15.0pt
 
-:tex2html_wrap_inline4664:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
+:tex2html_wrap_inline4398:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
 [9]
 
-:tex2html_wrap_inline4666:lthtmlCropMarkHeight:=14.19586pt
+:tex2html_wrap_inline4400:lthtmlCropMarkHeight:=14.19586pt
 
-:tex2html_wrap_inline4666:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
+:tex2html_wrap_inline4400:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
 [10]
 
-:tex2html_wrap_inline4668:lthtmlCropMarkHeight:=15.0pt
+:tex2html_wrap_inline4402:lthtmlCropMarkHeight:=15.0pt
 
-:tex2html_wrap_inline4668:lthtmlCropMarkDepth:=3.18732pt:1ex:=5.4pt
+:tex2html_wrap_inline4402:lthtmlCropMarkDepth:=3.18732pt:1ex:=5.4pt
 [11]
 
-:tex2html_wrap_inline4670:lthtmlCropMarkHeight:=15.0pt
+:tex2html_wrap_inline4404:lthtmlCropMarkHeight:=15.0pt
 
-:tex2html_wrap_inline4670:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
+:tex2html_wrap_inline4404:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
 [12]
 
-:tex2html_wrap_inline4676:lthtmlCropMarkHeight:=14.19586pt
+:tex2html_wrap_inline4410:lthtmlCropMarkHeight:=14.19586pt
 
-:tex2html_wrap_inline4676:lthtmlCropMarkDepth:=3.18732pt:1ex:=5.4pt
+:tex2html_wrap_inline4410:lthtmlCropMarkDepth:=3.18732pt:1ex:=5.4pt
 [13]
 
-:tex2html_wrap_inline4680:lthtmlCropMarkHeight:=14.93394pt
+:tex2html_wrap_inline4414:lthtmlCropMarkHeight:=14.93394pt
 
-:tex2html_wrap_inline4680:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
+:tex2html_wrap_inline4414:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
 [14]
 
-:tex2html_wrap_inline4684:lthtmlCropMarkHeight:=15.0pt
+:tex2html_wrap_inline4418:lthtmlCropMarkHeight:=15.0pt
 
-:tex2html_wrap_inline4684:lthtmlCropMarkDepth:=3.18732pt:1ex:=5.4pt
+:tex2html_wrap_inline4418:lthtmlCropMarkDepth:=3.18732pt:1ex:=5.4pt
 [15]
 
-:tex2html_wrap_inline4696:lthtmlCropMarkHeight:=17.0563pt
+:tex2html_wrap_inline4430:lthtmlCropMarkHeight:=17.0563pt
 
-:tex2html_wrap_inline4696:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
+:tex2html_wrap_inline4430:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
 [16]
 
-:tex2html_wrap_inline4698:lthtmlCropMarkHeight:=17.0563pt
+:tex2html_wrap_inline4432:lthtmlCropMarkHeight:=17.0563pt
 
-:tex2html_wrap_inline4698:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
+:tex2html_wrap_inline4432:lthtmlCropMarkDepth:=3.0pt:1ex:=5.4pt
 [17]
 
-:tex2html_wrap_inline4700:lthtmlCropMarkHeight:=13.78792pt
+:tex2html_wrap_inline4434:lthtmlCropMarkHeight:=13.78792pt
 
-:tex2html_wrap_inline4700:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
+:tex2html_wrap_inline4434:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
 [18]
 
-:tex2html_wrap_inline4702:lthtmlCropMarkHeight:=14.19586pt
+:tex2html_wrap_inline4436:lthtmlCropMarkHeight:=14.19586pt
 
-:tex2html_wrap_inline4702:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
+:tex2html_wrap_inline4436:lthtmlCropMarkDepth:=0.20389pt:1ex:=5.4pt
 [19]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 336.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 336.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 337.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 337.
 (./images.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 336.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 336.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 337.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 337.
 Package rerunfilecheck Info: File `images.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 336.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 337.
  ) 
 Here is how much of TeX's memory you used:
- 10391 strings out of 492678
- 145275 string characters out of 6133534
- 224830 words of memory out of 5000000
- 14143 multiletter control sequences out of 15000+600000
+ 10412 strings out of 492678
+ 145553 string characters out of 6133534
+ 226594 words of memory out of 5000000
+ 14164 multiletter control sequences out of 15000+600000
  26142 words of font info for 58 fonts, out of 8000000 for 9000
  1137 hyphenation exceptions out of 8191
- 28i,5n,43p,241b,350s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 28i,5n,43p,244b,350s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
 f-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/
 fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/
 utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on images.pdf (19 pages, 46470 bytes).
+Output written on images.pdf (19 pages, 46568 bytes).
 PDF statistics:
  92 PDF objects out of 1000 (max. 8388607)
  64 compressed objects within 1 object stream

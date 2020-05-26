@@ -4,8 +4,13 @@
 \alias{CorrectHeading}
 \title{CorrectHeading}
 \usage{
-CorrectHeading(.data, .span = 21, .default = -0.08, .Valid = NULL,
-  .plotfile = "inLine")
+CorrectHeading(
+  .data,
+  .span = 21,
+  .default = -0.08,
+  .Valid = NULL,
+  .plotfile = "inLine"
+)
 }
 \arguments{
 \item{.data}{A data.frame containing measurements of body accelerations (called

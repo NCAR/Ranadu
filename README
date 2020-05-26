@@ -1,7 +1,7 @@
 
 This is an R package with functions to facilitate use of NCAR/RAF-generated netCDF files from the research aircraft.
 
-See RanaduManual.pdf in the inst directory.
+See RanaduManual.pdf in the inst directory, and https://WilliamCooper.github.io for additional information.
  
 
 Contact information: cooperw@ucar.edu

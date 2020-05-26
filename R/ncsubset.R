@@ -47,18 +47,22 @@ ncsubset <- function (.OldFileName, .NewFileName, .Start=NA, .End=NA, .VarList=N
     IS = IS %/% 25
     IE = IE %/% 25
   }
+  if (IS > 1) {IS <- IS - 1}
+  if (IE < nrow(.Data)) {IE <- IE - 1}
   if (IE >= nrow (.Data)) {IE <- IE - 1}
   if (length(.VarList) == 0) {
     Cmd <- sprintf("ncks -d Time,%d,%d %s %s", IS, IE, .OldFileName, .NewFileName)
   } else {
     Cmd <- sprintf("ncks -v %s -d Time,%d,%d %s %s",  
                    paste(list=.VarList, collapse=','), IS, IE, .OldFileName, .NewFileName)
-    print(sprintf("Cmd=%s",Cmd))
-    print(sprintf(" .VarList=%s", paste(list=.VarList)))
-    print(sprintf(" start and end indices are %d, %d", getIndex(.Data$Time, .Start), getIndex(.Data$Time, .End)))
-    print(sprintf("Cmd=%s",Cmd))
+    # print(sprintf("Cmd=%s",Cmd))
+    # print(sprintf(" .VarList=%s", paste(list=.VarList)))
+    # print(sprintf(" start and end indices are %d, %d", getIndex(.Data$Time, .Start), getIndex(.Data$Time, .End)))
+    # print(sprintf("Cmd=%s",Cmd))
   }
-  system(sprintf("rm %s", .NewFileName), wait=TRUE)
+  if (file.exists(.NewFileName)) {
+    invisible (file.remove(.NewFileName))
+  }
   system(Cmd, wait=TRUE)
   .netCDFfile = nc_open (.NewFileName, write=TRUE)
   sh <- .Start %/% 10000

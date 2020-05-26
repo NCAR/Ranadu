@@ -13,6 +13,12 @@ standardVariables(list = NULL, SRC = "NCAR")
 \item{SRC}{An indicator of which institution's list should be used. Default
 is 'NCAR'; other choices are 'UWYO' and 'FAAM'.}
 }
+\value{
+A character vector containing a standard set of variable names,
+with additions as specified in "list". For NCAR the standard set is
+ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCXC, TASX,
+WDC, WSC, WIC.
+}
 \description{
 Standard set of variables, usually used in a call to getNetCDF
 }

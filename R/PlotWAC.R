@@ -52,13 +52,13 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
         ## Convert to appropriate expressions where needed:
         if (grepl('\\[deg C\\]', ylab)) {
           ylab <- sub ('\\[deg C\\]', '', ylab)
-          ylab <- bquote(paste(.(ylab),' [',degree,'C]'))
+          ylab <- bquote(.(ylab) * ' [\u00b0C]')
         } else if (grepl('m\\^-3\\]', ylab)) {
           ylab <- sub ('m\\^-3\\]', '', ylab)
           ylab <- bquote(paste(.(ylab),m^-3, ']'))
         } else if (grepl('degree\\]', ylab)) {
           ylab <- sub ('degree\\]', '', ylab)
-          ylab <- bquote(paste(.(ylab),degree,']'))
+          ylab <- bquote(.(ylab) * '\u00b0]')
         } else if (grepl('m s\\^-2\\]', ylab)) {
           ylab <- sub('m s\\^-2\\]', '', ylab)
           ylab <- bquote(paste(.(ylab),'m ',s^-2,']'))
@@ -74,6 +74,8 @@ plotWAC <- function (x, y=NA, col="blue", xlab="TIME [UTC]",
     }
     yrange <- c(min(x[ ,2], na.rm=TRUE), max(x[ ,2], na.rm=TRUE))
     if (length(x) > 2) {
+      if (length(pch) == 1) {pch <- rep(pch, length(x)-1)}
+      if (length(cex) == 1) {cex <- rep(cex, length(x)-1)}
       for (j in 3:min(7, length(x))) {
         if (any (!is.na(x[ ,j]))) {
           yl <- min(x[ ,j], na.rm=TRUE)

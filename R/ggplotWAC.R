@@ -84,13 +84,13 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
         ## Convert to appropriate expressions where needed:
         if (grepl('\\[deg C\\]', ylab)) {
           ylab <- sub ('\\[deg C\\]', '', ylab)
-          ylab <- bquote(paste(.(ylab),' [',degree,'C]'))
+          ylab <- bquote(paste(.(ylab),' [','\u00b0','C]'))
         } else if (grepl('m\\^-3\\]', ylab)) {
           ylab <- sub ('m\\^-3\\]', '', ylab)
           ylab <- bquote(paste(.(ylab),m^-3, ']'))
         } else if (grepl('degree\\]', ylab)) {
           ylab <- sub ('degree\\]', '', ylab)
-          ylab <- bquote(paste(.(ylab),degree,']'))
+          ylab <- bquote(paste(.(ylab),'\u00b0',']'))
         } else if (grepl('m s\\^-2\\]', ylab)) {
           ylab <- sub('m s\\^-2\\]', '', ylab)
           ylab <- bquote(paste(.(ylab),'m ',s^-2,']'))
@@ -168,7 +168,7 @@ ggplotWAC <- function (.data, col="blue", xlab="TIME [UTC]",
       g <- g + scale_size_manual ('', labels=lvl, breaks=lvl, values = lwd)
       g <- g + scale_linetype_manual ('', labels=lvl, breaks=lvl, values = lty)
       g <- g + scale_colour_manual('', labels = lvl, breaks=lvl, values = colrs)
-      g <- g + facet_grid (PanelGroup ~ ., scales='free_y', drop=TRUE)
+      g <- g + facet_grid (PanelGroup ~ ., scales='free_y', drop=TRUE, labeller = label_parsed)
     } else {
       a <- sprintf ("aes (x=%s)", names(.data)[1])
       g <- ggplot (data=.data, eval(parse(text=a)))

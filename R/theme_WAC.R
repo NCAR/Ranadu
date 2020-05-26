@@ -4,7 +4,7 @@
 #' @aliases theme_WAC
 #' @author William Cooper
 #' @import ggplot2
-#' @import ggthemes 
+#' @importFrom ggthemes theme_gdocs
 #' @param version The style number (default 0); 1 used for faceted 
 #' plots and other adaptations in KalmanFilterTechNote, e.g.
 #' @export theme_WAC

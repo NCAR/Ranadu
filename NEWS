@@ -1,11 +1,25 @@
+Version 2.6-20-05-15
   Additions:
+    setFileName.R           -- construct path to netCDF file
+    rk4.integrate.R         -- Runge-Kutta Cash-Karp numerical integration
+    flux.R                  -- calculate eddy-correlation flux
+    Rmutate.R               -- define new variables, esp. in pipes
+    getProjectData.R        -- load a composite data.frame for a project
     df2tibble.R             -- convert standard Ranadu data.frame to tibble
     selectTimes.R           -- add capability to set times in pipes
+    WACf.R                  -- gives a list of statistics like mean, sd
+    potentialTemperatures.R -- gives a set of results for potential temperatures
+    blankNA.R               -- set missing-values so plots show gaps
   Updates:
+    PlotWAC.R               -- trivial change: "degree" to \u00b0C for RStudio
+    ggplotWAC.R             --  "" same
+    contourPlot.R           -- changed how a fit line is specified
     getNetCDF.R             -- change for high-rate size spectra
     ggplotWAC.R             -- correction to variable-name in ggplot
     shinyApp:               -- suppress time reset on change from LR to HR
     DataFileInfo:           -- added output of Measurands and LongNames
+    getAttributes.R         -- made return invisible to avoid duplicate listings
+    TellAbout.R             -- small changes.
 Version 2.5-18-11-02
   Additions:
     plotSD.R                -- plots of size distributions, incl LWC distribution

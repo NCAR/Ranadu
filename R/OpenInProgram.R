@@ -70,9 +70,9 @@ OpenInProgram <- function(Data, Program="ncplot", dataDirectory=sprintf("%s/R", 
   ## edit the .def files for the Xanadu call
   WD <- getwd()
   setwd ("~/Xanadu/R")
-  lines <- readLines ("Xanadu.def")
+  linesX <- readLines ("Xanadu.def")
   newlines <- vector ("character")
-  for (line in lines) {
+  for (line in linesX) {
     if (grepl ("XANFILE", line)) {
       line <- gsub ("=.*", sprintf ("=%s", gsub ("\\.nc", '', netCDFfileName)), line)
     }

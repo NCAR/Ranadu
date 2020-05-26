@@ -6,11 +6,19 @@
 \alias{GetNetCDF}
 \title{getNetCDF}
 \usage{
-getNetCDF(fname, VarList = standardVariables(), Start = 0, End = 0,
-  F = 0)
+getNetCDF(
+  fname = setFileName(),
+  VarList = standardVariables(),
+  Start = 0,
+  End = 0,
+  F = 0
+)
 }
 \arguments{
-\item{fname}{string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"}
+\item{fname}{string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc".
+Also accepted are an OPENDAP URL. If used interactively, the default is to call the
+function "setFileName()" to select the data file. When not interactive, the default
+produces an error so "fname" must be supplied.}
 
 \item{VarList}{vector of variable names to load from the netCDF file. Use "ALL" to load 
 everything except vector variables like the size distributions. (This option may produce 
