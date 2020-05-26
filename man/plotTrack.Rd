@@ -4,9 +4,21 @@
 \alias{plotTrack}
 \title{plotTrack}
 \usage{
-plotTrack(lon, lat = NULL, Time = NULL, WDC = NULL, WSC = NULL,
-  .Range = 0, xc = NULL, yc = NULL, sz = NULL, .Spacing = 15,
-  .WindFlags = 0, .Add = FALSE, ...)
+plotTrack(
+  lon,
+  lat = NULL,
+  Time = NULL,
+  WDC = NULL,
+  WSC = NULL,
+  .Range = 0,
+  xc = NULL,
+  yc = NULL,
+  sz = NULL,
+  .Spacing = 15,
+  .WindFlags = 0,
+  .Add = FALSE,
+  ...
+)
 }
 \arguments{
 \item{lon}{A numeric vector of longitude coordinates (degrees). Optionally,

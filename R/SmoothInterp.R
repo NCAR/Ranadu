@@ -20,8 +20,12 @@
 SmoothInterp <- function (.timeSeries, .maxGap=1000, .Length=61, .order=3) {
   ## skip if there are fewer than 100 measurements
   if (length (.timeSeries[!is.na(.timeSeries)]) < 100) {return (.timeSeries)}
-  d <- zoo::na.spline (as.vector(.timeSeries), maxgap=.maxGap, na.rm = FALSE)
+  ## tried na.spline, but it often introduces too much variance, so returned to na.approx:
+  d <- zoo::na.approx (as.vector(.timeSeries), maxgap=.maxGap, na.rm = FALSE, rule=2)
   if (!(.Length %% 2)) {.Length <- .Length + 1}
+  # Special handling of first or last item:
+  # if (is.na(d[1])) {d[1] <- d[2]}
+  # if (is.na(d[length(d)])) {d[length(d)] <- d[length(d)-1]}
   d[is.na(d)] <- 0
   if (.Length > 2) {
     return (as.vector (signal::filter(signal::sgolay(.order, .Length), d)))

@@ -6,32 +6,56 @@
 \alias{vspec}
 \title{VSpec}
 \usage{
-VSpec(.data, .Variable, VLabel = NA, col = NA, type = "spectrum",
-  method = NA, xlim = c(0.001, 15), ylim = c(1e-04, 1), spans = 49,
-  ae = 0.2, smoothBins = 0, segLength = 512, poles = 50,
-  resolution = 1e-04, showErrors = 0, ADD = NA)
+VSpec(
+  .data,
+  .Variable = NA,
+  VLabel = NA,
+  col = NA,
+  type = "spectrum",
+  method = NA,
+  xlim = NA,
+  ylim = NA,
+  spans = 49,
+  ae = 0.2,
+  smoothBins = 0,
+  segLength = 512,
+  poles = 50,
+  resolution = 1e-04,
+  showErrors = 0,
+  WavelengthScale = TRUE,
+  ADD = NA,
+  add = NA,
+  EDR = FALSE,
+  WACtheme = NA
+)
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", "TASX" and ".Variable" where
-".Variable" is the second (required) parameter. It should also have an attribute "Rate"
+".Variable" is the second parameter. If the second parameter is omitted, up to three
+variables in the data.frame (excluding Time and TASX) will be used. 
+The data.frame should have an attribute "Rate"
 if its rate is different from 1 Hz (the default). Any restrictions on the time range
 should be applied to the data.frame before it is supplied to this function. See the
 examples below. If subsetting removes the "Rate" attributes from the data.frame, the
 value from the original data.frame should be added to .data.}
 
-\item{.Variable}{The (character) name of a variable that is a column in .data and for which the
-variance spectrum will be constructed. If this variable is not in .data an error message 
-is generated.}
+\item{.Variable}{The name of a variable (character or variable name) that is a column in 
+.data and for which the variance spectrum will be constructed. If this variable is not 
+in .data an error message is generated. If the parameter is not supplied or is set to NA 
+(the default), up to three variables are selected from the first three (other than 
+TASX or TIME) in the supplied data.frame. .Variable can be a vector with dimension
+up to 3.}
 
-\item{VLabel}{A character string that will be used as the label for this variable in
-the legend. The default is .Variable. The labels should differ if they are to appear
-separately in the legend. For example, to plot the spectrum for the same variable using
-different methods, include labels that indicate the different methods. See the
-examples.}
+\item{VLabel}{A character string or a vector of such strings
+that will be used as the labels in the legend. The default is .Variable. The labels 
+should differ if they are to appear separately in the legend. For example, to plot 
+the spectrum for the same variable using different methods, include labels that indicate 
+the different methods. See the examples.}
 
-\item{col}{The color to use when plotting this variable. The default is NA, and
+\item{col}{The color to use when plotting the spectral variance. The default is NA, and
 in this case the following plot colors will be used in order: blue, forestgreen, black, 
-brown.}
+black, darkorange. A vector of color names can be supplied if a multiple-variable plot
+is to be generated.}
 
 \item{type}{Three choices are avaiable: "spectrum" (the default), which
 uses the R routine "spectrum()" from the stats package to estimate the spectral
@@ -40,15 +64,17 @@ segments as implemented in the R package "bspec", and "MEM" to use the maximum-e
 method of spectral estimation as implemented in the Ranadu routines memCoef() and
 memEstimate(). The parameter "spans" applies only to the "spectrum" method, the
 argument "segLength" to the Welch method, and the
-arguments "poles" and "resolution" only to the "MEM" method.}
+arguments "poles" and "resolution" only to the "MEM" method. The type will
+be the same for all plotted variance spectra for a multiple-variable plot.}
 
 \item{method}{This is the same as "type" and over-rides it if present.}
 
 \item{xlim}{A two-element vector specifying the lower and upper limits for the abscissa of the
-plot. The default is c(0.001, 15).}
+plot. The default is NA, in which case c(0.001, 1) will be used if the Rate is 1
+and c(0.001, 15) if the Rate is 25.}
 
 \item{ylim}{A two-element vector specifying the lower and upper limits for the ordinate of the
-plot. The default is c(0.0001, 1).}
+plot. The default is NA, in which case c(0.0001, 1) will be used.}
 
 \item{spans}{An odd integer (or forced odd by incrementing upward if even) specifying the 
 number of frequencies to span when averaging the spectral variance estimate produced by the R routine
@@ -94,11 +120,30 @@ a ribbon extending one standard deviation above and below the mean value. The de
 0, and in that case no ribbon is plotted. The ribbon is plotted using color "gray50" but
 "alpha" of 0.5 for partial transparency.}
 
-\item{ADD}{This parameter has the default value NA, which causes the function to plots 
-only the spectrum for the variable provided. If a spectrum for an other set of variables 
-has already been defined by previous calls to VSpec, setting ADD to the plot definition 
-returned by that previous call will add this plot to the previous plot. Up to four
+\item{WavelengthScale}{If TRUE (the default), include a wavelength scale on the plot.}
+
+\item{ADD}{This parameter has the default value NA, which causes the function to plot 
+only the spectrum for the variable(s) provided by this call. If a spectrum for another 
+set of variables has already been defined by previous calls to VSpec and the result saved
+in, e.g., g, setting ADD = g will add this plot to the previous plot. Up to four
 variables can be included in the final plot. See the examples.}
+
+\item{add}{This is only included to make it possible to specify either "ADD" or "add".
+Default is NA, in which case the value of ADD is used.}
+
+\item{EDR}{If EDR is set TRUE, the plot will be normalized such that the ordinate
+is constant and has the value of the eddy dissipation rate for an inertial subrange. Otherwise
+this is not a true density function of log(frequency) and so is difficult to determine
+except for the above specialized use. The variable plotted is (2*pi/V)(C*P(f)*f^(5/3))^(3/2)
+where V is the airspeed in m/s and C is a constant equal to 1.5 for lateral spectra like
+WIC and 2 for longitudinal spectra like TASX. The resulting units are m^2/s^3 per interval in the
+true abscissa coordinate of -1.5C(epsilon)^-(1/3)k^(-2/3), but the plot is displayed
+with a logarithmic-frequency abscissa. The result can't be interpreted as a variance
+spectrum but can show consistency with inertial-subrange expectations and the
+approximate magnitude of the eddy dissipation rate when used with wind components.}
+
+\item{WACtheme}{Default is NA, in which case no special theme is added. Any other value
+adds "theme_WAC()" to the plot definition.}
 }
 \value{
 A ggplot2 definition for the plot of spectral density as a function of frequency.
@@ -107,10 +152,11 @@ to infinity is the total variance of the variable. The resulting plot definition
 can be plotted (via, e.g., 'print (VarSpec(...))) or
 saved for later addition of more variables or for later plotting. The plot is returned
 with the standard ggplot theme; to use the Ranadu theme "theme_WAC()", add it to the
-plot definition that is returned before plotting. In addition, to make it possible to 
-superimpose future plots, the following variables are saved in the global environment: 
-.clinesVSpec and .VSpecDF{1,2,3}, .VSpecVar{2,3}. The function does not check for 
-collision with other possible uses of those names in the global environment.
+plot definition that is returned before plottingvor set the WACtheme parameter. In addition, 
+to make it possible to superimpose future plots, the following variables are saved in the 
+'VSpecEnv' environment: clinesVSpec and VSpecDF{1,2,3}, VSpecVar{2,3}. The defined
+environment is used to preserve these variables between calls. The VSpecEnv environment
+variables are removed whenever a call is made with both "ADD" and "add" parameters NA.
 }
 \description{
 Produces a variance spectrum in a ggplot2 file suitable for printing.
@@ -130,13 +176,14 @@ Optional additional smoothing in logarithmic intervals in frequency is available
 through the "smoothBins" parameter. The plot includes background lines showing the
 -5/3 slope expected for homogeneous isotropic turbulence, and for wind variables
 the magnitude of these lines represent factor-of-10 changes in the eddy dissipation
-rate with the larger-dot line representing 1e-4 m^2/s^3.
+rate with the larger-dot line representing 1e-4 m^2/s^3. A recommended usage is as follows:
+library(magrittr) ## for the pipes that follow
+Data %>% dplyr::select(Time, TASX, WIC, WSC) %>% VSpec()
 }
 \examples{
 VSpec(RAFdata, 'WSC')
-with(RAFdata, VSpec(RAFdata, WSC))
-g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1)); 
-VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g)
+g <- VSpec(RAFdata, 'WSC', VLabel='std', xlim=c(0.1,1));
+VSpec(RAFdata, 'WSC', VLabel='MEM', method='MEM', ADD=g, WACtheme=1)
 VSpec(RAFdata,'TASX', spans=11, showErrors=1, xlim=c(0.01,1)) + theme_WAC()
 }
 \author{

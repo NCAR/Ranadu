@@ -5,9 +5,21 @@
 \alias{plotRAF}
 \title{plotWAC}
 \usage{
-plotWAC(x, y = NA, col = "blue", xlab = "TIME [UTC]", ylab = "",
-  lwd = 2, type = "l", lty = 1, logxy = "", pch = 20, cex = 1,
-  legend.position = "bottomright", ...)
+plotWAC(
+  x,
+  y = NA,
+  col = "blue",
+  xlab = "TIME [UTC]",
+  ylab = "",
+  lwd = 2,
+  type = "l",
+  lty = 1,
+  logxy = "",
+  pch = 20,
+  cex = 1,
+  legend.position = "bottomright",
+  ...
+)
 }
 \arguments{
 \item{x}{Usually, Time from a data.frame; a vector of abscissa values. Optionally,
@@ -57,11 +69,11 @@ argument, sets plot limits to cover range of all variables in the data.frame.
 \examples{
 plotWAC (RAFdata[, c("Time", "ATX", "DPXC")], legend.position="right")
 plotWAC (subset (RAFdata,, c(Time, TASX, GGVNS)), legend.position='topright')
-\dontrun{plotWAC (Time, TASX, ylab="TAS")}
-\dontrun{plotWAC (Time, PSXC, lty=2)}
-\dontrun{plotWAC (Data[, c("Time", "PSXC")])}
-\dontrun{plotWAC (subset (Data,,c(Time,ATX,DPXC)))}
-\dontrun{plotWAC (subset (Data,,c(ATX,DPXC)))}
+\dontrun{with(RAFdata, plotWAC (Time, TASX, ylab="TAS"))}
+\dontrun{with(RAFdata, plotWAC (Time, PSXC, lty=2, ylab='ambient pressure [hPa]'))}
+\dontrun{plotWAC (RAFdata[, c("Time", "PSXC")])}
+\dontrun{plotWAC (subset (RAFdata, ATX > -35, c(Time,ATX,DPXC)))}
+\dontrun{plotWAC (Rsubset (RAFdata, Var=c('ATX', 'DPXC')))}
 }
 \author{
 William Cooper

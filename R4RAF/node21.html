@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>The skew-T thermodynamic diagram</TITLE>
+<META NAME="description" CONTENT="The skew-T thermodynamic diagram">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node22.html">
+<LINK REL="previous" HREF="node20.html">
+<LINK REL="next" HREF="node22.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node22.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node14.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node20.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node22.html">Aerosol- and hydrometeor-size distributions</A>
+<B> Up:</B> <A
+ HREF="node14.html">More Details About Plotting</A>
+<B> Previous:</B> <A
+ HREF="node20.html">Error bars and box-and-whisker</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00450000000000000000">
+The skew-T thermodynamic diagram</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">Ranadu incorporates the ability to plot a set of measurements on the
+background of a skew-T diagram. The background is non-standard and
+is described in detail in <a href="https://drive.google.com/file/d/0B1kIUH45ca5ANVNoMnowUlhpYk0/view%3Fusp%3Dsharing">this document</a>.
+The &ldquo;Ranadu::SkewTSounding()&rdquo; function should be called with a
+data.frame containing measurements of pressure, temperature and dewpoint,
+which may be named either (&ldquo;PSXC&rdquo;, &ldquo;ATX&rdquo;, &ldquo;DPXC&rdquo;) or (&ldquo;Pressure&rdquo;,
+&ldquo;Temperature&rdquo;, &ldquo;DewPoint&rdquo;). A skew-T background is generated
+using the Ranadu data file &ldquo;skewTDiagram.Rdata&rdquo; and the values
+from the input data.frame are optionally averaged in pressure intervals
+and then plotted on this background.
+</FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+<FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2093"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3476">Project</SPAN> <SPAN ID="hue3478">&lt;-</SPAN> <SPAN ID="hue3480">'PREDICT'</SPAN>
+<BR><SPAN ID="hue3482">Flight</SPAN> <SPAN ID="hue3484">&lt;-</SPAN> <SPAN ID="hue3486">11</SPAN>
+<BR><SPAN ID="hue3488">fname</SPAN> <SPAN ID="hue3490">&lt;-</SPAN> <SPAN ID="hue3492"><SPAN &nbsp;CLASS="textbf">sprintf</SPAN></SPAN> <SPAN ID="hue3495">(</SPAN><SPAN ID="hue3497">'%s%s/%srf%02d.nc'</SPAN><SPAN ID="hue3499">,</SPAN> <SPAN ID="hue3501"><SPAN &nbsp;CLASS="textbf">DataDirectory</SPAN></SPAN><SPAN ID="hue3504">(), Project,</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3506">Project, Flight)</SPAN>
+<BR><SPAN ID="hue3508"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue3511">(fname)</SPAN> <SPAN ID="hue3513">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3515"><SPAN &nbsp;CLASS="textbf">selectTime</SPAN></SPAN><SPAN ID="hue3518">(</SPAN><SPAN ID="hue3520">0</SPAN><SPAN ID="hue3522">,</SPAN> <SPAN ID="hue3524">150000</SPAN><SPAN ID="hue3526">)</SPAN> <SPAN ID="hue3528">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3530"><SPAN &nbsp;CLASS="textbf">SkewTSounding</SPAN></SPAN><SPAN ID="hue3533">(</SPAN><SPAN ID="hue3535">AverageInterval</SPAN><SPAN ID="hue3537">=</SPAN><SPAN ID="hue3539">10</SPAN><SPAN ID="hue3541">)</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:skewT"></A><A ID="1148"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+Sounding from PREDICT flight 11.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./skewT-1.png"
+ ALT="Image skewT-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<P>
+</TD></TR>
+</TABLE></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node22.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node14.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node20.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node22.html">Aerosol- and hydrometeor-size distributions</A>
+<B> Up:</B> <A
+ HREF="node14.html">More Details About Plotting</A>
+<B> Previous:</B> <A
+ HREF="node20.html">Error bars and box-and-whisker</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

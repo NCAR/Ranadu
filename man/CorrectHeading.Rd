@@ -4,8 +4,13 @@
 \alias{CorrectHeading}
 \title{CorrectHeading}
 \usage{
-CorrectHeading(.data, .span = 21, .default = -0.08, .Valid = NULL,
-  .plotfile = NULL)
+CorrectHeading(
+  .data,
+  .span = 21,
+  .default = -0.08,
+  .Valid = NULL,
+  .plotfile = "inLine"
+)
 }
 \arguments{
 \item{.data}{A data.frame containing measurements of body accelerations (called
@@ -14,7 +19,10 @@ angles in units of degrees (PITCH, ROLL, THDG, the latter the heading relative t
 true north), and the latitude and altitude (LAT and GGALT), the latter two for
 finding the local acceleration of gravity. If variables named PITCHC, ROLLC, and
 LATC are present those will be used instead. The first two might be produced by
-prior use of the CorrectPitch() function.}
+prior use of the CorrectPitch() function. The data.frame variables must retain
+the original attributes from the netCDF file so that, if arbitrary "CalibrationCoefficients"
+have been applied these can be removed. The reason is that this routine needs the
+original unmodified value from the IRU for variables like THDG.}
 
 \item{.span}{The number of points (default 21) used for estimating the accelerations
 by differentiation and for smoothing the results.}
@@ -30,7 +38,8 @@ exclude from the calculation. This can be used to exclude low-airspeed cases
 is NULL, in which case the test will be skipped.}
 
 \item{.plotfile}{The name of a plot to generate (e.g., "./Plot1.pdf") that shows
-the results from the algorithm.}
+the results from the algorithm. The default is 'inLine', in which case the
+plot is generated and displayed normally. Suppress the plot with a NULL argument.}
 }
 \value{
 A vector of the same length as the supplied data.frame that gives an

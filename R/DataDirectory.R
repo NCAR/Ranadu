@@ -12,7 +12,7 @@
 DataDirectory <- function() {
   
   # provides a local data location that varies with system:
-  #    tikal: /scr/raf_data/ 
+  #    barolo: /scr/raf_data/ 
   #    laptop: /Data/
   #    LookoutHaven: /home/Data/
   #    RAF ground station: /home/data/

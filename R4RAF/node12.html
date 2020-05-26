@@ -1,0 +1,196 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Computational Algorithms</TITLE>
+<META NAME="description" CONTENT="Computational Algorithms">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node13.html">
+<LINK REL="previous" HREF="node11.html">
+<LINK REL="next" HREF="node13.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node13.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node11.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node13.html">Utility Functions</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node11.html">Plotting routines</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00340000000000000000">
+Computational Algorithms</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">A set of functions provide calculations like those used to process
+the original files and, in some cases, to extend those calculations.
+A full list of Ranadu functions can be viewed by using the R command
+&ldquo;?Ranadu&rdquo;, and clicking on the items in that list then will provide
+the standard &ldquo;help&rdquo; information for the functions. Some of these
+are listed below. For additional details, see the technical note titled
+&ldquo;Processing Algorithms&rdquo;.
+</FONT></FONT></FONT></FONT>
+<OL>
+<LI><SPAN  CLASS="texttt">AdiabaticTandLWC( ):</SPAN> Calculate the temperature and liquid
+water content produced by adiabatic ascent.
+</LI>
+<LI><SPAN  CLASS="texttt">AirTemperature( ):</SPAN> The standard calculation of temperature
+from the measured recovery temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">BoltonEquivalentPotentialTemperature( ):</SPAN> Equivalent potential
+temperature as calculated using the Bolton formula. In standard processing,
+this has been replaced now by the Davies-Jones representation; see
+&ldquo;EquivalentPotentialTemperature( )&rdquo; below.
+</LI>
+<LI><SPAN  CLASS="texttt">ButterworthFilter( ):</SPAN> Implementation of a Butterworth low-pass
+filter, used in wind processing; see &ldquo;ComplementaryFilter( )&rdquo;.
+</LI>
+<LI><SPAN  CLASS="texttt">calcAttack( ):</SPAN> This function calculates the angle of attack
+from the pitch and rate of climb of the aircraft under the assumption
+that the vertical wind is zero. This algorithm may be useful when
+determining or checking sensitivity coefficients for the measured
+angle of attack.
+</LI>
+<LI><SPAN  CLASS="texttt">ComplementaryFilter( ):</SPAN> The standard calculation of wind
+uses this complementary filter to combine the aircraft ground-speed
+components measured by the inertial system at high rate with the corresponding
+components measured by the global positioning system at lower rate.
+</LI>
+<LI><SPAN  CLASS="texttt">CorrectHeading( ), CorrectPitch( ) </SPAN>and<SPAN  CLASS="texttt"> CorrectRoll(
+): </SPAN>Algorithms that use the observed Schuler oscillation of the inertial
+system to improve the measurements of pitch and roll, and that calculates
+a related correction to the heading based on a comparison of the observed
+acceleration vector and the velocity derivatives from the global positioning
+system.
+</LI>
+<LI><SPAN  CLASS="texttt">DPfromE( ):</SPAN> Calculation of the dewpoint temperature corresponding
+to a specified vapor pressure.
+</LI>
+<LI><SPAN  CLASS="texttt">EquivalentPotentialTemperature( ):</SPAN> The pseudo-adiabatic equivalent
+potential temperature calculated using the Davies-Jones (2009) formula.
+See also BoltonEquivalentPotentialTemperature( ) and RossbyEquivalentPotentialTemperature(
+) for alternate values.
+</LI>
+<LI><SPAN  CLASS="texttt">GeoPotHeight( ):</SPAN> Calculates the geopotential height associated
+with a specified geometric height above sea level and location.
+</LI>
+<LI><SPAN  CLASS="texttt">Gravity( ):</SPAN> The acceleration of gravity as represented by
+the Somigliana formula.
+</LI>
+<LI><SPAN  CLASS="texttt">GV_AOAfromRadome( ), GV_YawFromRadome( ):</SPAN> Algorithms used
+to find the angles of attack and sideslip or yaw from pressure differences
+measured on the radome of the GV.
+</LI>
+<LI><SPAN  CLASS="texttt">KingProbe( ):</SPAN> Calculation of the liquid water content from
+the power measured by the CSIRO/King probe.
+</LI>
+<LI><SPAN  CLASS="texttt">LCL( ): </SPAN>Find the lifted condensation level from the observed
+pressure, temperature, and water-vapor mixing ratio.
+</LI>
+<LI><SPAN  CLASS="texttt">MachNumber( ):</SPAN> Calculate the Mach number from the measured
+dynamic pressure, ambient pressure, and humidity.
+</LI>
+<LI><SPAN  CLASS="texttt">memCoef( ), memEstimate( ):</SPAN> Routines used to implement the
+&ldquo;maximum entropy&rdquo; method of spectral estimation; see &ldquo;VSpec()&rdquo;.
+</LI>
+<LI><SPAN  CLASS="texttt">MixingRatio( ):</SPAN> Calculates the water vapor mixing ratio.
+</LI>
+<LI><SPAN  CLASS="texttt">MurphyKoop( ), MurphyKoopIce( ):</SPAN> Calculate the water vapor
+pressure from the Murphy-Koop formulas.
+</LI>
+<LI><SPAN  CLASS="texttt">PCORfunction( ):</SPAN> The algorithm used to correct measured ambient
+and dynamic pressures for the static defect.
+</LI>
+<LI><SPAN  CLASS="texttt">PotentialTemperature( ):</SPAN> Calculates the potential temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">PressureAltitude( ):</SPAN> Calculates the pressure altitude from
+the pressure.
+</LI>
+<LI><SPAN  CLASS="texttt">RAFdata:</SPAN> This is a sample data.frame as might be constructed
+by getNetCDF(), containing a short period of measurements from an
+NSF/NCAR GV flight in a project called IDEAS-4.
+The data.frame contains a set of measurements, one row per second,
+and a Time variable. This is provided
+for use in the Ranadu examples and can be used to test various Ranadu
+functions.
+</LI>
+<LI><SPAN  CLASS="texttt">RecoveryFactor( ):</SPAN> Returns the recovery factor used to process
+measurements of air temperature from probes exposed to the airstream.
+</LI>
+<LI><SPAN  CLASS="texttt">RossbyEquivalentPotentialTemperature( ):</SPAN> The Rossby formula
+for the equivalent potential temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">SpecificHeats( ):</SPAN> At the value of the ratio of water vapor
+pressure to total pressure provided as an argument, returns the values
+of the specific heat at constant pressure, the specific heat at constant
+volume, and the gas constant.
+</LI>
+<LI><SPAN  CLASS="texttt">Sqs( ):</SPAN> The quasi-steady supersaturation that will exist
+in a cloud with specified droplet size distribution and updraft.
+</LI>
+<LI><SPAN  CLASS="texttt">StandardConstant( ):</SPAN> Provides standardized values of some
+constants used in the processing algorithms. See &ldquo;StandardConstant(&ldquo;?&rdquo;)
+for a list of available constants.
+</LI>
+<LI><SPAN  CLASS="texttt">TrueAirspeed( ):</SPAN> Calculate the airspeed from the Mach number
+and temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">VirtualTemperature( )</SPAN> and <SPAN  CLASS="texttt">VirtualPotentialTemperature(
+):</SPAN> Functions to calculate these variables.
+</LI>
+<LI><SPAN  CLASS="texttt">WetEquivalentPotentialTemperature( ):</SPAN> Wet-equivalent potential
+temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">WindProcessor( ):</SPAN> Calculates the wind vector from the basic
+measurements and adds new wind variables to the input data.frame.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node13.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node8.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node11.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node13.html">Utility Functions</A>
+<B> Up:</B> <A
+ HREF="node8.html">Overview of Ranadu functions</A>
+<B> Previous:</B> <A
+ HREF="node11.html">Plotting routines</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

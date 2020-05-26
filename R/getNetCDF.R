@@ -17,6 +17,10 @@
 #' @param list An optional list of variable names to add to the standard list
 #' @param SRC An indicator of which institution's list should be used. Default
 #' is 'NCAR'; other choices are 'UWYO' and 'FAAM'.
+#' @return A character vector containing a standard set of variable names,
+#' with additions as specified in "list". For NCAR the standard set is
+#' ATX, DPXC, EWX, GGALT, LATC, LONC, MACHX, MR, PALT, PSXC, QCXC, TASX,
+#' WDC, WSC, WIC.
 #' @examples 
 #' standardVariables (c("VEW", "PLWCC"))
 standardVariables <- function (list=NULL, SRC='NCAR') {
@@ -45,7 +49,10 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' netCDF file is closed before returning the data.frame to the calling program.
 #' The global attributes in the netCDF file are loaded as attributes of the returned 
 #' data.frame, and attributes of each requested variable are also assigned to that column 
-#' in the data.frame from the variable attributes in the netCDF file.
+#' in the data.frame from the variable attributes in the netCDF file. A 'label' attribute
+#' is added where possible, constructed from the 'standard_name' and 'units' attributes,
+#' and the label also contains the variable name. Some translations are applied to the
+#' conventional standard_names and units; see "transl" below.
 #' When working with attributes, it is a feature of R data.frames that subsetting loses 
 #' all the assigned variable attributes. To preserve them, copy them via 
 #' A <- attributes (Data$VAR), remove A$dim (e.g., A$dim <- NULL),
@@ -65,8 +72,12 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' @import ncdf4
 #' @importFrom signal filter sgolay
 #' @importFrom stats approx
+#' @suggests magrittr
 #' @export getNetCDF
-#' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"
+#' @param fname string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc".
+#' Also accepted are an OPENDAP URL. If used interactively, the default is to call the
+#' function "setFileName()" to select the data file. When not interactive, the default
+#' produces an error so "fname" must be supplied.
 #' @param VarList vector of variable names to load from the netCDF file. Use "ALL" to load 
 #' everything except vector variables like the size distributions. (This option may produce 
 #' quite large data.frames.) The default is the list given by standardVariables (). 
@@ -87,7 +98,7 @@ standardVariables <- function (list=NULL, SRC='NCAR') {
 #' @examples 
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2", "Var3"))}
 #' \dontrun{D <- getNetCDF ("PathToFile.nc", c("Var1", "Var2"), 133000, 143000, 5)}
-getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) {
+getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0, End=0, F=0) {
   # This function reads the netCDF file 'fname' and extracts 
   # the variables specified in 'VarList', returning the
   # results in a data.frame. It includes the flight number F
@@ -140,7 +151,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
 	                     ## (It will be added separately.)
     VarList <- VarList[-which(VarList == 'Time')]
   }
- 
+
   ## check that requested variables are present in netCDF file; fail otherwise
   for (V in VarList) {
     if (is.na(V)) {next}
@@ -183,6 +194,7 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
   Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
+  if (i1 < 0) {i1 <- 1}
   i2 <- ifelse ((End != 0), getIndex (Time, End) + Rate - 1, length (Time))
   if (i2 < 1) {i2 <- length(Time)}
   # if (End != 0) {
@@ -267,7 +279,16 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     }
     ## handle higher-than-1 Rate:
     DM <- length(dim(X))
-    if (DM == 2) {
+    if (DM == 3) {
+      inputRate <- dim(X)[2]
+      CC <- vector ('numeric', Bins*Rate*dim(X)[3])
+      dim(CC) <- c(Bins, dim(X)[3] * Rate)
+      for (j in 2:(Bins+1)) {
+        Y <- IntFilter (X[j, , ], inputRate, Rate)
+        CC[j-1,] <- Y
+      }
+      XN <- t(CC)
+    } else if (DM == 2) {
       ## if this is 1-Hz altho HR file (e.g., UHSAS), need to interpolate to HR
       if (Rate > 1) {
         inputRate <- 1
@@ -371,20 +392,26 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
         X <- X[r1, ]
       } else {
         X <- X[r1]
-      }
+      }      
     } else { ## other rates require flattening and possibly interpolation and filtering
       if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
           grepl('^C1DC_', V) || grepl('CS200_', V)) {
+        XX <- X
+        Bins <- length(RL[[2]])
+        dim(XX) <- c(Rate, dim(X)[1]/Rate, Bins)
+        XX <- XX[,r1,]
+        dim(XX) <- c(dim(XX)[1]*dim(XX)[2], Bins)
+        X <- XX
       } else {
         DM <- length(dim(X))  
-        print (sprintf ('V=%s DM=%d', V, DM))
+        # print (sprintf ('V=%s DM=%d', V, DM))
         if (DM == 2) {    # flatten
           X <- X[,r1]
           inputRate <- dim(X)[1]
           needFilter <- ifelse ((dim(X)[1] != Rate), TRUE, FALSE)
           dim(X) <- dim(X)[1]*dim(X)[2]
           ## see if adjustment to max rate is needed
-          print (sprintf ('needFilter=%s, inputRate=%d, Rate=%d', needFilter, inputRate, Rate))
+          # print (sprintf ('needFilter=%s, inputRate=%d, Rate=%d', needFilter, inputRate, Rate))
           if (needFilter) {X <- IntFilter(X, inputRate, Rate)}
         } else {  ## single-dimension (1 Hz) in high-rate file
           X <- X[r1]
@@ -418,5 +445,6 @@ getNetCDF <- function (fname, VarList=standardVariables(), Start=0, End=0, F=0) 
     d["RF"] <- RF
   }
   nc_close (netCDFfile)
+  d <- addLabels(d)
   return (d)
 }

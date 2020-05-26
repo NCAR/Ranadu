@@ -5,9 +5,14 @@
 \alias{skewTSounding}
 \title{SkewTSounding}
 \usage{
-SkewTSounding(Pressure = NA, Temperature = NA, DewPoint = NA,
-  BackgroundSpecs = "skewTDiagram.Rdata", AverageInterval = 0,
-  ADD = FALSE)
+SkewTSounding(
+  Pressure = NA,
+  Temperature = NA,
+  DewPoint = NA,
+  BackgroundSpecs = "skewTDiagram.Rdata",
+  AverageInterval = 0,
+  ADD = FALSE
+)
 }
 \arguments{
 \item{Pressure}{A vector of numeric values representing the pressures [hPa] where

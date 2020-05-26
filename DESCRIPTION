@@ -1,6 +1,6 @@
 Package: Ranadu
 Title: Functions for use with RAF aircraft data files
-Version: 2.5-18-02-27
+Version: 2.6-20-05-15
 Author: William Cooper
 Maintainer: William Cooper <cooperw@ucar.edu>
 Description: This package contains a function for loading a portion of a netCDF
@@ -28,10 +28,82 @@ Description: This package contains a function for loading a portion of a netCDF
     for making subsets of a netCDF file, and there are other functions also.
     One new function supports starting other programs that read netCDF-format
     files and providing such files generated from R data.frames.
-License: GPL
+License: BSD_3_clause + file LICENSE
+Encoding: UTF-8
 Depends:
-    R (>= 3.3), ncdf4, maps, ggplot2, ggthemes, graphics, grid
+    R (>= 3.5), ncdf4, maps, ggplot2, grid, graphics, utils, scales
 Imports:
-    tcltk, nleqslv, zoo, fields, stats, signal, reshape2, plyr, scales, bspec
+    ggthemes, tcltk, nleqslv, zoo, fields, signal, reshape2, bspec, dplyr, plyr, tibble, stats
+Suggests:
+    magrittr
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.0
+Collate: 
+    'AOAfromRadome.R'
+    'AdiabaticTandLWC.R'
+    'AirTemperature.R'
+    'ButterworthFilter.R'
+    'CAPE.R'
+    'CohPhase.R'
+    'ComplementaryFilter.R'
+    'Constants.R'
+    'DPfromE.R'
+    'DataDirectory.R'
+    'DataFileInfo.R'
+    'DemingFit.R'
+    'GeoPotHeight.R'
+    'Gravity.R'
+    'HeadingCorrection.R'
+    'KingProbe.R'
+    'LCL.R'
+    'LagrangeInterpolation.R'
+    'MachNumber.R'
+    'MixingRatio.R'
+    'MurphyKoop.R'
+    'OpenInProgram.R'
+    'PCorFunction.R'
+    'PitchCorrection.R'
+    'PlotWAC.R'
+    'PotentialTemperatures.R'
+    'PressureAltitude.R'
+    'RAFdata.R'
+    'Ranadu.R'
+    'RanaduGlobal.R'
+    'RecoveryFactor.R'
+    'Rmutate.R'
+    'Rsubset.R'
+    'ShiftInTime.R'
+    'SkewT.R'
+    'SmoothInterp.R'
+    'SpecificHeats.R'
+    'Sqs.R'
+    'TellAbout.R'
+    'TimeRoutines.R'
+    'TrueAirspeed.R'
+    'zzz.R'
+    'VSpec.R'
+    'WindProcessor.R'
+    'XformLA.R'
+    'addLabels.R'
+    'binStats.R'
+    'blankNA.R'
+    'calcATTACK.R'
+    'contourPlot.R'
+    'df2tibble.R'
+    'flux.R'
+    'getNetCDF.R'
+    'getProjectData.R'
+    'getRAFData.R'
+    'getarg.R'
+    'ggplotWAC.R'
+    'makeNetCDF.R'
+    'mem.R'
+    'ncsubset.R'
+    'plotSD.R'
+    'plotTrack.R'
+    'removeSpikes.R'
+    'rk4.integrate.R'
+    'selectTime.R'
+    'setFileName.R'
+    'setVariableList.R'
+    'theme_WAC.R'

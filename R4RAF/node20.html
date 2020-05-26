@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+
+<!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
+<HTML lang="EN">
+<HEAD>
+<TITLE>Error bars and box-and-whisker plots</TITLE>
+<META NAME="description" CONTENT="Error bars and box-and-whisker plots">
+<META NAME="keywords" CONTENT="R4RAF">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META NAME="viewport" CONTENT="width=device-width, initial-scale=1.0">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2018.3">
+
+<LINK REL="STYLESHEET" HREF="R4RAF.css">
+
+<LINK REL="next" HREF="node21.html">
+<LINK REL="previous" HREF="node19.html">
+<LINK REL="next" HREF="node21.html">
+</HEAD>
+
+<BODY >
+
+<DIV CLASS="navigation"><!--Navigation Panel-->
+<A
+ HREF="node21.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node14.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node19.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node21.html">The skew-T thermodynamic diagram</A>
+<B> Up:</B> <A
+ HREF="node14.html">More Details About Plotting</A>
+<B> Previous:</B> <A
+ HREF="node19.html">Plotting the density of</A>
+<BR>
+<BR></DIV>
+<!--End of Navigation Panel-->
+
+<H1><A ID="SECTION00440000000000000000">
+Error bars and box-and-whisker plots</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">Ranadu provides the &ldquo;binStats()&rdquo; function to compile variable
+characteristics needed to generate plots like error-bar plots and
+box-and-whisker plots. The input should be a data.frame whose first
+two columns specify the expected respective ordinate and abscissa
+variables. Each row in the data.frame is assigned to a bin on the
+basis of the value of the second variable, and for each bin the mean,
+standard deviation, and number of events are accumulated for values
+of the first variable in the data.frame. The output from binStats()
+is a new four-column data.frame where the respective columns are the
+mean value of the abscissa for each bin, the mean value of the ordinate
+for all events in the bin, and corresponding standard deviation, and
+the number of events in the bin.
+</FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+<FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2075"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3247"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue3250">(fname)</SPAN> <SPAN ID="hue3252">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3254"><SPAN &nbsp;CLASS="textbf">Rmutate</SPAN></SPAN><SPAN ID="hue3257">(</SPAN><SPAN ID="hue3259">DPD</SPAN><SPAN ID="hue3261">=ATX</SPAN><SPAN ID="hue3263">-</SPAN><SPAN ID="hue3265">DPXC)</SPAN> <SPAN ID="hue3267">%&gt;%</SPAN> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3269"><SPAN &nbsp;CLASS="textit">## define dew-point-depression variable</SPAN></SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3272">dplyr</SPAN><SPAN ID="hue3274">::</SPAN><SPAN ID="hue3276"><SPAN &nbsp;CLASS="textbf">select</SPAN></SPAN><SPAN ID="hue3279">(DPD, GGALT)</SPAN> <SPAN ID="hue3281">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3283"><SPAN &nbsp;CLASS="textbf">binStats</SPAN></SPAN><SPAN ID="hue3286">()</SPAN> <SPAN ID="hue3288">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3290"><SPAN &nbsp;CLASS="textbf">ggplot</SPAN></SPAN><SPAN ID="hue3293">(</SPAN><SPAN ID="hue3295"><SPAN &nbsp;CLASS="textbf">aes</SPAN></SPAN><SPAN ID="hue3298">(</SPAN><SPAN ID="hue3300">x</SPAN><SPAN ID="hue3302">=xc))</SPAN> <SPAN ID="hue3304">+</SPAN> <SPAN ID="hue3306"><SPAN &nbsp;CLASS="textbf">geom_point</SPAN></SPAN><SPAN ID="hue3309">(</SPAN><SPAN ID="hue3311"><SPAN &nbsp;CLASS="textbf">aes</SPAN></SPAN><SPAN ID="hue3314">(</SPAN><SPAN ID="hue3316">y</SPAN><SPAN ID="hue3318">=ybar),</SPAN> <SPAN ID="hue3320">color</SPAN><SPAN ID="hue3322">=</SPAN><SPAN ID="hue3324">'blue'</SPAN><SPAN ID="hue3326">)</SPAN> <SPAN ID="hue3328">+</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3330"><SPAN &nbsp;CLASS="textbf">geom_errorbar</SPAN></SPAN><SPAN ID="hue3333">(</SPAN><SPAN ID="hue3335"><SPAN &nbsp;CLASS="textbf">aes</SPAN></SPAN><SPAN ID="hue3338">(</SPAN><SPAN ID="hue3340">ymin</SPAN><SPAN ID="hue3342">=ybar</SPAN><SPAN ID="hue3344">-</SPAN><SPAN ID="hue3346">sigma,</SPAN> <SPAN ID="hue3348">ymax</SPAN><SPAN ID="hue3350">=ybar</SPAN><SPAN ID="hue3352">+</SPAN><SPAN ID="hue3354">sigma))</SPAN> <SPAN ID="hue3356">+</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3358"><SPAN &nbsp;CLASS="textbf">xlab</SPAN></SPAN><SPAN ID="hue3361">(</SPAN><SPAN ID="hue3363">'geometric altitude [m]'</SPAN><SPAN ID="hue3365">)</SPAN> <SPAN ID="hue3367">+</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3369"><SPAN &nbsp;CLASS="textbf">ylab</SPAN></SPAN><SPAN ID="hue3372">(</SPAN><SPAN ID="hue3374"><SPAN &nbsp;CLASS="textbf">expression</SPAN></SPAN><SPAN ID="hue3377">(</SPAN><SPAN ID="hue3379"><SPAN &nbsp;CLASS="textbf">paste</SPAN></SPAN><SPAN ID="hue3382">(</SPAN><SPAN ID="hue3384">'dew point depression ['</SPAN><SPAN ID="hue3386">, degree,</SPAN> <SPAN ID="hue3388">'C]'</SPAN><SPAN ID="hue3390">)))</SPAN> <SPAN ID="hue3392">+</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3394"><SPAN &nbsp;CLASS="textbf">theme_WAC</SPAN></SPAN><SPAN ID="hue3397">()</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:errorbar-plot"></A><A ID="1043"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+Example of an error-bar plot generated using binStats().</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./errorbar-plot-1.png"
+ ALT="Image errorbar-plot-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<P>
+The following code creates Fig.&nbsp;<A HREF="#fig:bwplot"><IMG  ALT="[*]" SRC="crossref.png"></A>, an
+example of creating a box-and-whisker plot. When used with the argument
+&ldquo;addBin = TRUE&rdquo;, binStats instead returns a modified data.frame
+with a variable &ldquo;BIN&rdquo; added that is suitable to use when grouping
+in ggplot aesthetics.
+
+<P>
+
+<FONT COLOR="#585858"></FONT></TD></TR>
+</TABLE><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT></FONT></FONT></FONT></FONT></FONT><TABLE   STYLE="width:0%;">
+<TR><TD>
+ <SPAN ID="cbox2084"></SPAN>
+<P>
+
+<DIV CLASS="alltt" ALIGN="LEFT">
+<SPAN style="font-family:monospace">
+ <SPAN ID="hue3399"><SPAN &nbsp;CLASS="textbf">getNetCDF</SPAN></SPAN><SPAN ID="hue3402">(fname)</SPAN> <SPAN ID="hue3404">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3406">dplyr</SPAN><SPAN ID="hue3408">::</SPAN><SPAN ID="hue3410"><SPAN &nbsp;CLASS="textbf">select</SPAN></SPAN><SPAN ID="hue3413">(DPXC, GGALT)</SPAN> <SPAN ID="hue3415">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3417"><SPAN &nbsp;CLASS="textbf">binStats</SPAN></SPAN><SPAN ID="hue3420">(</SPAN><SPAN ID="hue3422">addBin</SPAN> <SPAN ID="hue3424">=</SPAN> <SPAN ID="hue3426">TRUE</SPAN><SPAN ID="hue3428">)</SPAN> <SPAN ID="hue3430">%&gt;%</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3432"><SPAN &nbsp;CLASS="textbf">ggplot</SPAN></SPAN><SPAN ID="hue3435">()</SPAN> <SPAN ID="hue3437">+</SPAN> <SPAN ID="hue3439"><SPAN &nbsp;CLASS="textbf">geom_boxplot</SPAN></SPAN><SPAN ID="hue3442">(</SPAN><SPAN ID="hue3444"><SPAN &nbsp;CLASS="textbf">aes</SPAN></SPAN><SPAN ID="hue3447">(GGALT, DPXC,</SPAN> <SPAN ID="hue3449">group</SPAN><SPAN ID="hue3451">=BIN),</SPAN>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue3453">color</SPAN><SPAN ID="hue3455">=</SPAN><SPAN ID="hue3457">'blue'</SPAN><SPAN ID="hue3459">,</SPAN> <SPAN ID="hue3461">na.rm</SPAN><SPAN ID="hue3463">=</SPAN><SPAN ID="hue3465">TRUE</SPAN><SPAN ID="hue3467">)</SPAN> <SPAN ID="hue3469">+</SPAN>
+<BR>&nbsp;&nbsp;<SPAN ID="hue3471"><SPAN &nbsp;CLASS="textbf">theme_WAC</SPAN></SPAN><SPAN ID="hue3474">()</SPAN>
+<BR></SPAN>
+</DIV>
+
+<P>
+<DIV class="CENTER"><A ID="fig:bwplot"></A><A ID="1094"></A>
+<TABLE WIDTH="0%">
+<CAPTION class="BOTTOM"><STRONG>Figure:</STRONG>
+An example of a box-and-whisker plot.</CAPTION>
+<TR><TD><P>
+<DIV class="CENTER"><IMG STYLE=""
+ SRC="./bwplot-1.png"
+ ALT="Image bwplot-1"> 
+</DIV>
+<P>
+<DIV class="CENTER"></DIV>
+
+<P></TD></TR>
+</TABLE>
+</DIV>
+
+<P>
+
+<P>
+
+
+<P>
+</TD></TR>
+</TABLE></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT></FONT>
+<DIV CLASS="navigation"><HR>
+<!--Navigation Panel-->
+<A
+ HREF="node21.html">
+<IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
+<A
+ HREF="node14.html">
+<IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
+<A
+ HREF="node19.html">
+<IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
+<BR>
+<B> Next:</B> <A
+ HREF="node21.html">The skew-T thermodynamic diagram</A>
+<B> Up:</B> <A
+ HREF="node14.html">More Details About Plotting</A>
+<B> Previous:</B> <A
+ HREF="node19.html">Plotting the density of</A></DIV>
+<!--End of Navigation Panel-->
+
+</BODY>
+</HTML>

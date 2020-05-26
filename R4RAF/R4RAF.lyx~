@@ -1,0 +1,5166 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass report
+\begin_preamble
+\input colordvi
+\usepackage{color}
+\fancyhead{}
+\fancyfoot[CE,CO]{}
+\newtoks{\topicofnote} \global\topicofnote={}
+\newdimen\longindent \longindent=3.5truein
+\fancyhead[L]{Note re: \the\topicofnote \\ \datetoday \\ Page \thepage \hfill}
+\renewcommand{\headrulewidth}{0.0pt}
+\newenvironment{lyxlst}[1]
+{\begin{list}{}
+{\settowidth{\labelwidth}{#1}
+\setlength{\leftmargin}{\labelwidth}
+\addtolength{\leftmargin}{\labelsep}
+\renewcommand{\makelabel}[1]{##1\hfil}}}
+{\end{list}}
+\newcommand{\datetoday}{\number\day\space
+     \ifcase\month\or January\or February\or March\or April\or May\or
+     June\or July\or August\or September\or October\or November\or
+     December\fi
+     \space\number\year}
+\newcommand{\ASPmemo}{\null \vskip-1.5truein
+{\raggedright \textsf{\textsc{\large \textcolor{blue}{Advanced Study Program}}}}\par
+{\raggedright \textsf{\textsl{\textcolor{blue}{Memorandum:}}}} \par \vskip6pt
+{\color{blue}{\hrule}}\par
+\vskip0.3truein \leftline{\hskip \longindent \datetoday} \vskip0.2truein
+\thispagestyle{empty}}
+\newcommand{\attachm}[1]{\begin{lyxlst}{Attachments:00}
+\item [Attachments:] {#1}
+\end{lyxlst}}
+\newcommand{\cc}[1]{\begin{lyxlst}{Attachments:00}
+\item [cc:] {#1}
+\end{lyxlst}}
+\newcommand{\attach}[1]{\begin{lyxlst}{Attachments:00}
+\item [Attachment:] {#1}
+\end{lyxlst}}
+%usage: \encl{A\\B\\C} or \cc{ma,e1\\name2\\name3}
+\end_preamble
+\use_default_options false
+\begin_modules
+knitr
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding default
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref false
+\papersize letterpaper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 0
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.54cm
+\topmargin 3.54cm
+\rightmargin 2.54cm
+\bottommargin 2.54cm
+\headheight 1cm
+\headsep 2cm
+\footskip 0.5cm
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation skip
+\defskip medskip
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+set topicofnote to topic of note
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+topicofnote={R tools}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+Note goes here:
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This note records some preliminary thoughts regarding a possible R-based
+ web site that documents R tools for use with the RAF-aircraft netCDF files.
+ The thought is that this might be either a static or a shinyApp site providing
+ guidance and access to Ranadu, modified to be more consistent with the
+ tools described in 
+\begin_inset Quotes eld
+\end_inset
+
+R for Data Science
+\begin_inset Quotes erd
+\end_inset
+
+ by Wickham.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Some preliminary steps to prepare for that:
+\end_layout
+
+\begin_layout Enumerate
+I need to get 
+\begin_inset Quotes eld
+\end_inset
+
+haven
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+readxl
+\begin_inset Quotes erd
+\end_inset
+
+ to load and work so I can include the library 
+\begin_inset Quotes eld
+\end_inset
+
+tidyverse
+\begin_inset Quotes erd
+\end_inset
+
+, or else get an analogous library omitting those items.
+ [SOLVED: see Zim notes]
+\end_layout
+
+\begin_layout Enumerate
+It would be useful to modify the data.frame produced by getNetCDF() to a
+ 
+\begin_inset Quotes eld
+\end_inset
+
+tibble
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The main impediment now is that size distributions are loaded as two-dimensiona
+l vectors in the data.frame, and therefore they won't be accepted by 
+\begin_inset Quotes eld
+\end_inset
+
+as.tibble()
+\begin_inset Quotes erd
+\end_inset
+
+ which wants columns to be either atomic single-dimension vectors or lists.
+ Conversion might be via, e.g., Data$CCDP <- apply(Data$CCDP, 1, list).
+ Then, to return to a two-dimensional vector for size-distributions, use
+ AA <- unlist(Data$CCDP); dim(AA) <- c(30, nrow(Data); AA <- t(AA); Data$CCDP
+ <- AA .
+ However, this loses the attributes.
+ Can save them: Attr <- attributes(Data$CCDP); Attr$dim <- NULL; save and
+ restore, add attr(AA, 'dim'') <- c(nrow(Data, 30).
+ For now, stay with data.frames to avoid need to make this change in programs
+ that plot size distributions, in Ranadu.
+ [SOLVED: see df2tibble.R
+\end_layout
+
+\begin_layout Enumerate
+When using ggplot, the function arguments can be variable names without
+ quotes, while plotWAC() and others need character names.
+ It would be useful to find how to adopt the ggplot model to plotWAC.
+ [Using select() addresses this problem, and new routine selectTime() should
+ be helpful also.
+\end_layout
+
+\begin_layout Enumerate
+Incorporating many of the dplyr functions would be advantageous, e.g., for
+ time-subsetting or variable selection, and it would be useful to ensure
+ that pipes function with the various routines.
+ [ADDRESSED with plotWAC()]
+\end_layout
+
+\begin_layout Plain Layout
+The key tool in Ranadu is the function that returns a data.frame containing
+ the data.
+ This data.frame has these key characteristics:
+\end_layout
+
+\begin_layout Enumerate
+Each row corresponds to a unique and sequential time, although there may
+ be gaps in time.
+ The 'Time' variable is POSIXct format.
+ It may have fractional seconds in cases where the rate is higher than 1
+\begin_inset space ~
+\end_inset
+
+Hz.
+ For data rates higher than 1
+\begin_inset space ~
+\end_inset
+
+Hz, all variables are included at the maximum rate, using interpolation
+ where necessary.
+\end_layout
+
+\begin_layout Enumerate
+Each measurement is a single column, except for the special case in item
+ 4 below.
+ If there are multiple measurements of the same meteorological measurand
+ (like temperature), each measurement has its own column.
+ 
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Quotes eld
+\end_inset
+
+Attributes
+\begin_inset Quotes erd
+\end_inset
+
+ describing the measurement are carried with each variable.
+ Mostly, these are from the original netCDF file.
+ In a few cases, attributes describing groups of data are assigned to their
+ own variables.
+ For example, the research flight number is often included as a separate
+ variable to make it convenient to construct data.frames containing many
+ flights and still examing the individual flights.
+ Other attributes may be data-quality flags assigned to particular variables,
+ but where the data-quality assignment varies a separate variable is used.
+ The available attributes indicate some groupings; for example, variables
+ with the same standard name provide redundant measurements of the same
+ measurand.
+ It is possible to add attributes to the variables themselves to indicate
+ further grouping.
+ The data.frame format makes it straightforward to add additional variables
+ that can be used in selection tests to sort the data.
+ There are also global attributes assigned to the data.frame itself.
+\end_layout
+
+\begin_layout Enumerate
+A complication that may interfere with conversion of the data.frames to tibbles
+ is that, for size distributions, the size distribution is carried in a
+ vector with one component for each size bin.
+ Therefore a variable like CCDP may have one entry each time slice, but
+ that entry contains a 30-component vector representing the size distribution.
+ The data.frame column is therefore a two-dimensional vector, and 
+\begin_inset Quotes eld
+\end_inset
+
+as.tibble' fails with a message that this is not permitted.
+ This is because the size-distribution matrix violates the 
+\begin_inset Quotes eld
+\end_inset
+
+tidy data
+\begin_inset Quotes erd
+\end_inset
+
+ rule that each observation should have its own column; here, 30 size-distributi
+on variables share the same column.
+ If size-distribution variables are not included in the output data.frame
+ or a subset output frame, conversion to tibbles is straightforward.
+ The routines df2tibble() and tibble2df() convert between these forms.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<initialization,echo=FALSE,include=FALSE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+library(knitr)
+\end_layout
+
+\begin_layout Plain Layout
+
+opts_chunk$set(echo=FALSE, include=FALSE, fig.lp="fig:")
+\end_layout
+
+\begin_layout Plain Layout
+
+opts_chunk$set(fig.width=6, fig.height=5, fig.align="center", digits=4)
+\end_layout
+
+\begin_layout Plain Layout
+
+thisFileName <- "R4RAF"
+\end_layout
+
+\begin_layout Plain Layout
+
+require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
+\end_layout
+
+\begin_layout Plain Layout
+
+require(ggplot2)
+\end_layout
+
+\begin_layout Plain Layout
+
+require(grid)
+\end_layout
+
+\begin_layout Plain Layout
+
+require(ggthemes)
+\end_layout
+
+\begin_layout Plain Layout
+
+library(magrittr)
+\end_layout
+
+\begin_layout Plain Layout
+
+library(dplyr)
+\end_layout
+
+\begin_layout Plain Layout
+
+library(tibble)
+\end_layout
+
+\begin_layout Plain Layout
+
+Directory <- DataDirectory ()
+\end_layout
+
+\begin_layout Plain Layout
+
+Flight <- "rf06" 				# XXX change this
+\end_layout
+
+\begin_layout Plain Layout
+
+Project = "WECAN"			 # XXX change this
+\end_layout
+
+\begin_layout Plain Layout
+
+ProjectDir <- "WECAN"
+\end_layout
+
+\begin_layout Plain Layout
+
+fname = sprintf("%s%s/%s%s.nc", Directory,ProjectDir,Project,Flight)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data <- getNetCDF (fname, standardVariables(c('UXC', 'VYC', 'TASX', 'TASR',
+ 'QCF', 'QCR')), 235900, 1716)		#XXX set variables needed here
+\end_layout
+
+\begin_layout Plain Layout
+
+SaveRData <- sprintf("%s.Rdata", thisFileName)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+Introduction
+\end_layout
+
+\begin_layout Standard
+The intent of this web site is to assist new users of NCAR/EOL/RAF-produced
+ aircraft data if they would like to use R in their data analysis projects.
+ The intent here is to provide 
+\begin_inset Quotes eld
+\end_inset
+
+layers
+\begin_inset Quotes erd
+\end_inset
+
+, starting with a very simple guide to constructing preliminary plots and
+ extending to the use of R, RStudio, and knitr to produce manuscripts and
+ reproducible and documented data-analysis projects.The emphasis here is
+ on 
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu
+\begin_inset Quotes erd
+\end_inset
+
+, an R package that is intended to facilitate use of the data archives produced
+ by the data systems on the NSF/NCAR/EOL/RAF research aircraft.
+ (NSF=National Science Foundation; NCAR=National Center for Atmospheric
+ Research; EOL=Earth Observing Laboratory; RAF=Research Aviation Facility)
+ All the recent data files are in netCDF format, so that is the format emphasize
+d here.
+ Those files contain measurements made in field campaigns that use the NSF
+ research aircraft operated by NCAR, presently consisting of a C-130 and
+ a Gulfstream V.
+ A list of recent projects is available at 
+\begin_inset CommandInset href
+LatexCommand href
+name "this EOL web page"
+target "http://www.eol.ucar.edu/all-field-projects-and-deployments/"
+literal "false"
+
+\end_inset
+
+, and data requests can be made via links on that page.
+ Information regarding the instruments and the processing algorithms are
+ available at these respective web sites: 
+\begin_inset CommandInset href
+LatexCommand href
+name "https://www.eol.ucar.edu/aircraft-instrumentation"
+target "https://www.eol.ucar.edu/aircraft-instrumentation"
+literal "false"
+
+\end_inset
+
+ and ProcessingAlgorithms.pdf.
+ The latter also provides references to the netCDF format, the variable
+ names in common use, and algorithms used to calculate the variables in
+ the data files.
+\end_layout
+
+\begin_layout Chapter
+Getting Started
+\end_layout
+
+\begin_layout Standard
+This chapter or 
+\begin_inset Quotes eld
+\end_inset
+
+layer
+\begin_inset Quotes erd
+\end_inset
+
+ summarizes a few key tools that will enable a new user to get started.
+ Of course, it is certainly possible to work with the NCAR/EOL/RAF data
+ files using R routines without reference to the 
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu
+\begin_inset Quotes erd
+\end_inset
+
+ package featured here, but this discussion will describe use of that package.
+ .
+ There are instructions for installing the package in the 
+\begin_inset Quotes eld
+\end_inset
+
+RanaduManual.pdf
+\begin_inset Quotes erd
+\end_inset
+
+, and there it is also recommended to use RStudio as the user GUI for working
+ with R\SpecialChar endofsentence
+ Once R, RStudio and Ranadu are installed, it will be simple to use
+ the functions highlighted in the remainder of this chapter to get started.
+ The key functions are getNetCDF(), for reading the netCDF file and producing
+ an R data.frame with the measurements, and DataFileInfo(), for checking
+ the properties of the netCDF file.
+ These two functions provide a useful starting point for all data-analysis
+ projects.
+\end_layout
+
+\begin_layout Section
+DataFileInfo()
+\end_layout
+
+\begin_layout Standard
+A useful first look at a netCDF file is provided by Ranadu::DataFileInfo(),
+ which returns characteristics like the project name, flight number, date/times,
+ variable names, and the data rate.
+ In addition, this function returns a set of 
+\begin_inset Quotes eld
+\end_inset
+
+measurands
+\begin_inset Quotes erd
+\end_inset
+
+ (measured properties of the atmosphere like air temperature) and the set
+ of variables that provide measurements of that measurand.
+ The measurands in a particular file (the one referenced above) are shown
+ below:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<measurand-example, include=TRUE, echo=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Project <- 'WECAN'
+\end_layout
+
+\begin_layout Plain Layout
+
+FlightNumber <- 6
+\end_layout
+
+\begin_layout Plain Layout
+
+fname <- sprintf ('%s%s/%srf%02d.nc', Ranadu::DataDirectory(), 
+\end_layout
+
+\begin_layout Plain Layout
+
+         Project, Project, FlightNumber)
+\end_layout
+
+\begin_layout Plain Layout
+
+FI <- DataFileInfo(fname)
+\end_layout
+
+\begin_layout Plain Layout
+
+names (FI$Measurands)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The variables that provide redundant measurements of a specific measurand
+ are named lists with the measurand name and can be displayed by printing
+ the measurand name, as in the following example:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<meas-ex2, include=TRUE, echo=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+FI$Measurands$air_temperature
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In addition, the 
+\begin_inset Quotes eld
+\end_inset
+
+long_name
+\begin_inset Quotes erd
+\end_inset
+
+ describing a variable (e.g., here 
+\begin_inset Quotes eld
+\end_inset
+
+ATX
+\begin_inset Quotes erd
+\end_inset
+
+) can be found as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<longName, include=TRUE, echo=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+FI$LongNames[which('ATX' == FI$Variables)]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To see all the lists of information contained in the DataFileInfo list,
+ print the names as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<FInames, include=TRUE, echo=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+names(FI)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Examining these can help a user understand what is included in a particular
+ data file.
+\end_layout
+
+\begin_layout Section
+getNetCDF() and the resulting data.frame
+\end_layout
+
+\begin_layout Standard
+A central component of the Ranadu structure is the Ranadu data.frame, produced
+ by reading the netCDF data file.
+ It has a structure similar to that of a spreadsheet, with rows corresponding
+ to measurement times and columns corresponding to measurements.
+ The data.frame has these features:
+\end_layout
+
+\begin_layout Enumerate
+Each row corresponds to a unique time, and times are sequential (possibly
+ with gaps).
+ For data rates higher than 1
+\begin_inset space ~
+\end_inset
+
+Hz, rows are produced for each time interval; i.e., 25 rows per second for
+ 25-Hz files.
+ When variables are present in the netCDF file at a slower rate, interpolation
+ is used to produce the higher rate.
+\end_layout
+
+\begin_layout Enumerate
+Each measurement corresponds to a single column.
+ When there are multiple measurements of a given measurand (e.g., temperature),
+ each individual measurement has its own column.
+ There is a significant exception: For instruments producing size-distribution
+ arrays, the entire array occupies one column of the data.frame.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Attributes describing the data.frame and the variables are carried with the
+ data.frame.
+ For example, variables often have 
+\begin_inset Quotes eld
+\end_inset
+
+short_name
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+long_name
+\begin_inset Quotes erd
+\end_inset
+
+ attributes, and these can be examined by looking at the variable attributes.
+ 
+\end_layout
+
+\begin_layout Standard
+The data.frame is constructed by Ranadu::getNetCDF(fname, variables), which
+ uses the ncdf4 package of routines to read the netCDF file.
+ An example of a subset of the data.frame is shown here:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<example-df, echo=TRUE, include=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Project <- 'WECAN'
+\end_layout
+
+\begin_layout Plain Layout
+
+FlightNumber <- 6
+\end_layout
+
+\begin_layout Plain Layout
+
+fname <- sprintf ('%s%s/%srf%02d.nc', Ranadu::DataDirectory(), 
+\end_layout
+
+\begin_layout Plain Layout
+
+         Project, Project, FlightNumber)
+\end_layout
+
+\begin_layout Plain Layout
+
+Variables <- Ranadu::standardVariables(c('UXC', 'VYC'))
+\end_layout
+
+\begin_layout Plain Layout
+
+Data <- Ranadu::getNetCDF(fname, Variables)
+\end_layout
+
+\begin_layout Plain Layout
+
+print (sprintf ('Data from data file %s', fname))
+\end_layout
+
+\begin_layout Plain Layout
+
+print (tibble::as.tibble(Data))  # or print(head(Data))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here is an explanation of some aspects of loading this data.frame:
+\end_layout
+
+\begin_layout Enumerate
+Ranadu::DataDirectory() returns the location of the data directory on various
+ systems, to avoid the necessity of changing this when moving among systems.
+ It may return '/scr/raf_data/' or '/Data/' or '~/Data/' depending on the
+ file system.
+\end_layout
+
+\begin_layout Enumerate
+The function Ranadu::standardVariables() returns a set of commonly used
+ variable names.
+ Additional variables provided to the routine (here, 'UXC' and 'VYC') are
+ added to the variable list.
+\end_layout
+
+\begin_layout Enumerate
+Ranadu::getNetCDF() produces the data.frame.
+ The special case where Variables <- 'ALL' will return all available variables.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+But use this cautiously because size-distribution variables are special
+ and sometimes cause problems when manipulating the resulting data.frame.
+ This is discussed later in association with 
+\begin_inset Quotes eld
+\end_inset
+
+tibbles.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Two additional optional arguments to getNetCDF() are 
+\begin_inset Quotes eld
+\end_inset
+
+Start
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+End
+\begin_inset Quotes erd
+\end_inset
+
+; if set, the range of time values in the data.frame will be restricted to
+ be between those two times.
+ See 
+\begin_inset Quotes eld
+\end_inset
+
+?Ranadu::getNetCDF
+\begin_inset Quotes erd
+\end_inset
+
+ for complete information on this function.
+\end_layout
+
+\begin_layout Enumerate
+The last statement, where the data.frame is converted to a tibble, is used
+ here because the print function for tibbles produces a more concise and
+ clearer format than that for a data.frame.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+print (head (Data))
+\begin_inset Quotes erd
+\end_inset
+
+ could have been used also.
+ More information on tibbles is included later in this document.
+ The resulting data.frame has 23,701 rows and 18 columns.
+\end_layout
+
+\begin_layout Section
+Using the data.frame
+\end_layout
+
+\begin_layout Subsection
+Simple Plots
+\end_layout
+
+\begin_layout Standard
+It is straightforward to plot variables in the data.frame using standard
+ R functions.
+ For example, the following code plots the altitude vs.
+\begin_inset space ~
+\end_inset
+
+time using the data.frame loaded previously:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<simple-plot1, include=TRUE, echo=TRUE, fig.cap='Geometric altitude vs time
+ for WECAN research flight 6, 3 August 2018.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+plot(Data$Time, Data$GGALT, type='l')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Many of the Ranadu tools are aimed at making construction of such plots
+ straightforward while supporting various manipulations of the style and
+ content of the plots.
+ Many of these are discussed in later chapters.
+ However, at this point you will be able to conduct extensive data-analysis
+ projects using only the standard tools provided by R.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Using plotWAC() and ggplotWAC()
+\end_layout
+
+\begin_layout Standard
+The function Ranadu::plotWAC() calls the standard R function 
+\begin_inset Quotes eld
+\end_inset
+
+plot
+\begin_inset Quotes erd
+\end_inset
+
+ with a particular set of conventions.
+ Some reasons you may want to consider using it include the following:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+time
+\begin_inset space ~
+\end_inset
+
+offset: The convention in the NCAR/EOL/RAF netCDF files is that the time
+ variable represents the start of the interval over which measurements are
+ averaged, so a 1-Hz variable with a specified time is actually an average
+ where the mean time is 0.5
+\begin_inset space ~
+\end_inset
+
+s later.
+ Plots generated by plotWAC() adjust for this offset.
+ For this same reason, you may want to use the routine Ranadu::lineWAC()
+ to add lines to the plot, instead of the standard 
+\begin_inset Quotes eld
+\end_inset
+
+lines
+\begin_inset Quotes erd
+\end_inset
+
+ routine provided by R.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+plot
+\begin_inset space ~
+\end_inset
+
+format: The set of conventions regarding time labels, axis formats, and
+ legends may be preferable to those that are standard with 
+\begin_inset Quotes eld
+\end_inset
+
+plot()
+\begin_inset Quotes erd
+\end_inset
+
+ and will save you from making those tailoring adjustments.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+pipe_compatible: The function plotWAC() can be used in a pipe where the
+ piped variable is a data.frame tailored to contain specified variables to
+ construct multiple-variable plots.
+ A similar pipe to 
+\begin_inset Quotes eld
+\end_inset
+
+plot()
+\begin_inset Quotes erd
+\end_inset
+
+ will produce a faceted plot of each variable vs.
+\begin_inset space ~
+\end_inset
+
+each other variable, which may not be what you want.
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:plotwac-ex}
+\end_layout
+
+\end_inset
+
+ shows an example.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<plotwac-ex, include=TRUE, echo=TRUE, fig.cap='Example of the same plot
+ as the preceding figure but generated with Ranadu::plotWAC().'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+plotWAC(Data[, c('Time', 'GGALT')])
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Another option is provided by Ranadu::ggplotWAC(), as shown in Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:ggplot-ex}
+\end_layout
+
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<ggplot-ex, include=TRUE, echo=TRUE, fig.cap='Example of the same plot as
+ the preceding figure but generated with Ranadu::ggplotWAC().'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+ggplotWAC(Data[, c('Time', 'GGALT')])
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Additional examples showing the advantages of constructing plots with pipes
+ will be presented in later chapters of this document.
+ For more information on the use of these plotting routines, see 
+\begin_inset Quotes eld
+\end_inset
+
+?Ranadu::plotWAC
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+?Ranadu::ggplotWAC
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+Overview of Ranadu functions
+\end_layout
+
+\begin_layout Section
+More about constructing data.frames
+\end_layout
+
+\begin_layout Standard
+These Ranadu functions can be of use when constructing and modifying data.frames:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+getNetCDF ( )
+\family default
+: loads a data.frame with requested variables
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+standardVariables ( ):
+\family default
+ defines a common set of variables for input to getNetCDF().
+ This list is the default if no variables are specified in the call to getNetCDF.
+ The optional argument is a list of character names that specify additional
+ variables to include.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+DataDirectory ( ): 
+\family default
+This is system dependent and is intended to aid in portability by providing
+ the usual location of the netCDF data files.
+ It tries a set of likely names, but may need redefinition for some file
+ systems.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+getIndex ( )
+\family default
+: finds the index for a specified time
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+setRange ( )
+\family default
+: sets a range of indices covering a specified time interval.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+selectTimes ( ):
+\family default
+ produces a new data.frame with a limited time range.
+\end_layout
+
+\begin_layout Standard
+In addition, some functions provided by the package 
+\begin_inset Quotes eld
+\end_inset
+
+dplyr
+\begin_inset Quotes erd
+\end_inset
+
+ can be very useful when working with data.frames.
+ These actions can be implemented by normal R subsetting also (e.g., using
+ 
+\begin_inset Quotes eld
+\end_inset
+
+[[...]]
+\begin_inset Quotes erd
+\end_inset
+
+ notation), but using these dplyr functions serves to clarify what the steps
+ in the code are doing:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+dplyr::select ( ):
+\family default
+ produces a new data.frame with only the variables listed as arguments in
+ the call to the function.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+dplyr::filter ( ):
+\family default
+ produces a subset data.frame where the argument is a logical test applied
+ to the data.frame rows that must be met for the row to be included in the
+ returned data.frame.
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+dplyr::mutate ( ):
+\family default
+ adds new variables to the data.frame.
+\end_layout
+
+\begin_layout Section
+Getting information about the data
+\end_layout
+
+\begin_layout Standard
+Some Ranadu functions provide information about the data set.
+ A good starting point is DataFileInfo(), discussed in the previous chapter.
+ In addition, these functions may be helpful:
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::getAttributes():
+\family default
+\bar default
+ The data.frames produced by getNetCDF() have assigned attributes that match
+ those in the original netCDF file, and these can be retrieved via getAttributes
+(), where the argument can be either the data.frame (for which the returned
+ attributes are those associated with the data file) or a variable name
+ (for which the attributes are those associated with the variable).
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Subsetting will often lose some attributes so special steps are needed to
+ preserve them if that is desired.
+\end_layout
+
+\end_inset
+
+ The result of the function call is a printed listing of attributes and
+ creation of a list (here in Z) that contains the attributes, so it is usually
+ preferable to assign the returned value to something to avoid the double
+ listing that would be produced otherwise.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::TellAbout()
+\family default
+\bar default
+ provides some information about the characteristics of a data.frame or a
+ variable in the data.frame.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::getStartEnd()
+\bar default
+ 
+\family default
+returns the start and end times of a data frame.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::ValueOf() and Ranadu::ValueOfAll()
+\bar default
+ 
+\family default
+for a specified time return the value of a specified variable or of all
+ variables, respectively.
+\end_layout
+
+\begin_layout Standard
+The standard R routines 
+\begin_inset Quotes eld
+\end_inset
+
+dim()
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+names()
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+str()
+\begin_inset Quotes erd
+\end_inset
+
+ will also provide information about a data.frame or a variable.
+\end_layout
+
+\begin_layout Section
+Plotting routines
+\end_layout
+
+\begin_layout Standard
+The routines plotWAC() and ggplotWAC() were introduced in the previous chapter.
+ The following is a list of other Ranadu routines that produce plots.
+ More detail about these routines is included in the next chapter.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::plotTrack()
+\family default
+\bar default
+ plots a flight track on a background that shows geographic boundaries.
+ In its simplest form it is called with a single argument of a data.frame
+ that contains at least latitude and longitude in variables named LATC and
+ LONC.
+ This routine also has an option to plot the track in a reference frame
+ that drifts with the wind.
+ See ?plotTrack for more information on options.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::VSpec()
+\family default
+\bar default
+ constructs a plot of the variance spectrum for a specified variable.
+ See also 
+\family typewriter
+\bar under
+Ranadu::CohPhase()
+\bar default
+ 
+\family default
+for plots of the coherence and phase relationship between veriables.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::lineWAC()
+\family default
+\bar default
+ adds a line to a plot previously constructed by plotWAC(), with adjustment
+ of the plotted time to correspond to the center of the interval averaged
+ to obtain the measurements.
+ Otherwise, like 
+\begin_inset Quotes eld
+\end_inset
+
+lines()
+\begin_inset Quotes erd
+\end_inset
+
+ in standard R.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::plotSD()
+\family default
+\bar default
+ plots the size distribution measured by cloud or aerosol particle probes.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::contourPlot()
+\family default
+\bar default
+ plots a scattergram-like display where the density of points is represented
+ by colored areas.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::DemingFit()
+\family default
+\bar default
+ calculates a Deming fit to two variables (in which the distance from the
+ fitted line to the two-dimensional locations of the measurements is minimized)
+ and plots the resulting fit.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+\bar under
+Ranadu::SkewTSounding()
+\family default
+\bar default
+ plots a skew-T thermodynamic diagram with measurements from a data.frame
+ averaged and superimposed on the diagram.
+ Options are available to include a hodograph and the denote values of the
+ LCL and CAPE.
+\end_layout
+
+\begin_layout Section
+Computational Algorithms
+\end_layout
+
+\begin_layout Standard
+A set of functions provide calculations like those used to process the original
+ files and, in some cases, to extend those calculations.
+ A full list of Ranadu functions can be viewed by using the R command 
+\begin_inset Quotes eld
+\end_inset
+
+?Ranadu
+\begin_inset Quotes erd
+\end_inset
+
+, and clicking on the items in that list then will provide the standard
+ 
+\begin_inset Quotes eld
+\end_inset
+
+help
+\begin_inset Quotes erd
+\end_inset
+
+ information for the functions.
+ Some of these are listed below.
+ For additional details, see the technical note titled 
+\begin_inset Quotes eld
+\end_inset
+
+Processing Algorithms
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+AdiabaticTandLWC( ):
+\family default
+ Calculate the temperature and liquid water content produced by adiabatic
+ ascent.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+AirTemperature( ):
+\family default
+ The standard calculation of temperature from the measured recovery temperature.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+BoltonEquivalentPotentialTemperature( ):
+\family default
+ Equivalent potential temperature as calculated using the Bolton formula.
+ In standard processing, this has been replaced now by the Davies-Jones
+ representation; see 
+\begin_inset Quotes eld
+\end_inset
+
+EquivalentPotentialTemperature( )
+\begin_inset Quotes erd
+\end_inset
+
+ below.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+ButterworthFilter( ):
+\family default
+ Implementation of a Butterworth low-pass filter, used in wind processing;
+ see 
+\begin_inset Quotes eld
+\end_inset
+
+ComplementaryFilter( )
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+calcAttack( ):
+\family default
+ This function calculates the angle of attack from the pitch and rate of
+ climb of the aircraft under the assumption that the vertical wind is zero.
+ This algorithm may be useful when determining or checking sensitivity coefficie
+nts for the measured angle of attack.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+ComplementaryFilter( ):
+\family default
+ The standard calculation of wind uses this complementary filter to combine
+ the aircraft ground-speed components measured by the inertial system at
+ high rate with the corresponding components measured by the global positioning
+ system at lower rate.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+CorrectHeading( ), CorrectPitch( ) 
+\family default
+and
+\family typewriter
+ CorrectRoll( ): 
+\family default
+Algorithms that use the observed Schuler oscillation of the inertial system
+ to improve the measurements of pitch and roll, and that calculates a related
+ correction to the heading based on a comparison of the observed acceleration
+ vector and the velocity derivatives from the global positioning system.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+DPfromE( ):
+\family default
+ Calculation of the dewpoint temperature corresponding to a specified vapor
+ pressure.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+EquivalentPotentialTemperature( ):
+\family default
+ The pseudo-adiabatic equivalent potential temperature calculated using
+ the Davies-Jones (2009) formula.
+ See also BoltonEquivalentPotentialTemperature( ) and RossbyEquivalentPotentialT
+emperature( ) for alternate values.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+GeoPotHeight( ):
+\family default
+ Calculates the geopotential height associated with a specified geometric
+ height above sea level and location.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+Gravity( ):
+\family default
+ The acceleration of gravity as represented by the Somigliana formula.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+GV_AOAfromRadome( ), GV_YawFromRadome( ):
+\family default
+ Algorithms used to find the angles of attack and sideslip or yaw from pressure
+ differences measured on the radome of the GV.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+KingProbe( ):
+\family default
+ Calculation of the liquid water content from the power measured by the
+ CSIRO/King probe.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+LCL( ): 
+\family default
+Find the lifted condensation level from the observed pressure, temperature,
+ and water-vapor mixing ratio.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+MachNumber( ):
+\family default
+ Calculate the Mach number from the measured dynamic pressure, ambient pressure,
+ and humidity.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+memCoef( ), memEstimate( ):
+\family default
+ Routines used to implement the 
+\begin_inset Quotes eld
+\end_inset
+
+maximum entropy
+\begin_inset Quotes erd
+\end_inset
+
+ method of spectral estimation; see 
+\begin_inset Quotes eld
+\end_inset
+
+VSpec()
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+MixingRatio( ):
+\family default
+ Calculates the water vapor mixing ratio.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+MurphyKoop( ), MurphyKoopIce( ):
+\family default
+ Calculate the water vapor pressure from the Murphy-Koop formulas.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+PCORfunction( ):
+\family default
+ The algorithm used to correct measured ambient and dynamic pressures for
+ the static defect.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+PotentialTemperature( ):
+\family default
+ Calculates the potential temperature.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+PressureAltitude( ):
+\family default
+ Calculates the pressure altitude from the pressure.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+RAFdata:
+\family default
+ This is a sample data.frame as might be constructed by getNetCDF(), containing
+ a short period of measurements from an NSF/NCAR GV flight in a project
+ called "IDEAS-4".
+ The data.frame contains a set of measurements, one row per second, and a
+ "Time" variable.
+ This is provided for use in the Ranadu examples and can be used to test
+ various Ranadu functions.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+RecoveryFactor( ):
+\family default
+ Returns the recovery factor used to process measurements of air temperature
+ from probes exposed to the airstream.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+RossbyEquivalentPotentialTemperature( ):
+\family default
+ The Rossby formula for the equivalent potential temperature.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+SpecificHeats( ):
+\family default
+ At the value of the ratio of water vapor pressure to total pressure provided
+ as an argument, returns the values of the specific heat at constant pressure,
+ the specific heat at constant volume, and the gas constant.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+Sqs( ):
+\family default
+ The quasi-steady supersaturation that will exist in a cloud with specified
+ droplet size distribution and updraft.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+StandardConstant( ):
+\family default
+ Provides standardized values of some constants used in the processing algorithm
+s.
+ See 
+\begin_inset Quotes eld
+\end_inset
+
+StandardConstant(
+\begin_inset Quotes eld
+\end_inset
+
+?
+\begin_inset Quotes erd
+\end_inset
+
+) for a list of available constants.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+TrueAirspeed( ):
+\family default
+ Calculate the airspeed from the Mach number and temperature.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+VirtualTemperature( )
+\family default
+ and 
+\family typewriter
+VirtualPotentialTemperature( ):
+\family default
+ Functions to calculate these variables.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+WetEquivalentPotentialTemperature( ):
+\family default
+ Wet-equivalent potential temperature.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+WindProcessor( ):
+\family default
+ Calculates the wind vector from the basic measurements and adds new wind
+ variables to the input data.frame.
+\end_layout
+
+\begin_layout Section
+Utility Functions
+\end_layout
+
+\begin_layout Standard
+The following are some of the Ranadu functions that are provided to assist
+ in various data-analysis tasks.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+getNetCDF()
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+DataDirectory()
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+standardVariables()
+\begin_inset Quotes erd
+\end_inset
+
+ functions were already described.
+ Others include:
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+binStats( ):
+\family default
+ A function to calculate average values and standard deviations in bins
+ of a specified variable, as might to useful when constructing error-bar
+ or box-and-whisker plots.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+detrend( ):
+\family default
+ Simple removal of the mean and trend from a time-series variable.
+ Used in the spectral-analysis routines.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+df2tibble( ):
+\family default
+ Convert a data.frame to a 
+\begin_inset Quotes eld
+\end_inset
+
+tibble
+\begin_inset Quotes erd
+\end_inset
+
+, a related data structure particularly suited to many data-analysis steps.
+ 
+\family typewriter
+tibble2df( )
+\family default
+ transforms from a tibble back to a data.frame.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+LagrangeInterpolate()
+\family default
+ implements standard Lagrange interpolation.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+makeNetCDF( )
+\family default
+: A utility that writes a new netCDF-format file from the measurements and
+ attributes contained in a data.frame.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+ncsubset( ):
+\family default
+ Produce a subset netCDF file from an existing netCDF file.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+OpenInProgram( ):
+\family default
+ View the variables in a data.frame in another program like ncplot or Xanadu.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+RAFdata:
+\family default
+ This is a sample data.frame as might be constructed by getNetCDF(), containing
+ a short period of measurements from an NSF/NCAR GV flight in a project
+ called "IDEAS-4".
+ The data.frame contains a set of measurements, one row per second, and a
+ "Time" variable.
+ This is provided for use in the Ranadu examples.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+removeSpikes( ):
+\family default
+ Find 
+\begin_inset Quotes eld
+\end_inset
+
+spikes
+\begin_inset Quotes erd
+\end_inset
+
+ in a variable and replace them with linear-interpolated values.
+ Useful in some studies of spectral variance where spikes distort the spectrum.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+RSubset( ):
+\family default
+ Produce a subset of a data.frame while preserving attributes.
+ This is useful because some standard R subsetting actions do not preserve
+ attributes.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+selectTimes( ):
+\family default
+ Produce a new data.frame with a subset of the time range included in the
+ original data.frame.
+ (Uses setRange.) This is of particular use in pipes.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+setRange( ):
+\family default
+ Find the data.frame indices corresponding to a specified time range in a
+ data.frame.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+setVariableList( ):
+\family default
+ An interactive way of setting a list of variables.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+ShiftInTime( ):
+\family default
+ Move a time-series variable forward or backward in time.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+SmoothInterp( ):
+\family default
+ Fill missing values with linear interpolation and optionally smooth the
+ resulting time series.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+theme_WAC( ):
+\family default
+ An optional theme available for use with 
+\begin_inset Quotes eld
+\end_inset
+
+ggplot2
+\begin_inset Quotes erd
+\end_inset
+
+ plots.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+XformLA( ):
+\family default
+ The transformation from the 
+\begin_inset Quotes eld
+\end_inset
+
+local
+\begin_inset Quotes erd
+\end_inset
+
+ Earth-relative reference frame to the aircraft or body reference frame,
+ or the reverse.
+ Used extensively in the Kalman processor and other GPS-updating functions.
+\end_layout
+
+\begin_layout Chapter
+More Details About Plotting
+\end_layout
+
+\begin_layout Standard
+This chapter includes additional details about the plot functions available
+ in Ranadu.
+\end_layout
+
+\begin_layout Section
+Pipes
+\end_layout
+
+\begin_layout Standard
+When constructing plots, the use of 
+\begin_inset Quotes eld
+\end_inset
+
+pipes
+\begin_inset Quotes erd
+\end_inset
+
+ makes the logic clear and is recommended, so that is described first.
+ All the code sequences described here can be implemented by saving the
+ result from each step and then providing it to the next step, but pipes
+ support the transmission of the result of a calculation to the next stage
+ in the calculation without the need for intermediate storage.
+ They are supported using the 
+\begin_inset Quotes eld
+\end_inset
+
+%>%
+\begin_inset Quotes erd
+\end_inset
+
+ argument, which is enabled by the 
+\begin_inset Quotes eld
+\end_inset
+
+magrittr
+\begin_inset Quotes erd
+\end_inset
+
+ package for R\SpecialChar endofsentence
+ Perhaps the strongest argument for using pipes is that they
+ make the logic of plot construction clear.
+ You start with a data.frame, optionally construct new variables, make appropriat
+e selection of variables and the time interval, apply filters to accept
+ only data meeting particular tests, and then construct the plot using the
+ resulting tailored data.frame.
+ Here is an example, where the data.frame is piped to 
+\begin_inset Quotes eld
+\end_inset
+
+select()
+\begin_inset Quotes erd
+\end_inset
+
+ (part of the dplyr package that passes on only the listed variables) and
+ where the result is then piped to 
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu::selectTime()
+\begin_inset Quotes erd
+\end_inset
+
+ where only the specified time range is transmitted forward.
+ The result is finally piped to Ranadu::plotWAC(), where the first argument
+ is a data.frame.
+ That is supplied by the pipe.
+ The result is shown in Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:pipe-example}
+\end_layout
+
+\end_inset
+
+.
+ Alternately, ggplotWAC() could be used to produce a similar result.
+ In addition to showing the explicit steps in the processing chain, code
+ like this ensures that the plot will be constructed the same way if the
+ code is re-used or moved.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<pipe-example, include=TRUE, echo=TRUE, fig.cap='Example of a figure generated
+ using pipes.
+ The variables are air temperature (ATX), dew point temperature (DPXC),
+ and a new generated variable representing the dew point depression (DPD=ATX-DPX
+C).
+ From WECAN research flight 6, 3 August 2018.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+library(magrittr)
+\end_layout
+
+\begin_layout Plain Layout
+
+Ranadu::getNetCDF(fname, Variables) %>%    ## load the data.frame
+\end_layout
+
+\begin_layout Plain Layout
+
+  dplyr::filter(TASX > 90) %>%             ## limit based on airspeed 
+\end_layout
+
+\begin_layout Plain Layout
+
+  dplyr::select(Time, ATX, DPXC) %>%       ## select the variables to plot
+\end_layout
+
+\begin_layout Plain Layout
+
+  Ranadu::Rmutate(DPD = ATX - DPXC) %>%      ## add the dewpoint-depression
+ DPD
+\end_layout
+
+\begin_layout Plain Layout
+
+  Ranadu::selectTime(220500, 221500) %>%   ## set the time range
+\end_layout
+
+\begin_layout Plain Layout
+
+  Ranadu::plotWAC(col=c('blue', 'forestgreen', 'black'))  ## construct the
+ plot
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+More information on some of the utility functions used or available when
+ constructing plots is provided in the following list:
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+dplyr::filter(): 
+\family default
+This function is used to limit the range of accepted values.
+ The arguments are a data.frame (provided above by the pipe) and a logical
+ statement.
+ Only rows for which the specified test is true are included in the resulting
+ data.frame.
+ An example where a statement like this might be useful is when fitting
+ to determine the sensitivity coefficients for angle of attack, because
+ it is useful to exclude slow flight when the gear and/or flaps might be
+ deployed.
+ Be sure to use the version from dplyr; the filter functions from the packages
+ 
+\begin_inset Quotes eld
+\end_inset
+
+stats
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+signal
+\begin_inset Quotes erd
+\end_inset
+
+ have different behavior.
+ An alternative method of creating a subset is to use the notation 
+\begin_inset Quotes eld
+\end_inset
+
+Data[Data$TASX > 90, ]
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The disadvantage of this method and of the 
+\begin_inset Quotes eld
+\end_inset
+
+select(Data, Data$TASX > 90)
+\begin_inset Quotes erd
+\end_inset
+
+ function provided by base-R is that variable attributes are lost.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Preserving attributes is desirable because the attributes are often used
+ by Ranadu routines.
+ The bin assignments for size distributions are carried in an attribute,
+ as is the data rate (used in spectral analysis).
+ Variables with the same 
+\begin_inset Quotes eld
+\end_inset
+
+short_name
+\begin_inset Quotes erd
+\end_inset
+
+ attributes are redundant measurements of the same quantity, so it is often
+ useful to plot all with matching short_names together.
+ Finally, the function makeNetCDF( ) makes a new netCDF file with the variables
+ and attributes in the data.frame, and it requires some attributes (like
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+Dimension
+\begin_inset Quotes erd
+\end_inset
+
+ attribute) to function.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+dplyr::select(): 
+\family default
+This function creates a subset data.frame with only the desired variables.
+ The desired list of names can be specified either as character names (with
+ quotes) or variable names (without quotes).
+ This also has the advantage over the 
+\begin_inset Quotes eld
+\end_inset
+
+[]
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+[[]]
+\begin_inset Quotes erd
+\end_inset
+
+ methods of subsetting that attributes of the data.frame and the variables
+ are preserved.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+Ranadu::Rmutate( ):
+\family default
+ This function adds new variables to the data.frame according to formulas
+ specified in the second argument.
+ In this processing chain, the first argument is the data.frame provided
+ by the pipe.
+ This calls the routine 
+\family typewriter
+dplyr::mutate()
+\family default
+ but then, because that function does not preserve variable attributes,
+ it transfers attributes from the input to the output data.frame.
+ New variables, however, have no attributes (even the 
+\begin_inset Quotes eld
+\end_inset
+
+Dimension
+\begin_inset Quotes erd
+\end_inset
+
+ attribute) so the resulting data.frame has some limitations, notably not
+ being accepted by 
+\begin_inset Quotes eld
+\end_inset
+
+makeNetCDF( )
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+Ranadu::selectTime( ): 
+\family default
+This function limits the time range of the resulting data.frame to be between
+ the times that are specified in HHMMSS format (hours, minutes, seconds).
+ This is equivalent to using 
+\begin_inset Quotes eld
+\end_inset
+
+dplyr::filter( )
+\begin_inset Quotes erd
+\end_inset
+
+ with limits on the accepted times, but it avoids the need to provide those
+ times in the POSIXct format used by Ranadu data.frames.
+ It preserves attributes and is suitable for use in pipes.
+\end_layout
+
+\begin_layout Enumerate
+
+\family typewriter
+Ranadu::Rsubset( ): 
+\family default
+This is not used in the present example but could be.
+ It accepts start and end times like 
+\begin_inset Quotes eld
+\end_inset
+
+selectTime
+\begin_inset Quotes erd
+\end_inset
+
+, selects variables like 
+\begin_inset Quotes eld
+\end_inset
+
+dplyr::select
+\begin_inset Quotes erd
+\end_inset
+
+, and imposes limitations on the data like 
+\begin_inset Quotes eld
+\end_inset
+
+dplyr::filter( )
+\begin_inset Quotes erd
+\end_inset
+
+, so several functions could be combined in one step: Ranadu::getNetCDF(fname,
+ Variables) %>% Ranadu::Rsubset(220500, 221500, c('ATX', 'DPXC')) %>% plotWAC(
+ ).
+ This function also preserves attributes in the modified data.frame.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu::plotWAC( )
+\begin_inset Quotes erd
+\end_inset
+
+ is designed primarily for time-series plots, but scatterplots can also
+ be generated.
+ In that case, the first two variables in the data.frame should be the variables
+ for the scatterplot, not the Time variable, and an explicit label 
+\begin_inset Quotes eld
+\end_inset
+
+xlab=xxx
+\begin_inset Quotes erd
+\end_inset
+
+ should be supplied.
+ Here is an example:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<scat-ex, include=TRUE, echo=TRUE, fig.cap='Example scatterplot.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Data %>% selectTime(220000, 221500) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+         dplyr::select(ATX, DPXC) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+         plotWAC(xlab='ATX', type='p')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Multi-Frame Plots
+\end_layout
+
+\begin_layout Standard
+It is often desirable to combine several plots into a single plot.
+ There are several ways to do this with Ranadu routines:
+\end_layout
+
+\begin_layout Subsection
+Multiple plotWAC( ) plots:
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset Quotes eld
+\end_inset
+
+layout()
+\begin_inset Quotes erd
+\end_inset
+
+ function in base-R can be used.
+ Here is an example.
+ The matrix layout can also be used to display plots in multiple columns
+ or in multiple rows and columns.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<layout-example, include=TRUE, echo=TRUE, fig.cap='Two-panel figure.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:2, ncol=1), widths=c(8,8), heights=c(5.5,8)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(2,4,1,1)+0.1, oma=c(1.1,0,0,0)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+Data %>% dplyr::select(Time, ATX) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+         plotWAC(ylab=expression(paste(
+\begin_inset Quotes eld
+\end_inset
+
+T [
+\begin_inset Quotes eld
+\end_inset
+
+, degree, 
+\begin_inset Quotes eld
+\end_inset
+
+C]
+\begin_inset Quotes erd
+\end_inset
+
+)))
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1)  
+\end_layout
+
+\begin_layout Plain Layout
+
+Data %>% dplyr::select(Time, WIC) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+         plotWAC(ylab=expression(paste('W [m/s]')))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<reset-layout, echo=FALSE, include=FALSE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+layout(matrix(1:1))
+\end_layout
+
+\begin_layout Plain Layout
+
+op <- par (mar=c(5,4,1,1)+0.1, oma=c(1.1,0,0,0)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Panels and Facets in ggplotWAC( ):
+\end_layout
+
+\begin_layout Standard
+The function 
+\family typewriter
+Ranadu::ggplotWAC( )
+\family default
+ is based on the ggplot2 package for R, which provides extensive plotting
+ capabilities and is highly recommended.
+ What is provided via ggplotWAC( ) is a very simplified and restricted approach,
+ but it might be useful in preliminary applications.
+ See 
+\begin_inset CommandInset href
+LatexCommand href
+name "this URL"
+target "http://had.co.nz/ggplot2/"
+literal "false"
+
+\end_inset
+
+ for information on ggplot2.
+ The Ranadu routine provides two approaches to multiple plots:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\bar under
+facets
+\bar default
+
+\begin_inset Quotes erd
+\end_inset
+
+: If the argument 
+\begin_inset Quotes eld
+\end_inset
+
+panels
+\begin_inset Quotes erd
+\end_inset
+
+ is supplied (e.g., panels=N), ggplotWAC( ) will construct N vertically aligned
+ panels.
+ All will contain time-series plots.
+ The first-argument to ggplotWAC(), the data.frame, should contain the variable
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Time
+\begin_inset Quotes erd
+\end_inset
+
+ and N*M variables, where the first M variables will be plotted in the first
+ panel, the next M in the second panel, etc.
+ A set of M character-mode labels should be supplied via labelN.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\bar under
+viewports
+\bar default
+
+\begin_inset Quotes erd
+\end_inset
+
+: An optional argument 
+\begin_inset Quotes eld
+\end_inset
+
+position=c(i, j)
+\begin_inset Quotes erd
+\end_inset
+
+ can be used to place a plot in the ith of j vertically aligned viewports.
+\end_layout
+
+\begin_layout Standard
+Examples are shown in Figs.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:gg-facets}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:gg-viewports}
+\end_layout
+
+\end_inset
+
+.
+ An advantage of the faceted plot is that vertical alignment of the plots
+ is ensured; this can be a problem with other plots if the axis labels are
+ of different size in the different plots.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+\begin_inset Quotes eld
+\end_inset
+
+suppressWarnings
+\begin_inset Quotes erd
+\end_inset
+
+ is used here because otherwise the routine prints a warning message about
+ mismatches among variable attributes.
+\end_layout
+
+\end_inset
+
+ In the second case, the viewports are positioned so that the abscissa labels
+ and title are obscured for the top plot.
+ The intent is that this should be used for identical time scales for each
+ plot, so that it is not necessary to duplicate the axis labels and title.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<gg-facets, include=TRUE, echo=TRUE, fig.cap='Example of a faceted ggplotWAC
+ plot.
+ Three temperature measurements are shown from probes identified as H1,
+ H2, and F2.
+ The top panel shows the air temperature, and the bottom panel the directly
+ measured recovery temperature before correction for dynamic heating.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Project <- 'WECAN'    ## faceted plot with ggplotWAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+Flight <- 5
+\end_layout
+
+\begin_layout Plain Layout
+
+V <- c('ATH1', 'ATH2', 'ATF1', 'RTH1', 'RTH2', 'RTF1')
+\end_layout
+
+\begin_layout Plain Layout
+
+fname <- sprintf('%s%s/%srf%02d.nc', DataDirectory(), Project, Project,
+\end_layout
+
+\begin_layout Plain Layout
+
+                 Flight)
+\end_layout
+
+\begin_layout Plain Layout
+
+suppressWarnings (
+\end_layout
+
+\begin_layout Plain Layout
+
+    getNetCDF(fname, V, 200000, 201500) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+    ggplotWAC(panels=2, 
+\end_layout
+
+\begin_layout Plain Layout
+
+              col=c('blue', 'darkorange', 'forestgreen'),
+\end_layout
+
+\begin_layout Plain Layout
+
+              ylab=expression(paste('temperature [', degree,'C]')),
+\end_layout
+
+\begin_layout Plain Layout
+
+              lwd=c(1.5, 0.8, 1), lty=c(1,2,1), 
+\end_layout
+
+\begin_layout Plain Layout
+
+              labelP=c('   air temperature', ' recovery temperature'),
+\end_layout
+
+\begin_layout Plain Layout
+
+              labelL=c('H1', 'H2', 'F1'),
+\end_layout
+
+\begin_layout Plain Layout
+
+              legend.position=c(0.5,0.95)
+\end_layout
+
+\begin_layout Plain Layout
+
+    )
+\end_layout
+
+\begin_layout Plain Layout
+
+)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<gg-viewports, include=TRUE, echo=TRUE, fig.cap='An example of selecting
+ the figure position using viewports and the 
+\begin_inset Quotes eld
+\end_inset
+
+position
+\begin_inset Quotes erd
+\end_inset
+
+ argument to ggplotWAC().'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+## viewport-plot with ggplotWAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+DG <- getNetCDF(fname, V, 200000, 201500)
+\end_layout
+
+\begin_layout Plain Layout
+
+with(DG, ggplotWAC(data.frame(Time, ATH1), position=c(1,2)))
+\end_layout
+
+\begin_layout Plain Layout
+
+with(DG, ggplotWAC(data.frame(Time, ATF1), position=c(2,2)))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Plotting the density of events
+\end_layout
+
+\begin_layout Standard
+A scatterplot like that in Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:scat-ex}
+\end_layout
+
+\end_inset
+
+ often is used to show a two-dimensional display of where events occur.
+ Such plots are useful when the number of events is small, but for large
+ numbers of events the overlap of points can obscure relationships.
+ The base-R function 
+\begin_inset Quotes eld
+\end_inset
+
+smoothScatter()
+\begin_inset Quotes erd
+\end_inset
+
+ is one option for plotting the density of points in such cases.
+ Another is the 
+\begin_inset Quotes eld
+\end_inset
+
+filled.contour()
+\begin_inset Quotes erd
+\end_inset
+
+ function.
+ Ranadu provides a third option in the function Ranadu::contourPlot().
+ The number of bins, colors, and linear vs.
+\begin_inset space ~
+\end_inset
+
+logarithmic density intervals can be provided as arguments to this function,
+ although the defaults often work acceptably.
+ The following figure and code illustrates the use of this plot.
+ Additional more elegant solutions are provided by the ggplot2 package.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<contourPlot, include=TRUE, echo=TRUE, fig.cap='Example of a density plot
+ generated using Ranadu::contourPlot().'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+getNetCDF(fname) %>% dplyr::select(ATX, DPXC) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+    contourPlot(title='WECAN flight #5')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Error bars and box-and-whisker plots
+\end_layout
+
+\begin_layout Standard
+Ranadu provides the 
+\begin_inset Quotes eld
+\end_inset
+
+binStats()
+\begin_inset Quotes erd
+\end_inset
+
+ function to compile variable characteristics needed to generate plots like
+ error-bar plots and box-and-whisker plots.
+ The input should be a data.frame whose first two columns specify the expected
+ respective ordinate and abscissa variables.
+ Each row in the data.frame is assigned to a bin on the basis of the value
+ of the second variable, and for each bin the mean, standard deviation,
+ and number of events are accumulated for values of the first variable in
+ the data.frame.
+ The output from binStats() is a new four-column data.frame where the respective
+ columns are the mean value of the abscissa for each bin, the mean value
+ of the ordinate for all events in the bin, and corresponding standard deviation
+, and the number of events in the bin.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<errorbar-plot, include=TRUE, echo=TRUE, fig.height=3.5, fig.cap='Example
+ of an error-bar plot generated using binStats().'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+getNetCDF(fname) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+  Rmutate(DPD=ATX-DPXC) %>%      ## define dew-point-depression variable
+\end_layout
+
+\begin_layout Plain Layout
+
+  dplyr::select(DPD, GGALT) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+  binStats() %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  ggplot(aes(x=xc)) + geom_point(aes(y=ybar), color='blue') +  
+\end_layout
+
+\begin_layout Plain Layout
+
+  geom_errorbar(aes(ymin=ybar-sigma, ymax=ybar+sigma)) +
+\end_layout
+
+\begin_layout Plain Layout
+
+  xlab('geometric altitude [m]') +
+\end_layout
+
+\begin_layout Plain Layout
+
+  ylab(expression(paste('dew point depression [', degree, 'C]'))) +
+\end_layout
+
+\begin_layout Plain Layout
+
+  theme_WAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+The following code creates Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:bwplot}
+\end_layout
+
+\end_inset
+
+, an example of creating a box-and-whisker plot.
+ When used with the argument 
+\begin_inset Quotes eld
+\end_inset
+
+addBin = TRUE
+\begin_inset Quotes erd
+\end_inset
+
+, binStats instead returns a modified data.frame with a variable 
+\begin_inset Quotes eld
+\end_inset
+
+BIN
+\begin_inset Quotes erd
+\end_inset
+
+ added that is suitable to use when grouping in ggplot aesthetics.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<bwplot, include=TRUE, echo=TRUE, fig.cap='An example of a box-and-whisker
+ plot.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+getNetCDF(fname) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  dplyr::select(DPXC, GGALT) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  binStats(addBin = TRUE) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  ggplot() + geom_boxplot(aes(GGALT, DPXC, group=BIN), 
+\end_layout
+
+\begin_layout Plain Layout
+
+                          color='blue', na.rm=TRUE) + 
+\end_layout
+
+\begin_layout Plain Layout
+
+  theme_WAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+The skew-T thermodynamic diagram
+\end_layout
+
+\begin_layout Standard
+Ranadu incorporates the ability to plot a set of measurements on the background
+ of a skew-T diagram.
+ The background is non-standard and is described in detail in 
+\begin_inset CommandInset href
+LatexCommand href
+name "this document"
+target "https://drive.google.com/file/d/0B1kIUH45ca5ANVNoMnowUlhpYk0/view?usp=sharing"
+literal "false"
+
+\end_inset
+
+.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu::SkewTSounding()
+\begin_inset Quotes erd
+\end_inset
+
+ function should be called with a data.frame containing measurements of pressure,
+ temperature and dewpoint, which may be named either (
+\begin_inset Quotes eld
+\end_inset
+
+PSXC
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+ATX
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+DPXC
+\begin_inset Quotes erd
+\end_inset
+
+) or (
+\begin_inset Quotes eld
+\end_inset
+
+Pressure
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+Temperature
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+DewPoint
+\begin_inset Quotes erd
+\end_inset
+
+).
+ A skew-T background is generated using the Ranadu data file 
+\begin_inset Quotes eld
+\end_inset
+
+skewTDiagram.Rdata
+\begin_inset Quotes erd
+\end_inset
+
+ and the values from the input data.frame are optionally averaged in pressure
+ intervals and then plotted on this background.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<skewT, include=TRUE, echo=TRUE, fig.cap='Sounding from PREDICT flight 11.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Project <- 'PREDICT'
+\end_layout
+
+\begin_layout Plain Layout
+
+Flight <- 11
+\end_layout
+
+\begin_layout Plain Layout
+
+fname <- sprintf ('%s%s/%srf%02d.nc', DataDirectory(), Project, 
+\end_layout
+
+\begin_layout Plain Layout
+
+                  Project, Flight)
+\end_layout
+
+\begin_layout Plain Layout
+
+getNetCDF(fname) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+    selectTime(0, 150000) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+    SkewTSounding(AverageInterval=10)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Aerosol- and hydrometeor-size distributions
+\end_layout
+
+\begin_layout Standard
+The Ranadu function 
+\begin_inset Quotes eld
+\end_inset
+
+plotSD()
+\begin_inset Quotes erd
+\end_inset
+
+ displays the size distribution measured by various probes that produce
+ arrays of measurements.
+ The data.frame containing these measurements is special in that the column
+ corresponding to a variable name like 
+\begin_inset Quotes eld
+\end_inset
+
+CCDP_RPC
+\begin_inset Quotes erd
+\end_inset
+
+ is a two-dimensional vector.
+ This makes the data.frame inconsistent with the 
+\begin_inset Quotes eld
+\end_inset
+
+tidy
+\begin_inset Quotes erd
+\end_inset
+
+ structure and with the structure required for a 
+\begin_inset Quotes eld
+\end_inset
+
+tibble
+\begin_inset Quotes erd
+\end_inset
+
+, so some special considerations are required if an analyst wants to use
+ only tidy data.
+ In this section, those considerations are not discussed further because
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+plotSD()
+\begin_inset Quotes erd
+\end_inset
+
+ function assumes Ranadu-style data.frame conventions.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu::getNetCDF()
+\begin_inset Quotes erd
+\end_inset
+
+ accepts variable names like 
+\begin_inset Quotes eld
+\end_inset
+
+CCDP_
+\begin_inset Quotes erd
+\end_inset
+
+, in which case it searches for the first variable starting with that name.
+ This avoids the need to know the location of the CDP probe in various projects.
+ However, if there are multiple probes with the same prefix name, they need
+ to be specified in the variable list used to construct the data.frame.
+\end_layout
+
+\begin_layout Standard
+An example, Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:SD1}
+\end_layout
+
+\end_inset
+
+, shows code that will construct a plot of the size distribution from several
+ probes.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+exceedance
+\begin_inset Quotes erd
+\end_inset
+
+ is added when the argument 
+\begin_inset Quotes eld
+\end_inset
+
+CDF=TRUE
+\begin_inset Quotes erd
+\end_inset
+
+ is used; it is the complement to a cumulative distribution and shows the
+ fraction of particles that exceed the plotted size.
+ The four numbers returned from the function are the mean concentration,
+ mean diameter, standard deviation in the diameter, and liquid water content
+ under the assumption that all particles are liquid.
+ It is also possible to construct a plot of the distribution in liquid water
+ content, as shown in Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:SD2}
+\end_layout
+
+\end_inset
+
+.
+ See 
+\begin_inset Quotes eld
+\end_inset
+
+?Ranadu::plotSD
+\begin_inset Quotes erd
+\end_inset
+
+ for more options including alternate specification of the size limits,
+ bins to include, and log vs linear axes.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<SD1, include=TRUE, echo=TRUE, fig.cap='Example of a size distribution.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+getNetCDF('/Data/CSET/CSETrf06.nc', c('CCDP_', 'C1DC_', 'CUHSAS_')) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  selectTime(173000, 173500) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+  plotSD(CellLimits=NA, logAxis='xy', CDF=TRUE)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<SD2, include=TRUE, echo=TRUE, fig.cap='Example of a distribution in liquid
+ water content.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+getNetCDF('/Data/CSET/CSETrf06.nc', c('CCDP_', 'C1DC_', 'CUHSAS_')) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  selectTime(173000, 173500) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+  plotSD(CellLimits=NA, logAxis='xy', LWC=TRUE, CDF=TRUE)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+Variance Spectra
+\end_layout
+
+\begin_layout Standard
+Variance spectra are also plots and perhaps belong in the preceding chapter,
+ but they are discussed here in greater detail than the preceding plots
+ and so seemed to fit better in a separate chapter.
+\end_layout
+
+\begin_layout Section
+Background regarding spectral variance
+\end_layout
+
+\begin_layout Subsection
+Terminology
+\end_layout
+
+\begin_layout Standard
+The plots discussed here as 
+\begin_inset Quotes eld
+\end_inset
+
+variance spectra
+\begin_inset Quotes erd
+\end_inset
+
+ are often referred to as 
+\begin_inset Quotes eld
+\end_inset
+
+power spectra.
+\begin_inset Quotes erd
+\end_inset
+
+ That term is not used here because the spectra representing variance in
+ the data.frame measurements from NCAR/EOL/RAF netCDF files are not power.
+ Even in the case of wind (with variance dimensions 
+\begin_inset Formula $\mathrm{m}^{2}\mathrm{s}^{-1}/Hz$
+\end_inset
+
+), the variance spectrum is better described as a kinetic-energy spectrum.
+ For this reason, the plots discussed in this chapter will be called 
+\begin_inset Quotes eld
+\end_inset
+
+variance spectra
+\begin_inset Quotes erd
+\end_inset
+
+ and the plotted quantity will be called the spectral variance.
+\end_layout
+
+\begin_layout Subsection
+Transformations among spectra; 
+\begin_inset Quotes eld
+\end_inset
+
+proper
+\begin_inset Quotes erd
+\end_inset
+
+ spectra
+\end_layout
+
+\begin_layout Standard
+Consider the cumulative distribution function for variance 
+\begin_inset Formula $C(\nu)$
+\end_inset
+
+, the fraction of the variance that is contributed by frequencies smaller
+ than 
+\begin_inset Formula $\nu$
+\end_inset
+
+.
+ The differential distribution function with respect to frequency is then
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset Formula 
+\[
+P(\nu)=\frac{dC(\nu)}{d\nu}\,\,\,\,.
+\]
+
+\end_inset
+
+Consider how this distribution function would change if defined in terms
+ of a new variable 
+\begin_inset Formula $x(v)$
+\end_inset
+
+ starting with the specific variable 
+\begin_inset Formula $x=\ln\nu$
+\end_inset
+
+.
+ The differential distribution function would then be 
+\begin_inset Formula $T(x)$
+\end_inset
+
+ specified by
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+T(x)=\frac{dC(x)}{dx}=\frac{dC(\nu)}{d\nu}\frac{d\nu}{dx}=\nu P(\nu)
+\]
+
+\end_inset
+
+
+\begin_inset Formula $\nu P(\nu)$
+\end_inset
+
+ thus gives the spectral density in terms of 
+\begin_inset Formula $\ln\nu$
+\end_inset
+
+ and so in terms of 
+\begin_inset Formula $\ln(10)\log_{10}\nu\approx2.30\log_{10}\nu$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In the following, two options for variance spectra are emphasized: 
+\begin_inset Formula $P(\nu)$
+\end_inset
+
+ vs 
+\begin_inset Formula $\nu$
+\end_inset
+
+ on a linear plot and 
+\begin_inset Formula $\nu P(\nu)$
+\end_inset
+
+ vs 
+\begin_inset Formula $\log_{10}\nu$
+\end_inset
+
+ with a logarithmic abscissa and either a linear or logarithmic ordinate
+ scale.
+ These are regarded here as 
+\begin_inset Quotes eld
+\end_inset
+
+proper
+\begin_inset Quotes erd
+\end_inset
+
+ displays because the area under segments of the plotted curves represent
+ contributions to the variance so it is possible to estimate the contributions
+ to variance from various intervals in frequency by using the areas on the
+ plot.
+ This direct representation is compromised in the case where the variable
+ 
+\begin_inset Formula $\nu P(\nu)$
+\end_inset
+
+ is plotted on a logarithmic scale because then it is necessary to consider
+ the logarithmic ordinate when evaluating areas.
+ This minor inconvenience nevertheless is less significant than the problems
+ that arise from using a linear ordinate scale, in which case the ordinate
+ range obscures relationships and the common 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $-5/3$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ slope seen in logarithmic plots becomes a parabolic line that is difficult
+ to interpret.
+ For that reason, plots of spectral variance here will emphasis plots of
+ 
+\begin_inset Formula $\nu P(\nu)$
+\end_inset
+
+ vs 
+\begin_inset Formula $\log_{10}(\nu)$
+\end_inset
+
+ on log-log scales.
+ It is suggested that plots of 
+\begin_inset Formula $P(\nu)$
+\end_inset
+
+ vs 
+\begin_inset Formula $\nu$
+\end_inset
+
+ on log-log scales should be avoided because the connection between area
+ on the plot and variance is lost, making the plot harder to interpret.
+ In addition, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $-5/3$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ spectra are steep, the range of ordinate values is higher, and the plots
+ are therefore more difficult to interpret than those plotting 
+\begin_inset Formula $\nu P(\nu)$
+\end_inset
+
+ vs 
+\begin_inset Formula $\nu$
+\end_inset
+
+ on a log-log scale.
+\end_layout
+
+\begin_layout Subsection
+Methods used to estimate spectral variance
+\end_layout
+
+\begin_layout Standard
+The function 
+\begin_inset Quotes eld
+\end_inset
+
+Ranadu::VSpec()
+\begin_inset Quotes erd
+\end_inset
+
+ includes three methods that can be selected to estimate the spectral variance:
+\end_layout
+
+\begin_layout Enumerate
+The function 
+\begin_inset Quotes eld
+\end_inset
+
+spectrum()
+\begin_inset Quotes erd
+\end_inset
+
+ from the 
+\begin_inset Quotes eld
+\end_inset
+
+stats
+\begin_inset Quotes erd
+\end_inset
+
+ R package, which estimates a periodogram using Fourier-series estimation
+ and then optionally smooths the spectrum using modified Daniell smoothers.
+ The amount of smoothing can be controlled with the 
+\begin_inset Quotes eld
+\end_inset
+
+spans
+\begin_inset Quotes erd
+\end_inset
+
+ parameter in the function call.
+\end_layout
+
+\begin_layout Enumerate
+The 
+\begin_inset Quotes eld
+\end_inset
+
+Welch
+\begin_inset Quotes erd
+\end_inset
+
+ method as implemented by the R package 
+\begin_inset Quotes eld
+\end_inset
+
+bspec
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In this method, the time series is divided into subsets and the spectra
+ resulting from the subsets are averaged to reduce the variance in the result.
+ The degree of smoothing is controlled by the 
+\begin_inset Quotes eld
+\end_inset
+
+segLength
+\begin_inset Quotes erd
+\end_inset
+
+ parameter that specifies the length of the segments to use.
+\end_layout
+
+\begin_layout Enumerate
+The 
+\begin_inset Quotes eld
+\end_inset
+
+maximum entropy
+\begin_inset Quotes erd
+\end_inset
+
+ method in which the spectrum is represented by 
+\begin_inset Quotes eld
+\end_inset
+
+poles
+\begin_inset Quotes erd
+\end_inset
+
+ and evaluated from the contributions of those poles across the frequency
+ spectrum.
+ A higher number of poles and a smaller value of the 
+\begin_inset Quotes eld
+\end_inset
+
+resolution
+\begin_inset Quotes erd
+\end_inset
+
+ will lead to more structure in the result.
+\end_layout
+
+\begin_layout Standard
+In addition, it is possible to smooth the resulting spectrum further by
+ specifying a value for the parameter 
+\begin_inset Quotes eld
+\end_inset
+
+smoothBins
+\begin_inset Quotes erd
+\end_inset
+
+, in which case the frequency range will be partitioned into the specified
+ number of logarithmically spaced bins and the values of the spectral density
+ will be averaged in each bin.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Generating plots of variance spectra
+\end_layout
+
+\begin_layout Standard
+See 
+\begin_inset Quotes eld
+\end_inset
+
+?Ranadu::VSpec
+\begin_inset Quotes erd
+\end_inset
+
+ for details regarding using this function.
+ The essential inputs are a data.frame that includes at least the variables
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Time
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+TASX
+\begin_inset Quotes erd
+\end_inset
+
+, and the variable for which the variance spectrum is desired.
+ TASX is needed to interpret the scale both in terms of frequency and wavelength.
+ An example is shown in Fig.
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:VS1}
+\end_layout
+
+\end_inset
+
+, using the default specifications.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<VS1, include=TRUE, echo=TRUE, fig.cap='Variance spectrum for measurements
+ of vertical wind during SOCRATES flight 8, 4:56:00 -- 5:01:00.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+getNetCDF('/Data/SOCRATES/SOCRATESrf08h.nc', Start=45600, End=50100) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  VSpec('WIC') + theme_WAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The following demonstrates how to combine plotted spectra.
+ The three lines on this plot were generated using the three methods of
+ spectral estimation available in VSpec(), all for the WIC variable:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<VS2, include=TRUE, echo=TRUE, fig.cap='Variance spectra for the same data
+ shown in the preceding plot but generated by the three methods indicated
+ in the legend.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+D <- getNetCDF('/Data/SOCRATES/SOCRATESrf08h.nc', Start=45600, End=50100)
+ %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+     Rmutate(WIC2=WIC, WIC3=WIC) ## duplicate the variable
+\end_layout
+
+\begin_layout Plain Layout
+
+g <- VSpec(D, 'WIC', VLabel='spectrum')
+\end_layout
+
+\begin_layout Plain Layout
+
+g <- VSpec(D, 'WIC2', method='Welch', VLabel='Welch', 
+\end_layout
+
+\begin_layout Plain Layout
+
+           segLength=128, smoothBins=50, add=g)
+\end_layout
+
+\begin_layout Plain Layout
+
+VSpec(D, 'WIC3', method='MEM', VLabel='MEM', add=g) +
+\end_layout
+
+\begin_layout Plain Layout
+
+  theme_WAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Another option that may be of use, although the result is not a 
+\begin_inset Quotes eld
+\end_inset
+
+proper
+\begin_inset Quotes erd
+\end_inset
+
+ spectrum in the sense used above, is to plot with weighting by 
+\begin_inset Formula $\nu^{5/3}$
+\end_inset
+
+ and additional change of variables so that the resulting ordinate matches
+ the eddy dissipation rate in a case where the measurements are indeed from
+ an inertial subrange.
+ Figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+ref{fig:VS3}
+\end_layout
+
+\end_inset
+
+ illustrates this plot.
+ The variable plotted is 
+\begin_inset Formula $(2\pi/V)(CP(\nu)\nu^{5/3})^{3/2}$
+\end_inset
+
+, with 
+\begin_inset Formula $V$
+\end_inset
+
+ the airspeed and 
+\begin_inset Formula $C=1.5$
+\end_inset
+
+ for lateral spectra; this quantity should equal the eddy dissipation rate
+ in an inertial subrange.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<VS3, include=TRUE, echo=TRUE, fig.height=4.5, fig.cap='An eddy-dissipation-rate
+ plot for the same data shown in the preceding plot.
+ but generated by the three methods indicated in the legend.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+VSpec(D, 'WIC', EDR=TRUE) + theme_WAC(1)  ## theme_WAC(1) => smaller title
+\end_layout
+
+\begin_layout Plain Layout
+
+## to suppress the title, add 
+\begin_inset Quotes eld
+\end_inset
+
++ ggtitle('')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+Miscellaneous
+\end_layout
+
+\begin_layout Section
+Combining flights
+\end_layout
+
+\begin_layout Standard
+It is sometimes useful to have a data.frame that spans a whole project.
+ Individual data.frames can be combined using the R function 
+\begin_inset Quotes eld
+\end_inset
+
+rbind
+\begin_inset Quotes erd
+\end_inset
+
+, provided the individual data.frames have the same structure.
+ The argument 
+\begin_inset Quotes eld
+\end_inset
+
+F
+\begin_inset Quotes erd
+\end_inset
+
+ to 
+\begin_inset Quotes eld
+\end_inset
+
+getNetCDF()
+\begin_inset Quotes erd
+\end_inset
+
+ can be used to add a variable named 
+\begin_inset Quotes eld
+\end_inset
+
+RF
+\begin_inset Quotes erd
+\end_inset
+
+ with the value specified by 
+\begin_inset Quotes eld
+\end_inset
+
+F
+\begin_inset Quotes erd
+\end_inset
+
+, so that individual flights can be identified and easily separated in the
+ combined data.frame.
+\end_layout
+
+\begin_layout Standard
+Here are some examples that illustrate uses of the combined data set:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<multiFlt, include=TRUE, echo=TRUE, fig.cap='Distribution of values of the
+ vertical wind for each research flight number.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+VarList <- c("ADIFR", "PITCH", "QCF", "PSF", "AKRD", "WIC", 
+\end_layout
+
+\begin_layout Plain Layout
+
+  "TASF", "GGALT", "ROLL", "PSXC", "ATX", 
+\begin_inset Quotes eld
+\end_inset
+
+DPXC
+\begin_inset Quotes erd
+\end_inset
+
+, "QCXC", 
+\end_layout
+
+\begin_layout Plain Layout
+
+  "EWX", "ACINS","GGLAT") 
+\end_layout
+
+\begin_layout Plain Layout
+
+## add variables needed to recalculate wind
+\end_layout
+
+\begin_layout Plain Layout
+
+VarList <- c(VarList, "TASX", "ATTACK", "SSLIP", 
+\end_layout
+
+\begin_layout Plain Layout
+
+  "GGVEW", "GGVNS", "VEW", "VNS", "THDG")
+\end_layout
+
+\begin_layout Plain Layout
+
+Data <- data.frame()
+\end_layout
+
+\begin_layout Plain Layout
+
+Project <- 'CSET'
+\end_layout
+
+\begin_layout Plain Layout
+
+Fl <- sort (list.files ( ## get list of available flights
+\end_layout
+
+\begin_layout Plain Layout
+
+  sprintf ("%s%s/", DataDirectory(), Project),     
+\end_layout
+
+\begin_layout Plain Layout
+
+  sprintf ("%srf...nc$", Project))) 
+\end_layout
+
+\begin_layout Plain Layout
+
+for (flt in Fl) {
+\end_layout
+
+\begin_layout Plain Layout
+
+    fname = sprintf("%s%s/%s", DataDirectory(), Project, flt)
+\end_layout
+
+\begin_layout Plain Layout
+
+    fno <- as.numeric(sub('.*f([0-9]*).nc', '
+\backslash
+
+\backslash
+1', flt))
+\end_layout
+
+\begin_layout Plain Layout
+
+    D <- getNetCDF (fname, VarList, F=fno)
+\end_layout
+
+\begin_layout Plain Layout
+
+    Data <- rbind(Data, D)
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+## impose restrictions where good vertical wind expected
+\end_layout
+
+\begin_layout Plain Layout
+
+Data <- dplyr::filter(Data, TASX > 90, abs(ROLL) < 2) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+        dplyr::select(Time, WIC, ATX, DPXC, EWX, GGALT, RF)
+\end_layout
+
+\begin_layout Plain Layout
+
+Data %>% ggplot() + 
+\end_layout
+
+\begin_layout Plain Layout
+
+         geom_boxplot(aes(RF, WIC, group=RF), 
+\end_layout
+
+\begin_layout Plain Layout
+
+                                 color='blue', na.rm=TRUE) + 
+\end_layout
+
+\begin_layout Plain Layout
+
+         theme_WAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<MF2, include=TRUE, echo=TRUE, fig.cap='Measurements of temperature vs.
+ altitude during research flights 3 to 6.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Data %>% dplyr::select(ATX, GGALT, RF) %>% dplyr::filter(RF >= 3 & RF <=
+ 6) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  Rmutate(RF = as.character(RF)) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+  ggplot() + geom_point(aes(ATX, GGALT, color=RF)) +
+\end_layout
+
+\begin_layout Plain Layout
+
+  theme_WAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<MF3, include=TRUE, echo=TRUE, fig.cap='Example that uses faceted plots
+ to show results from different research flights.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Data %>% dplyr::select(WIC, GGALT, RF) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+         dplyr::filter(RF == 4 | RF == 5) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+         Rmutate(RF = sprintf('research flight %d', RF)) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+         ggplot() + geom_point(aes(WIC, GGALT)) +
+\end_layout
+
+\begin_layout Plain Layout
+
+         facet_wrap(~ RF, nrow=1) + ## see also facet_grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+         theme_WAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<MF4, include=TRUE, echo=TRUE, fig.cap='Example that uses faceted plots
+ to show results from different research flights.'>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Data %>% dplyr::select(EWX, ATX, GGALT, RF) %>% 
+\end_layout
+
+\begin_layout Plain Layout
+
+         dplyr::filter(RF == 4 | RF == 5) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+         Rmutate(RF = sprintf('research flight %d', RF)) %>%
+\end_layout
+
+\begin_layout Plain Layout
+
+         Rmutate(RH = 100 * EWX / MurphyKoop(ATX)) %>%  ## new variable
+\end_layout
+
+\begin_layout Plain Layout
+
+         ggplot() + geom_path(aes(RH, GGALT, color=RF)) +
+\end_layout
+
+\begin_layout Plain Layout
+
+         ylim(c(0, 7500)) +
+\end_layout
+
+\begin_layout Plain Layout
+
+         xlab('relative humidity [%]') +
+\end_layout
+
+\begin_layout Plain Layout
+
+         ylab('geometric altitude [m]') +
+\end_layout
+
+\begin_layout Plain Layout
+
+         theme_WAC()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<<MF5, include=TRUE, echo=TRUE>>=
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Data %>% dplyr::group_by(RF) %>% summarise(mean = mean(WIC, na.rm=TRUE))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+@
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Comments re 
+\begin_inset Quotes eld
+\end_inset
+
+tibbles
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The data.frames used by convention in Ranadu are inconsistent with the 
+\begin_inset Quotes eld
+\end_inset
+
+tidy
+\begin_inset Quotes erd
+\end_inset
+
+ structure discussed in 
+\begin_inset Quotes eld
+\end_inset
+
+R for Data Analysis
+\begin_inset Quotes erd
+\end_inset
+
+ by H.
+\begin_inset space ~
+\end_inset
+
+Wickham because, for size-distribution variables such as those produced
+ by the CDP or UHSAS the column consists of a two-dimensional vector where
+ the first dimension is the row and the second is the concentration or count
+ of particles in each bin.
+ Data.frames not containing such variables are 
+\begin_inset Quotes eld
+\end_inset
+
+tidy
+\begin_inset Quotes erd
+\end_inset
+
+ and can be converted to tibbles using the function as.tibble().
+ This will fail, however, for data.frames that contain size-distribution
+ variables.
+ The function Ranadu::df2tibble() will convert such data.frames to tibbles
+ by converting the two-dimensional vectors into lists.
+ However, then the tibbles won't work with functions like Ranadu::plotSD().
+ Otherwise, the resulting tibbles are consistent with the Ranadu functions
+ including plotting and algorithm calculations.
+\end_layout
+
+\begin_layout Section
+Reproducible research
+\end_layout
+
+\begin_layout Standard
+With the tools now available, it is possible to document analysis projects
+ to a degree that others can duplicate them using archived information.
+ Steps toward that goal are the topic of this section.
+ It is suggested that proper documentation of a project should include these
+ components:
+\end_layout
+
+\begin_layout Enumerate
+The project report, documenting the analysis steps, data used, results and
+ interpretation.
+\end_layout
+
+\begin_layout Enumerate
+Any code used.
+\end_layout
+
+\begin_layout Enumerate
+Enough information on the underlying programming language (version number,
+ operating system, etc.) that someone else can use the same code interpreter
+ if necessary.
+\end_layout
+
+\begin_layout Enumerate
+Locations of data files used, if in maintained archives, or copies of the
+ data sufficient to reproduce the results.
+\end_layout
+
+\begin_layout Enumerate
+A discussion of the workflow required to reproduce the research.
+ This may include discussion of aspects of the code that may not be evident
+ to an inexperienced reader, documentation of investigations not included
+ in the report, reasons for choices made, and other advice to a person seeking
+ to reproduce the research that might not be appropriate in the project
+ report.
+ The workflow document can be less formal and more wordy or chatty that
+ the project report if that material might be useful to another analyst.
+\end_layout
+
+\begin_layout Standard
+Often, analysis steps are stutter-steps producing scattered material that
+ is hard to assemble, with different steps used to generate plots, manipulate
+ data, perform fits, construct derived data, combine multiple and supplementary
+ data sets, etc.
+ Reproducibility does not mean necessarily following that original path,
+ but a logical path using the successful steps should be documented.
+ Essential but not adequate steps toward reproducibility include making
+ the code available in some repository and ensuring that the data as used
+ is archived where it is accessible.
+ The project report should indicate where these components of the analysis
+ are saved.
+ The additional component that will usually be needed by a reproducing analyst
+ is a workflow document, which can be thought of as guidance to a person
+ wishing to verify or extend the results.
+\end_layout
+
+\begin_layout Standard
+R tools are available that are of great utility in performing reproducible
+ research.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+knitr
+\begin_inset Quotes erd
+\end_inset
+
+ package (see references) makes it possible to assemble the text and code
+ in the same file and to use knitr functions to reference results from the
+ code in the text or embed graphics in the document as generated in the
+ code.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+Rnw
+\begin_inset Quotes erd
+\end_inset
+
+ format or other alternative formats support this approach, and running
+ that program can generate the project report while running the specified
+ code.
+ This avoids ad hoc assembly of figures, tables, and text from different
+ sources, which often obscures efforts to reproduce the work.
+ A suggested documentation package can then include the Rnw-format (or equivalen
+t) file, the report in text form, links to archives where the data are available
+ or alternately inclusion of the data in the archived project package, a
+ workflow discussion, and documentation of the version of various programs
+ and computer systems used.
+ Some more information on using knitr is included in the 
+\begin_inset Quotes eld
+\end_inset
+
+RSessions
+\begin_inset Quotes erd
+\end_inset
+
+ shinyApp tutorial, in the 
+\begin_inset Quotes eld
+\end_inset
+
+reproducibility
+\begin_inset Quotes erd
+\end_inset
+
+ tab.
+\end_layout
+
+\begin_layout Section
+The Ranadu Shiny app
+\end_layout
+
+\begin_layout Standard
+A shiny app that uses the Ranadu package to examine data files is documented
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "here"
+target "https://drive.google.com/open?id=0B1kIUH45ca5AV1VDS1VxVDJaMmM"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%
+\backslash
+attach{attachment}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+%
+\backslash
+attachm{first
+\backslash
+
+\backslash
+second}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+%
+\backslash
+cc{first attachment
+\backslash
+
+\backslash
+second
+\backslash
+
+\backslash
+3rd att}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -3,7 +3,9 @@
 #' @details Reads the flight number, project, date/time, position, and variables from
 #' the netCDF file and returns a list of properties. Alternately, produces similar
 #' information for a saved (.Rdata-format) data.frame produced by reading such a
-#' netCDF file.
+#' netCDF file. In addition, produces a list of the long_names associated with the
+#' variables and a list of the "measurands" along with the redundant variables
+#' representing that measurand.
 #' @aliases dataFileInfo
 #' @author William Cooper
 #' @export DataFileInfo
@@ -18,7 +20,7 @@
 #' @examples 
 #' FI <-DataFileInfo (sprintf ("%s/extdata/RAFdata.nc", path.package ("Ranadu")))
 
-DataFileInfo <- function (fileLocation, LLrange=TRUE) {
+DataFileInfo <- function (fileLocation = setFileName(), LLrange=TRUE) {
   # get information about a netCDF data file or saved data.frame, Rdata format
   if (!(grepl ('Rdata$', fileLocation))) {
     netCDFfile <- nc_open (fileLocation)
@@ -51,7 +53,7 @@ DataFileInfo <- function (fileLocation, LLrange=TRUE) {
       if ('LATC' %in% namesCDF) {LATC <- ncvar_get (netCDFfile, "LATC")}
       if ('LONC' %in% namesCDF) {LONC <- ncvar_get (netCDFfile, "LONC")}
     }
-
+    
     sampleRate <- 1
     if (!UWYO) {
       if ('sps25' %in% nms) {sampleRate <- 25}
@@ -84,6 +86,50 @@ DataFileInfo <- function (fileLocation, LLrange=TRUE) {
       Flight$LonMax <- NA
     }
     Flight$Variables <- sort(namesCDF)
+    if (SOURCE == 'NCAR') {
+      ## also get a list of "measurands"
+      measurand <- vector()
+      vls <- vector()
+      ## get the associated long_name if available
+      Flight$LongNames <- Flight$Variables
+      for (v in Flight$Variables) {
+        ATT <- ncatt_get (netCDFfile, v)
+        if ('long_name' %in% names(ATT)) {
+          Flight$LongNames[which(v == Flight$Variables)] <- ATT$long_name
+        }
+        if ('standard_name' %in% names(ATT)) {
+          measurand <- c(measurand, ATT$standard_name)
+          vls <- c(vls, c(ATT$standard_name, v))
+        }
+      }
+      dim(vls) <- c(2, length(vls) / 2)
+      Measurands <- TRUE
+      if (Measurands) {
+        measurand <- unique (vls[1, ])
+        ml <- list(measurand)
+        
+        ## now find all variables with specified measurand:
+        for (ms in measurand) {
+          for (i in 1:dim(vls)[2]) {
+            if (vls[1, i] == ms) {
+              ims <- length(ml[[ms]]) + 1
+              ml[[ms]][[ims]] <- vls[2, i]
+            }
+          }
+          ## original, very slow, way to do this:
+          # for (v in Flight$Variables) {
+          #   ATT <- ncatt_get (netCDFfile, v)
+          #   if ('standard_name' %in% names(ATT)) {
+          #     if (ATT$standard_name == ms) {
+          #       ml[[ms]][[ims]] <- v
+          #       ims <- ims + 1
+          #     }
+          #   }
+          # }
+        }
+        Flight$Measurands <- ml
+      }
+    }
     if (FAAM) {
       ## get short names for variables instead of netCDF var name
       snames <- namesCDF

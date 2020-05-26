@@ -1,12 +1,15 @@
 #' @title OpenInProgram
-#' @description Transfers a data.frame to ncplot or Xanadu for analysis
+#' @description Transfers a data.frame to ncplot or Xanadu or a Excel/libreoffice 
+#' spreadsheet for analysis.
 #' @details ncplot is a widely used plotting program supported by NCAR/EOL. 
 #' Xanadu is a legacy package for data analysis. This function writes
-#' a specified data.frame to a netCDF file and opens either ncplot or Xanadu with 
+#' a specified data.frame to a netCDF file (for ncplot or Xanadu) or a CSV-format
+#' file (for Excel/libreoffice) and opens the appropriate program with 
 #' that file. This is a mechanism to use some of the ncplot capabilities for plots or
 #' the Xanadu special capabilities like those for spectral analysis, for constructing 
 #' vertical sections and sounding plots, and for producing plots using python routines 
-#' with python code that can be tailored for special needs.
+#' with python code that can be tailored for special needs. It also supports production
+#' of CSV-format files that include all the variables in the supplied data.frame.
 #' @aliases openInProgram
 #' @author William Cooper
 #' @export OpenInProgram
@@ -45,6 +48,21 @@ OpenInProgram <- function(Data, Program="ncplot", dataDirectory=sprintf("%s/R", 
     }
     unlink (nF)
   }
+  if (Program == 'Excel') {
+    nF <- sprintf('%sEXCEL/RtoCSV.csv', DataDirectory())
+    if (file.exists (nF)) {
+      if (warnOverwrite) {
+        x <- readline ("file exists: OK to overwrite? (Y/n): ")
+        if (x[1] != 'Y' && x[1] != 'y') {
+          return("no action, rejected overwriting data file")
+        }
+      }
+      unlink (nF)
+    }
+    write.csv(Data, file = nF)
+    system (sprintf ("libreoffice %s", nF), wait=FALSE)
+    return()
+  }
   Z <- makeNetCDF (Data, nF)
   if ((Program == 'ncplot') && openProgram) {
     system (sprintf ("ncplot %s", nF), wait=FALSE)
@@ -52,9 +70,9 @@ OpenInProgram <- function(Data, Program="ncplot", dataDirectory=sprintf("%s/R", 
   ## edit the .def files for the Xanadu call
   WD <- getwd()
   setwd ("~/Xanadu/R")
-  lines <- readLines ("Xanadu.def")
+  linesX <- readLines ("Xanadu.def")
   newlines <- vector ("character")
-  for (line in lines) {
+  for (line in linesX) {
     if (grepl ("XANFILE", line)) {
       line <- gsub ("=.*", sprintf ("=%s", gsub ("\\.nc", '', netCDFfileName)), line)
     }

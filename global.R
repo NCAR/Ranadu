@@ -5,6 +5,8 @@ rm(list=ls(all=TRUE))
 suppressMessages (
   library(shiny, quietly=TRUE, warn.conflicts=FALSE)
 )
+
+library(magrittr)
 library(shinyBS, quietly=TRUE, warn.conflicts=FALSE)
 suppressMessages (suppressWarnings (
   library(Ranadu, quietly=TRUE, warn.conflicts=FALSE))
@@ -31,15 +33,16 @@ source ('R/getNetCDF.R')
 ## of interactions when window entries are changed.
 Trace <- FALSE
 Trace <- TRUE
-load ('InputDF.Rdata')
+load ('inst/InputDF.Rdata')
+xVarList <- standardVariables()
 
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
 
-PJ <- c('SOCRATES', 'WECAN-TEST', 'ARISTO2017', 'ECLIPSE', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER', 'NOMADSS',
-        'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
-        'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
-        'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')
+PJ <- c('ECLIPSE2019', 'OTREC-TEST', 'WECAN', 'SOCRATES', 'WECAN-TEST', 'ARISTO2017', 'ECLIPSE', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER', 'NOMADSS',
+  'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
+  'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
+  'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')
 for (P in PJ) {
   if (grepl('HIPPO', P)) {
     fn <- sprintf ('%sHIPPO/%srf01.nc', DataDirectory (), P)
@@ -85,8 +88,8 @@ graphSpecs <- function () {
   .fixed <- FALSE
   sf <- function (.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed) {
     list(var=.var, col=.col, lw=.lw, lt=.lt,
-         lab=.lab, ylim=.ylim, logY=.logY, 
-         stamp=.stamp, fixed=.fixed)
+      lab=.lab, ylim=.ylim, logY=.logY, 
+      stamp=.stamp, fixed=.fixed)
   }
   s1 <- sf(.var, .col, .lw, .lt, .lab, .ylim, .logY, .stamp, .fixed)
   .var <- c('ATX', 'DPXC')
@@ -126,32 +129,32 @@ scatSpecs <- function () {
   .fixed <- FALSE
   s <- function (.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, .logX, .logY, .fixed) {
     list(varx=.varx, vary=.vary, col=.col, size=.size, symbol=.symbol, lab=.lab,
-         xlim=.xlim, ylim=.ylim, logX=.logX, logY=.logY, fixed=.fixed)
+      xlim=.xlim, ylim=.ylim, logX=.logX, logY=.logY, fixed=.fixed)
   }
   s1 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
-          .logX, .logY, .fixed)
+    .logX, .logY, .fixed)
   .varx <- 'PSXC'
   .vary <- c('ATX', 'DPXC')
   .lab <- .vary
   s2 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
-          .logX, .logY, .fixed)
+    .logX, .logY, .fixed)
   .varx <- 'GGALT'
   .vary <- c('WSC','TASX')
   .lab <- .vary
   s3 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
-          .logX, .logY, .fixed)
+    .logX, .logY, .fixed)
   .vary <- c('QCXC', 'QC_A')
   .lab <- .vary
   s4 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
-          .logX, .logY, .fixed)
+    .logX, .logY, .fixed)
   .vary <- c('WSC', 'WIC')
   .lab <- .vary
   s5 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
-          .logX, .logY, .fixed)
+    .logX, .logY, .fixed)
   .vary <- c('WDC', 'THDG')
   .lab <- .vary
   s6 <- s(.varx, .vary, .col, .size, .symbol, .lab, .xlim, .ylim, 
-          .logX, .logY, .fixed)
+    .logX, .logY, .fixed)
   specs$panel <- list (s1, s2, s3, s4, s5, s6)
   return (specs)
 }
@@ -237,7 +240,7 @@ C1DC <- NA
 #
 
 Themes <- c('WAC', 'standard', 'classic', 'WAC2', 'bw', 'base', 'excel', 'few', 'foundation', 'igray', 'light',
-            'linedraw', 'tufte')
+  'linedraw', 'tufte')
 getPower2 <- function (n=512) {x <- log(n)/log(2);y <- x-round(x);ifelse(y >=0, m <- 2^ceiling(x), m <- 2^floor(x))}
 # multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 #   library(grid)
@@ -281,10 +284,16 @@ hline <<- function(y, col='black', lwd=1, lty=2) {
 }
 
 formatTime <- function (time) {
-  t <- as.POSIXlt (time, tz='UTC')
+  t <- as.POSIXlt (time, tz='GMT')
   tt <- sprintf ("%d:%02d:%02d", t$hour, t$min, as.integer(t$sec))
   return (tt)
 }
+format2Time <- function (time) {
+  t <- as.POSIXlt (time, tz='GMT')
+  tt <- sprintf ("%d%02d%02d", t$hour, t$min, as.integer(t$sec))
+  return (as.integer(tt))
+}
+
 
 reverselog10_trans <- function() {
   trans <- function(x) -log10(x)
@@ -304,19 +313,19 @@ loadConfig <- function (inp) {
   ## restore FI to have variables available for reassignment
   if (plotSpec$SRC != 'NCAR') {
     FI <<- with (plotSpec, DataFileInfo (sprintf('%s%s/%s/%s%s%02d.nc', 
-                                                DataDirectory (), 
-                                                SRC, Project, Project, 
-                                                TypeFlight, Flight)))
+      DataDirectory (), 
+      SRC, Project, Project, 
+      TypeFlight, Flight)))
   } else {
     if (plotSpec$TypeFlight %in% c('F','KF')) {
       FI <<- with (plotSpec, DataFileInfo (sprintf ('%s%s/%srf%02d%s.nc',
-                                                    DataDirectory (),
-                                                    Project, Project, Flight, TypeFlight)))
+        DataDirectory (),
+        Project, Project, Flight, TypeFlight)))
     } else {
       FI <<- with (plotSpec, DataFileInfo (sprintf('%s%s/%s%s%02d.nc', 
-                                                DataDirectory (), 
-                                                Project, Project, 
-                                                TypeFlight, Flight)))
+        DataDirectory (), 
+        Project, Project, 
+        TypeFlight, Flight)))
     }
   }
 }
@@ -345,6 +354,7 @@ specialVar <- function (D) {
   WPSTAR <- cumsum(ACINS)
   print (summary(WPSTAR))
   DIF <- zoo::na.approx (as.vector(WPPRIME-WPSTAR), maxgap=10000, na.rm=FALSE)
+  DIF[is.na(DIF)] <- 0
   DIF <<- DIF
   tau <- 300
   DIF <- signal::filtfilt (signal::butter (3, 2/(tau*FI$Rate)), DIF)
@@ -367,12 +377,12 @@ specialVar <- function (D) {
 
 fileChoose <- function (newwd) {
   oldwd <- setwd (newwd)
-#   while(getwd() != normalizePath(newwd)) {
-#     Sys.sleep(0.02)
-#   }
-#   print (c('wd:', getwd(), newwd, oldwd))
-#   Z <- list.files()
-#   print (Z)
+  #   while(getwd() != normalizePath(newwd)) {
+  #     Sys.sleep(0.02)
+  #   }
+  #   print (c('wd:', getwd(), newwd, oldwd))
+  #   Z <- list.files()
+  #   print (Z)
   try(fn <- file.choose (), silent=TRUE)
   # if (!exists('fn')) {fn <- NULL}
   setwd (oldwd)
@@ -385,10 +395,10 @@ TypeFlight <- plotSpec$TypeFlight
 Production <- FALSE
 if (TypeFlight == 'F') {
   fn <- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), Project, 
-                 Project, Flight)
+    Project, Flight)
 } else {
   fn <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), Project, 
-               Project, TypeFlight, Flight)
+    Project, TypeFlight, Flight)
 }
 if (!file.exists (fn)) {
   if (Trace) {print (sprintf ('%s not found', fn))}
@@ -407,10 +417,10 @@ fname.last <- ''
 ## if Production load production-file info
 if (Production) {
   print (sprintf ('production section in global, Production=%d',
-                  Production))
+    Production))
   dr <- sprintf ('%s../raf/Prod_Data/%s', DataDirectory (), Project)
   scmd <- sprintf ('ls -lt `/bin/find %s -ipath "\\./movies" -prune -o -ipath "\\./*image*" -prune -o -name %s%s%02d.Rdata`',
-                   dr, Project, 'rf', Flight)
+    dr, Project, 'rf', Flight)
   fl <- system (scmd, intern=TRUE)[1]
   if ((length (fl) > 0) && (!grepl ('total', fl))) {
     fn <- sub ('.* /', '/', fl[1])
@@ -437,8 +447,8 @@ limitData <- function (Data, inp, lim=NA) {
     for (i in 1:nrow(Restrictions)) {
       if (Restrictions$apply[i]) {
         t <- t | (!is.na (DataV[, Restrictions$RVAR[i]]) & 
-                    ((DataV[, Restrictions$RVAR[i]] < Restrictions$min[i]) |
-                       (DataV[, Restrictions$RVAR[i]] > Restrictions$max[i])))
+            ((DataV[, Restrictions$RVAR[i]] < Restrictions$min[i]) |
+                (DataV[, Restrictions$RVAR[i]] > Restrictions$max[i])))
       }
     }
     #     t <- !is.na (DataV$TASX) & (DataV$TASX < inp$minTAS)
@@ -527,44 +537,44 @@ setXanadu <- function (fnew, start, end, var, cvar, wlow, whigh, type, addflag, 
     if (type == 'fft') {
       if (substr (line, 1, 4) == 'SEGL') {
         line <- sub (' .*', sprintf (' %d', 
-                                     plotSpec$Variance[[1]]$Definition$fftpts), line)
+          plotSpec$Variance[[1]]$Definition$fftpts), line)
       }
       if (substr (line, 1, 6) == 'WINDOW') {
         window <- switch (plotSpec$Variance[[1]]$Definition$fftwindow,
-                          Parzen=1,
-                          Welch=3,
-                          Hanning=4,
-                          2)
+          Parzen=1,
+          Welch=3,
+          Hanning=4,
+          2)
         line <- sub (' .*', sprintf (' %d', window-1), line)
       }
       if (substr (line, 1, 7) == 'SMOOTHB') {
         line <- sub (' .*', sprintf (' %d', 
-                                     plotSpec$Variance[[1]]$Definition$fftavg), line)
+          plotSpec$Variance[[1]]$Definition$fftavg), line)
       }
       if (substr (line, 1, 7) == 'SHOWFFT') {
         typ <- switch (plotSpec$Variance[[1]]$Definition$ffttype,
-                       'fp(f)'=4,
-                       'p(f)'=2,
-                       'eps(f)'=8,
-                       0)
+          'fp(f)'=4,
+          'p(f)'=2,
+          'eps(f)'=8,
+          0)
         line <- sub (' .*', sprintf (' %d', typ), line)
       }
       if (substr (line, 1, 8) == 'SHOWCFFT') {
         typ <- switch (plotSpec$Variance[[1]]$Definition$ffttype,
-                       'cospec. / quad.'=32,
-                       'coherence / phase'=16,
-                       'both fp(f)'=48,
-                       1)
+          'cospec. / quad.'=32,
+          'coherence / phase'=16,
+          'both fp(f)'=48,
+          1)
         line <- sub (' .*', sprintf (' %d', typ), line)
       }
     }
     if (type == 'acv') {
       if (substr (line, 1, 7) == 'SHOWACV') {
         typ <- switch (plotSpec$Variance[[1]]$Definition$acvtype,
-                       'fp(f)'=4,
-                       'p(f)'=2,
-                       'autocorrelation'=16,
-                       1)
+          'fp(f)'=4,
+          'p(f)'=2,
+          'autocorrelation'=16,
+          1)
         line <- sub (' .*', sprintf (' %d', typ), line)
       }
       if (substr (line, 1, 7) == 'SMOOTHS') {
@@ -572,32 +582,32 @@ setXanadu <- function (fnew, start, end, var, cvar, wlow, whigh, type, addflag, 
       }
       if (substr (line, 1, 7) == 'SMOOTHB') {
         line <- sub (' .*', sprintf (' %d', 
-                                     plotSpec$Variance[[1]]$Definition$acvavg), line)
+          plotSpec$Variance[[1]]$Definition$acvavg), line)
       }
       if (substr (line, 1, 6) == 'WINDOW') {
         window <- switch (plotSpec$Variance[[1]]$Definition$acvwindow,
-                          Parzen=1,
-                          Welch=3,
-                          Hanning=4,
-                          2)
+          Parzen=1,
+          Welch=3,
+          Hanning=4,
+          2)
         line <- sub (' .*', sprintf (' %d', window-1), line)
       }
     }
     if (type == 'MEM') {
       if (substr (line, 1, 7) == 'SHOWMEM') {
         typ <- switch (plotSpec$Variance[[1]]$Definition$MEMtype,
-                       'fp(f)'=4,
-                       'p(f)'=2,
-                       1)
+          'fp(f)'=4,
+          'p(f)'=2,
+          1)
         line <- sub (' .*', sprintf (' %d', typ), line)
       }
       if (substr (line, 1, 5) == 'POLES') {
         line <- sub (' .*', sprintf (' %d', 
-                                     plotSpec$Variance[[1]]$Definition$MEMpoles), line)
+          plotSpec$Variance[[1]]$Definition$MEMpoles), line)
       }
       if (substr (line, 1, 7) == 'SMOOTHB') {
         line <- sub (' .*', sprintf (' %d', 
-                                     plotSpec$Variance[[1]]$Definition$MEMavg), line)
+          plotSpec$Variance[[1]]$Definition$MEMavg), line)
       }
       if (substr (line, 1, 4) == 'RESN') {
         line <- sub (' .*', sprintf (' %f', plotSpec$Variance[[1]]$Definition$MEMres), line)
@@ -629,7 +639,7 @@ chooseQVar <- function (fname, inp) {
   quickPlotVar <<- setVariableList (fname, single=TRUE)
 }
 chooseXfrVar <- function (fname, inp) {
-  xVarList <<- setVariableList (fname, VarList)
+  xVarList <<- setVariableList (fname, xVarList, single=FALSE)
 }
 
 addedVariables <- c('PITCH', 'THETA', 'THETAP')
@@ -675,12 +685,12 @@ makeVarList <- function () {
   VarList <- c(VarList, plotSpec$StatVar)
   if (plotSpec$SRC == 'NCAR') {
     VarList <- c(VarList, c('LATC', 'LONC', 'WDC', 'WSC', 'ATX', 'PSXC', 'GGALT',
-                            'ACINS', 'GGVSPD', 'AKRD', 'QCR', 'QCRC', 'QCXC',
-                            'DPXC', 'TASX', 'ROLL', 'VSPD',
-                            'THDG', 'SSLIP'), quickPlotVar)
+      'ACINS', 'GGVSPD', 'AKRD', 'QCR', 'QCRC', 'QCXC',
+      'DPXC', 'TASX', 'ROLL', 'VSPD',
+      'THDG', 'SSLIP'), quickPlotVar)
   } else if (plotSpec$SRC == 'UWYO') {
     VarList <- c(VarList, 'ps_hads_a', 'trose', 'tdp', 'tas', 'hwdir', 
-                 'hwmag', 'hw', 'GALT', 'LATC', 'LONC', 'PALT', quickPlotVar)
+      'hwmag', 'hw', 'GALT', 'LATC', 'LONC', 'PALT', quickPlotVar)
   } else if (plotSpec$SRC == 'FAAM') {
     VarList <- c(VarList, 'SPR', 'PSP', 'TTDI', 'DEWP', 'TAS', 'PHGT', 'CLAT', 'CLNG', quickPlotVar)
   } else {
@@ -708,10 +718,10 @@ VarListLast <- VarList
 
 if (plotSpec$TypeFlight == 'F') {
   fname.last <- sprintf ('%s%s/%srf%02dF.nc', DataDirectory (), plotSpec$Project,
-                         plotSpec$Project, plotSpec$Flight)
+    plotSpec$Project, plotSpec$Flight)
 } else {  
   fname.last <- sprintf ('%s%s/%s%s%02d.nc', DataDirectory (), plotSpec$Project, 
-                       plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
+    plotSpec$Project, plotSpec$TypeFlight, plotSpec$Flight)
 }  
 Data <- getNetCDF (fname.last, VarList)
 checkTime <- Data$Time[500]  ## starting value...
@@ -778,15 +788,15 @@ saveRdata <- function (Data, inp) {
   print ('entered saveRdata')
   if (inp$typeFlight == 'F') {
     netCDFfile <- nc_open (sprintf ('%s%s/%srf%02dF.nc', DataDirectory (),
-                                    inp$Project, inp$Project,
-                                    inp$Flight))
+      inp$Project, inp$Project,
+      inp$Flight))
   } else if (inp$typeFlight == 'KF') {
     netCDFfile <- nc_open (sprintf ('%s%s/%srf%02dKF.nc', DataDirectory (),
-                                    inp$Project, inp$Project, inp$Flight))
+      inp$Project, inp$Project, inp$Flight))
   } else {
     netCDFfile <- nc_open (sprintf ('%s%s/%s%s%02d.nc', DataDirectory (),
-                                  inp$Project, inp$Project, inp$typeFlight,
-                                  inp$Flight))
+      inp$Project, inp$Project, inp$typeFlight,
+      inp$Flight))
   }
   nms <- c('Time', 'TASX')
   Time <- ncvar_get (netCDFfile, "Time")
@@ -837,16 +847,16 @@ saveRdata <- function (Data, inp) {
   }
   if (inp$typeFlight == 'F') {
     fn <- sprintf ('%s%s/%srf%02dF.Rdata', DataDirectory (),
-                   inp$Project, inp$Project, 
-                   inp$Flight)
+      inp$Project, inp$Project, 
+      inp$Flight)
   } else if (inp$typeFlight == 'KF') {
     fn <- sprintf ('%s%s/%srf%02dKF.Rdata', DataDirectory (),
-                     inp$Project, inp$Project, 
-                     inp$Flight)
+      inp$Project, inp$Project, 
+      inp$Flight)
   } else {
     fn <- sprintf ('%s%s/%s%s%02d.Rdata', DataDirectory (),
-                 inp$Project, inp$Project, inp$typeFlight,
-                 inp$Flight)
+      inp$Project, inp$Project, inp$typeFlight,
+      inp$Flight)
   }
   size.distributions <- mget (nms)
   save (Data, size.distributions, file=fn)

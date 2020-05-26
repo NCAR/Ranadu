@@ -6,11 +6,19 @@
 \alias{GetNetCDF}
 \title{getNetCDF}
 \usage{
-getNetCDF(fname, VarList = standardVariables(), Start = 0, End = 0,
-  F = 0)
+getNetCDF(
+  fname = setFileName(),
+  VarList = standardVariables(),
+  Start = 0,
+  End = 0,
+  F = 0
+)
 }
 \arguments{
-\item{fname}{string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc"}
+\item{fname}{string, full-path file name, e.g., "/scr/raf_data/PREDICT/PREDICTrf01.nc".
+Also accepted are an OPENDAP URL. If used interactively, the default is to call the
+function "setFileName()" to select the data file. When not interactive, the default
+produces an error so "fname" must be supplied.}
 
 \item{VarList}{vector of variable names to load from the netCDF file. Use "ALL" to load 
 everything except vector variables like the size distributions. (This option may produce 
@@ -45,7 +53,10 @@ optional arguments Start and End can limit the time range. After reading the dat
 netCDF file is closed before returning the data.frame to the calling program.
 The global attributes in the netCDF file are loaded as attributes of the returned 
 data.frame, and attributes of each requested variable are also assigned to that column 
-in the data.frame from the variable attributes in the netCDF file.
+in the data.frame from the variable attributes in the netCDF file. A 'label' attribute
+is added where possible, constructed from the 'standard_name' and 'units' attributes,
+and the label also contains the variable name. Some translations are applied to the
+conventional standard_names and units; see "transl" below.
 When working with attributes, it is a feature of R data.frames that subsetting loses 
 all the assigned variable attributes. To preserve them, copy them via 
 A <- attributes (Data$VAR), remove A$dim (e.g., A$dim <- NULL),

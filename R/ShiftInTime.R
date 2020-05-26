@@ -96,7 +96,7 @@ ShiftInTime <- function (.X, .rate=1, .shift=0, .smooth=0, .mod=NA) {
     }
     T <- T %% .mod
   }
-  ## now pick off discrete values representing average at original rate
+  ## now pick at original rate from shifted values
   tstart <- as.integer ((ratio + 1) / 2)
   T <- T[seq (tstart, ND, by=ratio)]
   return (T)

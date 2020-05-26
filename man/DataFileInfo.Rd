@@ -5,7 +5,7 @@
 \alias{dataFileInfo}
 \title{DataFileInfo}
 \usage{
-DataFileInfo(fileLocation, LLrange = TRUE)
+DataFileInfo(fileLocation = setFileName(), LLrange = TRUE)
 }
 \arguments{
 \item{fileLocation}{A complete address to the netCDF data file.}
@@ -26,7 +26,9 @@ Brief information on the contents of a netCDF data file
 Reads the flight number, project, date/time, position, and variables from
 the netCDF file and returns a list of properties. Alternately, produces similar
 information for a saved (.Rdata-format) data.frame produced by reading such a
-netCDF file.
+netCDF file. In addition, produces a list of the long_names associated with the
+variables and a list of the "measurands" along with the redundant variables
+representing that measurand.
 }
 \examples{
 FI <-DataFileInfo (sprintf ("\%s/extdata/RAFdata.nc", path.package ("Ranadu")))

@@ -1,6 +1,6 @@
 
 ## This correction should be subtracted from PITCH to get PITCHC;
-## it is the error in pitch, so you get the true value by subtraction
+## it is the error in pitch, so you get the true value by subtraction.
 ## This calculates corrections for an entire flight in one call.
 ## D must be a dataframe containing at least VNS, VEW, GGVNS, GGVEW,
 ## LATC, GGALT, THDG, PITCH, ROLL, and Time
@@ -44,9 +44,13 @@ CorrectPitch <- function (D, .span=1013) {
   }
   Cradeg <- pi/180
   ## get the data rate
-  data.rate <- 1
-  if ((D$Time[2]-D$Time[1]) <= 0.04) {data.rate <- 25}
-  if ((D$Time[2]-D$Time[1]) <= 0.02) {data.rate <- 50}
+  if (!is.null(attr(D, 'Rate'))) {
+    data.rate <- attr(D, 'Rate')
+  } else {
+    data.rate <- 1
+    if ((D$Time[2]-D$Time[1]) <= 0.04) {data.rate <- 25}
+    if ((D$Time[2]-D$Time[1]) <= 0.02) {data.rate <- 50}
+  }
   LD <- nrow(D)
   ## for HR, extract a 1-Hz data.frame and work with that, then interpolate/smooth
   ## to get the high-rate correction, which is smoothed to have no high-rate
@@ -64,10 +68,10 @@ CorrectPitch <- function (D, .span=1013) {
   }
     
   MaxGap <- 1000
-  .vns <- zoo::na.approx (as.vector(D$VNS), maxgap=MaxGap, na.rm = FALSE)
-  .vew <- zoo::na.approx (as.vector(D$VEW), maxgap=MaxGap, na.rm = FALSE)
-  .ggvns <- zoo::na.approx (as.vector(D$GGVNS), maxgap=MaxGap, na.rm = FALSE)
-  .ggvew <- zoo::na.approx (as.vector(D$GGVEW), maxgap=MaxGap, na.rm = FALSE)
+  .vns <- zoo::na.approx (as.vector(D$VNS), maxgap=MaxGap, na.rm = FALSE, rule=2)
+  .vew <- zoo::na.approx (as.vector(D$VEW), maxgap=MaxGap, na.rm = FALSE, rule=2)
+  .ggvns <- zoo::na.approx (as.vector(D$GGVNS), maxgap=MaxGap, na.rm = FALSE, rule=2)
+  .ggvew <- zoo::na.approx (as.vector(D$GGVEW), maxgap=MaxGap, na.rm = FALSE, rule=2)
   rej <- is.na(.vns) | is.na(.vew) | is.na(.ggvns) | is.na(.ggvew)
   .vns[rej] <- 0
   .vew[rej] <- 0
@@ -79,6 +83,8 @@ CorrectPitch <- function (D, .span=1013) {
   vndot <- signal::sgolayfilt (.vns-.ggvns, 3, NAV, m=1)  # m=1 for first deriv.
   vedot <- signal::sgolayfilt (.vew-.ggvew, 3, NAV, m=1)
   .G <- Ranadu::Gravity (.latc, D$GGALT)
+  gmean <- mean(Ranadu::Gravity (.latc, D$GGALT), na.rm=TRUE)
+  .G[is.na(.G)] <- gmean
   deltaPitchL <- -vndot/.G
   deltaRollL  <- vedot/.G
   .hdg <- D$THDG*Cradeg
@@ -101,8 +107,8 @@ CorrectPitch <- function (D, .span=1013) {
     PC <- rep (NA, LD); RC <- rep (NA, LD)
     PC[(0:(length(deltaPitch)-1)) * data.rate + 1] <- deltaPitch
     RC[(0:(length(deltaRoll)-1))  * data.rate + 1] <- deltaRoll
-    PC <- zoo::na.approx (PC, maxgap=1000, na.rm=FALSE)
-    RC <- zoo::na.approx (RC, maxgap=1000, na.rm=FALSE)
+    PC <- zoo::na.approx (PC, maxgap=1000, na.rm=FALSE, rule=2)
+    RC <- zoo::na.approx (RC, maxgap=1000, na.rm=FALSE, rule=2)
     C <- c(PC, RC)
   } else {
     C <- c(deltaPitch, deltaRoll)

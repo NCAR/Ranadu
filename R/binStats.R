@@ -19,24 +19,33 @@
 #' second variable.
 #' @param xhigh The upper limit for bins. The default is the maximum of the
 #' second variable.
-#' @return A dataframe of dimension c(bins, 4) that contains, for each bin,
+#' @param addBin If true, the return will be a list where the original data.frame
+#' is returned as the second component with values of "BIN" added to the
+#' data.frame. This is useful for grouping when plotting with ggplot.
+#' @return If addBIN == FALSE, dataframe of dimension c(bins, 4) that contains, for each bin,
 #' 'xc' = the center coordinate of the bin (2nd column), 'ybar' = the mean value for the bin
 #' (or NA if there are no members of the group), 'sigma' = the standard
 #' deviation for the bin, or NA for no members of the group, and 'nb' = 
-#' the number of values in the bin.
+#' the number of values in the bin. If addBin == TRUE, a replication of the
+#' input data.frame with a variable "BIN" added that denotes the classification
+#' of the first variable in bins of the second.
 #' @examples 
 #' E <- binStats(RAFdata[, c("PSXC", "ATX")], bins=10)
 binStats <- function (.d, bins=20, xlow=min(.d[,2], na.rm=TRUE), 
-                      xhigh=max(.d[,2], na.rm=TRUE)) {
-  ## ignore rows where the first column is NA
-  v <- .d[!is.na(.d[,1]) & !is.na(.d[,2]), 1]   ## variable to be put in bins
-  p <- .d[!is.na(.d[,1]) & !is.na(.d[,2]), 2]   ## bin-defining variable
+                      xhigh=max(.d[,2], na.rm=TRUE), addBin=FALSE) {
+  ## add a variable to the data.frame representing the bin:
+  .d$BIN <- rep(NA, nrow(.d))
+  v <- .d[, 1]
+  p <- .d[, 2]
+  # v <- .d[!is.na(.d[,1]) & !is.na(.d[,2]), 1]   ## variable to be put in bins
+  # p <- .d[!is.na(.d[,1]) & !is.na(.d[,2]), 2]   ## bin-defining variable
   xc <- ybar <- sigma <- N <- vector ("numeric", bins)
   binLimits <- xlow + (0:bins)/bins * (xhigh-xlow)
   for (i in 1:bins) {
     xc[i] <- (binLimits[i] + binLimits[i+1]) / 2
+    .d$BIN[p > binLimits[i] & p <= binLimits[i+1]] <- i
     y <- v[p > binLimits[i] & p <= binLimits[i+1]]
-    N[i] <- length (y)
+    N[i] <- length (y[!is.na(y)])
     if (N[i] > 0) {
       ybar[i] <- mean (y, na.rm=TRUE)
       sigma[i] <- sd (y, na.rm=TRUE)
@@ -52,6 +61,11 @@ binStats <- function (.d, bins=20, xlow=min(.d[,2], na.rm=TRUE),
     # CIfactor <- qt ((CI+1)/2, N-1)
     # sem <- sigma / sqrt (N)  # standard error of the bin mean
     # ci <- sem * CIfactor     # and add this to the data.frame
-  return (data.frame("xc"=xc, "ybar"=ybar, "sigma"=sigma, "nb"=N))
+  if (addBin) {
+    .d$BIN[is.na(.d[, 1])] <- NA
+    return (.d)
+  } else {
+    return (data.frame("xc"=xc, "ybar"=ybar, "sigma"=sigma, "nb"=N))
+  }
 }
   
