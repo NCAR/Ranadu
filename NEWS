@@ -1,5 +1,6 @@
 Version 2.6-20-05-15
   Additions:
+    histWAC.R               -- plot histogram with added cumulative d.f.
     setFileName.R           -- construct path to netCDF file
     rk4.integrate.R         -- Runge-Kutta Cash-Karp numerical integration
     flux.R                  -- calculate eddy-correlation flux
@@ -11,6 +12,7 @@ Version 2.6-20-05-15
     potentialTemperatures.R -- gives a set of results for potential temperatures
     blankNA.R               -- set missing-values so plots show gaps
   Updates:
+    VSpec.R                 -- modified to calculate Rate if attribute NA
     PlotWAC.R               -- trivial change: "degree" to \u00b0C for RStudio
     ggplotWAC.R             --  "" same
     contourPlot.R           -- changed how a fit line is specified

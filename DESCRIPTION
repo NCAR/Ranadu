@@ -20,12 +20,13 @@ Description: This package contains a function for loading a portion of a netCDF
     PotentialTemperature, EquivalentPotentialTemperature, Sqs (the quasi-steady
     supersaturation in cloud given the updraft and droplet size distribution), 
     WetEquivalentPotentialTemperature, MixingRatio, VirtualTemperature,
-    VirtualPotentialTemperature, and plotWAC and lineWAC (convenience routines
-    producing some aspects of plots I use routinely). A skew-T background is
-    provided by SkewT.R. A routine for generating plots of spectral variance is
-    included. There is also a function providing standard constants
-    including those defined in ProcessingAlgorithms.pdf. There is a utility
-    for making subsets of a netCDF file, and there are other functions also.
+    VirtualPotentialTemperature, and plotWAC, lineWAC and histWAC (convenience 
+    routines producing some aspects of plots I use routinely). A skew-T 
+    background is provided by SkewT.R. A routine for generating plots of 
+    spectral variance (VSpec) is included. There is also a function providing 
+    standard constants including those defined in ProcessingAlgorithms.pdf. 
+    There is a utility for making subsets of a netCDF file, included because it
+    preserves variable attributes, and there are other functions also.
     One new function supports starting other programs that read netCDF-format
     files and providing such files generated from R data.frames.
 License: BSD_3_clause + file LICENSE
@@ -37,7 +38,7 @@ Imports:
 Suggests:
     magrittr
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Collate: 
     'AOAfromRadome.R'
     'AdiabaticTandLWC.R'
@@ -96,6 +97,7 @@ Collate:
     'getRAFData.R'
     'getarg.R'
     'ggplotWAC.R'
+    'histWAC.R'
     'makeNetCDF.R'
     'mem.R'
     'ncsubset.R'
