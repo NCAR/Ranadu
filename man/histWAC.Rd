@@ -28,9 +28,11 @@ be added to an existing one.}
 \item{freq}{Logical controlling plotting frequency or density. Default FALSE.}
 
 \item{logAxis}{Character vector specifying if the axes should be log. 
-Default: FALSE.}
+Default: FALSE. The construction of tick marks and labels for the
+abscissa is designed for special applications where the range is small,
+so these may be inappropriate for some applications. (bug to be fixed)}
 
-\item{...}{Additional arguments passed to the hist() routine to control 
+\item{...}{Additional arguments passed to the plot() routine to control 
 graphics parameters etc.}
 }
 \value{

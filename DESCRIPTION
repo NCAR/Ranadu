@@ -95,6 +95,7 @@ Collate:
     'getNetCDF.R'
     'getProjectData.R'
     'getRAFData.R'
+    'getRData.R'
     'getarg.R'
     'ggplotWAC.R'
     'histWAC.R'

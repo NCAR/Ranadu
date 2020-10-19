@@ -1,8 +1,18 @@
-Version 2.6-20-05-15
+  Additions:
+    getRData.R              -- interactively select a data file and variables
+Version 2.6-20-10-10
   Additions:
     histWAC.R               -- plot histogram with added cumulative d.f.
     setFileName.R           -- construct path to netCDF file
     rk4.integrate.R         -- Runge-Kutta Cash-Karp numerical integration
+  Updates:
+    VSpec.R                 -- modified to calculate Rate if attribute NA
+    PlotWAC.R               -- trivial change: "degree" to \u00b0C for RStudio
+    ggplotWAC.R             --  "" same
+    contourPlot.R           -- changed how a fit line is specified
+    getNetCDF.R             -- additional mods for high-rate size distributions  
+Version 2.6-20-05-15
+  Additions:
     flux.R                  -- calculate eddy-correlation flux
     Rmutate.R               -- define new variables, esp. in pipes
     getProjectData.R        -- load a composite data.frame for a project
@@ -12,10 +22,6 @@ Version 2.6-20-05-15
     potentialTemperatures.R -- gives a set of results for potential temperatures
     blankNA.R               -- set missing-values so plots show gaps
   Updates:
-    VSpec.R                 -- modified to calculate Rate if attribute NA
-    PlotWAC.R               -- trivial change: "degree" to \u00b0C for RStudio
-    ggplotWAC.R             --  "" same
-    contourPlot.R           -- changed how a fit line is specified
     getNetCDF.R             -- change for high-rate size spectra
     ggplotWAC.R             -- correction to variable-name in ggplot
     shinyApp:               -- suppress time reset on change from LR to HR
