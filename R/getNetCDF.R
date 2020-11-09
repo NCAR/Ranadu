@@ -271,11 +271,26 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     # print (sprintf ('SizeDist, V=%s', V))
     # print (str(X))
     CellSizes <- ncatt_get (netCDFfile, V, "CellSizes")
-    CellLimits <- CellSizes$value
-    Bins <- length(CellLimits)-1
-    BinSize <- vector('numeric', Bins)
-    for (j in 1:Bins) {
-      BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+    if (CellSizes$hasatt == TRUE) { ## arrays like A1DC_ don't have CellSizes
+      CellLimits <- CellSizes$value
+      Bins <- length(CellLimits)-1
+      BinSize <- vector('numeric', Bins)
+      for (j in 1:Bins) {
+        BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+      }
+    } else { ## substitute from other attributes if available
+             ## (but ACDP_ doesn't have appropriate attributes):
+      if (grepl('^ACDP', V)) {
+        Bins <- 31
+        Resln <- 2  ## placeholder
+      } else {
+        Resln <- ncatt_get (netCDFfile, V, "Resolution")$value
+        # Bins <- ncatt_get (netCDFfile, V, "nDiodes")$value 
+        # if (Bins == 64) {Bins <- 63}
+        Bins <- dim(X)[1]
+      }
+      BinSize <- rep(Resln, Bins)
+      CellLimits <- c(0, cumsum(BinSize))
     }
     ## handle higher-than-1 Rate:
     DM <- length(dim(X))
@@ -283,7 +298,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       inputRate <- dim(X)[2]
       CC <- vector ('numeric', Bins*Rate*dim(X)[3])
       dim(CC) <- c(Bins, dim(X)[3] * Rate)
-      for (j in 2:(Bins+1)) {
+      for (j in 2:(Bins)) {
         Y <- IntFilter (X[j, , ], inputRate, Rate)
         CC[j-1,] <- Y
       }
@@ -294,13 +309,13 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         inputRate <- 1
         CC <- vector('numeric', Bins*Rate*dim(X)[2])
         dim(CC) <- c(Bins, Rate*dim(X)[2])
-        for (j in 2:(Bins+1)) {
+        for (j in 2:(Bins)) {
           Y <- IntFilter (X[j, ], inputRate, Rate)
           CC[j-1,] <- Y
         }
         XN <- t(CC)
       } else {
-        CC <- X[2:(Bins+1),]
+        CC <- X[2:(Bins),]
         XN <- t(CC)
       }
     } else {
@@ -308,8 +323,8 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       inputRate <- dim(X)[2]
       CC <- vector('numeric', Bins*Rate*dim(X)[3])
       dim(CC) <- c(Bins, Rate*dim(X)[3])
-      dim(X) <- c(Bins+1, dim(X)[2]*dim(X)[3])
-      for (j in 2:(Bins+1)) {
+      dim(X) <- c(Bins, dim(X)[2]*dim(X)[3])
+      for (j in 2:(Bins)) {
 	      Y <- IntFilter (X[j, ], inputRate, Rate)
 	      CC[j-1,] <- Y
       }
@@ -317,6 +332,8 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     }
     return(list(XN, BinSize, CellLimits))
   }
+  
+  #################### start of processing loop ############
   for (V in VarList) {
     if (is.na(V)) {next}
     if (FAAM) {
@@ -344,7 +361,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       X <- ncvar_get (netCDFfile, V)
       ATT <- ncatt_get (netCDFfile, V)
       ## special treatment for CCDP, CS100, CUHSAS, C1DC, CS200:
-      if (grepl ('CCDP_', V)) {
+      if (grepl ('CCDP_', V) || grepl('ACDP_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
         CellLimitsD <- RL[[2]]
@@ -352,7 +369,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         attr (X, 'CellLimits') <- CellLimitsD
         attr (X, 'BinSize') <- BinSizeD
       }
-      if (grepl ('^C1DC_', V)) {
+      if (grepl ('^C1DC_', V) || grepl('^A1DC_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
         CellLimits2 <- RL[[2]]
@@ -360,7 +377,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         attr (X, 'CellLimits') <- CellLimits2
         attr (X, 'BinSize') <- BinSize2
       }
-      if (grepl ('CS200_', V)) {
+      if (grepl ('CS200_', V) || grepl ('AS200_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
         CellLimitsP <- RL[[2]]
@@ -368,7 +385,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         attr (X, 'CellLimits') <- CellLimitsP
         attr (X, 'BinSize') <- BinSizeP
       }
-      if (grepl ('CS100_', V)) {
+      if (grepl ('CS100_', V) || grepl ('AS100_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
         CellLimitsF <- RL[[2]]
@@ -376,7 +393,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         attr (X, 'CellLimits') <- CellLimitsF
         attr (X, 'BinSize') <- BinSizeF
       }
-      if (grepl ('CUHSAS_', V)) {
+      if (grepl ('CUHSAS_', V) || grepl ('AUHSAS_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
         CellLimitsU <- RL[[2]]
@@ -384,18 +401,28 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         attr (X, 'CellLimits') <- CellLimitsU
         attr (X, 'BinSize') <- BinSizeU
       }
+      if (grepl ('^CPIP_', V) || grepl ('^APIP_', V)) {
+        RL <- SizeDist(V, netCDFfile, X)
+        X <- RL[[1]]
+        CellLimitsP <- RL[[2]]
+        BinSizeP <- RL[[3]]
+        attr (X, 'CellLimits') <- CellLimitsP
+        attr (X, 'BinSize') <- BinSizeP
+      }
     }
     ## for Rate == 1, nothing special is needed:
+    SDvar <- grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
+      grepl('^C1DC_', V) || grepl('CS200_', V) || grepl('^CPIP_', V)
+    SDvar <- SDvar || grepl('ACDP_', V) || grepl('AS100_', V) || grepl('AUHSAS_', V) ||
+      grepl('^A1DC_', V) || grepl('AS200_', V) || grepl('^APIP_', V)
     if (Rate == 1) {
-      if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
-          grepl('^C1DC_', V) || grepl('CS200_', V)) {
+      if (SDvar) {
         X <- X[r1, ]
       } else {
         X <- X[r1]
       }      
     } else { ## other rates require flattening and possibly interpolation and filtering
-      if (grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
-          grepl('^C1DC_', V) || grepl('CS200_', V)) {
+      if (SDvar) {
         XX <- X
         Bins <- length(RL[[2]])
         dim(XX) <- c(Rate, dim(X)[1]/Rate, Bins)
