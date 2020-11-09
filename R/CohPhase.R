@@ -131,7 +131,7 @@ CohPhase <- function (.data, .Var1, .Var2, col='blue', spans=25, smoothBins=50, 
       clo=(pf1$ybar-showErrors*pf1$sigma), chi=pf1$ybar+showErrors*pf1$sigma, 
       plo=(pf2$ybar-showErrors*pf2$sigma)*180/pi, phi=(pf2$ybar+showErrors*pf2$sigma)*180/pi)
     d2$clo[!is.na(d2$clo) & (d2$clo < 0)] <- 0
-    labelP <- c('coherence', 'phase [degrees]')
+    labelP <- c('coherence', 'phase [degree]')
     g <- ggplotWAC(d2[, c(1, 2, 3)], panels=2, labelP=labelP,
       col=col, lwd=c(1.0), lty=c(1), xlab='freq') 
     g <- g + xlab('frequency [Hz]') + ylab (sprintf ('%s x %s', .Var1, .Var2)) 

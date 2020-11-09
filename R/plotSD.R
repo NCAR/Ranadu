@@ -227,7 +227,7 @@ plotSD <- function (data, CellLimits=NA, logAxis='', ucon=rep(NA, 5), col='blue'
     # if (LWC) {ya <- ya * CellSizes^3}
     ya <- c(0, ya)
     if (ncol(data) > 2) {
-      ## get a single vector spanning all probes for the CDF. Concert back to #/bin if necessary.
+      ## get a single vector spanning all probes for the CDF. Convert back to #/bin if necessary.
       for (j in 3:ncol(data)) {
         V2 <- getP (data, VtoPlot[j-1], CellLimits=NA, logAxis=logAxis, ucon=ucon[j-1], FirstCell=FirstCell[j-1], LWC=LWC)
         dbar <- (dbar * aveN + V2[[3]] * V2[[4]]) / (aveN + V2[[3]])

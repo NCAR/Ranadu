@@ -23,7 +23,7 @@ Preserves data.frame attributes.
 \details{
 Given a RANADU-convention reference data.frame or tibble 
 and a second (usually subset) data.frame, this function transfers the 
-attributes ro variables in the second from the same variables in the
+attributes to variables in the second from the same variables in the
 first.  This avoids the loss of attributes that often occurs when 
 subset data.frames are constructed.
 }

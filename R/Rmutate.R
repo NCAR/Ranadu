@@ -21,31 +21,6 @@
 #' @return A new data.frame or tibble with the new variables included.
 #' @example DS <- Rmutate(RAFdata, DPD = ATX - DPXC)
 Rmutate <- function (.d, ...) {
-  transferAttributes <- function (d, dsub) {  
-    ds <- dsub
-    ## ds and dsub are the new variables; d is the original
-    for (nm in names (ds)) {
-      var <- sprintf ("d$%s", nm)
-      A <- attributes (eval (parse (text=var)))
-      if (!grepl ('Time', nm)) {
-        A$dim[1] <- nrow(ds)
-        A$class <- NULL
-      } else {
-        A$dim <- nrow (ds)
-      }
-      attributes (ds[,nm]) <- A
-    }
-    A <- attributes (d)
-    ## If there is a 'dim' attribute, change it as appropriate:
-    if ('dim' %in% names(A)) {
-      A$dim <- nrow(ds)
-    }
-    A$Dimensions$Time$len <- nrow (ds)
-    A$row.names <- 1:nrow (ds)
-    A$names <- names (ds)
-    attributes (ds) <- A
-    return(ds)
-  }
   dt <- dplyr::mutate(.d, ...)
   return (transferAttributes(.d, dt))
 }
