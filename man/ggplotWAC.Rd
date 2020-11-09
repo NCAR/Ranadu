@@ -4,10 +4,25 @@
 \alias{ggplotWAC}
 \title{ggplotWAC}
 \usage{
-ggplotWAC(.data, col = "blue", xlab = "TIME [UTC]", ylab = "",
-  lwd = 1, lty = 1, logxy = "", position = NA, lmargin = NA,
-  ylim = NA, legend.position = c(0.5, 0.92), panels = 1,
-  labelL = NA, labelP = NA, gtitle = NA, theme.version = 0, ...)
+ggplotWAC(
+  .data,
+  col = "blue",
+  xlab = "TIME [UTC]",
+  ylab = "",
+  lwd = 1,
+  lty = 1,
+  logxy = "",
+  position = NA,
+  lmargin = NA,
+  ylim = NA,
+  legend.position = c(0.5, 0.92),
+  panels = 1,
+  labelL = NA,
+  labelP = NA,
+  gtitle = NA,
+  theme.version = 0,
+  ...
+)
 }
 \arguments{
 \item{.data}{A data.frame containing vectors to plot. The first will be the

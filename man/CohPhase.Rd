@@ -7,8 +7,17 @@
 \alias{cohphase}
 \title{CohPhase}
 \usage{
-CohPhase(.data, .Var1, .Var2, col = "blue", spans = 25,
-  smoothBins = 50, plotType = "ggplot", showErrors = 0)
+CohPhase(
+  .data,
+  .Var1,
+  .Var2,
+  col = "blue",
+  spans = 25,
+  smoothBins = 50,
+  plotType = "ggplot",
+  showErrors = 0,
+  returnCospectrum = FALSE
+)
 }
 \arguments{
 \item{.data}{A data.frame containing at least the variables "Time", ".Var1" and ".Var2".
@@ -58,17 +67,25 @@ a ribbon extending one standard deviation above and below the mean value. The de
 "alpha" of 0.15 for partial transparency. The "showErrors" parameter has no effect unless
 the (default) plotType='ggplot' is used. The uncertainty band is not plotted where there are
 fewer than two values to average in a bin.}
+
+\item{returnCospectrum}{Default is FALSE. If set TRUE, instead of a plot definition, 
+the cospectrum and quadrature are returned in the form of a data.frame with columns "freq",
+"cospec' and 'quad'. These are not smoothed and probably need smoothing when they are used.
+The two variance spectra are also returned, as "spec1" and "spec2".}
 }
 \value{
-A ggplot2 definition for the plot of ((squared) coherence and phase as a function of frequency.
-The resulting plot definition
+A ggplot2 definition for the plot of ((squared) coherence and phase as a function 
+of frequency, if plotType == 'ggplot'. The resulting plot definition
 can be plotted (via, e.g., 'print (CohPhase(...))) or
 saved for later addition of more variables or for later plotting. The plot is returned
 with the Ranadu theme "theme_WAC()", but that can be changed by adding another theme to the
-plot definition before plotting.
+plot definition before plotting. if plotType is not 'ggplot', the plots are generated 
+using standard R plots and a data.frame is returned that contains the frequency, coherence, 
+and phase. That can be used to plot separately and perhaps combine with other plots.
 }
 \description{
-Plots the coherence and phase for a cross-spectrum.
+Plots the coherence and phase for a cross-spectrum. Optionally,
+returns the cospectrum in a (frequency, covariance) data.frame.
 }
 \details{
 For the variables provided, which must be in the supplied data.frame 

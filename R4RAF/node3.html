@@ -3,8 +3,8 @@
 <!--Converted with LaTeX2HTML 2018.3 (Released July 19, 2018) -->
 <HTML lang="EN">
 <HEAD>
-<TITLE>DataFileInfo()</TITLE>
-<META NAME="description" CONTENT="DataFileInfo()">
+<TITLE>3. Overview of Ranadu functions</TITLE>
+<META NAME="description" CONTENT="3. Overview of Ranadu functions">
 <META NAME="keywords" CONTENT="R4RAF">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -27,155 +27,405 @@
  HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
 <A
- HREF="node2.html">
+ HREF="R4RAF.html">
 <IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
 <A
  HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
 <BR>
 <B> Next:</B> <A
- HREF="node4.html">getNetCDF() and the resulting</A>
+ HREF="node4.html">4. More Details About</A>
 <B> Up:</B> <A
- HREF="node2.html">Getting Started</A>
+ HREF="R4RAF.html">R4RAF</A>
 <B> Previous:</B> <A
- HREF="node2.html">Getting Started</A>
+ HREF="node2.html">2. Getting Started</A>
 <BR>
 <BR></DIV>
 <!--End of Navigation Panel-->
+<!--Table of Child-Links-->
+<A ID="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
-<H1><A ID="SECTION00210000000000000000">
-DataFileInfo()</A>
-</H1>
-A useful first look at a netCDF file is provided by Ranadu::DataFileInfo(),
-which returns characteristics like the project name, flight number,
-date/times, variable names, and the data rate. In addition, this function
-returns a set of &ldquo;measurands&rdquo; (measured properties of the atmosphere
-like air temperature) and the set of variables that provide measurements
-of that measurand. The measurands in a particular file (the one referenced
-above) are shown below:
-<BR>
-<BR>
- <SPAN ID="cbox1937"></SPAN>
-<DIV CLASS="alltt" ALIGN="LEFT">
-<SPAN style="font-family:monospace">
- <SPAN ID="hue2214">Project</SPAN> <SPAN ID="hue2216">&lt;-</SPAN> <SPAN ID="hue2218">'WECAN'</SPAN>
-<BR><SPAN ID="hue2220">FlightNumber</SPAN> <SPAN ID="hue2222">&lt;-</SPAN> <SPAN ID="hue2224">6</SPAN>
-<BR><SPAN ID="hue2226">fname</SPAN> <SPAN ID="hue2228">&lt;-</SPAN> <SPAN ID="hue2230"><SPAN &nbsp;CLASS="textbf">sprintf</SPAN></SPAN> <SPAN ID="hue2233">(</SPAN><SPAN ID="hue2235">'%s%s/%srf%02d.nc'</SPAN><SPAN ID="hue2237">, Ranadu</SPAN><SPAN ID="hue2239">::</SPAN><SPAN ID="hue2241"><SPAN &nbsp;CLASS="textbf">DataDirectory</SPAN></SPAN><SPAN ID="hue2244">(),</SPAN>
-<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<SPAN ID="hue2246">Project, Project, FlightNumber)</SPAN>
-<BR><SPAN ID="hue2248">FI</SPAN> <SPAN ID="hue2250">&lt;-</SPAN> <SPAN ID="hue2252"><SPAN &nbsp;CLASS="textbf">DataFileInfo</SPAN></SPAN><SPAN ID="hue2255">(fname)</SPAN>
-<BR><SPAN ID="hue2257"><SPAN &nbsp;CLASS="textbf">names</SPAN></SPAN> <SPAN ID="hue2260">(FI</SPAN><SPAN ID="hue2262">$</SPAN><SPAN ID="hue2264">Measurands)</SPAN>
-<BR></SPAN>
-</DIV>
+<UL CLASS="ChildLinks">
+<LI><A ID="tex2html67"
+  HREF="node3.html#SECTION00310000000000000000"><SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">1</SPAN> More about constructing data.frames</A>
+<LI><A ID="tex2html68"
+  HREF="node3.html#SECTION00320000000000000000"><SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">2</SPAN> Getting information about the data</A>
+<LI><A ID="tex2html69"
+  HREF="node3.html#SECTION00330000000000000000"><SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">3</SPAN> Plotting routines</A>
+<LI><A ID="tex2html70"
+  HREF="node3.html#SECTION00340000000000000000"><SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">4</SPAN> Computational Algorithms</A>
+<LI><A ID="tex2html71"
+  HREF="node3.html#SECTION00350000000000000000"><SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">5</SPAN> Utility Functions</A>
+</UL>
+<!--End of Table of Child-Links-->
+<HR>
 
-<PRE>
-##  [1] ""                                     
-##  [2] "altitude"                             
-##  [3] "air_temperature"                      
-##  [4] "air_pressure"                         
-##  [5] "dew_point_temperature"                
-##  [6] "water_vapor_pressure"                 
-##  [7] "latitude"                             
-##  [8] "longitude"                            
-##  [9] "height"                               
-## [10] "humidity_mixing_ratio"                
-## [11] "barometric_altitude"                  
-## [12] "platform_pitch_angle"                 
-## [13] "atmosphere_cloud_liquid_water_content"
-## [14] "air_pressure_at_sea_level"            
-## [15] "relative_humidity"                    
-## [16] "platform_roll_angle"                  
-## [17] "solar_azimuth_angle"                  
-## [18] "solar_elevation_angle"                
-## [19] "solar_zenith_angle"                   
-## [20] "platform_speed_wrt_air"               
-## [21] "platform_orientation"                 
-## [22] "air_potential_temperature"            
-## [23] "equivelent_potential_temperature"     
-## [24] "platform_course"                      
-## [25] "virtual_temperature"                  
-## [26] "eastward_wind"                        
-## [27] "northward_wind"                       
-## [28] "wind_from_direction"                  
-## [29] "upward_air_velocity"                  
-## [30] "wind_speed"
-</PRE>
+<H1><A ID="SECTION00300000000000000000">
+<SPAN CLASS="arabic">3</SPAN>. Overview of Ranadu functions</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <P>
-The variables that provide redundant measurements of a specific measurand
-are named lists with the measurand name and can be displayed by printing
-the measurand name, as in the following example:
-
-<FONT COLOR="#585858"></FONT></TD></TR>
-</TABLE><TABLE   STYLE="width:0%;">
-<TR><TD>
- <SPAN ID="cbox1946"></SPAN>
-<DIV CLASS="alltt" ALIGN="LEFT">
-<SPAN style="font-family:monospace">
- <SPAN ID="hue2266">FI</SPAN><SPAN ID="hue2268">$</SPAN><SPAN ID="hue2270">Measurands</SPAN><SPAN ID="hue2272">$</SPAN><SPAN ID="hue2274">air_temperature</SPAN>
-<BR></SPAN>
-</DIV>
-
-<PRE>
-## [1] "ATF1" "ATH1" "ATH2" "ATX"
-</PRE>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">A more extensive discussion if Ranadu is contained in the Ranadu Manual,
+available here<a href="https://github.com/NCAR/Ranadu/blob/WAC/inst/RanaduManual.pdf">here</a>.
+Some of the central features are discussed in this chapter.
+</FONT></FONT></FONT>
 <P>
-In addition, the &ldquo;long_name&rdquo; describing a variable (e.g., here
-&ldquo;ATX&rdquo;) can be found as follows:
-
-<FONT COLOR="#585858"></FONT></TD></TR>
-</TABLE><TABLE   STYLE="width:0%;">
-<TR><TD>
- <SPAN ID="cbox1955"></SPAN>
-<DIV CLASS="alltt" ALIGN="LEFT">
-<SPAN style="font-family:monospace">
- <SPAN ID="hue2276">FI</SPAN><SPAN ID="hue2278">$</SPAN><SPAN ID="hue2280">LongNames[</SPAN><SPAN ID="hue2282"><SPAN &nbsp;CLASS="textbf">which</SPAN></SPAN><SPAN ID="hue2285">(</SPAN><SPAN ID="hue2287">'ATX'</SPAN> <SPAN ID="hue2289">==</SPAN> <SPAN ID="hue2291">FI</SPAN><SPAN ID="hue2293">$</SPAN><SPAN ID="hue2295">Variables)]</SPAN>
-<BR></SPAN>
-</DIV>
-
-<PRE>
-## [1] "Ambient Temperature, Reference"
-</PRE>
+<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<H1><A ID="SECTION00310000000000000000">
+<SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">1</SPAN> More about constructing data.frames</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <P>
-To see all the lists of information contained in the DataFileInfo
-list, print the names as follows:
-
-<FONT COLOR="#585858"></FONT></TD></TR>
-</TABLE><TABLE   STYLE="width:0%;">
-<TR><TD>
- <SPAN ID="cbox1964"></SPAN>
-<DIV CLASS="alltt" ALIGN="LEFT">
-<SPAN style="font-family:monospace">
- <SPAN ID="hue2297"><SPAN &nbsp;CLASS="textbf">names</SPAN></SPAN><SPAN ID="hue2300">(FI)</SPAN>
-<BR></SPAN>
-</DIV>
-
-<PRE>
-##  [1] "Number"     "Project"    "Platform"   "DataFile"   "Start"     
-##  [6] "End"        "Rate"       "LatMin"     "LatMax"     "LonMin"    
-## [11] "LonMax"     "Variables"  "LongNames"  "Measurands"
-</PRE>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">These Ranadu functions can be of use when constructing and modifying
+data.frames:
+</FONT></FONT></FONT>
+<UL>
+<LI><SPAN  CLASS="texttt">getNetCDF ( )</SPAN>: loads a data.frame with requested variables
+</LI>
+<LI><SPAN  CLASS="texttt">standardVariables( ):</SPAN> defines a common set of variables for
+input to getNetCDF(). This list is the default if no variables are
+specified in the call to getNetCDF. The optional argument is a list
+of character names that specify additional variables to include.
+</LI>
+<LI><SPAN  CLASS="texttt">DataDirectory( ): </SPAN>This is system dependent and is intended
+to aid in portability by providing the usual location of the netCDF
+data files. It tries a set of likely names, but may need redefinition
+for some file systems.
+</LI>
+<LI><SPAN  CLASS="texttt">getProjectData( ):</SPAN> Constructs a data.frame that includes
+measurements from multiple flights in a project.
+</LI>
+<LI><SPAN  CLASS="texttt">getIndex( )</SPAN>: finds the index for a specified time
+</LI>
+<LI><SPAN  CLASS="texttt">setRange( )</SPAN>: sets a range of indices covering a specified
+time interval.
+</LI>
+<LI><SPAN  CLASS="texttt">selectTimes( ):</SPAN> produces a new data.frame with a limited
+time range.
+</LI>
+</UL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+In addition, some functions provided by the package &ldquo;dplyr&rdquo; can
+be very useful when working with data.frames. These actions can be
+implemented by normal R subsetting also (e.g., using &ldquo;[[...]]&rdquo;
+notation), but using these dplyr functions serves to clarify what
+the steps in the code are doing:
+</FONT></FONT></FONT>
+<UL>
+<LI><SPAN  CLASS="texttt">dplyr::select( ):</SPAN> produces a new data.frame with only the
+variables listed as arguments in the call to the function.
+</LI>
+<LI><SPAN  CLASS="texttt">dplyr::filter( ):</SPAN> produces a subset data.frame where the
+argument is a logical test applied to the data.frame rows that must
+be met for the row to be included in the returned data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">dplyr::mutate( ):</SPAN> adds new variables to the data.frame. <SPAN  CLASS="texttt">Ranadu::Rmutate(
+)</SPAN> modifies this to preserve variable attributes.
+</LI>
+</UL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+The related function Ranadu::selectTime( ) can be used to restrict
+the times included in the data.frame, so it is often convenient to
+use this routine in combination with the above routines when constructing
+plots and for other data-analysis steps. See akso <SPAN  CLASS="texttt">Ranadu::RSubset(
+).</SPAN>
+</FONT></FONT></FONT>
 <P>
-Examining these can help a user understand what is included in a particular
-data file.
-</TD></TR>
-</TABLE></FONT>
+<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<H1><A ID="SECTION00320000000000000000">
+<SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">2</SPAN> Getting information about the data</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">Many Ranadu functions provide information about the data set. A good
+starting point is DataFileInfo(), discussed in the previous chapter.
+In addition, these functions may be helpful:
+</FONT></FONT></FONT>
+<OL>
+<LI><SPAN  CLASS="texttt">Ranadu::getAttributes():</SPAN> The data.frames produced
+by getNetCDF() have assigned attributes that match those in the original
+netCDF file, and these can be retrieved via getAttributes(), where
+the argument can be either the data.frame (for which the returned
+attributes are those associated with the data file) or a variable
+name (for which the attributes are those associated with the variable).<A ID="tex2html5"
+  HREF="footnode.html#foot403"><SUP><SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">1</SPAN></SUP></A> The result of the function call is a printed listing of attributes
+and creation of a list (here in Z) that contains the attributes, so
+it is usually preferable to assign the returned value to something
+to avoid the double listing that would be produced otherwise.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::TellAbout()</SPAN> provides some information
+about the characteristics of a data.frame or a variable in the data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::getStartEnd()</SPAN><SPAN  CLASS="texttt"> </SPAN>returns the start
+and end times of a data frame.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::ValueOf() and Ranadu::ValueOfAll()</SPAN><SPAN  CLASS="texttt">
+</SPAN>for a specified time return the value of a specified variable or
+of all variables, respectively.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">
+The standard R routines &ldquo;dim()&rdquo;, &ldquo;names()&rdquo; and &ldquo;str()&rdquo;
+will also provide information about a data.frame or a variable. &ldquo;str()&rdquo;
+in particular can provide important information about all R variables.
+</FONT></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<H1><A ID="SECTION00330000000000000000">
+<SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">3</SPAN> Plotting routines</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The routines plotWAC() and ggplotWAC() were introduced in the previous
+chapter. The following is a list of other Ranadu routines that produce
+plots. More detail about these routines is included in the next chapter.
+</FONT></FONT></FONT>
+<OL>
+<LI><SPAN  CLASS="texttt">Ranadu::plotTrack()</SPAN> plots a flight track on a
+background that shows geographic boundaries. In its simplest form
+it is called with a single argument of a data.frame that contains
+at least latitude and longitude in variables named LATC and LONC.
+This routine also has an option to plot the track in a reference frame
+that drifts with the wind. See ?plotTrack for more information on
+options.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::VSpec()</SPAN> constructs a plot of the variance
+spectrum for a specified variable. See also <SPAN  CLASS="texttt">Ranadu::CohPhase()</SPAN><SPAN  CLASS="texttt">
+</SPAN>for plots of the coherence and phase relationship between variables,
+and <SPAN  CLASS="texttt">Ranadu::flux( )</SPAN> for plotting the cospectrum
+and calculating various fluxes.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::lineWAC()</SPAN> adds a line to a plot previously
+constructed by plotWAC(), with adjustment of the plotted time to correspond
+to the center of the interval averaged to obtain the measurements.
+Otherwise, like &ldquo;lines()&rdquo; in standard R.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::plotSD()</SPAN> plots the size distribution measured
+by cloud or aerosol particle probes.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::contourPlot()</SPAN> plots a scattergram-like
+display where the density of points is represented by colored areas.
+This can be a useful alternative to a scatterplot when the number
+of plotted points is large.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::DemingFit()</SPAN> calculates a Deming fit to
+two variables (in which the distance from the fitted line to the two-dimensional
+locations of the measurements is minimized) and plots the resulting
+fit.
+</LI>
+<LI><SPAN  CLASS="texttt">Ranadu::SkewTSounding()</SPAN> plots a skew-T thermodynamic
+diagram with measurements from a data.frame averaged and superimposed
+on the diagram. Options are available to include a hodograph and the
+denote values of the LCL and CAPE.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<H1><A ID="SECTION00340000000000000000">
+<SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">4</SPAN> Computational Algorithms</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">A set of functions provide calculations like those used to process
+the original files and, in some cases, to extend those calculations.
+A full list of Ranadu functions can be viewed by using the R command
+&ldquo;?Ranadu&rdquo;, and clicking on the items in that list then will provide
+the standard &ldquo;help&rdquo; information for the functions. Some of these
+are listed below. For additional details, see the technical note titled
+&ldquo;Processing Algorithms&rdquo;.
+</FONT></FONT></FONT>
+<OL>
+<LI><SPAN  CLASS="texttt">AdiabaticTandLWC( ):</SPAN> Calculate the temperature and liquid
+water content produced by adiabatic ascent.
+</LI>
+<LI><SPAN  CLASS="texttt">AirTemperature( ):</SPAN> The standard calculation of temperature
+from the measured recovery temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">BoltonEquivalentPotentialTemperature( ):</SPAN> Equivalent potential
+temperature as calculated using the Bolton formula. In standard processing,
+this has been replaced now by the Davies-Jones representation; see
+&ldquo;EquivalentPotentialTemperature( )&rdquo; below.
+</LI>
+<LI><SPAN  CLASS="texttt">ButterworthFilter( ):</SPAN> Implementation of a Butterworth low-pass
+filter, used in wind processing; see &ldquo;ComplementaryFilter( )&rdquo;.
+</LI>
+<LI><SPAN  CLASS="texttt">calcAttack( ):</SPAN> This function calculates the angle of attack
+from the pitch and rate of climb of the aircraft under the assumption
+that the vertical wind is zero. This algorithm may be useful when
+determining or checking sensitivity coefficients for the measured
+angle of attack.
+</LI>
+<LI><SPAN  CLASS="texttt">ComplementaryFilter( ):</SPAN> The standard calculation of wind
+uses this complementary filter to combine the aircraft ground-speed
+components measured by the inertial system at high rate with the corresponding
+components measured by the global positioning system at lower rate.
+</LI>
+<LI><SPAN  CLASS="texttt">CorrectHeading( ), CorrectPitch( ) </SPAN>and<SPAN  CLASS="texttt"> CorrectRoll(
+): </SPAN>Algorithms that use the observed Schuler oscillation of the inertial
+system to improve the measurements of pitch and roll, and that calculates
+a related correction to the heading based on a comparison of the observed
+acceleration vector and the velocity derivatives from the global positioning
+system.
+</LI>
+<LI><SPAN  CLASS="texttt">DPfromE( ):</SPAN> Calculation of the dewpoint temperature corresponding
+to a specified vapor pressure.
+</LI>
+<LI><SPAN  CLASS="texttt">EquivalentPotentialTemperature( ):</SPAN> The pseudo-adiabatic equivalent
+potential temperature calculated using the Davies-Jones (2009) formula.
+See also BoltonEquivalentPotentialTemperature( ) and RossbyEquivalentPotentialTemperature(
+) for alternate values.
+</LI>
+<LI><SPAN  CLASS="texttt">GeoPotHeight( ):</SPAN> Calculates the geopotential height associated
+with a specified geometric height above sea level and location.
+</LI>
+<LI><SPAN  CLASS="texttt">Gravity( ):</SPAN> The acceleration of gravity as represented by
+the Somigliana formula.
+</LI>
+<LI><SPAN  CLASS="texttt">GV_AOAfromRadome( ), GV_YawFromRadome( ):</SPAN> Algorithms used
+to find the angles of attack and sideslip or yaw from pressure differences
+measured on the radome of the GV.
+</LI>
+<LI><SPAN  CLASS="texttt">KingProbe( ):</SPAN> Calculation of the liquid water content from
+the power measured by the CSIRO/King probe.
+</LI>
+<LI><SPAN  CLASS="texttt">LCL( ): </SPAN>Find the lifted condensation level from the observed
+pressure, temperature, and water-vapor mixing ratio.
+</LI>
+<LI><SPAN  CLASS="texttt">MachNumber( ):</SPAN> Calculate the Mach number from the measured
+dynamic pressure, ambient pressure, and humidity.
+</LI>
+<LI><SPAN  CLASS="texttt">memCoef( ), memEstimate( ):</SPAN> Routines used to implement the
+&ldquo;maximum entropy&rdquo; method of spectral estimation; see &ldquo;VSpec()&rdquo;.
+</LI>
+<LI><SPAN  CLASS="texttt">MixingRatio( ):</SPAN> Calculates the water vapor mixing ratio.
+</LI>
+<LI><SPAN  CLASS="texttt">MurphyKoop( ), MurphyKoopIce( ):</SPAN> Calculate the water vapor
+pressure from the Murphy-Koop formulas.
+</LI>
+<LI><SPAN  CLASS="texttt">PCORfunction( ):</SPAN> The algorithm used to correct measured ambient
+and dynamic pressures for the static defect.
+</LI>
+<LI><SPAN  CLASS="texttt">PotentialTemperature( ):</SPAN> Calculates the potential temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">PressureAltitude( ):</SPAN> Calculates the pressure altitude from
+the pressure.
+</LI>
+<LI><SPAN  CLASS="texttt">RecoveryFactor( ):</SPAN> Returns the recovery factor used to process
+measurements of air temperature from probes exposed to the airstream.
+</LI>
+<LI><SPAN  CLASS="texttt">RossbyEquivalentPotentialTemperature( ):</SPAN> The Rossby formula
+for the equivalent potential temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">SpecificHeats( ):</SPAN> At the value of the ratio of water vapor
+pressure to total pressure provided as an argument, returns the values
+of the specific heat at constant pressure, the specific heat at constant
+volume, and the gas constant.
+</LI>
+<LI><SPAN  CLASS="texttt">Sqs( ):</SPAN> The quasi-steady supersaturation that will exist
+in a cloud with specified droplet size distribution and updraft.
+</LI>
+<LI><SPAN  CLASS="texttt">StandardConstant( ):</SPAN> Provides standardized values of some
+constants used in the processing algorithms. See &ldquo;StandardConstant(&ldquo;?&rdquo;)
+for a list of available constants.
+</LI>
+<LI><SPAN  CLASS="texttt">TrueAirspeed( ):</SPAN> Calculate the airspeed from the Mach number
+and temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">VirtualTemperature( )</SPAN> and <SPAN  CLASS="texttt">VirtualPotentialTemperature(
+):</SPAN> Functions to calculate these variables.
+</LI>
+<LI><SPAN  CLASS="texttt">WetEquivalentPotentialTemperature( ):</SPAN> Wet-equivalent potential
+temperature.
+</LI>
+<LI><SPAN  CLASS="texttt">WindProcessor( ):</SPAN> Calculates the wind vector from the basic
+measurements and adds new wind variables to the input data.frame.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<H1><A ID="SECTION00350000000000000000">
+<SPAN CLASS="arabic">3</SPAN>.<SPAN CLASS="arabic">5</SPAN> Utility Functions</A>
+</H1><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"><FONT COLOR="#585858">The following are some of the Ranadu functions that are provided to
+assist in various data-analysis tasks. The &ldquo;getNetCDF()&rdquo;, &ldquo;DataDirectory()&rdquo;
+and &ldquo;standardVariables()&rdquo; functions were already described. Others
+include:
+</FONT></FONT></FONT>
+<OL>
+<LI><SPAN  CLASS="texttt">binStats( ):</SPAN> A function to calculate average values and standard
+deviations in bins of a specified variable, as might to useful when
+constructing error-bar or box-and-whisker plots.
+</LI>
+<LI><SPAN  CLASS="texttt">detrend( ):</SPAN> Simple removal of the mean and trend from a time-series
+variable. Used in the spectral-analysis routines.
+</LI>
+<LI><SPAN  CLASS="texttt">df2tibble( ):</SPAN> Convert a data.frame to a &ldquo;tibble&rdquo;, a related
+data structure particularly suited to many data-analysis steps. <SPAN  CLASS="texttt">tibble2df(
+)</SPAN> transforms from a tibble back to a data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">LagrangeInterpolate()</SPAN> implements standard Lagrange interpolation.
+</LI>
+<LI><SPAN  CLASS="texttt">makeNetCDF( )</SPAN>: A utility that writes a new netCDF-format
+file from the measurements and attributes contained in a data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">ncsubset( ):</SPAN> Produce a subset netCDF file from an existing
+netCDF file.
+</LI>
+<LI><SPAN  CLASS="texttt">OpenInProgram( ):</SPAN> View the variables in a data.frame in another
+program like ncplot or Xanadu.
+</LI>
+<LI><SPAN  CLASS="texttt">RAFdata:</SPAN> This is a sample data.frame as might be constructed
+by getNetCDF(), containing a short period of measurements from an
+NSF/NCAR GV flight in a project called IDEAS-4.
+The data.frame contains a set of measurements, one row per second,
+and a Time variable. This is provided
+for use in the Ranadu examples.
+</LI>
+<LI><SPAN  CLASS="texttt">removeSpikes( ):</SPAN> Find &ldquo;spikes&rdquo; in a variable and replace
+them with linear-interpolated values. Useful in some studies of spectral
+variance where spikes distort the spectrum.
+</LI>
+<LI><SPAN  CLASS="texttt">RSubset( ):</SPAN> Produce a subset of a data.frame while preserving
+attributes. This is useful because some standard R subsetting actions
+do not preserve attributes.
+</LI>
+<LI><SPAN  CLASS="texttt">selectTimes( ):</SPAN> Produce a new data.frame with a subset of
+the time range included in the original data.frame. (Uses setRange.)
+This is of particular use in pipes.
+</LI>
+<LI><SPAN  CLASS="texttt">setRange( ):</SPAN> Find the data.frame indices corresponding to
+a specified time range in a data.frame.
+</LI>
+<LI><SPAN  CLASS="texttt">setVariableList( ):</SPAN> An interactive way of setting a list
+of variables.
+</LI>
+<LI><SPAN  CLASS="texttt">ShiftInTime( ):</SPAN> Move a time-series variable forward or backward
+in time.
+</LI>
+<LI><SPAN  CLASS="texttt">SmoothInterp( ):</SPAN> Fill missing values with linear interpolation
+and optionally smooth the resulting time series.
+</LI>
+<LI><SPAN  CLASS="texttt">theme_WAC( ):</SPAN> An optional theme available for use with &ldquo;ggplot2&rdquo;
+plots.
+</LI>
+<LI><SPAN  CLASS="texttt">XformLA( ):</SPAN> The transformation from the &ldquo;local&rdquo; Earth-relative
+reference frame to the aircraft or body reference frame, or the reverse.
+Used extensively in the Kalman processor and other GPS-updating functions.
+</LI>
+</OL><FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
+<P>
+<FONT COLOR="#585858"><FONT COLOR="#585858"></FONT></FONT>
 <DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
 <A
  HREF="node4.html">
 <IMG WIDTH="37" HEIGHT="24" ALT="next" SRC="next.png"></A> 
 <A
- HREF="node2.html">
+ HREF="R4RAF.html">
 <IMG WIDTH="26" HEIGHT="24" ALT="up" SRC="up.png"></A> 
 <A
  HREF="node2.html">
 <IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A>   
 <BR>
 <B> Next:</B> <A
- HREF="node4.html">getNetCDF() and the resulting</A>
+ HREF="node4.html">4. More Details About</A>
 <B> Up:</B> <A
- HREF="node2.html">Getting Started</A>
+ HREF="R4RAF.html">R4RAF</A>
 <B> Previous:</B> <A
- HREF="node2.html">Getting Started</A></DIV>
+ HREF="node2.html">2. Getting Started</A></DIV>
 <!--End of Navigation Panel-->
 
 </BODY>

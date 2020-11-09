@@ -19,6 +19,35 @@ TellAbout <- function (V) {
   print (summary(V))
 }
 
+#' @title WACf
+#' @usage WACf(V)  # use [[n]] to select nth function or $name to select function name.
+#' @description List of statistical functions
+#' @details Contains mean, sd, sdMean, median, kount, length with NAs removed, in a list
+#' that can be used with lapply(WACf, function(f) f(V)) with V a vector. To use individual
+#' functions: WACf$sdMean(V). kount is the number of non-missing values in the parameter.
+#' @aliases WACf
+#' @author William Cooper
+#' @importFrom stats sd median
+#' @export WACf
+#' @param V A variable that may be scalar, vector, or data.frame column.
+#' @return The function value: mean, sd, sdMean, median, kount, or length. kount is
+#' the number of non-missing values in a vector. Values from individual functions
+#' are returned invisibly; i.e., they must be assigned to something as in the examples 
+#' or they will not print. The result of lapply() will still print if not assigned.
+#' More concise output is obtained from STAT <- lapply(); str(STAT). Consider also,
+#' for concise display: dplyr::as_tibble(lapply(WACf, function(f) f(V)))
+#' @examples 
+#' STAT <- lapply(WACf, function(f) f(RAFdata$TASX))
+#' sdATX <- WACf$sd(RAFdata$ATX)
+WACf <- list(
+  mean = function(x, ...) invisible(mean(as.vector(x), ..., na.rm = TRUE)),
+  sd   = function(x, ...) invisible(sd  (as.vector(x), ..., na.rm = TRUE)),
+  sdMean = function(x, ...) invisible(sd (as.vector(x), ..., na.rm = TRUE) / sqrt(length(x[!is.na(x)]))),
+  median = function(x, ...) invisible(median (as.vector(x), ..., na.rm = TRUE)),
+  length = function(x, ...) invisible(length(x)), 
+  kount = function(x, ...) invisible(length(x[!is.na(x)]))
+)
+
 #' @title ValueOf
 #' @description Returns value of a variable at a specified time
 #' @details In a dataframe, finds the index corresponding to
@@ -72,7 +101,7 @@ ValueOfAll <- function (DataFrame, HHMMSS) {
 
 #' @title getAttributes
 #' @description List the netCDF attributes for a specified variable or data.frame
-#' @details Prints the netCDF attributes and their values, and returns
+#' @details Prints the netCDF attributes and their values, and (invisibly) returns
 #' a text vector with the names of the attributes, for a specified
 #' data.frame. For variable attributes, the name of the variable should be
 #' specified as a string. For global attributes, omit the 'vname' parameter.
@@ -106,7 +135,9 @@ getAttributes <- function (dname, vname=NULL, .print=TRUE) {
     }
     ATT <- attributes (dname)
     if (.print) {
-      print (sprintf ("attributes for variable"))
+      a <- attr(dname, 'label')
+      a <- sub('\\).*', '', sub('^.*\\(', '', a))
+      print (sprintf ("attributes for variable %s:", a))
     }
     for (i in 1:length(ATT)) {
       if (names(ATT[i]) == "Dimensions") {next}
@@ -116,47 +147,49 @@ getAttributes <- function (dname, vname=NULL, .print=TRUE) {
         print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
       }
     }
-    return (atts)
-  }
-  ## avoid having is.null fail for variable argument rather than text (vname)
-  if (typeof (substitute (vname)) == "symbol") {
-    vname <- deparse (substitute (vname))
-  }
-  if (is.null(vname)) {
-    ATT <- attributes (dname)
-    if (.print) {
-      print ("attributes of data.frame:")
-    }
-    for (i in 1:length(ATT)) {
-      if (names(ATT[i]) == "row.names") {next}
-      if (names(ATT[i]) == "names") {next}
-      if (names(ATT[i]) == "Dimensions") {next}
-      if (names(ATT[i]) == "class") {next}
-      atts[[length(atts)+1]]  <- ATT[i]
-      if (.print) {
-        print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
-      }
-    }
-    return (atts)
-  } else {    # variable attributes
-    vname <- substitute (vname)
-    if (typeof (vname) != "character") {
+    invisible(atts)
+  } else {
+    ## avoid having is.null fail for variable argument rather than text (vname)
+    if (typeof (substitute (vname)) == "symbol") {
       vname <- deparse (substitute (vname))
     }
-    ATT <- attributes (eval(parse(text=sprintf("dname$%s", vname))))
-    if (.print) {
-      print (sprintf ("attributes for variable %s", vname))
-    }
-    for (i in 1:length(ATT)) {
-      if (names (ATT[i]) == "Dimensions") {next}
-      if (names (ATT[i]) == "dim") {next}
-      if (names (ATT[i]) == "class") {next}
-      atts[[length(atts)+1]]  <- ATT[i]
+    if (is.null(vname)) {
+      ATT <- attributes (dname)
       if (.print) {
-        print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
+        print ("attributes of data.frame:")
       }
+      for (i in 1:length(ATT)) {
+        if (names(ATT[i]) == "row.names") {next}
+        if (names(ATT[i]) == "names") {next}
+        if (names(ATT[i]) == "Dimensions") {next}
+        if (names(ATT[i]) == "class") {next}
+        atts[[length(atts)+1]]  <- ATT[i]
+        if (.print) {
+          print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
+        }
+      }
+      invisible(atts)
+    } else {    # variable attributes
+      vname <- substitute (vname)
+      if (typeof (vname) != "character") {
+        vname <- deparse (substitute (vname))
+      }
+      ATT <- attributes (eval(parse(text=sprintf("dname$%s", vname))))
+      if (.print) {
+        print (sprintf ("attributes for variable %s", vname))
+      }
+      for (i in 1:length(ATT)) {
+        if (names (ATT[i]) == "Dimensions") {next}
+        if (names (ATT[i]) == "dim") {next}
+        if (names (ATT[i]) == "class") {next}
+        atts[[length(atts)+1]]  <- ATT[i]
+        if (.print) {
+          print (sprintf ("%s: %s", names(ATT[i]), ATT[i]))
+        }
+      }
+      invisible(atts)
     }
-    return (atts)
   }
 }
+  
   

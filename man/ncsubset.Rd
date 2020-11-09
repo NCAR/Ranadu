@@ -4,8 +4,7 @@
 \alias{ncsubset}
 \title{ncsubset}
 \usage{
-ncsubset(.OldFileName, .NewFileName, .Start = NA, .End = NA,
-  .VarList = NULL)
+ncsubset(.OldFileName, .NewFileName, .Start = NA, .End = NA, .VarList = NULL)
 }
 \arguments{
 \item{.OldFileName}{The path to the existing netCDF file.}

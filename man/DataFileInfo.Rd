@@ -5,7 +5,7 @@
 \alias{dataFileInfo}
 \title{DataFileInfo}
 \usage{
-DataFileInfo(fileLocation, LLrange = TRUE)
+DataFileInfo(fileLocation = setFileName(), LLrange = TRUE)
 }
 \arguments{
 \item{fileLocation}{A complete address to the netCDF data file.}

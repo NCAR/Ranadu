@@ -142,15 +142,18 @@ memEstimate <- function (freq, .cf) {
 #' @export detrend
 #' @param .data A data.frame containing variable 'Time' as the first column and
 #' a second-column from which to remove the mean and trend. 
+#' @param silent Prints mean and trend only if set FALSE. Default is TRUE.
 #' @return A modified version of data[, 2] only, with mean and trend removed.
 #' @examples 
 #' AT <- detrend (RAFdata[, c('Time', 'ATX')])
-detrend <- function (.data) {
+detrend <- function (.data, silent = TRUE) {
   .data[,2] <- SmoothInterp (.data[,2], .Length=0)  ## .Length=0 suppresses smoothing
   meanV <- mean (.data[,2], na.rm=TRUE)
   TS <- as.numeric(.data[,1]-mean(.data[,1], na.rm=TRUE))
   trendV <- coef (stats::lm (.data[,2] ~ TS))[2]
-  print (sprintf ('mean and trend %.2f %.5f', meanV, trendV))
+  if (!silent) {
+    print (sprintf ('mean and trend %.2f %.5f', meanV, trendV))
+  }
   return (.data[,2] - meanV - trendV * TS)
 }
 

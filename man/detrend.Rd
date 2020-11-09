@@ -5,11 +5,13 @@
 \alias{deTrend}
 \title{detrend}
 \usage{
-detrend(.data)
+detrend(.data, silent = TRUE)
 }
 \arguments{
 \item{.data}{A data.frame containing variable 'Time' as the first column and
 a second-column from which to remove the mean and trend.}
+
+\item{silent}{Prints mean and trend only if set FALSE. Default is TRUE.}
 }
 \value{
 A modified version of data[, 2] only, with mean and trend removed.
