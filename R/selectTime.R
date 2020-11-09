@@ -42,14 +42,14 @@ transferAttributes <- function (d, dsub) {
   ## d is the original, which is not modified.
   for (nm in names (ds)) {
     var <- sprintf ("d$%s", nm)
-    A <- attributes (eval (parse (text=var)))
+    A <- attributes (eval (parse (text = var)))
     if (!grepl ('Time', nm)) {
       A$dim[1] <- nrow(ds)
       A$class <- NULL
     } else {
       A$dim <- nrow (ds)
     }
-    attributes (ds[,nm]) <- A
+    attributes (ds[, nm]) <- A
   }
   A <- attributes (d)
   if ('dim' %in% names(A)) {
