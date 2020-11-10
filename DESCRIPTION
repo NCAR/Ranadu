@@ -90,6 +90,7 @@ Collate:
     'blankNA.R'
     'calcATTACK.R'
     'contourPlot.R'
+    'correctT.R'
     'df2tibble.R'
     'flux.R'
     'getNetCDF.R'

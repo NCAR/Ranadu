@@ -27,10 +27,9 @@ For this routine to work effectively, the data.frame should be produced by a cal
 because that function also assigns attributes to the data.frame and to the variables it
 contains that match those in the original netCDF file. This function extracts those
 attributes and adds them to the netCDF file that is created. Note that, when subsetting,
-it will be necessary to preserve the attributes; see help for getNetCDF. The code
-includes an inactive function transferAttributes() for this purpose. At present, this
-will work for low-rate and 25-Hz variables but not for multi-dimensional variables like
-the hydrometeor size distributions.
+it will be necessary to preserve the attributes; see help for getNetCDF. 
+At present, this will work for low-rate and 25-Hz variables but not for 
+multi-dimensional variables like hydrometeor size distributions.
 }
 \examples{
 makeNetCDF (RAFdata, "RAFdata.nc")
