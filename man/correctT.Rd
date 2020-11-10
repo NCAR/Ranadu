@@ -3,6 +3,9 @@
 \name{correctT}
 \alias{correctT}
 \title{correctT}
+\usage{
+correctT(.data)
+}
 \arguments{
 \item{.data}{A data.frame containing measurements of air temperature and
 also airspeed (TASX), Mach Number (either MACHX or XMACH2), ambient pressure
@@ -26,9 +29,6 @@ NSF/NCAR GV and C-130, either unheated Rosemount sensors or heated HARCO
 sensors, and it depends on conventional attributes in the NCAR/EOL/RAF
 netCDF files to determine how to handle each sensor. The supplied data.frame 
 must contain additional variables as specified for the first parameter below.
-}
-\examples{
-DFC <- correctT (RAFdata)
 }
 \author{
 William Cooper
