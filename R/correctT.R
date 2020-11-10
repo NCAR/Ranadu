@@ -1,3 +1,5 @@
+## correct temperatures
+#' @name  correctT
 #' @title correctT
 #' @description Calculate time-response-corrected and dynamic-heating-filtered
 #' temperature variables for each temperature measurement in a supplied data.frame.
@@ -11,7 +13,7 @@
 #' @author William Cooper
 #' @export correctT
 #' @importFrom zoo na.approx
-#' @importFrom signal filter, filtfilt, butter
+#' @importFrom signal filter filtfilt butter
 #' @param .data A data.frame containing measurements of air temperature and
 #' also airspeed (TASX), Mach Number (either MACHX or XMACH2), ambient pressure
 #' (PSXC) and water vapor pressure (either EWX or EDPC),
@@ -23,12 +25,11 @@
 #' DFC <- correctT (RAFdata)
 ## Using this script: from a unix shell:
 
-require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
-# needed packages
-library(zoo)
-require(signal)
-load(file='inst/ARF.Rdata')    ## the filters
-load(file='inst/PAR.Rdata')    ## the response parameters
+# require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
+# # needed packages
+# library(zoo)
+# require(signal)
+
 # 
 # print (sprintf ('run parameters: Project = %s, Flight = %s, FFT = %s RTN = %s UH1 = %s',
 #                 Project, Flight, FFT, RTN, UH1))
@@ -239,6 +240,10 @@ addFFTsoln <- function(D, RV, responsePar) {
 }
 
 correctT <- function(.data) {
+  load(file = paste(path.package("Ranadu"), "ARF.Rdata", sep='/'))
+  load(file = paste(path.package("Ranadu"), "PAR.Rdata", sep='/'))
+  # load(file='inst/ARF.Rdata')    ## the filters
+  # load(file='inst/PAR.Rdata')    ## the response parameters
   ## Find the available air_temperature variables:
   Rate <- attr(.data, 'Rate')
   nms <- names(.data)
