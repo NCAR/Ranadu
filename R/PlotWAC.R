@@ -242,4 +242,3 @@ lineWAC <- function (x, y, col="blue", lwd=2, type='l', ...) {
   
   lines(x, y, lwd=lwd, col=col, ...)
 }
-
