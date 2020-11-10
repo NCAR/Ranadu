@@ -27,8 +27,8 @@ require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
 # needed packages
 library(zoo)
 require(signal)
-load(file='../SensibleHeatFlux/ARF.Rdata')    ## the filters
-load(file='../SensibleHeatFlux/PAR.Rdata')  ## the response parameters
+load(file='inst/ARF.Rdata')    ## the filters
+load(file='inst/PAR.Rdata')    ## the response parameters
 # 
 # print (sprintf ('run parameters: Project = %s, Flight = %s, FFT = %s RTN = %s UH1 = %s',
 #                 Project, Flight, FFT, RTN, UH1))
