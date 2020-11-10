@@ -1,3 +1,5 @@
+## correct temperatures
+#' @name  correctT
 #' @title correctT
 #' @description Calculate time-response-corrected and dynamic-heating-filtered
 #' temperature variables for each temperature measurement in a supplied data.frame.
@@ -11,7 +13,7 @@
 #' @author William Cooper
 #' @export correctT
 #' @importFrom zoo na.approx
-#' @importFrom signal filter, filtfilt, butter
+#' @importFrom signal filter filtfilt butter
 #' @param .data A data.frame containing measurements of air temperature and
 #' also airspeed (TASX), Mach Number (either MACHX or XMACH2), ambient pressure
 #' (PSXC) and water vapor pressure (either EWX or EDPC),
@@ -19,16 +21,196 @@
 #' correction for time response (added with suffix "C") and replacement of the
 #' conventional dynamic-heating correction by a version filtered to match
 #' the time response of the sensor (added with suffix "F").
-#' @examples 
-#' DFC <- correctT (RAFdata)
-## Using this script: from a unix shell:
+#' 
 
-require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
-# needed packages
-library(zoo)
-require(signal)
-load(file='../SensibleHeatFlux/ARF.Rdata')    ## the filters
-load(file='../SensibleHeatFlux/PAR.Rdata')  ## the response parameters
+correctT <- function(.data) {
+  load(file = paste(path.package("Ranadu"), "ARF.Rdata", sep='/'), .GlobalEnv)
+  load(file = paste(path.package("Ranadu"), "PAR.Rdata", sep='/'), .GlobalEnv)
+  # load(file='inst/ARF.Rdata')    ## the filters
+  # load(file='inst/PAR.Rdata')    ## the response parameters
+  ## Find the available air_temperature variables:
+  Rate <- attr(.data, 'Rate')
+  nms <- names(.data)
+  TVARS <- vector()
+  for (nm in nms) {
+    measurand <- attr(.data[, nm], 'measurand')
+    if (!(is.null(measurand)) && grepl('air_temp', measurand)) {
+      ## Omit unheated sensor if 1-Hz?
+      lna <- attr(.data[, nm], 'long_name')
+      if (Rate == 25 || !(grepl('nheated', lna) || grepl('^ATR', nm))) {
+        TVARS <- c(TVARS, nm)
+      }
+    }
+  }
+  TVARS <- TVARS[-which ('ATX' == TVARS)]  # don't include ATX, AT_A, AT_A2
+  if ('AT_A' %in% TVARS) {TVARS <- TVARS[-which('AT_A' == TVARS)]}
+  if ('AT_A2' %in% TVARS) {TVARS <- TVARS[-which('AT_A2' == TVARS)]}
+  if ('AT_VXL' %in% TVARS) {TVARS <- TVARS[-which('AT_VXL' == TVARS)]}
+  if ('AT_VXL2' %in% TVARS) {TVARS <- TVARS[-which('AT_VXL2' == TVARS)]}
+  if ('OAT' %in% TVARS) {TVARS <- TVARS[-which('OAT' == TVARS)]} #omit Ophir T
+  RVARS <- sub('^A', 'R', TVARS)
+  ## get the old netCDF variables needed to calculate the modified variables
+  VarList <- standardVariables(TVARS)
+  ## Treat case, in some old projects, where EWX and MACHX are not present:
+  if (!('EWX' %in% nms)) {
+    VarList <- VarList[-which('EWX' == VarList)]
+    VarList <- c(VarList, 'EDPC')
+  }
+  if (!('MACHX' %in% nms)) {
+    VarList <- VarList[-which('MACHX' == VarList)]
+    VarList <- c(VarList, 'XMACH2')
+  }
+  if (!('GGALT' %in% nms)) {
+    VarList <- VarList[-which('GGALT' == VarList)]
+    VarList <- c(VarList, 'GGALT_NTL')
+  }
+  ## Add the recovery temperatures if present; otherwise recalculate:
+  RVS <- RVARS[RVARS %in% nms]
+  ## The next lines deal with the case where, for a 25-Hz file, the recovery 
+  ## temperature is present only at 1-Hz rate (e.g., WECANrf08h.nc)
+  if (length(RVS) > 0) {
+    if (Rate == 25) {
+      for (RV in RVS) {  ## only add if present at 25 Hz in netCDF file
+        if (attr(.data[, RV], 'Dimensions')[[1]] == 'sps25') {
+          VarList <- c(VarList, RV)
+        }
+      }
+    } else {
+      VarList <- c(VarList, RVS)
+    }
+  }
+  if ('EDPC' %in% VarList) {
+    .data$EWX <- .data$EDPC
+  }
+  if ('XMACH2' %in% VarList) {
+    .data$MACHX <- sqrt(.data$XMACH2)
+  }
+  if ('GGALT_NTL' %in% VarList) {
+    .data$GGALT <- .data$GGALT_NTL
+  }
+  
+  ## Calculate the new variables:
+  E <- SmoothInterp(.data$EWX / .data$PSXC, .Length = 0)
+  .data$Cp <- SpecificHeats (E)[, 1]
+  .data$DH <- .data$TASX^2 / (2 * .data$Cp)
+  ## Recalculate recovery temperatures if missing:
+  retrievedRVARS <- rep(FALSE, length(RVARS))
+  for (RV in RVARS) {
+    if(!(RV %in% VarList)) {
+      TV <- sub('^R', 'A', RV)
+      prb <- 'HARCO'
+      if (TV == 'ATH2') {prb <- 'HARCOB'}
+      if (grepl('ATF', TV) || grepl('ATR', TV)) {prb <- 'UNHEATED'}
+      retrievedRVARS[which(RV == RVARS)] <- TRUE
+      .data[, RV] <- SmoothInterp(.data[, TV] + RecoveryFactor(.data$MACHX, prb) * .data$DH, .Length = 0)
+      ## modify the attributes for saving in the new file:
+      attr(.data[, RV], 'long_name') <- paste0("Recovery Air Temperature, ", prb)
+      attr(.data[, RV], 'standard_name') <- NULL
+      attr(.data[, RV], 'actual_range') <- NULL
+      attr(.data[, RV], 'Dependencies') <- NULL
+      attr(.data[, RV], 'measurand') <- "recovery_temperature"
+      attr(.data[, RV], 'label') <- paste0("recovery temperature (", RV, ") [deg C]")
+      attr(.data[, RV], 'RecoveryFactor') <- NULL
+      attr(.data[, RV], 'DataQuality') <- "Reconstructed"
+    }
+  }
+  platform <- attr(.data, 'Platform')
+  platform <- ifelse (grepl('677', platform), 'GV', 'C130')
+  # filter DH:
+  CutoffPeriod <- rep(Rate * 1.0, length(TVARS)) # Standard is 1 s for DH filtering
+  probe <- rep('HARCO', length(TVARS))  # used to determine the recovery factor
+  PAR <- list()
+  if (length(TVARS) > 0) {
+    for (i in 1:length(TVARS)) {
+      PAR[[length(PAR) + 1]] <- ParamSH
+    }
+  }
+  # check for ATF or ATR
+  ic <- which(grepl('ATF', TVARS))
+  if (length(ic) > 0) {
+    CutoffPeriod[ic] <- Rate * 0.5  # 0.5 s for ATFx
+    probe[ic] <- 'UNHEATED'
+    if (platform == 'GV') {
+      PAR[[ic]] <- ParamSF
+    } else {
+      PAR[[ic]] <- Param1
+    }
+  }
+  ic <- which(grepl('ATR', TVARS))  ## old naming convention (e.g., FRAPPE)
+  if (length(ic) > 0) {
+    CutoffPeriod[ic] <- Rate * 0.5  # 0.5 s for ATFx
+    probe[ic] <- 'UNHEATED'
+    for (icc in ic) {
+      if (platform == 'GV') {
+        PAR[[icc]] <- ParamSF
+      } else {
+        PAR[[icc]] <- Param1
+      }
+    }
+  }
+  ic <- which(grepl('ATH.*2', TVARS))  ## .* allows for names like ATHL2
+  if (length(ic) > 0) {
+    probe[ic] <- 'HARCOB'
+    PAR[[ic]] <- ParamSH
+  }
+  if (Rate == 1) {  # Protection against script failure for a LRT file
+    CutoffPeriod[CutoffPeriod == 1] <- 2.2
+    CutoffPeriod[CutoffPeriod == 0.5] <- 2.2
+  }
+  
+  DHM <- rep(.data$DH, length(TVARS))
+  dim(DHM) <- c(length(.data$DH), length(TVARS))
+  newTVARS <- paste0(TVARS, 'C')
+  newRVARS <- paste0(RVARS, 'C')
+  newRVARS2 <- paste0(RVARS, 'C2')
+  newTVARS2 <- paste0(TVARS, 'C2')
+  filteredTVARS <- paste0(TVARS, 'F')
+  for (i in 1:length(TVARS)) {
+    .data[, filteredTVARS[i]] <- correctDynamicHeating(.data, as.character(TVARS[i]))
+  }
+  
+  ## Calculate the corrected temperatures:
+  for (i in 1:length(TVARS)) {
+    .data[, newTVARS[i]] <- correctTemperature(.data, filteredTVARS[i], responsePar = PAR[[i]])
+    .data[, newRVARS[i]] <- correctTemperature(.data, RVARS[i], responsePar = PAR[[i]])
+    # if (FFT) {
+    #   .data[, newRVARS2[i]] <- addFFTsoln(.data, RVARS[i], responsePar = PAR[[i]])
+    # }
+    # get the recovery factor from the attribute:
+    rf <- recoveryF(.data, TVARS[[i]])
+    # Is the associated recovery temperature present?
+    dep <- attr(.data[, TVARS[i]], 'Dependencies')
+    RT <- gsub(' .*', '', gsub('^. ', '', dep))
+    # Get the dynamic-heating correction:
+    if ('EWX' %in% names(.data)) {
+      ER <- SmoothInterp(.data$EWX / .data$PSXC, .Length = 0)
+      CP <- SpecificHeats(ER)
+    } else {
+      CP <- SpecificHeats()
+    }
+    if (RT %in% VarList) {
+      X <- rf * .data$MACHX^2 * CP[, 3] / (2 * CP[, 2])
+      Q <- (273.15 + .data[, RT]) * X / (1 + X)
+    } else {
+      Q <- rf * .data$TASX^2 / 2010
+    }
+    # Interpolate to avoid missing values
+    Q <- SmoothInterp(Q, .Length = 0)
+    ## This should be the same as newTVARS except for numerical effects
+    # .data[, newTVARS2[i]] <- .data[, newRVARS[i]] - Q  ## using diff.eq.
+    # if (FFT) {
+    #   .data[, newTVARS2[i]] <- .data[, newRVARS2[i]] - Q  ## using FFT
+    # }
+  }
+  return(.data)
+}
+
+
+# require(Ranadu, quietly = TRUE, warn.conflicts=FALSE)
+# # needed packages
+# library(zoo)
+# require(signal)
+
 # 
 # print (sprintf ('run parameters: Project = %s, Flight = %s, FFT = %s RTN = %s UH1 = %s',
 #                 Project, Flight, FFT, RTN, UH1))
@@ -238,180 +420,3 @@ addFFTsoln <- function(D, RV, responsePar) {
   return(rvc)
 }
 
-correctT <- function(.data) {
-  ## Find the available air_temperature variables:
-  Rate <- attr(.data, 'Rate')
-  nms <- names(.data)
-  TVARS <- vector()
-  for (nm in nms) {
-    measurand <- attr(.data[, nm], 'measurand')
-    if (!(is.null(measurand)) && grepl('air_temp', measurand)) {
-      ## Omit unheated sensor if 1-Hz?
-      lna <- attr(.data[, nm], 'long_name')
-      if (Rate == 25 || !(grepl('nheated', lna) || grepl('^ATR', nm))) {
-        TVARS <- c(TVARS, nm)
-      }
-    }
-  }
-  TVARS <- TVARS[-which ('ATX' == TVARS)]  # don't include ATX, AT_A, AT_A2
-  if ('AT_A' %in% TVARS) {TVARS <- TVARS[-which('AT_A' == TVARS)]}
-  if ('AT_A2' %in% TVARS) {TVARS <- TVARS[-which('AT_A2' == TVARS)]}
-  if ('AT_VXL' %in% TVARS) {TVARS <- TVARS[-which('AT_VXL' == TVARS)]}
-  if ('AT_VXL2' %in% TVARS) {TVARS <- TVARS[-which('AT_VXL2' == TVARS)]}
-  if ('OAT' %in% TVARS) {TVARS <- TVARS[-which('OAT' == TVARS)]} #omit Ophir T
-  RVARS <- sub('^A', 'R', TVARS)
-  ## get the old netCDF variables needed to calculate the modified variables
-  VarList <- standardVariables(TVARS)
-  ## Treat case, in some old projects, where EWX and MACHX are not present:
-  if (!('EWX' %in% nms)) {
-    VarList <- VarList[-which('EWX' == VarList)]
-    VarList <- c(VarList, 'EDPC')
-  }
-  if (!('MACHX' %in% nms)) {
-    VarList <- VarList[-which('MACHX' == VarList)]
-    VarList <- c(VarList, 'XMACH2')
-  }
-  if (!('GGALT' %in% nms)) {
-    VarList <- VarList[-which('GGALT' == VarList)]
-    VarList <- c(VarList, 'GGALT_NTL')
-  }
-  ## Add the recovery temperatures if present; otherwise recalculate:
-  RVS <- RVARS[RVARS %in% nms]
-  ## The next lines deal with the case where, for a 25-Hz file, the recovery 
-  ## temperature is present only at 1-Hz rate (e.g., WECANrf08h.nc)
-  if (length(RVS) > 0) {
-    if (Rate == 25) {
-      for (RV in RVS) {  ## only add if present at 25 Hz in netCDF file
-        if (attr(.data[, RV], 'Dimensions')[[1]] == 'sps25') {
-          VarList <- c(VarList, RV)
-        }
-      }
-    } else {
-      VarList <- c(VarList, RVS)
-    }
-  }
-  if ('EDPC' %in% VarList) {
-    .data$EWX <- .data$EDPC
-  }
-  if ('XMACH2' %in% VarList) {
-    .data$MACHX <- sqrt(.data$XMACH2)
-  }
-  if ('GGALT_NTL' %in% VarList) {
-    .data$GGALT <- .data$GGALT_NTL
-  }
-
-  ## Calculate the new variables:
-  E <- SmoothInterp(.data$EWX / .data$PSXC, .Length = 0)
-  .data$Cp <- SpecificHeats (E)[, 1]
-  .data$DH <- .data$TASX^2 / (2 * .data$Cp)
-  ## Recalculate recovery temperatures if missing:
-  retrievedRVARS <- rep(FALSE, length(RVARS))
-  for (RV in RVARS) {
-    if(!(RV %in% VarList)) {
-      TV <- sub('^R', 'A', RV)
-      prb <- 'HARCO'
-      if (TV == 'ATH2') {prb <- 'HARCOB'}
-      if (grepl('ATF', TV) || grepl('ATR', TV)) {prb <- 'UNHEATED'}
-      retrievedRVARS[which(RV == RVARS)] <- TRUE
-      .data[, RV] <- SmoothInterp(.data[, TV] + RecoveryFactor(.data$MACHX, prb) * .data$DH, .Length = 0)
-      ## modify the attributes for saving in the new file:
-      attr(.data[, RV], 'long_name') <- paste0("Recovery Air Temperature, ", prb)
-      attr(.data[, RV], 'standard_name') <- NULL
-      attr(.data[, RV], 'actual_range') <- NULL
-      attr(.data[, RV], 'Dependencies') <- NULL
-      attr(.data[, RV], 'measurand') <- "recovery_temperature"
-      attr(.data[, RV], 'label') <- paste0("recovery temperature (", RV, ") [deg C]")
-      attr(.data[, RV], 'RecoveryFactor') <- NULL
-      attr(.data[, RV], 'DataQuality') <- "Reconstructed"
-    }
-  }
-  platform <- attr(.data, 'Platform')
-  platform <- ifelse (grepl('677', platform), 'GV', 'C130')
-  # filter DH:
-  CutoffPeriod <- rep(Rate * 1.0, length(TVARS)) # Standard is 1 s for DH filtering
-  probe <- rep('HARCO', length(TVARS))  # used to determine the recovery factor
-  PAR <- list()
-  if (length(TVARS) > 0) {
-    for (i in 1:length(TVARS)) {
-      PAR[[length(PAR) + 1]] <- ParamSH
-    }
-  }
-  # check for ATF or ATR
-  ic <- which(grepl('ATF', TVARS))
-  if (length(ic) > 0) {
-    CutoffPeriod[ic] <- Rate * 0.5  # 0.5 s for ATFx
-    probe[ic] <- 'UNHEATED'
-    if (platform == 'GV') {
-      PAR[[ic]] <- ParamSF
-    } else {
-      PAR[[ic]] <- Param1
-    }
-  }
-  ic <- which(grepl('ATR', TVARS))  ## old naming convention (e.g., FRAPPE)
-  if (length(ic) > 0) {
-    CutoffPeriod[ic] <- Rate * 0.5  # 0.5 s for ATFx
-    probe[ic] <- 'UNHEATED'
-    for (icc in ic) {
-      if (platform == 'GV') {
-        PAR[[icc]] <- ParamSF
-      } else {
-        PAR[[icc]] <- Param1
-      }
-    }
-  }
-  ic <- which(grepl('ATH.*2', TVARS))  ## .* allows for names like ATHL2
-  if (length(ic) > 0) {
-    probe[ic] <- 'HARCOB'
-    PAR[[ic]] <- ParamSH
-  }
-  if (Rate == 1) {  # Protection against script failure for a LRT file
-    CutoffPeriod[CutoffPeriod == 1] <- 2.2
-    CutoffPeriod[CutoffPeriod == 0.5] <- 2.2
-  }
-  
-  DHM <- rep(.data$DH, length(TVARS))
-  dim(DHM) <- c(length(.data$DH), length(TVARS))
-  newTVARS <- paste0(TVARS, 'C')
-  newRVARS <- paste0(RVARS, 'C')
-  newRVARS2 <- paste0(RVARS, 'C2')
-  newTVARS2 <- paste0(TVARS, 'C2')
-  filteredTVARS <- paste0(TVARS, 'F')
-  for (i in 1:length(TVARS)) {
-    .data[, filteredTVARS[i]] <- correctDynamicHeating(.data, as.character(TVARS[i]))
-  }
-  
-  ## Calculate the corrected temperatures:
-  for (i in 1:length(TVARS)) {
-    .data[, newTVARS[i]] <- correctTemperature(.data, filteredTVARS[i], responsePar = PAR[[i]])
-    .data[, newRVARS[i]] <- correctTemperature(.data, RVARS[i], responsePar = PAR[[i]])
-    # if (FFT) {
-    #   .data[, newRVARS2[i]] <- addFFTsoln(.data, RVARS[i], responsePar = PAR[[i]])
-    # }
-    # get the recovery factor from the attribute:
-    rf <- recoveryF(.data, TVARS[[i]])
-    # Is the associated recovery temperature present?
-    dep <- attr(.data[, TVARS[i]], 'Dependencies')
-    RT <- gsub(' .*', '', gsub('^. ', '', dep))
-    # Get the dynamic-heating correction:
-    if ('EWX' %in% names(.data)) {
-      ER <- SmoothInterp(.data$EWX / .data$PSXC, .Length = 0)
-      CP <- SpecificHeats(ER)
-    } else {
-      CP <- SpecificHeats()
-    }
-    if (RT %in% VarList) {
-      X <- rf * .data$MACHX^2 * CP[, 3] / (2 * CP[, 2])
-      Q <- (273.15 + .data[, RT]) * X / (1 + X)
-    } else {
-      Q <- rf * .data$TASX^2 / 2010
-    }
-    # Interpolate to avoid missing values
-    Q <- SmoothInterp(Q, .Length = 0)
-    ## This should be the same as newTVARS except for numerical effects
-    # .data[, newTVARS2[i]] <- .data[, newRVARS[i]] - Q  ## using diff.eq.
-    # if (FFT) {
-    #   .data[, newTVARS2[i]] <- .data[, newRVARS2[i]] - Q  ## using FFT
-    # }
-  }
-  return(.data)
-}
