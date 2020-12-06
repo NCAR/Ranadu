@@ -52,7 +52,7 @@ getStartEnd <- function (Time) {
   Tlt <- as.POSIXlt (Time[1], tz="UTC", origin="1970-01-01")
   StartTime = Tlt$hour*10000 + Tlt$min*100 + Tlt$sec
   Tlt <- as.POSIXlt (Time[length(Time)], tz="UTC", origin="1970-01-01")
-  EndTime = Tlt$hour*10000 + Tlt$min*100 + Tlt$sec
+  EndTime = Tlt$hour*10000 + Tlt$min*100 + trunc(Tlt$sec)
   return (c(StartTime, EndTime))
 }
 
