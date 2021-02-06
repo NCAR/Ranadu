@@ -127,7 +127,7 @@ BoltonEquivalentPotentialTemperature <- function (P, AT, E=0) {
 VirtualTemperature <- function (AT, r) {
 # Virtual Temperature, fn of AT (degC), r (mixing ratio
 # in dimensionless units, kg/kg)
-  Tvir <- (AT+TZERO)*((1.+(StandardConstant("MWD")/StandardConstant("MWW")*r)/(1.+r)))-TZERO
+  Tvir <- (AT+TZERO)*((1. + r * StandardConstant("MWD") / StandardConstant("MWW")) / (1 + r)) - TZERO
   return (Tvir)
 }
 

@@ -16,6 +16,7 @@ library(grid)
 library(XML)
 library(tcltk)
 library(scales)
+library(ggthemes)
 library(allanvar)
 
 ## temporary
@@ -23,7 +24,7 @@ library(allanvar)
 
 # source ('R/plotTrack.R')
 # source ('R/PlotWAC.R')
-source ('R/getNetCDF.R')
+# source ('R/getNetCDF.R')
 # source ('R/makeNetCDF.R')
 # source ('R/setVariableList.R')
 # source ('R/CAPE.R')
@@ -39,7 +40,7 @@ xVarList <- standardVariables()
 ## assemble a list of projects for which an appropriately named rf01
 ## exists in the data directory:
 
-PJ <- c('ECLIPSE2019', 'OTREC-TEST', 'WECAN', 'SOCRATES', 'WECAN-TEST', 'ARISTO2017', 'ECLIPSE', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER', 'NOMADSS',
+PJ <- c('WCR-TEST', 'ECLIPSE2019', 'OTREC-TEST', 'WECAN', 'SOCRATES', 'WECAN-TEST', 'ARISTO2017', 'ECLIPSE', 'ORCAS', 'CSET', 'NOREASTER', 'HCRTEST', 'WINTER', 'NOMADSS',
   'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
   'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
   'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')
