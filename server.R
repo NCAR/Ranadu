@@ -1898,7 +1898,7 @@ shinyServer(function(input, output, session) {
           TatEnd <- D$Time[ix[length(ix)]]
           DS <- D
           D <- D[D$Time >= TatStart & D$Time <= TatEnd, ]
-          D <- transferAttributes (D, DS)
+          D <- transferAttributes (DS, D)
           rm (DS)
         }
         if (fname != fname.last) {
@@ -1952,7 +1952,7 @@ shinyServer(function(input, output, session) {
         } else {
           DS <- D
           D <- cbind (D, SD)
-          D <- transferAttributes (D, DS)
+          D <- transferAttributes (DS, D)
           rm(DS)
         }
       }
@@ -1960,7 +1960,7 @@ shinyServer(function(input, output, session) {
       NMD <- names(D)
       if (length(unique(NMD)) < length(NMD)) {
         DS <- D[, NMD]
-        D <- transferAttributes (DS, D)
+        D <- transferAttributes (D, DS)
         rm (DS)
       }
       if (exists ('specialData')) {
@@ -2610,7 +2610,7 @@ shinyServer(function(input, output, session) {
     input$addcdf
     DT <- data ()
     Data <- DT[DT$Time > times[1] & DT$Time < times[2], ]
-    Data <- transferAttributes (Data, DT)
+    Data <- transferAttributes (DT, Data)
     print (c('in Data:', sort(names(Data))))
     nms <- names (Data)
     op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
@@ -2846,7 +2846,7 @@ shinyServer(function(input, output, session) {
     print (sprintf ('before time limits, nrow(DataR)=%d', nrow(Data)))
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
     print (sprintf ('nrow(DataR)=%d, start %s end %s', nrow(DataR), getStartEnd(DataR)[1], getStartEnd(DataR)[2]))
-    DataR <- transferAttributes (DataR, Data)
+    DataR <- transferAttributes (Data, DataR)
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Variance[[input$plot]]$restrict)
     ndv <- names (DataV)
