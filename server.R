@@ -2902,6 +2902,9 @@ shinyServer(function(input, output, session) {
     if (grepl('fft', input$spectype) && exists ('FFTPlot.png')) {
       unlink ("FFTPlot.png")
     }
+    if (!(dir.exists('SpecialGraphics'))) {
+      dir.create('SpecialGraphics')
+    }
     if (input$spectype == 'acv') {
       lagMax <- min(3600, nrow (data ()))
       gname <- 'SpecialGraphics/ACVPlot.png'
