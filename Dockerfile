@@ -48,7 +48,7 @@ RUN apt-get install -y --no-install-recommends \
   libnetcdf-dev \
   libtk8.6
 RUN R -e "install.packages(c('maps',\
-  'ncdf4'\
+  'ncdf4',\
   'ggplot2'))"
 RUN R -e "install.packages(c(\
   'scales',\
