@@ -24,11 +24,15 @@
 #    optionally log in to the localhost URL from another computer.)
 # 7. Specify a new project:
 #    * "File -> new project -> existing directory -> browse -> RStudio -> Ranadu -> choose -> create project
-# 8. If you want to start the Shiny app, select "global.R" from the 
+# 8. Recent changes are made to the "WAC" branch, so you may want
+#    to select that branch. Select "git" in the top right panel,
+#    then use the dropdown-menu button right of "master" to change
+#    to "WAC".
+# 9. If you want to start the Shiny app, select "global.R" from the 
 #    "Files" option at the bottom right panel, then click "Run App"
 # --> NOTE: any changes you make to the source routines will be lost
 #           when the container stops, so read "docker" documentation
-#           for ways to avoid this.
+#           for ways to avoid this and save your work.
 FROM rocker/r-ver:4.0.4
 
 LABEL org.label-schema.license="GPL-2.0" \
