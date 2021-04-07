@@ -33,7 +33,7 @@ library(allanvar)
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
 Trace <- FALSE
-Trace <- TRUE
+# Trace <- TRUE
 load ('inst/InputDF.Rdata')
 xVarList <- standardVariables()
 
@@ -353,7 +353,7 @@ specialVar <- function (D) {
   ACINS <- zoo::na.approx (as.vector(D$ACINS), maxgap=10000, na.rm=FALSE)
   ACINS[is.na(ACINS)] <- 0
   WPSTAR <- cumsum(ACINS)
-  print (summary(WPSTAR))
+  if(Trace) {print (summary(WPSTAR))}
   DIF <- zoo::na.approx (as.vector(WPPRIME-WPSTAR), maxgap=10000, na.rm=FALSE)
   DIF[is.na(DIF)] <- 0
   DIF <<- DIF
