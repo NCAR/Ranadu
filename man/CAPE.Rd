@@ -18,24 +18,26 @@ respective substitutes 'PSXC', 'ATX', and 'DPXC' and will use those instead if t
 are found. If neither set of veriables is found, the function fails.}
 
 \item{nbins}{An integer representing the number of bins into which the sounding
-will be partitioned in pressure. The default is 50.}
+will be partitioned in pressure. The default is 50. A value of 250 provides
+better resolution and is preferable if values like LWC or updraft are to be used.}
 
 \item{player}{A numeric variable specifying the depth in hPa over which to
 average the lowest layer in the sounding for calculation of the LCL. The default
 is 50.}
 }
 \value{
-The supplied data.frame with the addition of six columns, for which
+The supplied data.frame with the addition of eight columns, for which
 all pressure values in the original sounding will have corresponding values 
 for each of these variables: (1) TP: the
 temperature for pseudo-adiabatic ascent above or dry-adiabatic descent below the 
 LCL; (2) TPV: the virtual temperature corresponding to TP; (3) TQ the temperature 
 for wet-adiabatic ascent above the LCL or
-dry-adiabatic descent below the LCL; (4) TQV the virtual temperature corresonding
+dry-adiabatic descent below the LCL; (4) TQV the virtual temperature corresponding
 to TPV, for which the weight of condensed liquid water is accounted for in the
 calculation; (5) TVIR: the virtual temperature of the
-original sounding, used for the calculation of buoyancy; and (6) LWC: the profile of
-condensed liquid water content [g/m^3] for reversible ascent.
+original sounding, used for the calculation of buoyancy; (6) LWC: the profile of
+condensed liquid water content [g/m^3] for reversible ascent; (7) W: the updraft
+profile; and {8} WQ, the updraft profile for reversible wet-adiabatic ascent.
 The function also adds some attributes to the
 data.frame: LCL (lifted condensation level) pressure and temperature (attribute
 names 'LCLp' and LCLt' in respective units of hPa and deg.C), the peak LWC

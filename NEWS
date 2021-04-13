@@ -1,5 +1,12 @@
+Version 2.6-21-4-5
   Additions:
+    Dockerfile              -- instructions to build docker container
     getRData.R              -- interactively select a data file and variables
+  Updates:
+    server.R                -- fixed some transferAttributes() calls
+                            -- now creates "SpecialGraphics" directory if absent
+    CAPE.R                  -- added capability to return updraft profiles
+    PotentialTemperatures.R -- corrected coding error affecting virtual temp.
 Version 2.6-20-10-10
   Additions:
     histWAC.R               -- plot histogram with added cumulative d.f.

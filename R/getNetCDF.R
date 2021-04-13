@@ -298,7 +298,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       inputRate <- dim(X)[2]
       CC <- vector ('numeric', Bins*Rate*dim(X)[3])
       dim(CC) <- c(Bins, dim(X)[3] * Rate)
-      for (j in 2:(Bins)) {
+      for (j in 2:(Bins+1)) {
         Y <- IntFilter (X[j, , ], inputRate, Rate)
         CC[j-1,] <- Y
       }
@@ -309,13 +309,13 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         inputRate <- 1
         CC <- vector('numeric', Bins*Rate*dim(X)[2])
         dim(CC) <- c(Bins, Rate*dim(X)[2])
-        for (j in 2:(Bins)) {
+        for (j in 2:(Bins+1)) {
           Y <- IntFilter (X[j, ], inputRate, Rate)
           CC[j-1,] <- Y
         }
         XN <- t(CC)
       } else {
-        CC <- X[2:(Bins),]
+        CC <- X[2:(Bins+1),]
         XN <- t(CC)
       }
     } else {
@@ -324,7 +324,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       CC <- vector('numeric', Bins*Rate*dim(X)[3])
       dim(CC) <- c(Bins, Rate*dim(X)[3])
       dim(X) <- c(Bins, dim(X)[2]*dim(X)[3])
-      for (j in 2:(Bins)) {
+      for (j in 2:(Bins+1)) {
 	      Y <- IntFilter (X[j, ], inputRate, Rate)
 	      CC[j-1,] <- Y
       }
