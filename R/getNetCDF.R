@@ -281,13 +281,13 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     } else { ## substitute from other attributes if available
              ## (but ACDP_ doesn't have appropriate attributes):
       if (grepl('^ACDP', V)) {
-        Bins <- 31
+        Bins <- 30
         Resln <- 2  ## placeholder
       } else {
         Resln <- ncatt_get (netCDFfile, V, "Resolution")$value
         # Bins <- ncatt_get (netCDFfile, V, "nDiodes")$value 
         # if (Bins == 64) {Bins <- 63}
-        Bins <- dim(X)[1]
+        Bins <- dim(X)[1] - 1
       }
       BinSize <- rep(Resln, Bins)
       CellLimits <- c(0, cumsum(BinSize))

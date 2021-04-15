@@ -33,7 +33,7 @@ library(allanvar)
 ## indicating which functions are entered, to trace the sequence
 ## of interactions when window entries are changed.
 Trace <- FALSE
-Trace <- TRUE
+# Trace <- TRUE
 load ('inst/InputDF.Rdata')
 xVarList <- standardVariables()
 
@@ -353,7 +353,7 @@ specialVar <- function (D) {
   ACINS <- zoo::na.approx (as.vector(D$ACINS), maxgap=10000, na.rm=FALSE)
   ACINS[is.na(ACINS)] <- 0
   WPSTAR <- cumsum(ACINS)
-  print (summary(WPSTAR))
+  if(Trace) {print (summary(WPSTAR))}
   DIF <- zoo::na.approx (as.vector(WPPRIME-WPSTAR), maxgap=10000, na.rm=FALSE)
   DIF[is.na(DIF)] <- 0
   DIF <<- DIF
@@ -743,47 +743,6 @@ if (plotSpec$Times[2] < times[2]) {times <- c(times[1], plotSpec$Times[2])}
 # Restrictions[1, 'min'] <- 130
 # Restrictions[1, 'max'] <- 300
 defFiles <- list.files(pattern = "^plotSpec")
-# transferAttributes <- function (dsub, d) {    
-#   ds <- dsub
-#   for (nm in names (ds)) {
-#     var <- sprintf ("d$%s", nm)
-#     A <- attributes (eval (parse (text=var)))
-#     A[[1]] <- nrow (ds)
-#     # print (sprintf ('transfer attributes, nm=%s, var=%s', nm, var))
-#     # print (A)
-#     if (!grepl ('Time', nm)) {
-#       A$dim <- NULL
-#       A$class <- NULL
-#     }
-#     attributes (ds[,nm]) <- A
-#   }
-#   return(ds)
-# }
-transferAttributes <- function (dsub, d) {    
-  ds <- dsub
-  ## ds and dsub are the new variables; 
-  ## d is the original with attributes
-  for (nm in names (ds)) {
-    if ((nm != 'Time') && exists ('specialData') &&  
-        (nm %in% names (specialData))) {next}
-    var <- sprintf ("d$%s", nm)
-    A <- attributes (eval (parse (text=var)))
-    if (!grepl ('Time', nm)) {
-      A$dim[1] <- nrow(ds)
-      A$class <- NULL
-    } else {
-      A$dim <- nrow (ds)
-    }
-    # print (sprintf ('tA: nm=%s, A=%s', nm, A))
-    attributes (ds[,nm]) <- A
-  }
-  A <- attributes (d)
-  A$Dimensions$Time$len <- nrow (ds)
-  A$row.names <- 1:nrow (ds)
-  A$names <- names (ds)
-  attributes (ds) <- A
-  return(ds)
-}
 
 saveRdata <- function (Data, inp) {
   print ('entered saveRdata')

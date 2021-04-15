@@ -121,7 +121,9 @@ shinyServer(function(input, output, session) {
     if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('TypeFlight: reset newdata')}
-    rm ('specialData', pos='.GlobalEnv')
+    if (exists ('specialData')) {
+      rm ('specialData', pos='.GlobalEnv')
+    }
   })
   obsTypeFlight <- observe (exprTypeFlight, quoted=TRUE)
   
@@ -136,7 +138,7 @@ shinyServer(function(input, output, session) {
     if (exists ("cfile", where=1)) {rm(cfile, pos=1)}
     isolate (reac$newdata <- reac$newdata + 1)
     if (Trace) {print ('SuffixFlight: reset newdata')}
-    rm ('specialData', pos='.GlobalEnv')
+    if (exists('specialData')) {rm ('specialData', pos='.GlobalEnv')}
   })
   obsSuffixFlight <- observe (exprSuffixFlight, quoted=TRUE)
   
@@ -175,8 +177,10 @@ shinyServer(function(input, output, session) {
     isolate (pnl <- input$panel)
     isolate (lv <- input$lineV)
     
-    print (sprintf ('lv, pnl, plt = %d %d %d adv %s', lv,pnl, plt, input$addVarP))
-    print (sprintf ('plotSpec is %s', plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]))
+    if(Trace) {
+      print (sprintf ('lv, pnl, plt = %d %d %d adv %s', lv,pnl, plt, input$addVarP))
+      print (sprintf ('plotSpec is %s', plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]))
+    }
     if ((lv <= length(plotSpec$Plot[[plt]]$panel[[pnl]]$var)) && input$addVarP != plotSpec$Plot[[plt]]$panel[[pnl]]$var[lv]) {
       isolate (reac$newdisplay <- reac$newdisplay + 1)
       if (Trace) {print ('PlotVar: reset newdisplay')}
@@ -246,7 +250,9 @@ shinyServer(function(input, output, session) {
   
   exprRefT <- quote ({
     txt <- input$RefT
-    print (sprintf (' entered RefT, checkTime=%s, RefT=%s', checkTime, txt))
+    if(Trace) {
+      print (sprintf (' entered RefT, checkTime=%s, RefT=%s', checkTime, txt))
+    }
     if ((nchar(txt) > 0) &&(!grepl('[^0-9:]', txt))) {  ## ^ means not in the list
       hhmmss <- as.integer (gsub (':', '', txt))
       i1 <- getIndex (Data, hhmmss)
@@ -422,8 +428,10 @@ shinyServer(function(input, output, session) {
   
   exprSmooth <- quote ({
     input$smooth
-    print (sprintf (' input$smooth:'))
-    print (input$smooth)
+    if(Trace) {
+      print (sprintf (' input$smooth:'))
+      print (input$smooth)
+    }
     isolate (lv <- input$lineV)
     plotSpec$Plot[[input$plot]]$panel[[input$panel]]$smooth[lv] <<- input$smooth
     isolate (reac$newdisplay <- reac$newdisplay + 1)
@@ -822,7 +830,7 @@ shinyServer(function(input, output, session) {
     plt <- isolate(input$plot)
     pnl <- isolate(input$bpanel)
     lv <- input$blineV
-    print (sprintf ('blineV: plt=%d, pnl=%d, lv=%d', plt,pnl,lv))
+    if(Trace) {print (sprintf ('blineV: plt=%d, pnl=%d, lv=%d', plt,pnl,lv))}
     if (lv <= length (plotSpec$Bin[[plt]]$panel[[pnl]]$vary)) {
       updateSelectInput (session, 'baddVarP1', selected=plotSpec$Bin[[plt]]$panel[[pnl]]$varx)
       updateSelectInput (session, 'baddVarP2', selected=plotSpec$Bin[[plt]]$panel[[pnl]]$vary[lv])
@@ -2059,8 +2067,10 @@ shinyServer(function(input, output, session) {
       if (spec$panel[[pnl]]$fixed) {yl <- spec$panel[[pnl]]$ylim}
       par(cex=1.5)
       v <- spec$panel[[pnl]]$var
-      print (sprintf('v: %s %s', v[1], v[2]))
-      print (sprintf ('smooth: %d %d', spec$panel[[pnl]]$smooth[1], spec$panel[[pnl]]$smooth[2]))
+      if(Trace) {
+        print (sprintf('v: %s %s', v[1], v[2]))
+        print (sprintf ('smooth: %d %d', spec$panel[[pnl]]$smooth[1], spec$panel[[pnl]]$smooth[2]))
+      }
       isolate (SGL <- spec$panel[[pnl]]$SGlength)
       for (i in 1:length(v)) {
         if (spec$panel[[pnl]]$smooth[i]) {
@@ -2600,7 +2610,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$sdplot <- renderPlot ({  ## CDP etc.
-    print (sprintf ('entry to sdplot, probes=%s', input$probe))
+    if(Trace) {print (sprintf ('entry to sdplot, probes=%s', input$probe))}
     Project <- plotSpec$Project
     Flight <- plotSpec$Flight
     tf <- plotSpec$TypeFlight
@@ -2611,7 +2621,7 @@ shinyServer(function(input, output, session) {
     DT <- data ()
     Data <- DT[DT$Time > times[1] & DT$Time < times[2], ]
     Data <- transferAttributes (DT, Data)
-    print (c('in Data:', sort(names(Data))))
+    if(Trace) {print (c('in Data:', sort(names(Data))))}
     nms <- names (Data)
     op <- par (mar=c(5,6,1,1)+0.1,oma=c(1.1,0,0,0))
     
@@ -2659,7 +2669,7 @@ shinyServer(function(input, output, session) {
       if (CL[length(CL)] > xhigh) {xhigh <- CL[length(CL)]}
     }
     cdf <- input$addcdf
-    print (sprintf ('cdf is %s', cdf))
+    if(Trace) {print (sprintf ('cdf is %s', cdf))}
     logxy <- ''
     if (grepl('x', input$sdtype)) {logxy <- 'x'}
     if (grepl('y', input$sdtype)) {logxy <- 'y'}
@@ -2820,7 +2830,7 @@ shinyServer(function(input, output, session) {
     input$TypeFlight
     input$times
     Project <- plotSpec$Project
-    print (sprintf ('spectype is %s', input$spectype))
+    if(Trace) {print (sprintf ('spectype is %s', input$spectype))}
     # spec <- plotSpec$Var[[input$plot]]
     if (Trace) {
       print ('varplot: entered')
@@ -2843,9 +2853,13 @@ shinyServer(function(input, output, session) {
     
     namesV <- names(Data)  
     namesV <- namesV[namesV != "Time"]
-    print (sprintf ('before time limits, nrow(DataR)=%d', nrow(Data)))
+    if(Trace) {
+      print (sprintf ('before time limits, nrow(DataR)=%d', nrow(Data)))
+    }
     DataR <- Data[(Data$Time >= plotSpec$Times[1]) & (Data$Time < plotSpec$Times[2]), ]
-    print (sprintf ('nrow(DataR)=%d, start %s end %s', nrow(DataR), getStartEnd(DataR)[1], getStartEnd(DataR)[2]))
+    if(Trace) {
+      print (sprintf ('nrow(DataR)=%d, start %s end %s', nrow(DataR), getStartEnd(DataR)[1], getStartEnd(DataR)[2]))
+    }
     DataR <- transferAttributes (Data, DataR)
     ## see global.R functions:
     DataV <- limitData (DataR, input, plotSpec$Variance[[input$plot]]$restrict)
@@ -4294,12 +4308,12 @@ shinyServer(function(input, output, session) {
           FigDatestr),1,outer=T,cex=0.75)
       }
       op <- par (mfrow=c(1,1), mar=c(5,5,2,2)+0.1,oma=c(1.1,0,0,0))
-      print (ndv)
+      # print (ndv)
       if (plotSpec$SRC == 'NCAR') {VSKT <- c('PSXC', 'ATX', 'DPXC')}
       if (plotSpec$SRC == 'UWYO') {VSKT <- c('ps_hads_a', 'trose', 'tdp')}
       if (plotSpec$SRC == 'FAAM') {VSKT <- c('SPR', 'TTDI', 'DEWP')}
-      print (VSKT)
-      print (names(Data))
+      if(Trace) {print (VSKT)}
+      # print (names(Data))
       if (input$limits6) {
         DF <- DataV[, VSKT]
       } else {
