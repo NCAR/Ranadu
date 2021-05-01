@@ -44,6 +44,16 @@ PJ <- c('WCR-TEST', 'ECLIPSE2019', 'OTREC-TEST', 'WECAN', 'SOCRATES', 'WECAN-TES
   'DEEPWAVE', 'CONTRAST', 'SPRITE-II', 'MPEX', 'DC3', 'RICO',
   'TORERO', 'HIPPO-5', 'HIPPO-4', 'HIPPO-3', 'HIPPO-2',
   'HIPPO-1','PREDICT', 'START08', 'PACDEX', 'TREX')
+### Replace this by constructing a list of available projects
+## by searching the DataDirectory(). That way a new project will
+## be incorporated automatically.
+PJ <- list.dirs(path = DataDirectory(), full.names = FALSE, recursive = FALSE)
+PJ <- PJ[-which('lost+found' == PJ)]
+## Leave in alphabetical order, except for the first which is the latest modified.
+FullPJ <- paste0(DataDirectory(), PJ)
+iw <- which.max(file.mtime(FullPJ))
+PJ <- c(PJ[iw], PJ[-iw])
+
 for (P in PJ) {
   if (grepl('HIPPO', P)) {
     fn <- sprintf ('%sHIPPO/%srf01.nc', DataDirectory (), P)
