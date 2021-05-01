@@ -274,6 +274,10 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     if (CellSizes$hasatt == TRUE) { ## arrays like A1DC_ don't have CellSizes
       CellLimits <- CellSizes$value
       Bins <- length(CellLimits)-1
+      ## For some reason there are 64 bin-limits for the PIP:
+      if((grepl('^CPIP', V)) || (grepl('^APIP', V))) {
+          Bins <- Bins - 1
+      }
       BinSize <- vector('numeric', Bins)
       for (j in 1:Bins) {
         BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
