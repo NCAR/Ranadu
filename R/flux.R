@@ -203,10 +203,14 @@ flux <- function(.data, .A, Acorrection = 0, Units = '', scaleFactor = 1, spans 
     bse$ymin[bse$ymin < ylim[1]] <- ylim[1]
     bse$yminN[bse$yminN < ylim[1]] <- ylim[1]
   }
+  if (is.data.frame(CSprevious)) {CS$oldogive <- CSprevious$ogive}
   g <- ggplot(data = CS, aes(x=freq))
   g <- g + geom_path(aes(y = cospec, colour='cospectrum', linetype='cospectrum'))
   g <- g + geom_path(aes(y = ncospec, colour='-cospectrum', linetype='-cospectrum'))
   g <- g + geom_path(aes(y = ogive, colour='exceedance', linetype='exceedance'), lwd=1.2)
+  if(is.data.frame(CSprevious)) {
+    g <- g + geom_path(aes(y=oldogive), colour='brown', linetype=2, lwd=1.2)
+  }
   if (!is.na(Par[1])) {
     g <- g + geom_path(aes(y = UCogive, colour='exceedance'), lty=2, lwd=1.2)
   }
@@ -238,7 +242,7 @@ flux <- function(.data, .A, Acorrection = 0, Units = '', scaleFactor = 1, spans 
     values=c('cospectrum'='blue', '-cospectrum'='red', 'exceedance'='brown')))
   g <- g + scale_linetype_manual (name='', values=c('cospectrum'=1, '-cospectrum'=1, 'exceedance'=1))
   g <- g + guides(col=guide_legend(reverse = TRUE), linetype=guide_legend(reverse = TRUE))
-  ttl <- bquote('Total flux '~.(format(Flux, digits=3))~.(Units)*'; partial <'*.(format((wavelengthLimit/1000), digits=2))~'km:'~.(format(FluxL, digits=3))~.(Units))
+  ttl <- bquote('Total flux '~.(format(Flux, digits=3, scientific=TRUE))~.(Units)*'; partial <'*.(format((wavelengthLimit/1000), digits=2))~'km:'~.(format(FluxL, digits=3, scientific=TRUE))~.(Units))
   if (printTitle) {
     g <- g + labs(title=ttl)
   }
