@@ -1,3 +1,6 @@
+Version 2.6-21-8-7
+  Addition:
+    wetbulbT.R              -- calculates the wet-bulb temperature
 Version 2.6-21-4-5
   Additions:
     Dockerfile              -- instructions to build docker container
