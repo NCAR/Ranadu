@@ -109,6 +109,8 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
   ## get the header information
   netCDFfile = nc_open (fname) 
   namesCDF <- names (netCDFfile$var)
+  ## Check for old-time convention:
+  oldTime <- 'base_time' %in% namesCDF
   ## check source/institution:
   ATTG <- ncatt_get (netCDFfile, 0)   # get list of global attributes
   SOURCE <- 'NCAR'
@@ -161,17 +163,26 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     cat (sprintf ("requested variable %s not in netCDF file;\n ----> getNetCDF returning with error", V))
     return (-1)
   }
+  nms <- names(netCDFfile$dim)
   if (UWYO) {
     Time <- ncvar_get (netCDFfile, 'time')
     time_units <- ncatt_get (netCDFfile, "time", "units")
+  } else if (oldTime) {  ## This is old-format without Time variable, with Time dimension
+      base_time <- ncvar_get(netCDFfile, 'base_time')
+      tref <- ncatt_get (netCDFfile, 'base_time', 'long_name')$value
+      tref <- sub('.$', '', sub('Seconds since ', '', tref))
+      if (tref == 'Jan 1, 1970') {tref <- '1970-01-01'}
+      time_offset <- ncvar_get (netCDFfile, 'time_offset')
+      Time <- time_offset + base_time
   } else {
     Time <- ncvar_get (netCDFfile, "Time")
     time_units <- ncatt_get (netCDFfile, 'Time', 'units')
+    # time_units <- ncatt_get (netCDFfile, "Time", "units")
+    tref <- sub ('seconds since ', '', time_units$value)
   }
   DL <- length (Time)
   ## set the maximum data rate (but not above 100 Hz):
   Rate <- 1
-  nms <- names(netCDFfile$dim)
   if (!UWYO) {    ## only use Rate=1 for UWYO for now
     if ("sps25" %in% nms) {Rate <- 25}
     if ("sps50" %in% nms) {Rate <- 50}
@@ -189,9 +200,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     }
     Time <- T
   }
-  # time_units <- ncatt_get (netCDFfile, "Time", "units")
-  tref <- sub ('seconds since ', '', time_units$value)
-  Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
+  Time <- as.POSIXct (as.POSIXct (tref, tz='UTC') + Time, tz='UTC')
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
   if (i1 < 0) {i1 <- 1}
@@ -212,6 +221,12 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
   ## save 'Time' attributes:
   if (UWYO) {
     ATT <- ncatt_get (netCDFfile, "time")   # get list of Time attributes
+  } else if (oldTime) {
+      tunits <- sprintf('seconds since %s', Time[1])
+      ATT <- list('long_name' = 'time of measurement',
+                  'standard_name' = 'time',
+                  'units' = tunits,
+                  'strptime_format' = 'seconds since %F %T %z')
   } else {
     ATT <- ncatt_get (netCDFfile, "Time")   # get list of Time attributes
   }
@@ -340,6 +355,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
   #################### start of processing loop ############
   for (V in VarList) {
     if (is.na(V)) {next}
+    if (V == 'base_time' || V == 'time_offset') {next}
     if (FAAM) {
       SV <- names(snames[which(V == snames)])
     } 

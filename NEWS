@@ -1,6 +1,12 @@
+Version 2.6-22-3-7
+  Updates:
+    DataFileInfo.R          -- accepts old-style Time with base_time
+    getNetCDF.R             -- accepts old-style Time with base_time
 Version 2.6-21-8-7
   Addition:
     wetbulbT.R              -- calculates the wet-bulb temperature
+  Updates:
+    flux.R                  -- minor updates to plot
 Version 2.6-21-4-5
   Additions:
     Dockerfile              -- instructions to build docker container

@@ -37,18 +37,24 @@ correctT <- function(.data) {
     if (!(is.null(measurand)) && grepl('air_temp', measurand)) {
       ## Omit unheated sensor if 1-Hz?
       lna <- attr(.data[, nm], 'long_name')
-      if (Rate == 25 || !(grepl('nheated', lna) || grepl('^ATR', nm))) {
+      # if (Rate == 25 || !(grepl('nheated', lna) || grepl('^ATR', nm))) {
         TVARS <- c(TVARS, nm)
-      }
+      # }
     }
   }
-  TVARS <- TVARS[-which ('ATX' == TVARS)]  # don't include ATX, AT_A, AT_A2
+  if ('ATX' %in% TVARS) {TVARS <- TVARS[-which ('ATX' == TVARS)]}  # don't include ATX, AT_A, AT_A2
   if ('AT_A' %in% TVARS) {TVARS <- TVARS[-which('AT_A' == TVARS)]}
   if ('AT_A2' %in% TVARS) {TVARS <- TVARS[-which('AT_A2' == TVARS)]}
   if ('AT_VXL' %in% TVARS) {TVARS <- TVARS[-which('AT_VXL' == TVARS)]}
   if ('AT_VXL2' %in% TVARS) {TVARS <- TVARS[-which('AT_VXL2' == TVARS)]}
   if ('OAT' %in% TVARS) {TVARS <- TVARS[-which('OAT' == TVARS)]} #omit Ophir T
   RVARS <- sub('^A', 'R', TVARS)
+  ## See if absent but Txxx present:
+  if (!(RVARS[1] %in% nms)) {
+      if (sub('^A', 'T', TVARS[1]) %in% nms) {
+          RVARS <- sub('^A', 'T', TVARS)
+      }
+  }
   ## get the old netCDF variables needed to calculate the modified variables
   VarList <- standardVariables(TVARS)
   ## Treat case, in some old projects, where EWX and MACHX are not present:
@@ -126,7 +132,7 @@ correctT <- function(.data) {
     }
   }
   # check for ATF or ATR
-  ic <- which(grepl('ATF', TVARS))
+  ic <- which(grepl('ATF', TVARS) & !(grepl('ATFH', TVARS)))
   if (length(ic) > 0) {
     CutoffPeriod[ic] <- Rate * 0.5  # 0.5 s for ATFx
     probe[ic] <- 'UNHEATED'
@@ -323,7 +329,7 @@ correctTemperature <- function(D, RT, responsePar =
   heated <- attr(D[, RT], 'long_name')
   heated <- ifelse(grepl('nheated', heated), FALSE, TRUE)
   ## This indication is often missing from RTFx:
-  if ((grepl('RTF', RT)) || (grepl('ATF', RT)) || (grepl('^ATR', RT)) || (grepl('^RTR', RT))) {
+  if (((grepl('RTF', RT)) && !grepl('RTFH', RT)) || ((grepl('ATF', RT)) && !grepl('ATFH', RT)) || (grepl('^ATR', RT)) || (grepl('^RTR', RT))) {
     heated <- FALSE
   }
   a <- responsePar$a

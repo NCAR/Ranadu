@@ -41,7 +41,7 @@ brown.}
 
 \item{spans}{An odd integer (or forced odd by incrementing upward if even) specifying the 
 number of frequencies to span when averaging the spectral variance estimate produced by the R routine
-"spectrom". The smoothing uses modified Daniell smoothers. This parameter can also be a vector of odd
+"spectrum". The smoothing uses modified Daniell smoothers. This parameter can also be a vector of odd
 integers, and in that case they will be applied consecutively. See help for that function for more 
 information about the nature of this averaging. The default value is 25. If spans=NULL or spans <= 4 this averaging
 is suppressed. In that case "smoothBins" below should be used because the coherence for an individual
