@@ -2,6 +2,7 @@ Version 2.6-22-3-7
   Updates:
     DataFileInfo.R          -- accepts old-style Time with base_time
     getNetCDF.R             -- accepts old-style Time with base_time
+    correctT.R              -- mods for old-style TT vs RT
 Version 2.6-21-8-7
   Addition:
     wetbulbT.R              -- calculates the wet-bulb temperature
