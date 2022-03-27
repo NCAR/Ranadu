@@ -345,17 +345,21 @@ plotSD <- function (data, CellLimits=NA, logAxis='', ucon=rep(NA, 5), col='blue'
       points(dbar, 0.5*chigh, pch=19, col='darkgreen')
       lines (c(dbar-sd, dbar+sd), rep(0.5*chigh, 2), lwd=1.6, col='darkgreen')
     }
-    if (is.na(legend.position[1])) {
-      lloc <- ifelse (LWC, 'topleft', 'topright')
+    if (!is.na(legend.position) && legend.position == 'none') {
+        
     } else {
-      lloc <- legend.position
-    }
-    if (CDF) {
-      legend(lloc, inset=0.04, legend=c(sub('_.*', '', VtoPlot), 'exceedance'), col=c(colrs[1:length(VtoPlot)], 'darkorange'), 
-        lwd=c(rep(2, length(VtoPlot)), 1.6), lty=c(rep(1, length(VtoPlot)), 2))    
-    } else {
-      legend(lloc, inset=0.04, legend=c(sub('_.*', '', VtoPlot)), col=c(colrs[1:length(VtoPlot)]), 
-        lwd=c(rep(2, length(VtoPlot))), lty=c(rep(1, length(VtoPlot))))
+      if (is.na(legend.position[1])) {
+        lloc <- ifelse (LWC, 'topleft', 'topright')
+      } else {
+        lloc <- legend.position
+      }
+      if (CDF) {
+        legend(lloc, inset=0.04, legend=c(sub('_.*', '', VtoPlot), 'exceedance'), col=c(colrs[1:length(VtoPlot)], 'darkorange'), 
+          lwd=c(rep(2, length(VtoPlot)), 1.6), lty=c(rep(1, length(VtoPlot)), 2))    
+      } else {
+        legend(lloc, inset=0.04, legend=c(sub('_.*', '', VtoPlot)), col=c(colrs[1:length(VtoPlot)]), 
+          lwd=c(rep(2, length(VtoPlot))), lty=c(rep(1, length(VtoPlot))))
+      }
     }
     if (is.na(title[1])) {
       if (LWC) {
