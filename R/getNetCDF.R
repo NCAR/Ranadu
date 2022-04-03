@@ -348,12 +348,14 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         inputRate <- 1
         CC <- vector('numeric', Bins*Rate*dim(X)[2])
         dim(CC) <- c(Bins, Rate*dim(X)[2])
+        if (Bins >= dim(X)[1]) {Bins <- dim(X)[1]-1}
         for (j in 2:(Bins+1)) {
           Y <- IntFilter (X[j, ], inputRate, Rate)
           CC[j-1,] <- Y
         }
         XN <- t(CC)
       } else {
+        if (Bins >= dim(X)[1]) {Bins <- dim(X)[1]-1}
         CC <- X[2:(Bins+1),]
         XN <- t(CC)
       }
