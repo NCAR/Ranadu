@@ -17,8 +17,8 @@
 #' @param DP A numeric representing dewpoint temperature in deg. C. 
 #' @import nleqslv
 #' @return A numeric representing the wet-bulb temperature in deg. C
-#' @example
-#' twb <- wetbulbT(800, 20, 10) # Expect 13.58
+#' @example expect 13.58
+#' twb <- wetbulbT(800, 20, 10) 
 wetbulbT <- function(P, AT, DPT) {
     twb <- function(tw) { # This function depends on P. AT and DPT 
         # (i.e., temperature [degC], pressure [hPa], dewpoint [degC]

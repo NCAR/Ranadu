@@ -35,7 +35,7 @@ addLabels <- function(.Data) {
       'deg_E', 'std cm3/s', 'C', '#/L', 'vol cm3/s', 'G'
     ),
     replacement   = c('airspeed', 'updraft', 'wind direction',
-      'temperature', 'condensation-nucleus concentration',
+      'temperature', 'aerosol-particle concentration',
       'groundspeed',
       'pressure', 'pressure altitude', 'water mixing ratio', 'dew point',
       'geopotential altitude', 'height above terrain', 'liquid water content',

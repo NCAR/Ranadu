@@ -38,7 +38,7 @@ Imports:
 Suggests:
     magrittr
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Collate: 
     'AOAfromRadome.R'
     'AdiabaticTandLWC.R'

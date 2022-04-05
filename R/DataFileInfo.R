@@ -26,6 +26,8 @@ DataFileInfo <- function (fileLocation = setFileName(), LLrange=TRUE) {
     netCDFfile <- nc_open (fileLocation)
     namesCDF <- names (netCDFfile$var)
     nms <- names(netCDFfile$dim)
+    ## Check for old-time convention:
+    oldTime <- 'base_time' %in% namesCDF
     ## check source/institution:
     ATTG <- ncatt_get (netCDFfile, 0)   # get list of global attributes
     SOURCE <- 'NCAR'
@@ -43,12 +45,19 @@ DataFileInfo <- function (fileLocation = setFileName(), LLrange=TRUE) {
         Time <- ncvar_get (netCDFfile, "time")
         time_units <- ncatt_get (netCDFfile, "time", "units")        
       }
-    } else if ('Time' %in% namesCDF || 'Time' %in% nms) {
-      Time <- ncvar_get (netCDFfile, "Time")
-      time_units <- ncatt_get (netCDFfile, "Time", "units")
-    } 
-    tref <- sub ('seconds since ', '', time_units$value)
-    Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
+    } else if (oldTime) {  ## This is old-format without Time variable, with Time dimension
+        base_time <- ncvar_get(netCDFfile, 'base_time')
+        tref <- ncatt_get (netCDFfile, 'base_time', 'long_name')$value
+        tref <- sub('.$', '', sub('Seconds since ', '', tref))
+        if (tref == 'Jan 1, 1970') {tref <- '1970-01-01'}
+        time_offset <- ncvar_get (netCDFfile, 'time_offset')
+        Time <- as.POSIXct (as.POSIXct (tref, tz='UTC') + time_offset + base_time, tz='UTC')
+    } else {
+        Time <- ncvar_get (netCDFfile, "Time")
+        time_units <- ncatt_get (netCDFfile, "Time", "units")
+        tref <- sub ('seconds since ', '', time_units$value)
+        Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
+    }
     if (LLrange) {
       if ('LATC' %in% namesCDF) {LATC <- ncvar_get (netCDFfile, "LATC")}
       if ('LONC' %in% namesCDF) {LONC <- ncvar_get (netCDFfile, "LONC")}
@@ -65,7 +74,11 @@ DataFileInfo <- function (fileLocation = setFileName(), LLrange=TRUE) {
     if (UWYO) {
       Flight$Platform <- as.character (ncatt_get (netCDFfile, 0, 'Aircraft')[2])
     } else {
-      Flight$Platform <- as.character (ncatt_get (netCDFfile, 0, 'Platform')[2])
+        if ('Platform' %in% names(ATTG)) {
+            Flight$Platform <- as.character (ncatt_get (netCDFfile, 0, 'Platform')[2])
+        } else {
+            Flight$Platform <- as.character (ncatt_get (netCDFfile, 0, 'Aircraft')[2])
+        }
     }
     Flight$DataFile <- fileLocation
     Flight$Start <- min (Time, na.rm=TRUE)
@@ -173,5 +186,6 @@ DataFileInfo <- function (fileLocation = setFileName(), LLrange=TRUE) {
     nms <- nms[nms != 'Time' && nms != 'time']
     Flight$Variables <- nms
   }
+  nc_close(netCDFfile)
   return(Flight)
 }

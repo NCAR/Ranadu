@@ -107,8 +107,10 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
   # a POSIXct date/time variable.
   
   ## get the header information
-  netCDFfile = nc_open (fname) 
+  netCDFfile = nc_open (fname)
   namesCDF <- names (netCDFfile$var)
+  ## Check for old-time convention:
+  oldTime <- 'base_time' %in% namesCDF
   ## check source/institution:
   ATTG <- ncatt_get (netCDFfile, 0)   # get list of global attributes
   SOURCE <- 'NCAR'
@@ -161,17 +163,26 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     cat (sprintf ("requested variable %s not in netCDF file;\n ----> getNetCDF returning with error", V))
     return (-1)
   }
+  nms <- names(netCDFfile$dim)
   if (UWYO) {
     Time <- ncvar_get (netCDFfile, 'time')
     time_units <- ncatt_get (netCDFfile, "time", "units")
+  } else if (oldTime) {  ## This is old-format without Time variable, with Time dimension
+      base_time <- ncvar_get(netCDFfile, 'base_time')
+      tref <- ncatt_get (netCDFfile, 'base_time', 'long_name')$value
+      tref <- sub('.$', '', sub('Seconds since ', '', tref))
+      if (tref == 'Jan 1, 1970') {tref <- '1970-01-01'}
+      time_offset <- ncvar_get (netCDFfile, 'time_offset')
+      Time <- time_offset + base_time
   } else {
     Time <- ncvar_get (netCDFfile, "Time")
     time_units <- ncatt_get (netCDFfile, 'Time', 'units')
+    # time_units <- ncatt_get (netCDFfile, "Time", "units")
+    tref <- sub ('seconds since ', '', time_units$value)
   }
   DL <- length (Time)
   ## set the maximum data rate (but not above 100 Hz):
   Rate <- 1
-  nms <- names(netCDFfile$dim)
   if (!UWYO) {    ## only use Rate=1 for UWYO for now
     if ("sps25" %in% nms) {Rate <- 25}
     if ("sps50" %in% nms) {Rate <- 50}
@@ -189,9 +200,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     }
     Time <- T
   }
-  # time_units <- ncatt_get (netCDFfile, "Time", "units")
-  tref <- sub ('seconds since ', '', time_units$value)
-  Time <- as.POSIXct (as.POSIXct (tref, tz='UTC')+Time, tz='UTC')
+  Time <- as.POSIXct (as.POSIXct (tref, tz='UTC') + Time, tz='UTC')
   # see if limited time range wanted:
   i1 <- ifelse ((Start != 0), getIndex (Time, Start), 1)
   if (i1 < 0) {i1 <- 1}
@@ -212,6 +221,12 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
   ## save 'Time' attributes:
   if (UWYO) {
     ATT <- ncatt_get (netCDFfile, "time")   # get list of Time attributes
+  } else if (oldTime) {
+      tunits <- sprintf('seconds since %s', Time[1])
+      ATT <- list('long_name' = 'time of measurement',
+                  'standard_name' = 'time',
+                  'units' = tunits,
+                  'strptime_format' = 'seconds since %F %T %z')
   } else {
     ATT <- ncatt_get (netCDFfile, "Time")   # get list of Time attributes
   }
@@ -273,6 +288,10 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     CellSizes <- ncatt_get (netCDFfile, V, "CellSizes")
     if (CellSizes$hasatt == TRUE) { ## arrays like A1DC_ don't have CellSizes
       CellLimits <- CellSizes$value
+      ## If AFSSP_, only use 16 determined by FRNG
+      if (grepl('^AFSSP_', V)) {
+          CellLimits <- CellLimits[17:32]
+      }
       Bins <- length(CellLimits)-1
       ## For some reason there are 64 bin-limits for the PIP:
       if((grepl('^CPIP', V)) || (grepl('^APIP', V))) {
@@ -287,14 +306,30 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       if (grepl('^ACDP', V)) {
         Bins <- 30
         Resln <- 2  ## placeholder
+        BinSize <- rep(Resln, Bins)
+        CellLimits <- c(0, cumsum(BinSize))
+      } else if (grepl('CFSSP_', V)) {
+          ## get cell sizes from AFSSP, first range
+          AtoPlot <- sub('^C', 'A', V)
+          CellSizes <- ncatt_get (netCDFfile, AtoPlot, "CellSizes")
+          CellLimits <- CellSizes$value
+          CellLimits <- CellLimits[17:32]
+          Bins <- length(CellLimits)-1
+          BinSize <- vector('numeric', Bins)
+          for (j in 1:Bins) {
+              BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+          }
       } else {
         Resln <- ncatt_get (netCDFfile, V, "Resolution")$value
         # Bins <- ncatt_get (netCDFfile, V, "nDiodes")$value 
         # if (Bins == 64) {Bins <- 63}
         Bins <- dim(X)[1] - 1
+        BinSize <- rep(Resln, Bins)
+        CellLimits <- c(0, cumsum(BinSize)) + Resln / 2
+        for (j in 1:Bins) {
+            BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+        }
       }
-      BinSize <- rep(Resln, Bins)
-      CellLimits <- c(0, cumsum(BinSize))
     }
     ## handle higher-than-1 Rate:
     DM <- length(dim(X))
@@ -313,13 +348,26 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         inputRate <- 1
         CC <- vector('numeric', Bins*Rate*dim(X)[2])
         dim(CC) <- c(Bins, Rate*dim(X)[2])
-        for (j in 2:(Bins+1)) {
-          Y <- IntFilter (X[j, ], inputRate, Rate)
-          CC[j-1,] <- Y
+        if (Bins >= dim(X)[1]) {
+            Bins <- dim(X)[1] - 1
+            for (j in 1:(Bins+1)) {
+              Y <- IntFilter (X[j, ], inputRate, Rate)
+              CC[j,] <- Y
+            }
+        } else {
+            for (j in 2:(Bins+1)) {
+                Y <- IntFilter (X[j, ], inputRate, Rate)
+                CC[j-1,] <- Y
+            }
         }
         XN <- t(CC)
       } else {
-        CC <- X[2:(Bins+1),]
+        if (Bins >= dim(X)[1]) {
+            Bins <- dim(X)[1] - 1
+            CC <- X[1:(Bins+1),]
+        } else {
+            CC <- X[2:(Bins+1),]
+        }
         XN <- t(CC)
       }
     } else {
@@ -340,6 +388,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
   #################### start of processing loop ############
   for (V in VarList) {
     if (is.na(V)) {next}
+    if (V == 'base_time' || V == 'time_offset') {next}
     if (FAAM) {
       SV <- names(snames[which(V == snames)])
     } 
@@ -364,61 +413,59 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       }    ## later, save datt as an attribute of V
       X <- ncvar_get (netCDFfile, V)
       ATT <- ncatt_get (netCDFfile, V)
-      ## special treatment for CCDP, CS100, CUHSAS, C1DC, CS200:
+      ## special treatment for CCDP, CS100, CUHSAS, C1DC, CS200, CFSSP (old 16-bin FSSP):
       if (grepl ('CCDP_', V) || grepl('ACDP_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
-        CellLimitsD <- RL[[2]]
-        BinSizeD <- RL[[3]]
-        attr (X, 'CellLimits') <- CellLimitsD
-        attr (X, 'BinSize') <- BinSizeD
+        attr (X, 'CellLimits') <- RL[[3]]
+        attr (X, 'BinSize') <- RL[[2]]
       }
       if (grepl ('^C1DC_', V) || grepl('^A1DC_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
-        CellLimits2 <- RL[[2]]
-        BinSize2 <- RL[[3]]
-        attr (X, 'CellLimits') <- CellLimits2
-        attr (X, 'BinSize') <- BinSize2
+        attr (X, 'CellLimits') <- RL[[3]]
+        attr (X, 'BinSize') <- RL[[2]]
       }
       if (grepl ('CS200_', V) || grepl ('AS200_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
-        CellLimitsP <- RL[[2]]
-        BinSizeP <- RL[[3]]
-        attr (X, 'CellLimits') <- CellLimitsP
-        attr (X, 'BinSize') <- BinSizeP
+        attr (X, 'CellLimits') <- RL[[3]]
+        attr (X, 'BinSize') <- RL[[2]]
       }
       if (grepl ('CS100_', V) || grepl ('AS100_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
-        CellLimitsF <- RL[[2]]
-        BinSizeF <- RL[[3]]
-        attr (X, 'CellLimits') <- CellLimitsF
-        attr (X, 'BinSize') <- BinSizeF
+        attr (X, 'CellLimits') <- RL[[3]]
+        attr (X, 'BinSize') <- RL[[2]]
       }
       if (grepl ('CUHSAS_', V) || grepl ('AUHSAS_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
-        CellLimitsU <- RL[[2]]
-        BinSizeU <- RL[[3]]
-        attr (X, 'CellLimits') <- CellLimitsU
-        attr (X, 'BinSize') <- BinSizeU
+        attr (X, 'CellLimits') <- RL[[3]]
+        attr (X, 'BinSize') <- RL[[2]]
       }
       if (grepl ('^CPIP_', V) || grepl ('^APIP_', V)) {
         RL <- SizeDist(V, netCDFfile, X)
         X <- RL[[1]]
-        CellLimitsP <- RL[[2]]
-        BinSizeP <- RL[[3]]
-        attr (X, 'CellLimits') <- CellLimitsP
-        attr (X, 'BinSize') <- BinSizeP
+        attr (X, 'CellLimits') <- RL[[3]]
+        attr (X, 'BinSize') <- RL[[2]]
+      }
+      if (grepl ('CFSSP_', V) || grepl ('AFSSP_', V)) {
+          RL <- SizeDist(V, netCDFfile, X)
+          X <- RL[[1]]
+          attr (X, 'CellLimits') <- RL[[3]]
+          attr (X, 'BinSize') <- RL[[2]]
       }
     }
     ## for Rate == 1, nothing special is needed:
     SDvar <- grepl('CCDP_', V) || grepl('CS100_', V) || grepl('CUHSAS_', V) ||
-      grepl('^C1DC_', V) || grepl('CS200_', V) || grepl('^CPIP_', V)
+      grepl('^C1DC_', V) || grepl('CS200_', V) || grepl('^CPIP_', V) || grepl('^CFSSP_', V)
     SDvar <- SDvar || grepl('ACDP_', V) || grepl('AS100_', V) || grepl('AUHSAS_', V) ||
-      grepl('^A1DC_', V) || grepl('AS200_', V) || grepl('^APIP_', V)
+      grepl('^A1DC_', V) || grepl('AS200_', V) || grepl('^APIP_', V) || grepl('^AFSSP_', V)
+    if (SDvar) {  ## This is needed to avoid losing these attributes to subsetting:
+        LATT <- list('CellLimits' = attr(X, 'CellLimits'), 'BinSize' = attr(X, 'BinSize'))
+        ATT <- append (ATT, LATT)  
+    }
     if (Rate == 1) {
       if (SDvar) {
         X <- X[r1, ]

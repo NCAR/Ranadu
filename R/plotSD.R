@@ -61,7 +61,7 @@
 
 plotSD <- function (data, CellLimits=NA, logAxis='', ucon=rep(NA, 5), col='blue', FirstCell=rep(1,5), 
   title=NA, lwd=rep(2,5), xlim=NA, ylim=NA, CDF=FALSE, LWC=FALSE, addBar=FALSE, ADD=FALSE, legend.position=NA, ...) {
-  VtoPlot <- names(data)[-1]
+  VtoPlot <- names(data)[2]
   ## define functions used to construct size distribution: --------------------------------
   logaxis <- function(side, ...) {
     aty <- axTicks(side)
@@ -88,6 +88,12 @@ plotSD <- function (data, CellLimits=NA, logAxis='', ucon=rep(NA, 5), col='blue'
     if (is.na(CellLimits[1])) {
       if (!is.null (attr(data[ , VtoPlot], 'CellSizes'))) {
         CellLimits <- attr(data[ , VtoPlot], 'CellSizes')
+      } else if (!is.null (attr(data[ , VtoPlot], 'CellLimits'))) {
+            CellLimits <- attr(data[ , VtoPlot], 'CellLimits')
+      } else if (!is.null (attr(data[ , sub('^C', 'A', VtoPlot)], 'CellSizes'))) {  ## old convention, e.g., SCMS
+          CellLimits <- attr(data[ , sub('^C', 'A', VtoPlot)], 'CellSizes')
+          ## In this case, all 4 ranges for FSSP are included. Take first in lieu of looking up range.
+          CellLimits <- CellLimits[1:16]
       } else {
         CellLimits <- c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50)
       }
@@ -176,7 +182,7 @@ plotSD <- function (data, CellLimits=NA, logAxis='', ucon=rep(NA, 5), col='blue'
     if (is.na(xlim[1])) {
       xlim <- c(CLimits[1], CLimits[length(CLimits)])
       ## are there other size distributions? If so, set appropriate limits
-      if (ncol(data) > 2) {
+      if (ncol(data) > 2 && !(grepl('AFSSP_', names(data)[3]))) { ## kludge for old FSSP
         for (j in 3:ncol(data)) {
           V2 <- getP (data, VtoPlot[j-1], CellLimits=NA, logAxis=logAxis, ucon=ucon[j-1], FirstCell=FirstCell[j-1], LWC=LWC)
           CL <- V2[[1]]
@@ -191,7 +197,7 @@ plotSD <- function (data, CellLimits=NA, logAxis='', ucon=rep(NA, 5), col='blue'
     } 
     if (is.na(ylim[1])) {
       ylim <- c(min(P, na.rm=TRUE), max(P, na.rm=TRUE))      
-      if (ncol(data) > 2) {
+      if (ncol(data) > 2 && !(grepl('AFSSP_', names(data)[3]))) {
         for (j in 3:ncol(data)) {
           V2 <- getP (data, VtoPlot[j-1], CellLimits=NA, logAxis=logAxis, ucon=ucon[j-1], FirstCell=FirstCell[j-1], LWC=LWC)
           if (min(V2[[2]], na.rm=TRUE) < ylim[1]) {ylim[1] <- min(V2[[2]], na.rm=TRUE)}
@@ -226,7 +232,7 @@ plotSD <- function (data, CellLimits=NA, logAxis='', ucon=rep(NA, 5), col='blue'
     }
     # if (LWC) {ya <- ya * CellSizes^3}
     ya <- c(0, ya)
-    if (ncol(data) > 2) {
+    if (ncol(data) > 2 && !(grepl('AFSSP_', names(data)[3]))) {
       ## get a single vector spanning all probes for the CDF. Convert back to #/bin if necessary.
       for (j in 3:ncol(data)) {
         V2 <- getP (data, VtoPlot[j-1], CellLimits=NA, logAxis=logAxis, ucon=ucon[j-1], FirstCell=FirstCell[j-1], LWC=LWC)
@@ -339,17 +345,21 @@ plotSD <- function (data, CellLimits=NA, logAxis='', ucon=rep(NA, 5), col='blue'
       points(dbar, 0.5*chigh, pch=19, col='darkgreen')
       lines (c(dbar-sd, dbar+sd), rep(0.5*chigh, 2), lwd=1.6, col='darkgreen')
     }
-    if (is.na(legend.position[1])) {
-      lloc <- ifelse (LWC, 'topleft', 'topright')
+    if (!is.na(legend.position) && legend.position == 'none') {
+        
     } else {
-      lloc <- legend.position
-    }
-    if (CDF) {
-      legend(lloc, inset=0.04, legend=c(sub('_.*', '', VtoPlot), 'exceedance'), col=c(colrs[1:length(VtoPlot)], 'darkorange'), 
-        lwd=c(rep(2, length(VtoPlot)), 1.6), lty=c(rep(1, length(VtoPlot)), 2))    
-    } else {
-      legend(lloc, inset=0.04, legend=c(sub('_.*', '', VtoPlot)), col=c(colrs[1:length(VtoPlot)]), 
-        lwd=c(rep(2, length(VtoPlot))), lty=c(rep(1, length(VtoPlot))))
+      if (is.na(legend.position[1])) {
+        lloc <- ifelse (LWC, 'topleft', 'topright')
+      } else {
+        lloc <- legend.position
+      }
+      if (CDF) {
+        legend(lloc, inset=0.04, legend=c(sub('_.*', '', VtoPlot), 'exceedance'), col=c(colrs[1:length(VtoPlot)], 'darkorange'), 
+          lwd=c(rep(2, length(VtoPlot)), 1.6), lty=c(rep(1, length(VtoPlot)), 2))    
+      } else {
+        legend(lloc, inset=0.04, legend=c(sub('_.*', '', VtoPlot)), col=c(colrs[1:length(VtoPlot)]), 
+          lwd=c(rep(2, length(VtoPlot))), lty=c(rep(1, length(VtoPlot))))
+      }
     }
     if (is.na(title[1])) {
       if (LWC) {
