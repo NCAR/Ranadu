@@ -34,7 +34,7 @@ Runge-Kutta integration with Cash-Karp adjustment of the time step.
 }
 \details{
 This is a somewhat specialized function that has not been tested very
-much and in included for some special uses like that for sensible-heat flux. It
+much and is included for some special uses like that for sensible-heat flux. It
 is suggested that the R function rmutil::runge.kutta be used instead unless
 problems with stability and accuracy arise with that function. Here the 
 fourth-order Runge-Kutta method is used to integrate the derivative

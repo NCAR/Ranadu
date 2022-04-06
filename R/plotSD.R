@@ -23,7 +23,7 @@
 #' CellLimits=NA, ucon=1.e-4, ADD=TRUE)". 
 #' @param CellLimits A vector containing the bin limits for the data. This is usually obtained from "attr(Data$CCDP_LWOI, 'CellSizes').
 #' It represents the lower limits of the bins, so it should have one more entry than the number of columns in data to represent
-#' the upper limit of the last bin. The deault is a vector of bin limits applicable to the CDP. If the supplied value is NA, the vector 
+#' the upper limit of the last bin. The default is a vector of bin limits applicable to the CDP. If the supplied value is NA, the vector 
 #' will be loaded from the attribute. In this case, if the attribute is unavailable, the function will fail. Don't use the standard
 #' plot parameter 'log' because, while logarithmic axes will be generated, the weighted distribution won't be constructed.
 #' @param logAxis A string indicating which axes should be logarithmic; e.g., logAxis='xy' for both logarithmic.
