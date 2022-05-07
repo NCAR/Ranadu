@@ -34,7 +34,8 @@ PotentialTemperature <- function (P, AT, E=0.) {
 #' @return A numeric representing the pseudo-adiabatic equivalent potential temperature in kelvin.
 #' @examples 
 #' THETAP <- EquivalentPotentialTemperature (700., 10., 9.) 
-#' THETAP <- EquivalentPotentialTemperature (RAFdata$PSXC, RAFdata$ATX, RAFdata$EWX)
+#' THETAP <- EquivalentPotentialTemperature (
+#'           RAFdata$PSXC, RAFdata$ATX, RAFdata$EWX)
 EquivalentPotentialTemperature <- function (P, AT, E=0) {
 # Davies-Jones pseudo-adiabatic equivalent potential 
 # temperature. Needs P, AT, E (hPa, degC, hPa).
@@ -127,7 +128,8 @@ BoltonEquivalentPotentialTemperature <- function (P, AT, E=0) {
 VirtualTemperature <- function (AT, r) {
 # Virtual Temperature, fn of AT (degC), r (mixing ratio
 # in dimensionless units, kg/kg)
-  Tvir <- (AT+TZERO)*((1. + r * StandardConstant("MWD") / StandardConstant("MWW")) / (1 + r)) - TZERO
+  Tvir <- (AT+TZERO)*((1. + r * StandardConstant("MWD") / 
+		       StandardConstant("MWW")) / (1 + r)) - TZERO
   return (Tvir)
 }
 
@@ -205,8 +207,10 @@ WetEquivalentPotentialTemperature <- function (P, AT, E=0, w=0) {
 #' More concise output is obtained from str(lapply(potentialTemperatures, function (f) f(DF), 
 #' digits.d = 5)
 #' @examples 
-#' PTS <- lapply(potentialTemperatures, function(f) f(RAFdata[, c('PSXC', 'ATX', 'EWX')]))
-#' ThetaV <- mean(potentialTemperatures$VirtualPotentialTemperature(RAFdata[, c('PSXC', 'ATX', 'EWX')]))
+#' PTS <- lapply(potentialTemperatures, function(f) 
+#'               f(RAFdata[, c('PSXC', 'ATX', 'EWX')]))
+#' ThetaV <- mean(potentialTemperatures$VirtualPotentialTemperature(
+#'                RAFdata[, c('PSXC', 'ATX', 'EWX')]))
 potentialTemperatures <- list(
   PotentialTemperature = function(Data) as.vector(
     PotentialTemperature(Data$PSXC, Data$ATX, Data$EWX)),

@@ -11,13 +11,14 @@ getProjectData(
   Flights = NA,
   .Test = FALSE,
   .Ferry = FALSE,
+  .HR = FALSE,
   maxMemory = 1e+09
 )
 }
 \arguments{
 \item{.Project}{The name of the project, for which data files are assumed
 stored in DataDirectory()/Project with names like Projectrf01.nc. If this is
-not the desired location, the next parameter can be used to specify the
+not the desired location, the DataDir parameter can be used to specify the
 directory. There is no default, so omission of the project name generates an error.}
 
 \item{.Variables}{A list of variables to be loaded. "ALL" loads everything; 
@@ -36,6 +37,8 @@ starting at 51. The default is FALSE.}
 
 \item{.Ferry}{If TRUE, ferry flights will be included, identified by flight
 numbers starting at 101. The default is FALSE.}
+
+\item{.HR}{If TRUE, only 25-Hz data will be included.}
 
 \item{maxMemory}{The cutoff at which data.frame construction will be suspended to
 avoid very large data.frame generation. The default is 1000000000. When the data.frame

@@ -15,7 +15,7 @@
 #' @param EndTime An ending time in HHMMSS format. Default = 400000.
 #' @return A subset tibble or data.frame restricted to the specified 
 #' time range. Limits are inclusive.
-#' @example DS <- selectTime(RAFdata, 201100, 201200)
+#' @example DS <- Ranadu::selectTime(RAFdata, 201100, 201200)
 selectTime <- function (.d, StartTime, EndTime) {
   dt <- .d[setRange(.d, StartTime, EndTime),]
   return(transferAttributes(.d, dt))

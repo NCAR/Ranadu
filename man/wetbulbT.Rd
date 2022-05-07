@@ -12,7 +12,7 @@ wetbulbT(P, AT, DPT)
 
 \item{AT}{A numeric representing air temperature in deg. C}
 
-\item{DP}{A numeric representing dewpoint temperature in deg. C.}
+\item{DPT}{A numeric representing dewpoint temperature in deg. C.}
 }
 \value{
 A numeric representing the wet-bulb temperature in deg. C
@@ -30,6 +30,10 @@ input parameters may be vectors, all of the same size, and in that
 case the result will also be a vector. Be aware, however, that large
 vectors (like whole flights even at 1 Hz) are likely to give an error
 resulting from the attempt by nleqslv to allocate too much memory.
+}
+\examples{
+# expect 13.58
+twb <- Ranadu::wetbulbT(800, 20, 10) 
 }
 \author{
 William Cooper

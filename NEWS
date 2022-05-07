@@ -1,3 +1,8 @@
+Varsion 26-22-05-07
+  Updates:
+    getNetCDF.R             -- Some changes for 100 and 50 Hz variables
+    getProjectData.R        -- Modify to work with 25-Hz files
+    misc                    -- There were a few documentation changes 
 Version 2.6-22-3-7
   Updates:
     getNetCDF.R             -- protection against Bins inconsistency for UHSAS

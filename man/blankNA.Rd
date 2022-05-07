@@ -32,9 +32,9 @@ is preserved, with data.frame attributes.
 The purpose of this function is to enable plots where the excluded
 variables have gaps rather than connecting lines spanning the exclusion.
 This is suitable for use in pipes like
-D %>% blankNA(TASX > 100) %>% select(Time, ATX) %>% plotWAC()
+D \%>\% blankNA(TASX > 100) \%>\% select(Time, ATX) \%>\% plotWAC()
 Another syntax is to generate the restriction variable:
-D %>% Rmutate(Restr, TASX > 230) %>% blankNA(Restr) %>% ...
+D \%>\% Rmutate(Restr, TASX > 230) \%>\% blankNA(Restr) \%>\% ...
 }
 \author{
 William Cooper

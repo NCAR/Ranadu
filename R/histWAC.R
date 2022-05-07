@@ -23,7 +23,7 @@
 #' graphics parameters etc. 
 #' @return T -- The result is the plot, but the usual value returned by
 #' hist() is also returned invisibly. Assign it to a variable to use it.
-#' @example histWAC(rnorm(2000,20,2))
+#' @example Ranadu::histWAC(rnorm(2000,20,2))
 
 
 histWAC <- function (x, Exceedance = FALSE, ADD = FALSE, 

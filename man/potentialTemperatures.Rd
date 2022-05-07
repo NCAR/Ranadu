@@ -31,8 +31,10 @@ data.frame containing PSXC, ATX, EWX, and optionally PLWCD (for WetEquivalentPot
 To use individual functions: potentialTemperatures$EquivalentPotentialTemperature(DF)
 }
 \examples{
-PTS <- lapply(potentialTemperatures, function(f) f(RAFdata[, c('PSXC', 'ATX', 'EWX')]))
-ThetaV <- mean(potentialTemperatures$VirtualPotentialTemperature(RAFdata[, c('PSXC', 'ATX', 'EWX')]))
+PTS <- lapply(potentialTemperatures, function(f) 
+              f(RAFdata[, c('PSXC', 'ATX', 'EWX')]))
+ThetaV <- mean(potentialTemperatures$VirtualPotentialTemperature(
+               RAFdata[, c('PSXC', 'ATX', 'EWX')]))
 }
 \author{
 William Cooper

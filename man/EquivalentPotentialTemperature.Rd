@@ -25,7 +25,8 @@ The pseudo-adiabatic equivalent potential temperature is calculated according to
 }
 \examples{
 THETAP <- EquivalentPotentialTemperature (700., 10., 9.) 
-THETAP <- EquivalentPotentialTemperature (RAFdata$PSXC, RAFdata$ATX, RAFdata$EWX)
+THETAP <- EquivalentPotentialTemperature (
+          RAFdata$PSXC, RAFdata$ATX, RAFdata$EWX)
 }
 \author{
 William Cooper

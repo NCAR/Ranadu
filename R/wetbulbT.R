@@ -14,11 +14,11 @@
 #' @export wetbulbT
 #' @param P A numeric representing ambient pressure in hPa 
 #' @param AT A numeric representing air temperature in deg. C 
-#' @param DP A numeric representing dewpoint temperature in deg. C. 
+#' @param DPT A numeric representing dewpoint temperature in deg. C. 
 #' @import nleqslv
 #' @return A numeric representing the wet-bulb temperature in deg. C
-#' @example expect 13.58
-#' twb <- wetbulbT(800, 20, 10) 
+#' @examples # expect 13.58
+#' twb <- Ranadu::wetbulbT(800, 20, 10) 
 wetbulbT <- function(P, AT, DPT) {
     twb <- function(tw) { # This function depends on P. AT and DPT 
         # (i.e., temperature [degC], pressure [hPa], dewpoint [degC]

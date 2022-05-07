@@ -14,7 +14,7 @@
 #' @export getProjectData
 #' @param .Project The name of the project, for which data files are assumed
 #' stored in DataDirectory()/Project with names like Projectrf01.nc. If this is
-#' not the desired location, the next parameter can be used to specify the
+#' not the desired location, the DataDir parameter can be used to specify the
 #' directory. There is no default, so omission of the project name generates an error.
 #' @param .Variables A list of variables to be loaded. "ALL" loads everything; 
 #' the default is the set of variables specified by 'standardVariables()'. If
@@ -28,32 +28,53 @@
 #' starting at 51. The default is FALSE.
 #' @param .Ferry If TRUE, ferry flights will be included, identified by flight
 #' numbers starting at 101. The default is FALSE.
+#' @param .HR If TRUE, only 25-Hz data will be included.
 #' @param maxMemory The cutoff at which data.frame construction will be suspended to
 #' avoid very large data.frame generation. The default is 1000000000. When the data.frame
 #' exceeds this size, subsequent requested flights are skipped.
 #' @return A new data.frame containing all the flights.
 getProjectData <- function (.Project, .Variables = standardVariables(), 
-  DataDir=DataDirectory(), Flights=NA, .Test=FALSE, .Ferry=FALSE, maxMemory=1000000000) {
+  DataDir=DataDirectory(), Flights=NA, .Test=FALSE, .Ferry=FALSE, .HR=FALSE, maxMemory=1000000000) {
   .Data <- data.frame()
   PD <- .Project
   if (DataDir != DataDirectory()) {
     PD <- ''
   }
   # print (sprintf ('DataDir=%s, .Project=%s', DataDir, .Project))
-  Fl <- sort (list.files ( ## get list of available flights
-    sprintf ("%s%s/", DataDir, PD),
-    sprintf ("%srf...nc$",.Project)))
+  if (.HR) {
+      Fl <- sort (list.files ( ## get list of available flights
+          sprintf ("%s%s/", DataDir, PD),
+          sprintf ("%srf..h.nc$",.Project)))      
+  } else {
+    Fl <- sort (list.files ( ## get list of available flights
+      sprintf ("%s%s/", DataDir, PD),
+      sprintf ("%srf...nc$",.Project)))
+  }
   if (.Test) {
-    Fl <- c(Fl, sort (list.files ( ## get list of available flights
-      sprintf ("%s%s/", DataDir, PD),     
-      sprintf ("%stf...nc$", .Project)))
-    )
+    if (.HR) {
+      Fl <- c(Fl, sort (list.files ( ## get list of available flights
+            sprintf ("%s%s/", DataDir, PD),     
+            sprintf ("%stf..h.nc$", .Project)))
+            )
+    } else {
+      Fl <- c(Fl, sort (list.files ( ## get list of available flights
+        sprintf ("%s%s/", DataDir, PD),     
+        sprintf ("%stf...nc$", .Project)))
+        )
+    }
   }
   if (.Ferry) {
-    Fl <- c(Fl, sort (list.files ( ## get list of available flights
-      sprintf ("%s%s/", DataDir, PD),     
-      sprintf ("%sff...nc$", .Project)))
-    )
+    if (.HR) {
+      Fl <- c(Fl, sort (list.files ( ## get list of available flights
+            sprintf ("%s%s/", DataDir, PD),     
+            sprintf ("%sff..h.nc$", .Project)))
+            )  
+    } else {
+      Fl <- c(Fl, sort (list.files ( ## get list of available flights
+        sprintf ("%s%s/", DataDir, PD),     
+        sprintf ("%sff...nc$", .Project)))
+        )
+    }
   }
 
   First <- TRUE
@@ -64,8 +85,8 @@ getProjectData <- function (.Project, .Variables = standardVariables(),
       print ('Change the maxMemory limit if you really want a larger file.')
       break
     }
-    fno <- as.numeric(sub('.*f([0-9]*).nc', '\\1', flt))
-    if (!is.na(Flights) && (!(fno %in% Flights))) {next}
+    fno <- as.numeric(sub('.*f([0-9]*).*.nc', '\\1', flt))
+    if (!is.na(Flights[1]) && (!(fno %in% Flights))) {next}
     if (grepl ('tf', fname)) {
       fno <- fno + 50
     } else if (grepl ('ff', fname)) {

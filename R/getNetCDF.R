@@ -181,7 +181,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     tref <- sub ('seconds since ', '', time_units$value)
   }
   DL <- length (Time)
-  ## set the maximum data rate (but not above 100 Hz):
+  ## set the maximum data rate (but not above 50 Hz except for special use):
   Rate <- 1
   if (!UWYO) {    ## only use Rate=1 for UWYO for now
     if ("sps25" %in% nms) {Rate <- 25}
@@ -206,15 +206,10 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
   if (i1 < 0) {i1 <- 1}
   i2 <- ifelse ((End != 0), getIndex (Time, End) + Rate - 1, length (Time))
   if (i2 < 1) {i2 <- length(Time)}
-  # if (End != 0) {
-  #   i2 <- getIndex (Time, End) + Rate - 1
-  # } else {
-  #   i2 <- length (Time)
-  # }
   r <- i1:i2
   # r is the appropriate index for any rate, but also need
   # the 1-Hz and 5-Hz indices for interpolation:
-  r1 <- ((i1-1)/Rate+1):((i2-1)/Rate+1)
+  r1 <- ((i1 - 1) / Rate + 1):((i2 - 1) / Rate + 1)
   DL <- length (r1)
   Time <- Time[r]
   SE <- getStartEnd (Time)
@@ -254,29 +249,34 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
   ######------------------------------------------------------------------
   IntFilter <- function (X, inRate, outRate) {
     if (inRate == outRate) {return (X)}
-    ratio <- as.integer(outRate/inRate)    ## expected to be an integer
-    ratio <- outRate / inRate              ## try 2.5 for CDP etc.
-    ## beware of missing values
-    z <- zoo::na.approx (as.vector(X), maxgap=1000, na.rm = FALSE)
+    # ratio <- as.integer(outRate / inRate)    ## expected to be an integer
+    ratio <- outRate / inRate              ## allow 2.5 for CDP etc.
+    ## interpolate where there are missing values
+    z <- zoo::na.approx (as.vector(X), maxgap=1000, na.rm = FALSE, rule = 2)
     z[is.na(z)] <- 0
     x <- 0:(length(X)-1)
-    A <- stats::approx (x, z, n=length(X)*ratio-ratio+1)
+    N <- length(X) * ratio - ratio + 1
+    # adjustment is needed for 100 Hz variable at 50 Hz:
+    if (ratio < 1) {
+        N <- N - 1
+    }
+    A <- stats::approx (x, z, n = N)  # Interpolate
     T <- A$y
-    SGL <- as.integer(ifelse (ratio %% 2, ratio, ratio+1))
-    if (SGL <= 3) {SGL <- 5}
+    SGL <- as.integer(ifelse (ratio %% 2, ratio, ratio+1))  # Points to use for smoothing (odd)
+    if (SGL <= 3) {SGL <- 5}                                # Use at least 5 (e.g., for CDP)
     # print (sprintf ('SGL=%f', SGL))
-    T <- signal::filter(signal::sgolay(3,SGL),T)  # normally 75 pts
+    T <- signal::filter(signal::sgolay(3, SGL), T)  # Smooth interpolated values
     # T <- signal::filter(signal::butter(3, 0.5), T)
     ## now shift to match outRate:
     ## The values are the average over the ensuing time period, so
     ## the interpolated values should be shifted forward 1/2 the
     ## ratio. This leaves constant values at start and end.
     ## Special Note re SRT: Variables like TASX end up at 1 Hz
-    ## because ATX is sampled at 1 Hz. The result is that recorded
+    ## if ATX is sampled at 1 Hz. The result is that recorded
     ## values are apparently shifted 1.5 s later in time.
     n <- as.integer (ratio / 2)
     NL = length(T)
-    T <- c(rep(T[1],n), T, rep(T[NL],ratio-n-1))  ## OK, even or odd ratio
+    T <- c(rep(T[1], n), T, rep(T[NL], ratio - n - 1))  ## OK, even or odd ratio
     return (T)
   }
   ######------------------------------------------------------------------
@@ -292,14 +292,14 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       if (grepl('^AFSSP_', V)) {
           CellLimits <- CellLimits[17:32]
       }
-      Bins <- length(CellLimits)-1
+      Bins <- length(CellLimits) - 1
       ## For some reason there are 64 bin-limits for the PIP:
       if((grepl('^CPIP', V)) || (grepl('^APIP', V))) {
           Bins <- Bins - 1
       }
       BinSize <- vector('numeric', Bins)
       for (j in 1:Bins) {
-        BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+        BinSize[j] <- (CellLimits[j] + CellLimits[j + 1]) / 2    
       }
     } else { ## substitute from other attributes if available
              ## (but ACDP_ doesn't have appropriate attributes):
@@ -314,10 +314,10 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
           CellSizes <- ncatt_get (netCDFfile, AtoPlot, "CellSizes")
           CellLimits <- CellSizes$value
           CellLimits <- CellLimits[17:32]
-          Bins <- length(CellLimits)-1
+          Bins <- length(CellLimits) - 1
           BinSize <- vector('numeric', Bins)
           for (j in 1:Bins) {
-              BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+              BinSize[j] <- (CellLimits[j] + CellLimits[j + 1]) / 2    
           }
       } else {
         Resln <- ncatt_get (netCDFfile, V, "Resolution")$value
@@ -327,7 +327,7 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         BinSize <- rep(Resln, Bins)
         CellLimits <- c(0, cumsum(BinSize)) + Resln / 2
         for (j in 1:Bins) {
-            BinSize[j] <- (CellLimits[j] + CellLimits[j+1]) / 2    
+            BinSize[j] <- (CellLimits[j] + CellLimits[j + 1]) / 2    
         }
       }
     }
@@ -335,50 +335,50 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     DM <- length(dim(X))
     if (DM == 3) {
       inputRate <- dim(X)[2]
-      CC <- vector ('numeric', Bins*Rate*dim(X)[3])
+      CC <- vector ('numeric', Bins * Rate * dim(X)[3])
       dim(CC) <- c(Bins, dim(X)[3] * Rate)
-      for (j in 2:(Bins+1)) {
+      for (j in 2:(Bins + 1)) {
         Y <- IntFilter (X[j, , ], inputRate, Rate)
-        CC[j-1,] <- Y
+        CC[j - 1,] <- Y
       }
       XN <- t(CC)
     } else if (DM == 2) {
       ## if this is 1-Hz altho HR file (e.g., UHSAS), need to interpolate to HR
       if (Rate > 1) {
         inputRate <- 1
-        CC <- vector('numeric', Bins*Rate*dim(X)[2])
-        dim(CC) <- c(Bins, Rate*dim(X)[2])
+        CC <- vector('numeric', Bins * Rate * dim(X)[2])
+        dim(CC) <- c(Bins, Rate * dim(X)[2])
         if (Bins >= dim(X)[1]) {
             Bins <- dim(X)[1] - 1
-            for (j in 1:(Bins+1)) {
+            for (j in 1:(Bins + 1)) {
               Y <- IntFilter (X[j, ], inputRate, Rate)
               CC[j,] <- Y
             }
         } else {
-            for (j in 2:(Bins+1)) {
+            for (j in 2:(Bins + 1)) {
                 Y <- IntFilter (X[j, ], inputRate, Rate)
-                CC[j-1,] <- Y
+                CC[j - 1, ] <- Y
             }
         }
         XN <- t(CC)
       } else {
         if (Bins >= dim(X)[1]) {
             Bins <- dim(X)[1] - 1
-            CC <- X[1:(Bins+1),]
+            CC <- X[1:(Bins + 1), ]
         } else {
-            CC <- X[2:(Bins+1),]
+            CC <- X[2:(Bins + 1), ]
         }
         XN <- t(CC)
       }
     } else {
       ## interpolate to Rate:
       inputRate <- dim(X)[2]
-      CC <- vector('numeric', Bins*Rate*dim(X)[3])
-      dim(CC) <- c(Bins, Rate*dim(X)[3])
-      dim(X) <- c(Bins, dim(X)[2]*dim(X)[3])
-      for (j in 2:(Bins+1)) {
+      CC <- vector('numeric', Bins * Rate * dim(X)[3])
+      dim(CC) <- c(Bins, Rate * dim(X)[3])
+      dim(X) <- c(Bins, dim(X)[2] * dim(X)[3])
+      for (j in 2:(Bins + 1)) {
 	      Y <- IntFilter (X[j, ], inputRate, Rate)
-	      CC[j-1,] <- Y
+	      CC[j - 1,] <- Y
       }
       XN <- t(CC)
     }
@@ -403,13 +403,13 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
     datt <- list()
     if (FAAM) {
       for (dd in netCDFfile$var[[SV]]$dim) {
-        datt[[length(datt)+1]] <- dd$name
+        datt[[length(datt) + 1]] <- dd$name
       } 
       X <- ncvar_get (netCDFfile, SV)
       ATT <- ncatt_get (netCDFfile, SV)
     } else {
       for (dd in netCDFfile$var[[V]]$dim) {
-        datt[[length(datt)+1]] <- dd$name
+        datt[[length(datt) + 1]] <- dd$name
       }    ## later, save datt as an attribute of V
       X <- ncvar_get (netCDFfile, V)
       ATT <- ncatt_get (netCDFfile, V)
@@ -477,17 +477,17 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
         XX <- X
         Bins <- length(RL[[2]])
         dim(XX) <- c(Rate, dim(X)[1]/Rate, Bins)
-        XX <- XX[,r1,]
-        dim(XX) <- c(dim(XX)[1]*dim(XX)[2], Bins)
+        XX <- XX[, r1, ]
+        dim(XX) <- c(dim(XX)[1] * dim(XX)[2], Bins)
         X <- XX
       } else {
         DM <- length(dim(X))  
         # print (sprintf ('V=%s DM=%d', V, DM))
         if (DM == 2) {    # flatten
-          X <- X[,r1]
+          X <- X[, r1]
           inputRate <- dim(X)[1]
-          needFilter <- ifelse ((dim(X)[1] != Rate), TRUE, FALSE)
-          dim(X) <- dim(X)[1]*dim(X)[2]
+          needFilter <- (dim(X)[1] != Rate)
+          dim(X) <- dim(X)[1] * dim(X)[2]
           ## see if adjustment to max rate is needed
           # print (sprintf ('needFilter=%s, inputRate=%d, Rate=%d', needFilter, inputRate, Rate))
           if (needFilter) {X <- IntFilter(X, inputRate, Rate)}
@@ -502,27 +502,13 @@ getNetCDF <- function (fname=setFileName(), VarList=standardVariables(), Start=0
       attr (X, A) <- ATT[[A]]
     }
     attr (X, "Dimensions") <- datt
-    # if (grepl('CCDP_', V)) {
-      # d$CCDP <- X
-    # } else if (grepl('CSP100_', V)) {
-      # d$CSP100 <- X
-    # } else if (grepl('CUHSAS_', V)) {
-      # d$CUHSAS <- X
-    # } else if (grepl('^C1DC_', V)) {
-      # d$C1DC <- X
-    # } else if (grepl('CS200', V)) {
-      # d$CS200 <- X
-    # } else {
-      # print (sprintf ('V=%s, dim=%f', V, dim(X)))
-      # print (str(X))
-      d[V] <- X
-    # }
+    d[V] <- X
   }
   if (F != 0) {    # if specified, include the flight number
     RF <- rep (F, times=length(Time))    # label flight number
     d["RF"] <- RF
   }
   nc_close (netCDFfile)
-  d <- addLabels(d)
+  d <- addLabels (d)
   return (d)
 }

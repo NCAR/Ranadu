@@ -19,7 +19,7 @@
 #' @param ... A set of definitions that will be used to construct new variables.
 #' For example, DPD=ATX-DPXC, WICby2=WIC/2
 #' @return A new data.frame or tibble with the new variables included.
-#' @example DS <- Rmutate(RAFdata, DPD = ATX - DPXC)
+#' @example DS <- Ranadu::Rmutate(RAFdata, DPD = ATX - DPXC)
 Rmutate <- function (.d, ...) {
   dt <- dplyr::mutate(.d, ...)
   return (transferAttributes(.d, dt))
