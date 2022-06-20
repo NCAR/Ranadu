@@ -1,4 +1,4 @@
-TZERO = StandardConstant("Tzero")
+TZERO = Ranadu::StandardConstant("Tzero")
 #' @title MurphyKoop
 #' @description Returns the water vapor pressure corresponding to a supplied temperature.
 #' @details Calculates the equilibrium water vapor pressure according to the 
@@ -77,4 +77,33 @@ MurphyKoopIce <- function (FP, P=0) {
   f <- 1.e-5 * P * (4.923 - 0.0325 * tk + 5.84e-5  * tk**2) + 1.
   return (as.vector (f * ess))
 }
-
+GoffGratch <- function(Tc, P = 0) {
+#' @title GoffGratch
+#' @description Returns the water vapor pressure corresponding to a supplied temperature.
+#' @details Calculates the equilibrium water vapor pressure according to the 
+#' Goff-Gratch equation
+#' @aliases goffgratch
+#' @author William Cooper
+#' @export GoffGratch
+#' @param Tc A numeric vector containing the dew point in deg. C
+#' @param P An optional numeric vector representing the total pressure in hPa. Set zero 
+#' to suppress the 'enhancement factor' correction for total pressure. Use the pressure to
+#' find the equilibrium water vapor in the presence of that total pressure of air.
+#' @return Water vapor pressure [hPa] in equilibrium with a plane water surface at dew point Tc
+#' @examples 
+#' e <- GoffGratch (-12.)
+#' e <- GoffGratch(10., 800.)
+#' EW2 <- GoffGratch (RAFdata$DPXC, RAFdata$PSXC)
+# Note that the 5th coefficient has been corrected vs 11.334 used by RAF before M-K adopted
+  a <- c(1013.246, -7.90298, 5.02808, -1.3816e-7, 11.344, 8.1328e-3, -3.49149)
+  Tk <- Tc + TZERO
+  Ts <- 373.16
+  x <- a[2] * ((Ts / Tk) - 1.0) + 
+       a[3] * log10(Ts / Tk) + 
+       a[4] * (10^(a[5] * (1.0 - Tk / Ts)) - 1.0) + 
+       a[6] * (10^(a[7] * (Ts / Tk - 1.0)) - 1.0) +
+       log10(a[1])
+  ew <- 10^x
+  f <- 1.e-5 * P * (4.923 - 0.0325 * Tk + 5.84e-5  * Tk**2) + 1.
+  return(as.vector(f * ew))
+}
