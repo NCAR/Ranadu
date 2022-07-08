@@ -1,4 +1,11 @@
-Varsion 26-22-05-07
+Version 2.6-22-07-08
+  Additions:
+    GoffGratch()            -- Added function in function MurphyKoop.R
+  Updates:
+    binStats.R              -- modified to accepted specified breaks
+    histWAC.R               -- added ability to plot weighted histogram,
+                               and made some corrections to bin limits
+Varsion 2.6-22-05-07
   Updates:
     getNetCDF.R             -- Some changes for 100 and 50 Hz variables
     getProjectData.R        -- Modify to work with 25-Hz files
