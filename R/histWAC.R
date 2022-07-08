@@ -11,7 +11,7 @@
 #' @author William Cooper
 #' @export histWAC
 #' @param x The usual first argument to hist().
-#' @oaram weights Numerical, length matching "x" or recyclable to match, 
+#' @param weights Numerical, length matching "x" or recyclable to match, 
 #' to calculates a weighted histogram. Default NA.
 #' @param Exceedance Logical (default FALSE). If TRUE, the exceedance is
 #' plotted instead of the conventional cumulative distribution. If NA
@@ -32,7 +32,7 @@
 #' @example Ranadu::histWAC(rnorm(2000,20,2))
 
 
-histWAC <- function (x, Exceedance = FALSE, weights = NA, ADD = FALSE, 
+histWAC <- function (x, weights = NA, Exceedance = FALSE, ADD = FALSE, 
                      breaks = 100, freq = FALSE, logAxis = '', plot=TRUE, ...) {
     ## define functions used to construct a logarithmic distribution: --------------------------------
     logaxis <- function(side, ...) {

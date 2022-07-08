@@ -6,19 +6,25 @@
 \usage{
 histWAC(
   x,
+  weights = NA,
   Exceedance = FALSE,
   ADD = FALSE,
   breaks = 100,
   freq = FALSE,
   logAxis = "",
+  plot = TRUE,
   ...
 )
 }
 \arguments{
 \item{x}{The usual first argument to hist().}
 
+\item{weights}{Numerical, length matching "x" or recyclable to match, 
+to calculates a weighted histogram. Default NA.}
+
 \item{Exceedance}{Logical (default FALSE). If TRUE, the exceedance is
-plotted instead of the conventional cumulative distribution.}
+plotted instead of the conventional cumulative distribution. If NA
+the cumulative distribution is not plotted.}
 
 \item{ADD}{Logical (default FALSE) specifying if the distribution should
 be added to an existing one.}
@@ -31,6 +37,8 @@ be added to an existing one.}
 Default: FALSE. The construction of tick marks and labels for the
 abscissa is designed for special applications where the range is small,
 so these may be inappropriate for some applications. (bug to be fixed)}
+
+\item{plot}{Logical that, if FALSE, suppresses the plot. Default = TRUE.}
 
 \item{...}{Additional arguments passed to the plot() routine to control 
 graphics parameters etc.}
@@ -46,7 +54,9 @@ Plot a normal histogram but add a cumulative distribution function.
 The usual histogram with conventional arguments is used, but
 the result then has an added cumulative distribution function with
 scale on the right side. The 'density' plot is used and the cumulative
-distribution function has limits from 0 to 1.
+distribution function has limits from 0 to 1. In addition, an optional
+argument "weughts" applies weighting to eqch of the items entering
+the histogram
 }
 \author{
 William Cooper

@@ -9,6 +9,7 @@ binStats(
   bins = 20,
   xlow = min(.d[, 2], na.rm = TRUE),
   xhigh = max(.d[, 2], na.rm = TRUE),
+  breaks = NA,
   addBin = FALSE
 )
 }
@@ -19,13 +20,17 @@ defining bins. Values from the first will be grouped according to the
 bins in the second and then a mean and standard deviation will be
 calculated for each group. Additional column variables will be ignored.}
 
-\item{bins}{(default 20)}
+\item{bins}{(default 20).}
 
 \item{xlow}{The lower limit for bins. The default is the minimum of the
 second variable.}
 
 \item{xhigh}{The upper limit for bins. The default is the maximum of the
 second variable.}
+
+\item{breaks}{The bin limits. This overrides the preceding three parameters
+(bins, xlow, xhigh). Default=NA, in which case uniform bins from xlow to
+xhigh are used as the breaks.}
 
 \item{addBin}{If true, the return will be a list where the original data.frame
 is returned as the second component with values of "BIN" added to the
