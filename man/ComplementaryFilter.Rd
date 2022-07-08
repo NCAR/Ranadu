@@ -4,7 +4,7 @@
 \alias{ComplementaryFilter}
 \title{ComplementaryFilter}
 \usage{
-ComplementaryFilter(FastSignal, SlowSignal, tau = 200)
+ComplementaryFilter(FastSignal, SlowSignal, tau = 150)
 }
 \arguments{
 \item{FastSignal}{A numeric vector with a fast-response signal.}
@@ -13,7 +13,7 @@ ComplementaryFilter(FastSignal, SlowSignal, tau = 200)
 fast-response signal.}
 
 \item{tau}{The time constant for the low-pass filter, in units of the spacing of 
-measurements in the input arrays. (Default: 200)}
+measurements in the input arrays. (Default: 150)}
 }
 \value{
 The vector of measurements that combines the two input signals.
@@ -26,7 +26,7 @@ Applies a Butterworth filter to calculate the low-pass-filtered result of the
 difference between the two signals, and adds this filtered result to the signal with 
 fast response.
 
-The use for this function is two combine two measurements of the same quantity, 
+The use for this function is to combine two measurements of the same quantity, 
 one that has fast response but perhaps drifts and the other that maintains absolute 
 accuracy. The technique has been applied, for example, to the measurement of wind 
 through the combination of GPS measurements and IRS measurements because GPS measurements 

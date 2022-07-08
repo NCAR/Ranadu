@@ -14,11 +14,14 @@
 #' defining bins. Values from the first will be grouped according to the
 #' bins in the second and then a mean and standard deviation will be
 #' calculated for each group. Additional column variables will be ignored.
-#' @param bins (default 20)
+#' @param bins (default 20). 
 #' @param xlow The lower limit for bins. The default is the minimum of the
 #' second variable.
 #' @param xhigh The upper limit for bins. The default is the maximum of the
 #' second variable.
+#' @param breaks The bin limits. This overrides the preceding three parameters
+#' (bins, xlow, xhigh). Default=NA, in which case uniform bins from xlow to
+#' xhigh are used as the breaks.
 #' @param addBin If true, the return will be a list where the original data.frame
 #' is returned as the second component with values of "BIN" added to the
 #' data.frame. This is useful for grouping when plotting with ggplot.
@@ -32,28 +35,34 @@
 #' @examples 
 #' E <- binStats(RAFdata[, c("PSXC", "ATX")], bins=10)
 binStats <- function (.d, bins=20, xlow=min(.d[,2], na.rm=TRUE), 
-                      xhigh=max(.d[,2], na.rm=TRUE), addBin=FALSE) {
-  ## add a variable to the data.frame representing the bin:
-  .d$BIN <- rep(NA, nrow(.d))
-  v <- .d[, 1]
-  p <- .d[, 2]
-  # v <- .d[!is.na(.d[,1]) & !is.na(.d[,2]), 1]   ## variable to be put in bins
-  # p <- .d[!is.na(.d[,1]) & !is.na(.d[,2]), 2]   ## bin-defining variable
-  xc <- ybar <- sigma <- N <- vector ("numeric", bins)
-  binLimits <- xlow + (0:bins)/bins * (xhigh-xlow)
-  for (i in 1:bins) {
-    xc[i] <- (binLimits[i] + binLimits[i+1]) / 2
-    .d$BIN[p > binLimits[i] & p <= binLimits[i+1]] <- i
-    y <- v[p > binLimits[i] & p <= binLimits[i+1]]
-    N[i] <- length (y[!is.na(y)])
-    if (N[i] > 0) {
-      ybar[i] <- mean (y, na.rm=TRUE)
-      sigma[i] <- sd (y, na.rm=TRUE)
+                      xhigh=max(.d[,2], na.rm=TRUE), breaks=NA, addBin=FALSE) {
+    ## add a variable to the data.frame representing the bin:
+    .d$BIN <- rep(NA, nrow(.d))
+    v <- .d[, 1]
+    p <- .d[, 2]
+    # v <- .d[!is.na(.d[,1]) & !is.na(.d[,2]), 1]   ## variable to be put in bins
+    # p <- .d[!is.na(.d[,1]) & !is.na(.d[,2]), 2]   ## bin-defining variable
+    xc <- ybar <- sigma <- N <- vector ("numeric", bins)
+    if (is.na(breaks[1])) {
+        binLimits <- xlow + (0:bins)/bins * (xhigh-xlow)
+    } else if (length(breaks) <= 1) {
+        binLimits <- xlow + (0:breaks)/breaks * (xhigh-xlow)
     } else {
-      ybar[i] <- NA
-      sigma[i] <- NA
+        binLimits <- breaks
     }
-  }
+    for (i in 1:bins) {
+        xc[i] <- (binLimits[i] + binLimits[i+1]) / 2
+        .d$BIN[p > binLimits[i] & p <= binLimits[i+1]] <- i
+        y <- v[p > binLimits[i] & p <= binLimits[i+1]]
+        N[i] <- length (y[!is.na(y)])
+        if (N[i] > 0) {
+            ybar[i] <- mean (y, na.rm=TRUE)
+            sigma[i] <- sd (y, na.rm=TRUE)
+        } else {
+            ybar[i] <- NA
+            sigma[i] <- NA
+        }
+    }
     # in case it is useful to extend this to confidence intervals for
     # the bin mean, based on t-statistic:
     # for conf int of C, use (1+c)/2 for two-tailed CI. DOF=N-1
@@ -61,11 +70,11 @@ binStats <- function (.d, bins=20, xlow=min(.d[,2], na.rm=TRUE),
     # CIfactor <- qt ((CI+1)/2, N-1)
     # sem <- sigma / sqrt (N)  # standard error of the bin mean
     # ci <- sem * CIfactor     # and add this to the data.frame
-  if (addBin) {
-    .d$BIN[is.na(.d[, 1])] <- NA
-    return (.d)
-  } else {
-    return (data.frame("xc"=xc, "ybar"=ybar, "sigma"=sigma, "nb"=N))
-  }
+    if (addBin) {
+        .d$BIN[is.na(.d[, 1])] <- NA
+        return (.d)
+    } else {
+        return (data.frame("xc"=xc, "ybar"=ybar, "sigma"=sigma, "nb"=N))
+    }
 }
-  
+

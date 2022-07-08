@@ -1,4 +1,3 @@
-TZERO = Ranadu::StandardConstant("Tzero")
 #' @title MurphyKoop
 #' @description Returns the water vapor pressure corresponding to a supplied temperature.
 #' @details Calculates the equilibrium water vapor pressure according to the 
@@ -20,6 +19,7 @@ MurphyKoop <- function (DP, P=0) {
 # returns vapor pressure via Murphy-Koop equations.
 # Supply DP=dewpoint (deg C) and optionally P=pressure (hPa),
 # the latter for the enhancement-factor correction.
+  TZERO <-  Ranadu::StandardConstant("Tzero")
   b0 <- 9.550426
   b1 <- -5723.265
   b2 <- 3.53068
@@ -57,6 +57,7 @@ MurphyKoop <- function (DP, P=0) {
 #' e <- MurphyKoopIce (-50.)
 #' e <- MurphyKoopIce (-60., 200.)
 MurphyKoopIce <- function (FP, P=0) {
+  TZERO <-  Ranadu::StandardConstant("Tzero")
   b0 <- 9.550426
   b1 <- -5723.265
   b2 <- 3.53068
@@ -95,6 +96,7 @@ GoffGratch <- function(Tc, P = 0) {
 #' e <- GoffGratch(10., 800.)
 #' EW2 <- GoffGratch (RAFdata$DPXC, RAFdata$PSXC)
 # Note that the 5th coefficient has been corrected vs 11.334 used by RAF before M-K adopted
+  TZERO <-  Ranadu::StandardConstant("Tzero")
   a <- c(1013.246, -7.90298, 5.02808, -1.3816e-7, 11.344, 8.1328e-3, -3.49149)
   Tk <- Tc + TZERO
   Ts <- 373.16
