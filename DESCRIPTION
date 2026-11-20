@@ -32,7 +32,7 @@ Description: This package contains a function for loading a portion of a netCDF
 License: BSD_3_clause + file LICENSE
 Encoding: UTF-8
 Depends:
-    R (>= 3.5), ncdf4, maps, ggplot2, grid, graphics, utils, scales
+    R (>= 3.5), ncdf4, maps, ggplot2 (>= 3.4.0), grid, graphics, utils, scales
 Imports:
     ggthemes, tcltk, nleqslv, zoo, fields, signal, reshape2, bspec, dplyr, plyr, tibble, stats, png
 Suggests:

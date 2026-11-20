@@ -263,10 +263,10 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
   if (GeneratePlot) {
     p <- with (EH, ggplot(data=EH, aes(x=tbar), na.rm=TRUE))
     p <- p + geom_errorbar(aes(ymin=hmeanR-hsdR, ymax=hmeanR+hsdR, colour="right"),
-                           width=600, size=1.5, na.rm=TRUE) + ylim (-0.5, 0.5)
+                           width=600, linewidth=1.5, na.rm=TRUE) + ylim (-0.5, 0.5)
     p <- p + geom_point (aes(y = hmeanR, colour="right"),size=3.5, na.rm=TRUE)
     p <- p + geom_errorbar(aes(ymin=hmeanL-hsdL, ymax=hmeanL+hsdL, colour="left"),
-                           width=600, size=1.5, na.rm=TRUE)
+                           width=600, linewidth=1.5, na.rm=TRUE)
     p <- p + geom_point (aes(y = hmeanL, colour="left"), size=3.5, na.rm=TRUE)
     p <- p + ylab(expression(paste(delta,psi,' [',degree,']')))
     p <- p + xlab ("Time [UTC]")
