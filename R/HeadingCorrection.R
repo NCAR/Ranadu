@@ -261,7 +261,7 @@ CorrectHeading <- function (.data, .span=21, .default=-0.08, .Valid=NULL, .plotf
                            c(1/EH$hsdR^2, 1/EH$hsdL^2), na.rm=TRUE)
   whsd <- sqrt (1/sum(c(1/EH$hsdR^2, 1/EH$hsdL^2), na.rm=TRUE))
   if (GeneratePlot) {
-    p <- with (EH, ggplot(data=EH, aes(x=tbar), na.rm=TRUE))
+    p <- with (EH, ggplot(data=EH, aes(x=tbar)))  # na.rm is set on each geom below
     p <- p + geom_errorbar(aes(ymin=hmeanR-hsdR, ymax=hmeanR+hsdR, colour="right"),
                            width=600, linewidth=1.5, na.rm=TRUE) + ylim (-0.5, 0.5)
     p <- p + geom_point (aes(y = hmeanR, colour="right"),size=3.5, na.rm=TRUE)
